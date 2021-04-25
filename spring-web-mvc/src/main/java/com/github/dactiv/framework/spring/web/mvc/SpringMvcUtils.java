@@ -171,7 +171,7 @@ public class SpringMvcUtils {
     public static String getDeviceIdentified() {
         Optional<HttpServletRequest> optional = getHttpServletRequest();
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             throw new SystemException("当前线程中无法获取 HttpServletRequest 信息");
         }
 

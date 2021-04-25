@@ -16,7 +16,7 @@ public @interface ConcurrentProcess {
     /**
      * 并发的 key
      * <p>
-     * return key 名称
+     * @return key 名称
      */
     String value();
 
@@ -30,21 +30,21 @@ public @interface ConcurrentProcess {
     /**
      * 锁等待时间
      *
-     * @return
+     * @return 锁等待时间
      */
     long waitTime() default -1;
 
     /**
      * 锁生存/释放时间
      *
-     * @return
+     * @return 锁生存/释放时间
      */
     long leaseTime() default 1000;
 
     /**
      * 时间单位
      *
-     * @return
+     * @return 时间单位
      */
     TimeUnit unit() default TimeUnit.MILLISECONDS;
 

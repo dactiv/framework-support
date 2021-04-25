@@ -167,11 +167,11 @@ public class SpringSecuritySupportAutoConfiguration {
         return new PluginEndpoint(infoContributors);
     }
 
-    @Bean
+    /*@Bean
     ElasticsearchAuditEventRepository elasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
                                                                         SecurityProperties securityProperties) {
         return new ElasticsearchAuditEventRepository(elasticsearchRestTemplate, securityProperties);
-    }
+    }*/
 
 
     @Bean

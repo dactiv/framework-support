@@ -17,6 +17,7 @@ import java.util.List;
  * @author maurice.chen
  */
 public interface UserDetailsService {
+
     /**
      * 认证缓存块名称
      */

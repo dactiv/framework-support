@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.commons.spring.web;
+package com.github.dactiv.framework.commons;
 
 import org.springframework.http.HttpStatus;
 

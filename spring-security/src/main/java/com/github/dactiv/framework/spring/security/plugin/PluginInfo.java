@@ -121,6 +121,8 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
 
     /**
      * 设置 id
+     *
+     * @param id id
      */
     public void setId(String id) {
         this.id = id;

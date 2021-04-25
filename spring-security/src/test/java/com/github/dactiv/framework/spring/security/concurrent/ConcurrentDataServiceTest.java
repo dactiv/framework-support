@@ -23,9 +23,6 @@ public class ConcurrentDataServiceTest {
     @Autowired
     private ConcurrentDataService concurrentDataService;
 
-    @Autowired
-    private RedissonClient redissonClient;
-
     @Test
     public void testIncrement() throws InterruptedException {
 

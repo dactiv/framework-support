@@ -2,9 +2,7 @@ package com.github.dactiv.framework.spring.web.result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.page.Page;
-import com.github.dactiv.framework.commons.page.PageRequest;
-import com.github.dactiv.framework.commons.spring.web.RestResult;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -109,7 +107,9 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             }
 
             if (Objects.nonNull(data)) {
-                data = getIncludeAndExcludeData(data, excludeFields, includeFields);
+                data = getFilterPropertyData(data, excludeFields, false);
+
+                data = getFilterPropertyData(data, includeFields, true);
             }
 
             RestResult<Object> result = new RestResult<>(
@@ -135,45 +135,116 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private Object getIncludeAndExcludeData(Object data, List<String> excludeFields, List<String> includeFields) {
+    private Object getFilterPropertyData(Object data, List<String> properties, boolean includeOrExclude) {
 
-        if (CollectionUtils.isEmpty(excludeFields) && CollectionUtils.isEmpty(includeFields)) {
+        Object result = filterDataProperty(
+                data,
+                properties
+                        .stream()
+                        .filter(s -> !StringUtils.contains(s, Casts.DEFAULT_POINT_SYMBOL))
+                        .collect(Collectors.toList()),
+                includeOrExclude
+        );
+
+        List<String> nextProperties = properties
+                .stream()
+                .filter(s -> StringUtils.contains(s, Casts.DEFAULT_POINT_SYMBOL))
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(nextProperties)) {
+
+            Map<String, Object> resultMap = objectMapper.convertValue(result, Map.class);
+
+            Map<String, List<String>> excludeFieldsMap = new LinkedHashMap<>();
+
+            for (String next : nextProperties) {
+
+                String before = StringUtils.substringBefore(next, Casts.DEFAULT_POINT_SYMBOL);
+
+                String after = StringUtils.substringAfter(next, Casts.DEFAULT_POINT_SYMBOL);
+
+                excludeFieldsMap.computeIfAbsent(before, k -> new LinkedList<>()).add(after);
+
+            }
+
+            for (Map.Entry<String, List<String>> entry : excludeFieldsMap.entrySet()) {
+
+                Object o = resultMap.get(entry.getKey());
+
+                if (Objects.isNull(o)) {
+                    continue;
+                }
+
+                Object newValue = getFilterPropertyData(o, entry.getValue(), includeOrExclude);
+
+                resultMap.put(entry.getKey(), newValue);
+            }
+
+            result = resultMap;
+
+        }
+
+        return result;
+    }
+
+    /**
+     * 过滤数据属性
+     *
+     * @param data 当前数据
+     * @param properties 要过滤的属性名称
+     * @param includeOrExclude true 仅仅引入 properties 的属性，false 仅仅去除 properties 的属性
+     *
+     * @return 新的数据信息
+     */
+    @SuppressWarnings("unchecked")
+    public Object filterDataProperty(Object data, List<String> properties, boolean includeOrExclude) {
+
+        if (CollectionUtils.isEmpty(properties)) {
             return data;
         }
 
-        if(List.class.isAssignableFrom(data.getClass())) {
+        if (List.class.isAssignableFrom(data.getClass())) {
+
             List<Object> list = Casts.cast(data);
+
             return list.stream()
-                    .map(o -> getIncludeAndExcludeData(o, excludeFields, includeFields))
+                    .map(o -> filterDataProperty(o, properties, includeOrExclude))
                     .collect(Collectors.toList());
-        } else if (Page.class.isAssignableFrom(data.getClass())) {
 
-            Page<Object> page = Casts.cast(data);
-
-            Object o = getIncludeAndExcludeData(page.getContent(), excludeFields, includeFields);
-
-            return new Page<>(new PageRequest(page.getNumber(), page.getSize()), Casts.cast(o));
         }
 
         try {
 
-            Map<String, Object> tempExcludeFields = objectMapper.convertValue(data, Map.class);
+            Map<String, Object> newData = objectMapper.convertValue(data, Map.class);
 
-            excludeFields.forEach(tempExcludeFields::remove);
+            Map<String, Object> result = new LinkedHashMap<>();
 
-            Map<String, Object> tempIncludeFields = new LinkedHashMap<>(tempExcludeFields);
+            List<String> keys;
 
-            if (!includeFields.isEmpty()) {
-                tempExcludeFields.keySet().stream().filter(o -> !includeFields.contains(o)).forEach(tempIncludeFields::remove);
+            if (includeOrExclude) {
+                keys = newData
+                        .keySet()
+                        .stream()
+                        .filter(properties::contains)
+                        .collect(Collectors.toList());
+            } else {
+                keys = newData
+                        .keySet()
+                        .stream()
+                        .filter(s -> !properties.contains(s))
+                        .collect(Collectors.toList());
             }
 
-            return tempIncludeFields;
+            for (String key : keys) {
+                result.put(key, newData.get(key));
+            }
+
+            return result;
         } catch (IllegalArgumentException e) {
             LOGGER.warn("json 处理出现异常", e);
         }
 
         return data;
-
     }
 
     private List<String> getParameterValues(HttpServletRequest request, String paramName) {

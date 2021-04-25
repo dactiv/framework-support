@@ -4,7 +4,6 @@ package com.github.dactiv.framework.spring.web;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
-import com.github.dactiv.framework.spring.web.interceptor.InjectionClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
@@ -80,7 +79,7 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
-    public RestTemplate restTemplate(List<InjectionClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
+    public RestTemplate restTemplate(List<ClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
         RestTemplate restTemplate = new RestTemplate();
 
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(clientHttpRequestInterceptors);

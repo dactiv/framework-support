@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
@@ -73,7 +74,7 @@ public interface UserDetailsService {
      *
      * @return 超时时间
      */
-    default Duration getAuthorizationCacheExpiresTime() {
+    default TimeProperties getAuthorizationCacheExpiresTime() {
         return null;
     }
 

@@ -39,11 +39,11 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             "arguments"
     );
 
-    private static final List<Class<? extends Exception>> DEFAULT_GET_MESSAGE_EXCEPTION = Collections.singletonList(
+    private static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Collections.singletonList(
             ServiceException.class
     );
 
-    private static final List<HttpStatus> DEFAULT_GET_HTTP_STATUSES_MESSAGE = Arrays.asList(
+    private static final List<HttpStatus> DEFAULT_HTTP_STATUSES_MESSAGE = Arrays.asList(
             HttpStatus.FORBIDDEN,
             HttpStatus.UNAUTHORIZED
     );
@@ -105,7 +105,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 result.setMessage(errorCodeException.getMessage());
             }
 
-            if (DEFAULT_GET_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
+            if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
                 result.setMessage(error.getMessage());
             }
 
@@ -113,7 +113,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
         }
 
-        if (DEFAULT_GET_HTTP_STATUSES_MESSAGE.contains(status)) {
+        if (DEFAULT_HTTP_STATUSES_MESSAGE.contains(status)) {
             result.setMessage(status.getReasonPhrase());
         }
 

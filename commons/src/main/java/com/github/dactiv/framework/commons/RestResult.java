@@ -3,6 +3,7 @@ package com.github.dactiv.framework.commons;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,8 +20,6 @@ public class RestResult<T> implements Serializable {
     public static final String SUCCESS_EXECUTE_CODE = String.valueOf(HttpStatus.OK.value());
 
     public static final String ERROR_EXECUTE_CODE = String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value());
-
-    public static final String CAPTCHA_EXECUTE_CODE = "1001";
 
     public static final String DEFAULT_MESSAGE_NAME = "message";
 
@@ -55,7 +54,7 @@ public class RestResult<T> implements Serializable {
     /**
      * 创建时间
      */
-    private Date timestamp = new Date();
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     public RestResult() {
     }
@@ -196,7 +195,7 @@ public class RestResult<T> implements Serializable {
      *
      * @return 创建时间
      */
-    public Date getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -205,7 +204,7 @@ public class RestResult<T> implements Serializable {
      *
      * @param timestamp 创建时间
      */
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 

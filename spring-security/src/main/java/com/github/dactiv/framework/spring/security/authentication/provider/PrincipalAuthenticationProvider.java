@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.authentication.provider;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
@@ -138,14 +139,14 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
 
             if (userDetailsService.isEnabledAuthorizationCache()) {
 
-                Duration expiresTime = userDetailsService.getAuthorizationCacheExpiresTime();
+                TimeProperties expiresTime = userDetailsService.getAuthorizationCacheExpiresTime();
 
                 String key = userDetailsService.getAuthorizationCacheName(token);
 
                 if (expiresTime == null) {
                     redisTemplate.opsForValue().set(key, grantedAuthorities);
                 } else {
-                    redisTemplate.opsForValue().set(key, grantedAuthorities, expiresTime);
+                    redisTemplate.opsForValue().set(key, grantedAuthorities, expiresTime.getValue(), expiresTime.getUnit());
                 }
             }
 

@@ -10,6 +10,7 @@ import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -104,15 +105,15 @@ public class ElasticsearchAuditEventRepository implements AuditEventRepository {
 
         builder.withQuery(boolQuery);
 
-        List<AuditEventEntity> auditEventEntities = elasticsearchRestTemplate.queryForList(
+        List<AuditEventEntity> auditEventEntities = elasticsearchRestTemplate.search(
                 builder.build(),
                 AuditEventEntity.class,
                 IndexCoordinates.of(index)
-        );
+        ).stream().map(SearchHit::getContent).collect(Collectors.toList());
 
         return auditEventEntities
                 .stream()
-                .map(a -> new AuditEvent(a.getCreationTime().toInstant(), a.getPrincipal(), a.getType(), a.getData()))
+                .map(a -> new AuditEvent(a.getCreationTIme().atZone(ZoneId.systemDefault()).toInstant(), a.getPrincipal(), a.getType(), a.getData()))
                 .collect(Collectors.toList());
     }
 

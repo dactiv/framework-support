@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 /**
  * 敏感数据加 * 的 json 序列化实现

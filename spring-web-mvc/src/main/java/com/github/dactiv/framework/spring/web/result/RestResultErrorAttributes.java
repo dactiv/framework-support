@@ -1,9 +1,10 @@
 package com.github.dactiv.framework.spring.web.result;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.ServiceException;
-import com.github.dactiv.framework.commons.RestResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -29,14 +30,14 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
     public static final String DEFAULT_ERROR_EXECUTE_ATTR_NAME = "REST_ERROR_ATTRIBUTES_EXECUTE";
 
-    private static final String[] DEFAULT_BINDING_RESULT_IGNORE_FIELD = {
+    private static final List<String> DEFAULT_BINDING_RESULT_IGNORE_FIELD = Arrays.asList(
             "rejectedValue",
             "bindingFailure",
             "objectName",
             "source",
             "codes",
             "arguments"
-    };
+    );
 
     private static final List<Class<? extends Exception>> DEFAULT_GET_MESSAGE_EXCEPTION = Collections.singletonList(
             ServiceException.class
@@ -47,7 +48,14 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             HttpStatus.UNAUTHORIZED
     );
 
+    private final ObjectMapper objectMapper;
+
+    public RestResultErrorAttributes(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
         HttpStatus status = getStatus(webRequest);
 
@@ -70,14 +78,25 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
             if (bindingResult != null && bindingResult.hasErrors()) {
 
-                List<Map<String, Object>> filedErrorResult = bindingResult.getAllErrors()
+                List<FieldError> filedErrorResult = bindingResult.getAllErrors()
                         .stream()
                         .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
-                        .map(o -> Casts.castObjectToMap(o, DEFAULT_BINDING_RESULT_IGNORE_FIELD))
+                        .map(o -> (FieldError)o)
                         .collect(Collectors.toList());
 
+                List<Map<String, Object>> data = new LinkedList<>();
+
+                for (FieldError fieldError : filedErrorResult) {
+                    Map<String, Object> map = objectMapper.convertValue(fieldError, Map.class);
+
+                    map.entrySet().removeIf(i -> DEFAULT_BINDING_RESULT_IGNORE_FIELD.contains(i.getKey()));
+
+                    data.add(map);
+                }
+
                 result.setMessage("参数验证不通过");
-                result.setData(filedErrorResult);
+
+                result.setData(data);
 
             } else if (error instanceof ErrorCodeException) {
                 ErrorCodeException errorCodeException = Casts.cast(error, ErrorCodeException.class);
@@ -100,7 +119,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
         webRequest.setAttribute(DEFAULT_ERROR_EXECUTE_ATTR_NAME, true, RequestAttributes.SCOPE_REQUEST);
 
-        return Casts.castObjectToMap(result);
+        return objectMapper.convertValue(result, Map.class);
     }
 
     private BindingResult extractBindingResult(Throwable error) {

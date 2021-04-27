@@ -1,7 +1,6 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.dactiv.framework.commons.IntegerIdEntity;
 import com.github.dactiv.framework.commons.enumerate.NameEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class SecurityUserDetails extends IntegerIdEntity implements UserDetails {
+public class SecurityUserDetails implements UserDetails {
 
     private static final long serialVersionUID = 1369484231035811533L;
 
@@ -52,6 +51,8 @@ public class SecurityUserDetails extends IntegerIdEntity implements UserDetails 
             DEFAULT_HAS_ROLE_METHOD_NAME
     );
 
+    private Object id;
+
     @JsonIgnore
     private String password;
     private String username;
@@ -70,15 +71,15 @@ public class SecurityUserDetails extends IntegerIdEntity implements UserDetails 
     public SecurityUserDetails() {
     }
 
-    public SecurityUserDetails(Integer id, String username, String password) {
+    public SecurityUserDetails(Object id, String username, String password) {
         this(id, username, password, UserStatus.Enabled);
     }
 
-    public SecurityUserDetails(Integer id, String username, String password, UserStatus userStatus) {
+    public SecurityUserDetails(Object id, String username, String password, UserStatus userStatus) {
         this(id, username, password, userStatus, true, true, true);
     }
 
-    public SecurityUserDetails(Integer id, String username, String password, UserStatus status,
+    public SecurityUserDetails(Object id, String username, String password, UserStatus status,
                                boolean accountNonExpired, boolean credentialsNonExpired,
                                boolean accountNonLocked) {
 
@@ -86,7 +87,7 @@ public class SecurityUserDetails extends IntegerIdEntity implements UserDetails 
             throw new IllegalArgumentException("Cannot pass null or empty values to constructor");
         }
 
-        this.setId(id);
+        this.id = id;
         this.username = username;
         this.password = password;
         this.status = status.getValue();
@@ -113,6 +114,24 @@ public class SecurityUserDetails extends IntegerIdEntity implements UserDetails 
                 .collect(Collectors.toList()));
 
         return result;
+    }
+
+    /**
+     * 获取主键 id
+     *
+     * @return 主键 id
+     */
+    public Object getId() {
+        return id;
+    }
+
+    /**
+     * 设置主键 id
+     *
+     * @param id 主键 id
+     */
+    public void setId(Object id) {
+        this.id = id;
     }
 
     /**

@@ -21,12 +21,12 @@ public enum YesOrNo implements NameValueEnum<Integer> {
     /**
      * 值
      */
-    private Integer value;
+    private final Integer value;
 
     /**
      * 名称
      */
-    private String name;
+    private final String name;
 
     /**
      * 是或否枚举

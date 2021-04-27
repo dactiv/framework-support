@@ -1,14 +1,14 @@
 package com.github.dactiv.framework.crypto.access;
 
 
-import com.github.dactiv.framework.commons.IntegerIdEntity;
+import java.io.Serializable;
 
 /**
  * 访问加解密条件
  *
  * @author maurice
  */
-public class AccessCryptoPredicate extends IntegerIdEntity {
+public class AccessCryptoPredicate implements Serializable {
 
     private static final long serialVersionUID = 5801688557790146889L;
     /**

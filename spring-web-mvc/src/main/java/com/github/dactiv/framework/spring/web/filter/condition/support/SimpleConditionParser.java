@@ -9,7 +9,6 @@ import com.github.dactiv.framework.spring.web.filter.condition.ConditionType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;

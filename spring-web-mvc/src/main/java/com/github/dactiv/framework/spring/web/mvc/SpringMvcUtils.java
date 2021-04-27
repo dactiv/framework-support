@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * spring mvc 工具类
@@ -156,11 +157,7 @@ public class SpringMvcUtils {
 
         Optional<HttpServletRequest> optional = getHttpServletRequest();
 
-        if (!optional.isPresent()) {
-            throw new SystemException("当前线程中无法获取 HttpServletRequest 信息");
-        }
-
-        return DeviceUtils.getRequiredCurrentDevice(optional.get());
+        return DeviceUtils.getRequiredCurrentDevice(optional.orElseThrow(() -> new SystemException("当前线程中无法获取 HttpServletRequest 信息")));
     }
 
     /**
@@ -171,11 +168,7 @@ public class SpringMvcUtils {
     public static String getDeviceIdentified() {
         Optional<HttpServletRequest> optional = getHttpServletRequest();
 
-        if (optional.isEmpty()) {
-            throw new SystemException("当前线程中无法获取 HttpServletRequest 信息");
-        }
-
-        return getDeviceIdentified(optional.get());
+        return getDeviceIdentified(optional.orElseThrow(() -> new SystemException("当前线程中无法获取 HttpServletRequest 信息")));
     }
 
     /**

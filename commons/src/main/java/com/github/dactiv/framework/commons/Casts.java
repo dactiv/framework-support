@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.commons;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.dactiv.framework.commons.exception.ServiceException;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -11,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
@@ -232,148 +228,6 @@ public class Casts {
     }
 
     /**
-     * 简单的将 map 转型成目标对象的方法
-     *
-     * @param map         map
-     * @param targetClass 目标对象
-     * @param <T>         对象类型
-     * @return 目标对象
-     * @deprecated 使用{@link com.fasterxml.jackson.databind.ObjectMapper#convertValue(Object, Class)} 使用此功能
-     */
-    @Deprecated
-    public static <T> T castMapToObject(Map<String, Object> map, Class<T> targetClass, String... ignoreField) {
-        T entity = newInstance(targetClass);
-
-        List<String> ignoreFieldList = Arrays.asList(ignoreField);
-
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(targetClass);
-
-        for (PropertyDescriptor pd : propertyDescriptors) {
-
-            Method writeMethod = pd.getWriteMethod();
-
-            if (writeMethod == null || !Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-                continue;
-            }
-
-            String key = pd.getName();
-
-            if (ignoreFieldList.contains(key)) {
-                continue;
-            }
-
-            Class<?>[] classes = writeMethod.getParameterTypes();
-
-            if (!map.containsKey(key) || classes.length > 1) {
-                continue;
-            }
-
-            Class<?> type = classes[0];
-
-            try {
-                Object value = map.get(key);
-
-                if (value != null && Map.class.isAssignableFrom(value.getClass())) {
-                    writeMethod.invoke(entity, castMapToObject(map, type, ignoreField));
-                } else {
-                    writeMethod.invoke(entity, Casts.cast(map.get(key), type));
-                }
-
-            } catch (Exception e) {
-                String msg = "map 转型成 object 时候出错，无法将" + key +
-                        "赋值到" + targetClass.getSimpleName() + "中";
-                LOGGER.warn(msg, e);
-            }
-        }
-
-        return entity;
-    }
-
-    /**
-     * 简单的将对象转换成 map 方法
-     *
-     * @param o 对象
-     * @return 转换的 map
-     * @deprecated 使用{@link com.fasterxml.jackson.databind.ObjectMapper#convertValue(Object, Class)} 使用此功能
-     */
-    @Deprecated
-    public static Map<String, Object> castObjectToMap(Object o, String... ignoreField) {
-
-        if (Map.class.isAssignableFrom(o.getClass())) {
-
-            Map<String, Object> result =  Casts.cast(o);
-
-            List<String> ignoreFieldList = Arrays.asList(ignoreField);
-            ignoreFieldList.forEach(result::remove);
-
-            return result;
-        }
-
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(o.getClass());
-
-        Map<String, Object> map = new LinkedHashMap<>(propertyDescriptors.length);
-
-        List<String> ignoreFieldList = Arrays.asList(ignoreField);
-
-        for (PropertyDescriptor pd : propertyDescriptors) {
-
-            Method readMethod = pd.getReadMethod();
-
-            if (readMethod == null || !Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-                continue;
-            }
-
-            String key = pd.getName();
-
-            if (StringUtils.isEmpty(key) || ignoreFieldList.contains(key)) {
-                continue;
-            }
-
-            Field objectField = ReflectionUtils.findField(o.getClass(), key);
-
-            if (objectField != null) {
-                JsonIgnore jsonIgnore = AnnotationUtils.findAnnotation(objectField, JsonIgnore.class);
-
-                if (jsonIgnore != null) {
-                    continue;
-                }
-            }
-
-            JsonIgnore methodJsonIgnore = AnnotationUtils.findAnnotation(readMethod, JsonIgnore.class);
-
-            if (methodJsonIgnore != null) {
-                continue;
-            }
-
-            JsonIgnoreProperties properties = AnnotationUtils.findAnnotation(o.getClass(), JsonIgnoreProperties.class);
-
-            if (properties != null && Arrays.asList(properties.value()).contains(key)) {
-                continue;
-            }
-
-            String name = readMethod.getName();
-
-            if (StringUtils.equals(name, "getClass")) {
-                continue;
-            }
-
-            try {
-                Object value = readMethod.invoke(o);
-
-                if (value != null && IdEntity.class.isAssignableFrom(value.getClass())) {
-                    value = castObjectToMap(value, ignoreField);
-                }
-
-                map.put(key, value);
-            } catch (Exception e) {
-                throw new FatalBeanException(o.getClass().getName() + "读取[" + readMethod.getName() + "]错误", e);
-            }
-        }
-
-        return map;
-    }
-
-    /**
      * 创建一个新实例
      *
      * @param targetClass 目标类型 class
@@ -509,17 +363,10 @@ public class Casts {
      * @return 字段属性说明
      */
     private static PropertyDescriptor findPropertyDescriptor(Object o, String name) {
-        List<PropertyDescriptor> propertyDescriptors = Arrays.asList(BeanUtils.getPropertyDescriptors(o.getClass()));
-
-        Optional<PropertyDescriptor> optional = propertyDescriptors
-                .stream()
+        return Arrays.stream(BeanUtils.getPropertyDescriptors(o.getClass()))
                 .filter(p -> p.getName().equals(name))
-                .findFirst();
-
-        if (!optional.isPresent()) {
-            throw new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性");
-        }
-        return optional.get();
+                .findFirst()
+                .orElseThrow(() -> new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性"));
     }
 
 }

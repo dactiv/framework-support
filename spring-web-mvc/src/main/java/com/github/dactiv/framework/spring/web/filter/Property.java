@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.spring.web.filter;
 
-import java.util.List;
-
 /**
  * 属性信息，用户记录对应字段名称和值信息
  *

@@ -57,7 +57,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      * 当前用户认证供应者实现
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
-     * @param redisTemplate       账户认证的用户明细服务集合
+     * @param redisTemplate       redis 模版
      */
     public PrincipalAuthenticationProvider(List<UserDetailsService> userDetailsServices,
                                            RedisTemplate<String, Object> redisTemplate) {
@@ -72,19 +72,15 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
         RequestAuthenticationToken token = Casts.cast(authentication);
 
         // 通过 token 获取对应 type 实现的 UserDetailsService
-        Optional<UserDetailsService> optionalUserDetailsService = getUserDetailsService(token);
+        Optional<UserDetailsService> optional = getUserDetailsService(token);
 
-        // 如果找不到，表示不支持此类型用户登陆，抛出异常
-        if (!optionalUserDetailsService.isPresent()) {
-            String message = messages.getMessage(
-                    "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
-                    "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
-            );
-            throw new AuthenticationServiceException(message);
-        }
+        String message = messages.getMessage(
+                "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
+        );
 
         // 获取实现类
-        UserDetailsService userDetailsService = optionalUserDetailsService.get();
+        UserDetailsService userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
 
         SecurityUserDetails userDetails = null;
 

@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.web.filter.generator;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.dactiv.framework.spring.web.filter.Property;
-import com.github.dactiv.framework.spring.web.filter.condition.ConditionType;
 
 /**
  * 通配符解析器

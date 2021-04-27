@@ -1,11 +1,10 @@
 package com.github.dactiv.framework.crypto.access;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.github.dactiv.framework.commons.IntegerIdEntity;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +13,7 @@ import java.util.List;
  *
  * @author maurice
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class AccessCrypto extends IntegerIdEntity {
-
-    private static final long serialVersionUID = -8441240266365812046L;
+public class AccessCrypto implements Serializable {
 
     public static final String DEFAULT_REQUEST_DECRYPT_FIELD_NAME = "requestDecrypt";
 
@@ -41,7 +37,7 @@ public class AccessCrypto extends IntegerIdEntity {
     /**
      * 是否启用，1.是，0.否
      */
-    private Integer enabled = DisabledOrEnabled.Enabled.getValue();
+    private Integer enabled = YesOrNo.Yes.getValue();
 
     /**
      * 是否请求加密，0.否，1.是

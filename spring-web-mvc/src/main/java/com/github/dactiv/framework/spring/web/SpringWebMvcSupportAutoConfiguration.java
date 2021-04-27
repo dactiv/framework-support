@@ -1,11 +1,12 @@
 package com.github.dactiv.framework.spring.web;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
-import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
+import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +58,8 @@ public class SpringWebMvcSupportAutoConfiguration {
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResultErrorAttributes servletRestResultErrorAttributes() {
-        return new RestResultErrorAttributes();
+    public RestResultErrorAttributes servletRestResultErrorAttributes(ObjectMapper objectMapper) {
+        return new RestResultErrorAttributes(objectMapper);
     }
 
     @Bean

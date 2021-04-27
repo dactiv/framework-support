@@ -78,7 +78,7 @@ public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAd
                 .filter(v -> v.device().equals(requestDevicePlatform))
                 .findFirst();
 
-        if (!versionControlOptional.isPresent()) {
+        if (versionControlOptional.isEmpty()) {
             return true;
         }
 

@@ -2,6 +2,8 @@ package com.github.dactiv.framework.commons.enumerate.support;
 
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 
+import java.time.LocalDateTime;
+
 /**
  * 执行状态枚举
  *
@@ -35,9 +37,9 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
         this.value = value;
     }
 
-    private String name;
+    private final String name;
 
-    private Integer value;
+    private final Integer value;
 
     @Override
     public Integer getValue() {
@@ -47,5 +49,56 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     @Override
     public String getName() {
         return name;
+    }
+
+    /**
+     * 成功设置值
+     *
+     * @param body 数据体
+     * @param message 消息
+     */
+    public static void success(Body body, String message) {
+        body.setExecuteStatus(ExecuteStatus.Success);
+        body.setRemark(message);
+        body.setSuccessTime(LocalDateTime.now());
+    }
+
+    /**
+     * 失败设置值
+     *
+     * @param body 数据体
+     * @param message 消息
+     */
+    public static void failure(Body body, String message) {
+        body.setExecuteStatus(ExecuteStatus.Failure);
+        body.setRemark(message);
+    }
+
+    /**
+     * 执行状态数据体
+     *
+     * @author maurice.chen
+     */
+    public interface Body {
+        /**
+         * 设置备注
+         *
+         * @param remark 备注
+         */
+        void setRemark(String remark);
+
+        /**
+         * 设置成功时间
+         *
+         * @param successTime 成功时间
+         */
+        void setSuccessTime(LocalDateTime successTime);
+
+        /**
+         * 设置状态
+         *
+         * @param status 状态
+         */
+        void setExecuteStatus(ExecuteStatus status);
     }
 }

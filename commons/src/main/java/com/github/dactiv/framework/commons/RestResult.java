@@ -3,7 +3,6 @@ package com.github.dactiv.framework.commons;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class RestResult<T> implements Serializable {
     /**
      * 创建时间
      */
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private Date timestamp = new Date();
 
     public RestResult() {
     }
@@ -195,7 +194,7 @@ public class RestResult<T> implements Serializable {
      *
      * @return 创建时间
      */
-    public LocalDateTime getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
@@ -204,7 +203,7 @@ public class RestResult<T> implements Serializable {
      *
      * @param timestamp 创建时间
      */
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 

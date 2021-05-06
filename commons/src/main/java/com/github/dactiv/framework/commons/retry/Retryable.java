@@ -1,8 +1,10 @@
 package com.github.dactiv.framework.commons.retry;
 
+import com.github.dactiv.framework.commons.TimeProperties;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 可重试的对象实现
@@ -11,7 +13,7 @@ import java.time.temporal.ChronoUnit;
  */
 public interface Retryable {
 
-    int DEFAULT_POW_INTERVAL_TIME = 5000;
+    TimeProperties DEFAULT_POW_INTERVAL_TIME = new TimeProperties(5, TimeUnit.SECONDS);
 
     /**
      * 获取当前重试次数
@@ -32,7 +34,7 @@ public interface Retryable {
      *
      * @return 时间（毫秒为单位）
      */
-    default Integer getNextRetryTimeInMillisecond(){
+    default TimeProperties getNextRetryTimeInMillisecond(){
         return DEFAULT_POW_INTERVAL_TIME;
     }
 
@@ -46,7 +48,7 @@ public interface Retryable {
         return BigDecimal
                 .valueOf(getRetryCount())
                 .pow(getRetryCount())
-                .multiply(BigDecimal.valueOf(getNextRetryTimeInMillisecond()))
+                .multiply(BigDecimal.valueOf(getNextRetryTimeInMillisecond().toMillis()))
                 .intValue();
     }
 
@@ -55,8 +57,8 @@ public interface Retryable {
      *
      * @return 重试时间
      */
-    default LocalDateTime getNextRetryTime() {
-        return LocalDateTime.now().plus(getNextIntervalTime(), ChronoUnit.MILLIS);
+    default Date getNextRetryTime() {
+        return new Date(System.currentTimeMillis() + getNextIntervalTime());
     }
 
     /**

@@ -2,7 +2,7 @@ package com.github.dactiv.framework.commons.enumerate.support;
 
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 执行状态枚举
@@ -60,7 +60,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     public static void success(Body body, String message) {
         body.setExecuteStatus(ExecuteStatus.Success);
         body.setRemark(message);
-        body.setSuccessTime(LocalDateTime.now());
+        body.setSuccessTime(new Date());
     }
 
     /**
@@ -92,7 +92,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
          *
          * @param successTime 成功时间
          */
-        void setSuccessTime(LocalDateTime successTime);
+        void setSuccessTime(Date successTime);
 
         /**
          * 设置状态

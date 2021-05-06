@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * spring mvc 工具类

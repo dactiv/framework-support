@@ -71,4 +71,68 @@ public class TimeProperties {
     public void setUnit(TimeUnit unit) {
         this.unit = unit;
     }
+
+    /**
+     * 转换为毫秒
+     *
+     * @return 毫秒值
+     */
+    public long toMillis() {
+        return unit.toMillis(value);
+    }
+
+    /**
+     * 转换为秒值
+     *
+     * @return 秒值
+     */
+    public long toSeconds() {
+        return unit.toSeconds(value);
+    }
+
+    /**
+     * 转换为分钟值
+     *
+     * @return 分钟值
+     */
+    public long toMinutes() {
+        return unit.toMinutes(value);
+    }
+
+    /**
+     * 转换为小时值
+     *
+     * @return 小时值
+     */
+    public long toHours() {
+        return unit.toHours(value);
+    }
+
+    /**
+     * 转换为微秒值
+     *
+     * @return 微秒值
+     */
+    public long toMicros() {
+        return unit.toMicros(value);
+    }
+
+    /**
+     * 转换为天数值
+     *
+     * @return 天数值
+     */
+    public long toDays() {
+        return unit.toDays(value);
+    }
+
+    /**
+     * 转换为纳秒值
+     *
+     * @return 纳秒值
+     */
+    public long toNanos() {
+        return unit.toNanos(value);
+    }
+
 }

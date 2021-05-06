@@ -33,16 +33,6 @@ public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAd
 
     private final DeviceResolver deviceResolver = new LiteDeviceResolver();
 
-    private final ObjectMapper objectMapper;
-
-    public AccessVersionControlHandlerInterceptor() {
-        this(new ObjectMapper());
-    }
-
-    public AccessVersionControlHandlerInterceptor(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
@@ -98,7 +88,7 @@ public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAd
                     RestResult.ERROR_EXECUTE_CODE
             );
 
-            response.getWriter().write(objectMapper.writeValueAsString(r));
+            response.getWriter().write(Casts.writeValueAsString(r));
 
             return false;
         }

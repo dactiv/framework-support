@@ -58,8 +58,8 @@ public class SpringWebMvcSupportAutoConfiguration {
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResultErrorAttributes servletRestResultErrorAttributes(ObjectMapper objectMapper) {
-        return new RestResultErrorAttributes(objectMapper);
+    public RestResultErrorAttributes servletRestResultErrorAttributes() {
+        return new RestResultErrorAttributes();
     }
 
     @Bean

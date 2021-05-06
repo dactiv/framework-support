@@ -50,9 +50,6 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     private List<String> supportClients = DEFAULT_SUPPORT_CLIENT;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
@@ -153,7 +150,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         if (CollectionUtils.isNotEmpty(nextProperties)) {
 
-            Map<String, Object> resultMap = objectMapper.convertValue(result, Map.class);
+            Map<String, Object> resultMap = Casts.convertValue(result, Map.class);
 
             Map<String, List<String>> excludeFieldsMap = new LinkedHashMap<>();
 
@@ -215,7 +212,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         try {
 
-            Map<String, Object> newData = objectMapper.convertValue(data, Map.class);
+            Map<String, Object> newData = Casts.convertValue(data, Map.class);
 
             Map<String, Object> result = new LinkedHashMap<>();
 

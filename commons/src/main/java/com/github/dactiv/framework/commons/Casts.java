@@ -1,6 +1,8 @@
 package com.github.dactiv.framework.commons;
 
-import com.github.dactiv.framework.commons.exception.ServiceException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
@@ -8,15 +10,11 @@ import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.objenesis.instantiator.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -27,14 +25,117 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class Casts {
 
-    public static final String DEFAULT_POINT_SYMBOL = ".";
-
-    public static final String DEFAULT_EQ_SYMBOL = "=";
-
-    public static final String DEFAULT_AND_SYMBOL = "&";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Casts.class);
 
+    /**
+     * 默认点符号
+     */
+    public static final String DEFAULT_POINT_SYMBOL = ".";
+
+    /**
+     * 默认等于符号
+     */
+    public static final String DEFAULT_EQ_SYMBOL = "=";
+
+    /**
+     * 默认 and 符号
+     */
+    public static final String DEFAULT_AND_SYMBOL = "&";
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired(required = false)
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        Casts.objectMapper = objectMapper;
+    }
+
+    /**
+     * 将值转换成指定类型的对象
+     *
+     * @param value 值
+     * @param type 指定类型
+     * @param <T> 对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T convertValue(Object value, Class<T> type) {
+        return objectMapper.convertValue(value, type);
+    }
+
+    /**
+     * 将值转换成指定类型的对象
+     *
+     * @param value 值
+     * @param type 引用类型
+     * @param <T> 对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T convertValue(Object value, TypeReference<T> type) {
+        return objectMapper.convertValue(value, type);
+    }
+
+    /**
+     * 将值转换为 json 字符串
+     *
+     * @param value 值
+     *
+     * @return json 字符串
+     */
+    public static String writeValueAsString(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * 将 json 字符串转换为指定类型的对象
+     *
+     * @param json json 字符串
+     * @param type 指定类型的对象 class
+     * @param <T> 对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(String json, Class<T> type) {
+
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new SystemException(e);
+        }
+
+    }
+
+    /**
+     * 将 json 字符串转换为指定类型的对象
+     *
+     * @param json json 字符串
+     * @param type 引用类型
+     * @param <T> 对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(String json, TypeReference<T> type) {
+
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new SystemException(e);
+        }
+
+    }
+
+    /**
+     *
+     * 将格式为 name=value&name2=value2&name3=value3 的字符串转型为成 MultiValueMap
+     *
+     * @param body 数据题
+     *
+     * @return 转换后的 MultiValueMap 对象
+     */
     public static MultiValueMap<String, String> castRequestBodyMap(String body) {
         MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 
@@ -47,6 +148,13 @@ public class Casts {
         return result;
     }
 
+    /**
+     * 将 MultiValueMap 对象转换为 name=value&name2=value2&name3=value3 格式字符串
+     *
+     * @param newRequestBody MultiValueMap 对象
+     *
+     * @return 转换后的字符串
+     */
     public static String castRequestBodyMapToString(MultiValueMap<String, String> newRequestBody) {
         StringBuilder result = new StringBuilder();
 
@@ -68,6 +176,11 @@ public class Casts {
         return result.toString();
     }
 
+    /**
+     * 集合转换器的实现
+     *
+     * @author maurice.chen
+     */
     @SuppressWarnings("rawtypes")
     private static class CollectionConverter implements Converter {
 
@@ -85,7 +198,7 @@ public class Casts {
                 typeInstance = value.getClass();
             }
 
-            Object obj = newInstance(typeInstance);
+            Object obj = ClassUtils.newInstance(typeInstance);
             Collection<?> collection = null;
 
             if (Collection.class.isAssignableFrom(obj.getClass())) {
@@ -225,148 +338,6 @@ public class Casts {
         }
 
         return cast(value, type);
-    }
-
-    /**
-     * 创建一个新实例
-     *
-     * @param targetClass 目标类型 class
-     * @param <T>         目标类型
-     * @return 新实例
-     */
-    public static <T> T newInstance(Class<T> targetClass) {
-        try {
-            return targetClass.newInstance();
-        } catch (Exception e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    /**
-     * 设置对象的字段值
-     *
-     * @param o 对象
-     * @param name 字段名称
-     * @param value 值
-     */
-    public static void setFieldValue(Object o, String name, Object value) {
-        Field field = ReflectionUtils.findField(o.getClass(), name);
-
-        if (field == null) {
-            throw new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 字段");
-        }
-
-        field.setAccessible(true);
-
-        ReflectionUtils.setField(field, o, value);
-    }
-
-    /**
-     * 获取对象的字段值
-     *
-     * @param o 对象
-     * @param name 字段名称
-     *
-     * @return 值
-     */
-    public static Object getFieldValue(Object o, String name) {
-        Field field = ReflectionUtils.findField(o.getClass(), name);
-
-        if (field == null) {
-            throw new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 字段");
-        }
-
-        field.setAccessible(true);
-
-        return ReflectionUtils.getField(field, o);
-    }
-
-    /**
-     * 通过 get 方法获取字段内容
-     *
-     * @param o 对象
-     * @param name 字段名称
-     * @param args 参数
-     *
-     * @return 字段内容
-     */
-    public static Object getReadProperty(Object o, String name, Object... args) {
-
-        PropertyDescriptor propertyDescriptor = findPropertyDescriptor(o, name);
-
-        if (!Modifier.isPublic(propertyDescriptor.getReadMethod().getDeclaringClass().getModifiers())) {
-            throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
-        }
-
-        return invokeMethod(o, propertyDescriptor.getReadMethod(), Arrays.asList(args));
-    }
-
-    /**
-     * 通过 set 方法设置字段内容
-     *
-     * @param o 对象
-     * @param name 字段名称
-     * @param value 值
-     */
-    public static void setWriteProperty(Object o, String name, Object value) {
-
-        PropertyDescriptor propertyDescriptor = findPropertyDescriptor(o, name);
-
-        if (!Modifier.isPublic(propertyDescriptor.getWriteMethod().getDeclaringClass().getModifiers())) {
-            throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
-        }
-
-        invokeMethod(o, propertyDescriptor.getWriteMethod(), Collections.singletonList(value));
-    }
-
-    /**
-     * 执行对象方法
-     *
-     * @param o 对象
-     * @param methodName 方法名称
-     * @param args 参数值
-     * @param paramTypes 参数类型
-     *
-     * @return 返回值
-     */
-    public static Object invokeMethod(Object o, String methodName, List<Object> args, Class<?>... paramTypes) {
-        Method method = ReflectionUtils.findMethod(o.getClass(), methodName, paramTypes);
-
-        if (method == null) {
-            throw new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + methodName + "] 方法");
-        }
-
-        return invokeMethod(o, method, args);
-    }
-
-    /**
-     * 执行对象方法
-     *
-     * @param o 对象
-     * @param method 方法
-     * @param args 参数
-     *
-     * @return 返回值
-     */
-    public static Object invokeMethod(Object o, Method method, List<Object> args) {
-        method.setAccessible(true);
-
-        return ReflectionUtils.invokeMethod(method, o, args.toArray());
-    }
-
-    /**
-     * 查找对象中的字段属性说明
-     *
-     * @param o 对象
-     * @param name 字段名称
-     *
-     * @return 字段属性说明
-     */
-    private static PropertyDescriptor findPropertyDescriptor(Object o, String name) {
-        return Arrays.stream(BeanUtils.getPropertyDescriptors(o.getClass()))
-                .filter(p -> p.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性"));
     }
 
 }

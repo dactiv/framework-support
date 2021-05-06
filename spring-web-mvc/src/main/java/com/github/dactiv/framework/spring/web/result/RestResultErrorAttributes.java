@@ -48,12 +48,6 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             HttpStatus.UNAUTHORIZED
     );
 
-    private final ObjectMapper objectMapper;
-
-    public RestResultErrorAttributes(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
@@ -87,7 +81,8 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 List<Map<String, Object>> data = new LinkedList<>();
 
                 for (FieldError fieldError : filedErrorResult) {
-                    Map<String, Object> map = objectMapper.convertValue(fieldError, Map.class);
+
+                    Map<String, Object> map = Casts.convertValue(fieldError, Map.class);
 
                     map.entrySet().removeIf(i -> DEFAULT_BINDING_RESULT_IGNORE_FIELD.contains(i.getKey()));
 
@@ -119,7 +114,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
         webRequest.setAttribute(DEFAULT_ERROR_EXECUTE_ATTR_NAME, true, RequestAttributes.SCOPE_REQUEST);
 
-        return objectMapper.convertValue(result, Map.class);
+        return Casts.convertValue(result, Map.class);
     }
 
     private BindingResult extractBindingResult(Throwable error) {

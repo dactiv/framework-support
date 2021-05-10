@@ -26,16 +26,18 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      * 默认的并发 key 前缀
      */
     private static final String DEFAULT_CONCURRENT_KEY_PREFIX = "redis:concurrent:";
-
+    /**
+     * redisson 客户端
+     */
     private final RedissonClient redissonClient;
     /**
      * 并发 key 前缀
      */
     private String concurrentKeyPrefix = DEFAULT_CONCURRENT_KEY_PREFIX;
 
-    private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-    private SpelExpressionParser parser = new SpelExpressionParser();
+    private final SpelExpressionParser parser = new SpelExpressionParser();
 
     public ConcurrentInterceptor(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;

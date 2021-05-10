@@ -26,5 +26,5 @@ public interface ConditionParser {
      *
      * @return 条件
      */
-    List<Condition> getCondition(String name, List<String> value);
+    List<Condition> getCondition(String name, List<Object> value);
 }

@@ -1,55 +1,57 @@
-package com.github.dactiv.framework.spring.security.audit.elasticsearch;
+package com.github.dactiv.framework.spring.security.audit.mongo;
 
 import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
 import com.github.dactiv.framework.spring.security.audit.DateIndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.elasticsearch.ElasticsearchAuditEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * es 审计事件仓库实现
+ * mongo 审计事件仓库实现
  *
  * @author maurice.chen
  */
-public class ElasticsearchAuditEventRepository implements PageAuditEventRepository {
+public class MongoAuditEventRepository implements PageAuditEventRepository {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final MongoTemplate mongoTemplate;
 
     private final SecurityProperties securityProperties;
 
     private IndexGenerator indexGenerator;
 
-    public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
-                                             SecurityProperties securityProperties) {
-        this(elasticsearchRestTemplate, securityProperties, new DateIndexGenerator());
+    public MongoAuditEventRepository(MongoTemplate mongoTemplate,
+                                     SecurityProperties securityProperties) {
+        this(mongoTemplate, securityProperties, new DateIndexGenerator());
     }
 
-    public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
-                                             SecurityProperties securityProperties,
-                                             IndexGenerator indexGenerator) {
-        this.elasticsearchRestTemplate = elasticsearchRestTemplate;
+    public MongoAuditEventRepository(MongoTemplate mongoTemplate,
+                                     SecurityProperties securityProperties,
+                                     IndexGenerator indexGenerator) {
+
+        this.mongoTemplate = mongoTemplate;
         this.securityProperties = securityProperties;
         this.indexGenerator = indexGenerator;
     }
@@ -61,15 +63,10 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
         try {
 
-            ElasticsearchAuditEvent auditEventEntity = new ElasticsearchAuditEvent(event);
+            MongoAuditEvent auditEventEntity = new MongoAuditEvent(event);
 
             if (!auditEventEntity.getPrincipal().equals(securityProperties.getUser().getName())) {
-
-                IndexQueryBuilder indexQueryBuilder = new IndexQueryBuilder()
-                        .withId(auditEventEntity.getId())
-                        .withObject(auditEventEntity);
-
-                elasticsearchRestTemplate.index(indexQueryBuilder.build(), IndexCoordinates.of(index));
+                mongoTemplate.save(auditEventEntity, index);
             }
 
         } catch (Exception e) {
@@ -80,43 +77,40 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
-
         String index = indexGenerator.getDefaultIndexPrefix() + "-*";
 
-        Criteria criteria  = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").contains(principal);
+            criteria = criteria.and("principal").regex(".*" + principal + ".*");
             index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
         }
 
-        return elasticsearchRestTemplate
-                .search(new CriteriaQuery(criteria), ElasticsearchAuditEvent.class, IndexCoordinates.of(index))
+        return mongoTemplate
+                .find(new Query(criteria), MongoAuditEvent.class, index)
                 .stream()
-                .map(SearchHit::getContent)
                 .map(AuditEventEntity::toAuditEvent)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type) {
-
         String index = indexGenerator.getDefaultIndexPrefix() + "-*";
 
-        Criteria criteria  = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").contains(principal);
+            criteria = criteria.and("principal").regex(".*" + principal + ".*");
             index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
         }
 
-        List<AuditEvent> content = elasticsearchRestTemplate
-                .search(new CriteriaQuery(criteria, pageable), AuditEventEntity.class, IndexCoordinates.of(index))
-                .stream().map(SearchHit::getContent)
+        List<AuditEvent> data = mongoTemplate
+                .find(new Query(criteria).with(pageable).with(pageable.getSort()), MongoAuditEvent.class, index)
+                .stream()
                 .map(AuditEventEntity::toAuditEvent)
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(content, pageable, content.size());
+        return new PageImpl<>(data, pageable, data.size());
     }
 
     /**
@@ -136,7 +130,7 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
         }
 
         if (after != null) {
-            criteria = criteria.and("type").greaterThanEqual(type);
+            criteria = criteria.and("type").gte(type);
         }
 
         return criteria;

@@ -1,13 +1,10 @@
 package com.github.dactiv.framework.spring.security.audit;
 
-import com.github.dactiv.framework.spring.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import org.springframework.boot.actuate.audit.AuditEvent;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,8 +13,9 @@ import java.util.UUID;
  *
  * @author maurice
  */
-@Document(indexName = "audit-event", type = ElasticsearchAuditEventRepository.DEFAULT_ES_TYPE_VALUE)
 public class AuditEventEntity implements Serializable {
+
+    private static final long serialVersionUID = -8633684304971875621L;
 
     /**
      * 主键 id
@@ -27,7 +25,7 @@ public class AuditEventEntity implements Serializable {
     /**
      * 创建时间
      */
-    private LocalDateTime creationTIme = LocalDateTime.now();
+    private LocalDateTime creationTime = LocalDateTime.now();
 
     /**
      * 操作者
@@ -37,7 +35,6 @@ public class AuditEventEntity implements Serializable {
     /**
      * 审计类型
      */
-    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String type;
 
     /**
@@ -49,6 +46,7 @@ public class AuditEventEntity implements Serializable {
      * 创建一个审计事件实体
      */
     public AuditEventEntity() {
+        super();
     }
 
     /**
@@ -86,17 +84,17 @@ public class AuditEventEntity implements Serializable {
      *
      * @return 创建时间
      */
-    public LocalDateTime getCreationTIme() {
-        return creationTIme;
+    public LocalDateTime getCreationTime() {
+        return creationTime;
     }
 
     /**
      * 设置创建时间
      *
-     * @param creationTIme 创建时间
+     * @param creationTime 创建时间
      */
-    public void setCreationTIme(LocalDateTime creationTIme) {
-        this.creationTIme = creationTIme;
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
     }
 
     /**
@@ -145,9 +143,19 @@ public class AuditEventEntity implements Serializable {
 
     /**
      * 设置审计数据
-     * @param data
+     *
+     * @param data 审计数据
      */
     public void setData(Map<String, Object> data) {
         this.data = data;
+    }
+
+    /**
+     * 转换为 spring 默认的审计事件
+     *
+     * @return  spring 默认审计事件
+     */
+    public AuditEvent toAuditEvent() {
+        return new AuditEvent(creationTime.atZone(ZoneId.systemDefault()).toInstant(), principal, type, data);
     }
 }

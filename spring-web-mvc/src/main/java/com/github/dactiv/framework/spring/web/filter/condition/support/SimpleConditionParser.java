@@ -8,6 +8,7 @@ import com.github.dactiv.framework.spring.web.filter.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.filter.condition.ConditionType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Objects;
 
 /**
  * 简单的条件解析器实现, 默认以 filter_ 最前缀的参数创建条件集合，具体格式为：
- *
+ * <p>
  * filter_[字段名_通配符]_and_[字段名_通配符]_or_[字段名_通配符]
  *
  * @author maurice.chen
@@ -26,7 +27,6 @@ public class SimpleConditionParser implements ConditionParser {
      * 默认条件名称前缀
      */
     public static final String DEFAULT_CONDITION_NAME_PREFIX = "filter";
-
 
     /**
      * 默认条件名称前缀
@@ -74,7 +74,7 @@ public class SimpleConditionParser implements ConditionParser {
     }
 
     @Override
-    public List<Condition> getCondition(String name, List<String> value) {
+    public List<Condition> getCondition(String name, List<Object> value) {
 
         String[] fieldConditionList = StringUtils.substringsBetween(
                 name,
@@ -90,9 +90,17 @@ public class SimpleConditionParser implements ConditionParser {
 
         for (String fieldCondition : fieldConditionList) {
 
-            String property = StringUtils.substringBeforeLast(fieldCondition, fieldConditionSeparators);
+            String propertyName = StringUtils.substringBeforeLast(fieldCondition, fieldConditionSeparators);
 
-            Property p = new Property(property, value.size() > 1 ? value : value.iterator().next());
+            Object propertyValue = value;
+
+            if (CollectionUtils.isEmpty(value)) {
+                propertyValue = null;
+            } else if (value.size() > 1) {
+                propertyValue = value.iterator().next();
+            }
+
+            Property p = new Property(propertyName, propertyValue);
 
             String condition = StringUtils.substringAfterLast(fieldCondition, fieldConditionSeparators);
 
@@ -109,11 +117,19 @@ public class SimpleConditionParser implements ConditionParser {
                 type = NameEnumUtils.parse(StringUtils.capitalize(typeValue), ConditionType.class, true);
 
                 if (Objects.isNull(type)) {
-                    throw new SystemException("找不到条件类型，请检查格式是否存在问，" +
-                            "标准的条件格式为 " + conditionNamePrefix + fieldOpenPrefix + "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + " 如果多个条件，" +
-                            "请记得添加 or 或者 and 关联下一个条件的," +
-                            "如: " + conditionNamePrefix + fieldOpenPrefix + "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + fieldConditionSeparators + "and" + fieldOpenPrefix + "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + " = where 字段名 通配符 值 and 字段名 通配符 值 , " +
-                            conditionNamePrefix + fieldOpenPrefix + "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + fieldConditionSeparators + "or" + fieldOpenPrefix + "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + " = where 字段名 通配符 值 and 字段名 通配符 值 , ");
+                    throw new SystemException(
+                            "找不到条件类型，请检查格式是否存在问，" +
+                            "标准的条件格式为 " + conditionNamePrefix + fieldOpenPrefix +
+                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + " 如果多个条件，" +
+                            "请记得添加 or 或者 and 关联下一个条件的, 如: " + conditionNamePrefix + fieldOpenPrefix +
+                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix +
+                            fieldConditionSeparators + "and" + fieldOpenPrefix + "字段名" +
+                            fieldConditionSeparators + "通配符" + fieldCloseSuffix +
+                            " = where 字段名 通配符 值 and 字段名 通配符 值 , " + conditionNamePrefix + fieldOpenPrefix +
+                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix +
+                            fieldConditionSeparators + "or" + fieldOpenPrefix + "字段名" + fieldConditionSeparators +
+                            "通配符" + fieldCloseSuffix + " = where 字段名 通配符 值 and 字段名 通配符 值 , "
+                    );
                 }
             }
 

@@ -171,15 +171,14 @@ public class SpringSecuritySupportAutoConfiguration {
         return new ElasticsearchAuditEventRepository(elasticsearchRestTemplate, securityProperties);
     }*/
 
-
     @Bean
     ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor() {
         return new ControllerAuditHandlerInterceptor();
     }
 
     @Bean
-    AccessVersionControlHandlerInterceptor accessVersionControlHandlerInterceptor(ObjectMapper objectMapper) {
-        return new AccessVersionControlHandlerInterceptor(objectMapper);
+    AccessVersionControlHandlerInterceptor accessVersionControlHandlerInterceptor() {
+        return new AccessVersionControlHandlerInterceptor();
     }
 
     @Bean

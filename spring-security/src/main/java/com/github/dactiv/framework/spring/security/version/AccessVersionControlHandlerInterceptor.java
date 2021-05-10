@@ -29,7 +29,7 @@ import java.util.Optional;
  */
 public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAdapter {
 
-    private static final String DEFAULT_VERSION_HEAD_NAME = "X-APP-VERSION";
+    private static final String DEFAULT_VERSION_HEAD_NAME = "X-REQUEST-VERSION";
 
     private final DeviceResolver deviceResolver = new LiteDeviceResolver();
 

@@ -131,7 +131,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * @return 包装器
      */
     public <S> QueryWrapper<S> getQueryWrapperByHttpRequest(HttpServletRequest request) {
-        return Casts.cast(getQueryWrapperFromHttpRequest(request));
+        return Casts.cast(createQueryWrapperFromHttpRequest(request));
     }
 
     /**

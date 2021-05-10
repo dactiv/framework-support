@@ -34,7 +34,7 @@ public class ConcurrentDataService {
         return count;
     }
 
-    @ConcurrentProcess(value = "'increment:spring-el:count:' + #socketUserDetails.id")
+    @ConcurrentProcess(value = "increment:spring-el:count:#socketUserDetails.id")
     public int incrementArgs(SocketUserDetails socketUserDetails) {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);

@@ -35,12 +35,24 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
 
     private static final String DEFAULT_EXCEPTION_KEY_NAME = "exception";
 
+    /**
+     * spring 应用的事件推送器
+     */
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * 成功执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
+     */
     private String successSuffixName = DEFAULT_SUCCESS_SUFFIX_NAME;
 
+    /**
+     * 失败执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
+     */
     private String failureSuffixName = DEFAULT_FAILURE_SUFFIX_NAME;
 
+    /**
+     * 异常执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
+     */
     private String exceptionKeyName = DEFAULT_EXCEPTION_KEY_NAME;
 
     public ControllerAuditHandlerInterceptor() {

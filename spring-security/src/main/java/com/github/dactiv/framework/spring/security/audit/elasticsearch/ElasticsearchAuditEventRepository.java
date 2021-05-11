@@ -35,11 +35,14 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
-    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
-    private final SecurityProperties securityProperties;
+    private SecurityProperties securityProperties;
 
     private IndexGenerator indexGenerator;
+
+    public ElasticsearchAuditEventRepository() {
+    }
 
     public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
                                              SecurityProperties securityProperties) {
@@ -86,7 +89,7 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
         Criteria criteria  = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").contains(principal);
+            criteria = criteria.and("principal").is(principal);
             index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
         }
 

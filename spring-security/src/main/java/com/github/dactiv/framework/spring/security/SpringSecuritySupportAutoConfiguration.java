@@ -1,9 +1,8 @@
 package com.github.dactiv.framework.spring.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.spring.security.asscess.UserTypeVoter;
+import com.github.dactiv.framework.spring.security.audit.AuditProperties;
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
-import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedProperties;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedSecurityContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.provider.AnonymousUserAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentInterceptor;
@@ -53,8 +52,8 @@ import java.util.stream.Collectors;
  * @author maurice
  */
 @Configuration
-@EnableConfigurationProperties(DeviceIdentifiedProperties.class)
 @AutoConfigureBefore(RedisAutoConfiguration.class)
+@EnableConfigurationProperties(SpringSecuritySupportProperties.class)
 @ConditionalOnProperty(prefix = "spring.security.support", value = "enabled", matchIfMissing = true)
 public class SpringSecuritySupportAutoConfiguration {
 
@@ -165,12 +164,6 @@ public class SpringSecuritySupportAutoConfiguration {
         return new PluginEndpoint(infoContributors);
     }
 
-    /*@Bean
-    ElasticsearchAuditEventRepository elasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
-                                                                        SecurityProperties securityProperties) {
-        return new ElasticsearchAuditEventRepository(elasticsearchRestTemplate, securityProperties);
-    }*/
-
     @Bean
     ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor() {
         return new ControllerAuditHandlerInterceptor();
@@ -184,14 +177,14 @@ public class SpringSecuritySupportAutoConfiguration {
     @Bean
     DeviceIdentifiedSecurityContextRepository deviceIdentifiedSecurityContextRepository(
             RedisTemplate<String, Object> redisTemplate,
-            DeviceIdentifiedProperties deviceIdentifiedProperties) {
+            SpringSecuritySupportProperties properties) {
 
         DeviceIdentifiedSecurityContextRepository repository = new DeviceIdentifiedSecurityContextRepository(redisTemplate);
 
-        repository.setSpringSecurityContextKey(deviceIdentifiedProperties.getSpringSecurityContextKey());
-        repository.setLoginProcessingUrl(deviceIdentifiedProperties.getLoginProcessingUrl());
-        repository.setAllowSessionCreation(deviceIdentifiedProperties.getAllowSessionCreation());
-        repository.setDisableUrlRewriting(deviceIdentifiedProperties.getDisableUrlRewriting());
+        repository.setSpringSecurityContextKey(properties.getSpringSecurityContextKey());
+        repository.setLoginProcessingUrl(properties.getLoginProcessingUrl());
+        repository.setAllowSessionCreation(properties.getAllowSessionCreation());
+        repository.setDisableUrlRewriting(properties.getDisableUrlRewriting());
 
         return repository;
     }

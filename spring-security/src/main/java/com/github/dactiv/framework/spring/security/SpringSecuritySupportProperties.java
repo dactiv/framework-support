@@ -1,14 +1,14 @@
-package com.github.dactiv.framework.spring.security.authentication;
+package com.github.dactiv.framework.spring.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 设备唯一识别的 spring security context 配置信息
+ * spring security 扩展的配置内容
  *
  * @author maurice.chen
  */
-@ConfigurationProperties("spring.security.support.device-identified")
-public class DeviceIdentifiedProperties {
+@ConfigurationProperties("spring.security.support")
+public class SpringSecuritySupportProperties {
 
     /**
      * 默认存储在 redis 的 security context key 名称
@@ -36,41 +36,81 @@ public class DeviceIdentifiedProperties {
     private boolean allowSessionCreation = true;
 
     /**
-     * 禁用 url 重写
+     * 是否禁用 url 重写，默认为 false
      */
     private boolean disableUrlRewriting = false;
 
-    public DeviceIdentifiedProperties() {
+    public SpringSecuritySupportProperties() {
     }
 
+    /**
+     * 获取安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     *
+     * @return 安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     */
     public String getSpringSecurityContextKey() {
         return springSecurityContextKey;
     }
 
+    /**
+     * 设置安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     *
+     * @param springSecurityContextKey 安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     */
     public void setSpringSecurityContextKey(String springSecurityContextKey) {
         this.springSecurityContextKey = springSecurityContextKey;
     }
 
+    /**
+     * 获取登陆处理 url
+     *
+     * @return 登陆处理 url
+     */
     public String getLoginProcessingUrl() {
         return loginProcessingUrl;
     }
 
+    /**
+     * 设置登陆处理 url
+     *
+     * @param loginProcessingUrl 登陆处理 url
+     */
     public void setLoginProcessingUrl(String loginProcessingUrl) {
         this.loginProcessingUrl = loginProcessingUrl;
     }
 
+    /**
+     * 获取是否允许 session 创建
+     *
+     * @return true 是，否则 false
+     */
     public boolean getAllowSessionCreation() {
         return allowSessionCreation;
     }
 
+    /**
+     * 设置是否允许 session 创建
+     *
+     * @param allowSessionCreation true 是，否则 false
+     */
     public void setAllowSessionCreation(boolean allowSessionCreation) {
         this.allowSessionCreation = allowSessionCreation;
     }
 
+    /**
+     * 获取是否禁用 url 重写
+     *
+     * @return true 是，否则 false
+     */
     public boolean getDisableUrlRewriting() {
         return disableUrlRewriting;
     }
 
+    /**
+     * 设置是否禁用 url 重写
+     *
+     * @param disableUrlRewriting 是否禁用 url 重写
+     */
     public void setDisableUrlRewriting(boolean disableUrlRewriting) {
         this.disableUrlRewriting = disableUrlRewriting;
     }

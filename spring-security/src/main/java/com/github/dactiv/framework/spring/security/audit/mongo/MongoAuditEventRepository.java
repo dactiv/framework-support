@@ -4,26 +4,19 @@ import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
 import com.github.dactiv.framework.spring.security.audit.DateIndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
-import com.github.dactiv.framework.spring.security.audit.elasticsearch.ElasticsearchAuditEvent;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
-import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,11 +29,14 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    private final MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
 
-    private final SecurityProperties securityProperties;
+    private SecurityProperties securityProperties;
 
     private IndexGenerator indexGenerator;
+
+    public MongoAuditEventRepository() {
+    }
 
     public MongoAuditEventRepository(MongoTemplate mongoTemplate,
                                      SecurityProperties securityProperties) {
@@ -82,7 +78,7 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
         Criteria criteria = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").regex(".*" + principal + ".*");
+            criteria = criteria.and("principal").is(principal);
             index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
         }
 

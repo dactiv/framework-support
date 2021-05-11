@@ -8,7 +8,13 @@
     {
       "name": "spring.security.support.enabled",
       "type": "java.lang.Boolean",
-      "description": "enabled spring security support .",
+      "description": "是否开启 spring security 支持 .",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.security.support.override-http-security",
+      "type": "java.lang.Boolean",
+      "description": "是否充血 spring security http .",
       "defaultValue": true
     }
   ]

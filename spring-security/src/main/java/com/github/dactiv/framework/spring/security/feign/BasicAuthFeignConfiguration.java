@@ -2,7 +2,8 @@ package com.github.dactiv.framework.spring.security.feign;
 
 import feign.RequestInterceptor;
 import feign.auth.BasicAuthRequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,16 +13,14 @@ import org.springframework.context.annotation.Configuration;
  * @author maurice
  */
 @Configuration
+@EnableConfigurationProperties(SecurityProperties.class)
 public class BasicAuthFeignConfiguration {
 
-    @Value("${spring.security.user.name:feign}")
-    private String username;
-
-    @Value("${spring.security.user.password:feign}")
-    private String password;
-
     @Bean
-    public RequestInterceptor basicAuthRequestInterceptor() {
-        return new BasicAuthRequestInterceptor(username, password);
+    public RequestInterceptor basicAuthRequestInterceptor(SecurityProperties securityProperties) {
+        return new BasicAuthRequestInterceptor(
+                securityProperties.getUser().getName(),
+                securityProperties.getUser().getPassword()
+        );
     }
 }

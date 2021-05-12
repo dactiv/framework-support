@@ -1,8 +1,6 @@
 package com.github.dactiv.framework.spring.security.audit.mongo;
 
 import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
-import com.github.dactiv.framework.spring.security.audit.DateIndexGenerator;
-import com.github.dactiv.framework.spring.security.audit.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,36 +31,25 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
 
     private SecurityProperties securityProperties;
 
-    private IndexGenerator indexGenerator;
-
     public MongoAuditEventRepository() {
     }
 
     public MongoAuditEventRepository(MongoTemplate mongoTemplate,
                                      SecurityProperties securityProperties) {
-        this(mongoTemplate, securityProperties, new DateIndexGenerator());
-    }
-
-    public MongoAuditEventRepository(MongoTemplate mongoTemplate,
-                                     SecurityProperties securityProperties,
-                                     IndexGenerator indexGenerator) {
 
         this.mongoTemplate = mongoTemplate;
         this.securityProperties = securityProperties;
-        this.indexGenerator = indexGenerator;
     }
 
     @Override
     public void add(AuditEvent event) {
 
-        String index = indexGenerator.generateIndex(event).toLowerCase();
+        AuditEventEntity auditEventEntity = new AuditEventEntity(event);
 
         try {
 
-            MongoAuditEvent auditEventEntity = new MongoAuditEvent(event);
-
             if (!auditEventEntity.getPrincipal().equals(securityProperties.getUser().getName())) {
-                mongoTemplate.save(auditEventEntity, index);
+                mongoTemplate.save(auditEventEntity, AuditEventEntity.DEFAULT_INDEX_NAME);
             }
 
         } catch (Exception e) {
@@ -73,17 +60,11 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
 
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
-        String index = indexGenerator.getDefaultIndexPrefix() + "-*";
 
         Criteria criteria = createCriteria(after, type);
 
-        if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").is(principal);
-            index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
-        }
-
         return mongoTemplate
-                .find(new Query(criteria), MongoAuditEvent.class, index)
+                .find(new Query(criteria), AuditEventEntity.class, AuditEventEntity.DEFAULT_INDEX_NAME)
                 .stream()
                 .map(AuditEventEntity::toAuditEvent)
                 .collect(Collectors.toList());
@@ -91,17 +72,11 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
 
     @Override
     public Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type) {
-        String index = indexGenerator.getDefaultIndexPrefix() + "-*";
 
         Criteria criteria = createCriteria(after, type);
 
-        if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").regex(".*" + principal + ".*");
-            index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
-        }
-
         List<AuditEvent> data = mongoTemplate
-                .find(new Query(criteria).with(pageable).with(pageable.getSort()), MongoAuditEvent.class, index)
+                .find(new Query(criteria).with(pageable).with(pageable.getSort()), AuditEventEntity.class, AuditEventEntity.DEFAULT_INDEX_NAME)
                 .stream()
                 .map(AuditEventEntity::toAuditEvent)
                 .collect(Collectors.toList());
@@ -130,14 +105,5 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
         }
 
         return criteria;
-    }
-
-    /**
-     * 设置索引生成器
-     *
-     * @param indexGenerator 索引生成器
-     */
-    public void setIndexGenerator(IndexGenerator indexGenerator) {
-        this.indexGenerator = indexGenerator;
     }
 }

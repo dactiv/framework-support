@@ -1,12 +1,10 @@
 package com.github.dactiv.framework.spring.security.audit.elasticsearch;
 
 import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
-import com.github.dactiv.framework.spring.security.audit.DateIndexGenerator;
-import com.github.dactiv.framework.spring.security.audit.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.IndexGenerator;
+import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -20,9 +18,9 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,25 +44,23 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
     public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
                                              SecurityProperties securityProperties) {
-        this(elasticsearchRestTemplate, securityProperties, new DateIndexGenerator());
-    }
 
-    public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
-                                             SecurityProperties securityProperties,
-                                             IndexGenerator indexGenerator) {
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
         this.securityProperties = securityProperties;
-        this.indexGenerator = indexGenerator;
+
+        this.indexGenerator = new DateIndexGenerator(AuditEventEntity.DEFAULT_INDEX_NAME, "-", "creationTime");
     }
+
+
 
     @Override
     public void add(AuditEvent event) {
 
-        String index = indexGenerator.generateIndex(event).toLowerCase();
+        AuditEventEntity auditEventEntity = new AuditEventEntity(event);
 
         try {
 
-            ElasticsearchAuditEvent auditEventEntity = new ElasticsearchAuditEvent(event);
+            String index = indexGenerator.generateIndex(auditEventEntity).toLowerCase();
 
             if (!auditEventEntity.getPrincipal().equals(securityProperties.getUser().getName())) {
 
@@ -84,17 +80,17 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
 
-        String index = indexGenerator.getDefaultIndexPrefix() + "-*";
+        String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
 
         Criteria criteria  = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
             criteria = criteria.and("principal").is(principal);
-            index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
+            index = AuditEventEntity.DEFAULT_INDEX_NAME + "-" + principal + "-*";
         }
 
         return elasticsearchRestTemplate
-                .search(new CriteriaQuery(criteria), ElasticsearchAuditEvent.class, IndexCoordinates.of(index))
+                .search(new CriteriaQuery(criteria), AuditEventEntity.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
                 .map(AuditEventEntity::toAuditEvent)
@@ -104,13 +100,13 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
     @Override
     public Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type) {
 
-        String index = indexGenerator.getDefaultIndexPrefix() + "-*";
+        String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
 
         Criteria criteria  = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
             criteria = criteria.and("principal").contains(principal);
-            index = indexGenerator.getDefaultIndexPrefix() + "-" + principal + "-*";
+            index = AuditEventEntity.DEFAULT_INDEX_NAME + "-" + principal + "-*";
         }
 
         List<AuditEvent> content = elasticsearchRestTemplate

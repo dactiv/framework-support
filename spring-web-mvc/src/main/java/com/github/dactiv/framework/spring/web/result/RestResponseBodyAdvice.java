@@ -1,8 +1,8 @@
 package com.github.dactiv.framework.spring.web.result;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
+import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,7 +10,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -121,7 +120,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             } else if (HttpStatus.OK == status) {
                 result.setExecuteCode(RestResult.SUCCESS_EXECUTE_CODE);
             } else {
-                result.setExecuteCode(RestResult.ERROR_EXECUTE_CODE);
+                result.setExecuteCode(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
             }
 
             return result;

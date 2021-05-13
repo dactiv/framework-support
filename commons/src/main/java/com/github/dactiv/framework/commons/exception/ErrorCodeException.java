@@ -1,14 +1,21 @@
 package com.github.dactiv.framework.commons.exception;
 
-
-import org.springframework.http.HttpStatus;
-
 /**
  * 带错误代码的异常
  *
  * @author maurice
  */
 public class ErrorCodeException extends SystemException {
+
+    /**
+     * 默认错误的异常信息
+     */
+    public static String DEFAULT_ERROR_MESSAGE = "服务器异常，请稍后再试。";
+
+    /**
+     * 默认异常代码
+     */
+    public static String DEFAULT_EXCEPTION_CODE = "500";
 
     /**
      * 错误代码
@@ -88,8 +95,8 @@ public class ErrorCodeException extends SystemException {
      */
     public static void throwErrorCodeException(Throwable cause) {
 
-        String message = HttpStatus.INTERNAL_SERVER_ERROR.name();
-        String executeCode = HttpStatus.INTERNAL_SERVER_ERROR.toString();
+        String message = DEFAULT_ERROR_MESSAGE;
+        String executeCode = DEFAULT_EXCEPTION_CODE;
 
         if (cause instanceof ErrorCodeException || cause instanceof ServiceException) {
             message = cause.getMessage();

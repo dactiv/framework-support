@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.web.result;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
@@ -58,9 +57,9 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
         }
 
         RestResult<Object> result = new RestResult<>(
-                "服务器异常，请稍后再试。",
+                ErrorCodeException.DEFAULT_ERROR_MESSAGE,
                 status.value(),
-                RestResult.ERROR_EXECUTE_CODE,
+                ErrorCodeException.DEFAULT_EXCEPTION_CODE,
                 new LinkedHashMap<>()
         );
 

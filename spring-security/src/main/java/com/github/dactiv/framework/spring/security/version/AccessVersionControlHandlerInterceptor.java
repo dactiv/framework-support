@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.util.VersionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
+import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.web.mobile.Device;
 import com.github.dactiv.framework.spring.web.mobile.DevicePlatform;
@@ -85,7 +86,7 @@ public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAd
             RestResult<Map<String, Object>> r = new RestResult<>(
                     versionControl.responseStrategy().getName(),
                     versionControl.responseStrategy().getValue(),
-                    RestResult.ERROR_EXECUTE_CODE
+                    ErrorCodeException.DEFAULT_EXCEPTION_CODE
             );
 
             response.getWriter().write(Casts.writeValueAsString(r));

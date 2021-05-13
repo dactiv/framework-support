@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons;
 
-import org.springframework.http.HttpStatus;
+import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,9 +16,7 @@ public class RestResult<T> implements Serializable {
 
     private static final long serialVersionUID = 8809220528389402403L;
 
-    public static final String SUCCESS_EXECUTE_CODE = String.valueOf(HttpStatus.OK.value());
-
-    public static final String ERROR_EXECUTE_CODE = String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    public static final String SUCCESS_EXECUTE_CODE = "200";
 
     public static final String DEFAULT_MESSAGE_NAME = "message";
 
@@ -64,7 +62,7 @@ public class RestResult<T> implements Serializable {
      * @param message 响应信息
      */
     public RestResult(String message) {
-        this(message, HttpStatus.OK.value());
+        this(message, Integer.valueOf(SUCCESS_EXECUTE_CODE));
     }
 
     /**
@@ -111,7 +109,7 @@ public class RestResult<T> implements Serializable {
      */
     public RestResult(String executeCode, Throwable e) {
         this.executeCode = executeCode;
-        this.status = HttpStatus.INTERNAL_SERVER_ERROR.value();
+        this.status = Integer.parseInt(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
         this.message = e.getMessage();
     }
 
@@ -137,7 +135,7 @@ public class RestResult<T> implements Serializable {
      * 获取状态
      *
      * @return 状态
-     * @see HttpStatus
+     *
      */
     public int getStatus() {
         return status;
@@ -147,7 +145,7 @@ public class RestResult<T> implements Serializable {
      * 设置状态
      *
      * @param status 状态
-     * @see HttpStatus
+     *
      */
     public void setStatus(int status) {
         this.status = status;

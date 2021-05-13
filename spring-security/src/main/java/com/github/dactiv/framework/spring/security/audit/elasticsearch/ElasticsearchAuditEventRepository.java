@@ -51,8 +51,6 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
         this.indexGenerator = new DateIndexGenerator(AuditEventEntity.DEFAULT_INDEX_NAME, "-", "creationTime");
     }
 
-
-
     @Override
     public void add(AuditEvent event) {
 

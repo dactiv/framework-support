@@ -1,9 +1,11 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -14,14 +16,11 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  */
 public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> extends
         AbstractAuthenticationFilterConfigurer<H, RequestFormLoginConfiguration<H>, RequestAuthenticationFilter> {
-
-    private static final String DEFAULT_LOGIN_PROCESSING_URL = "/login";
-
     /**
      * spring boot 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration() {
-        super(new RequestAuthenticationFilter(), DEFAULT_LOGIN_PROCESSING_URL);
+        super(new RequestAuthenticationFilter(), DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL);
     }
 
     /**
@@ -30,12 +29,12 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * @param authenticationFilter 认证 filter
      */
     public RequestFormLoginConfiguration(RequestAuthenticationFilter authenticationFilter) {
-        super(authenticationFilter, DEFAULT_LOGIN_PROCESSING_URL);
+        super(authenticationFilter, DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL);
     }
 
     @Override
     protected RequestMatcher createLoginProcessingUrlMatcher(String loginProcessingUrl) {
-        return new AntPathRequestMatcher(loginProcessingUrl, "POST");
+        return new AntPathRequestMatcher(loginProcessingUrl, HttpMethod.POST.toString());
     }
 
     @Override

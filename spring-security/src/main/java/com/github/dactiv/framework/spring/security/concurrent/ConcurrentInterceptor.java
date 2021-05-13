@@ -1,17 +1,13 @@
 package com.github.dactiv.framework.spring.security.concurrent;
 
-import com.github.dactiv.framework.spring.security.concurrent.annotation.ConcurrentProcess;
+import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
+import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Objects;
 
@@ -23,58 +19,47 @@ import java.util.Objects;
 public class ConcurrentInterceptor implements MethodInterceptor {
 
     /**
-     * 默认的并发 key 前缀
-     */
-    private static final String DEFAULT_CONCURRENT_KEY_PREFIX = "redis:concurrent:";
-    /**
      * redisson 客户端
      */
     private final RedissonClient redissonClient;
+
     /**
-     * 并发 key 前缀
+     * key 生成器
      */
-    private String concurrentKeyPrefix = DEFAULT_CONCURRENT_KEY_PREFIX;
+    private final KeyGenerator keyGenerator;
 
-    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
-    private final SpelExpressionParser parser = new SpelExpressionParser();
-
-    public ConcurrentInterceptor(RedissonClient redissonClient) {
+    public ConcurrentInterceptor(RedissonClient redissonClient, KeyGenerator keyGenerator) {
         this.redissonClient = redissonClient;
-    }
-
-    public ConcurrentInterceptor(RedissonClient redissonClient, String concurrentKeyPrefix) {
-        this.redissonClient = redissonClient;
-        this.concurrentKeyPrefix = concurrentKeyPrefix;
+        this.keyGenerator = keyGenerator;
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
 
-        ConcurrentProcess concurrentProcess = AnnotationUtils.findAnnotation(invocation.getMethod(), ConcurrentProcess.class);
+        Concurrent concurrent = AnnotationUtils.findAnnotation(invocation.getMethod(), Concurrent.class);
 
-        if (Objects.isNull(concurrentProcess)) {
+        if (Objects.isNull(concurrent)) {
             return invocation.proceed();
         }
 
-        String key = concurrentProcess.value();
+        String key = concurrent.value();
 
         if (StringUtils.isEmpty(key)) {
             throw new ConcurrentException("并发处理的 key 不能为空");
         }
 
-        String concurrentKey = getConcurrentKey(key, invocation);
+        String concurrentKey = keyGenerator.generate(key, invocation);
 
         RLock lock = redissonClient.getLock(concurrentKey);
 
         boolean tryLock;
 
-        long waitTime = concurrentProcess.waitTime();
+        long waitTime = concurrent.waitTime();
 
         if (waitTime <= 0) {
             tryLock = lock.tryLock();
         } else {
-            tryLock = lock.tryLock(waitTime, concurrentProcess.leaseTime(), concurrentProcess.unit());
+            tryLock = lock.tryLock(waitTime, concurrent.leaseTime(), concurrent.unit());
         }
 
         if (tryLock) {
@@ -85,26 +70,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
             }
         }
 
-        throw new ConcurrentException(concurrentProcess.exceptionMessage());
-
-    }
-
-    private String getConcurrentKey(String key, MethodInvocation invocation) {
-
-        try {
-
-            String[] parameterNames = parameterNameDiscoverer.getParameterNames(invocation.getMethod());
-
-            EvaluationContext evaluationContext = new StandardEvaluationContext(invocation.getThis());
-
-            for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
-                evaluationContext.setVariable(parameterNames[i], invocation.getArguments()[i]);
-            }
-
-            return concurrentKeyPrefix + parser.parseExpression(key).getValue(evaluationContext, String.class);
-        } catch (Exception e) {
-            return concurrentKeyPrefix + key;
-        }
+        throw new ConcurrentException(concurrent.exceptionMessage());
 
     }
 

@@ -1,12 +1,13 @@
 package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.asscess.UserTypeVoter;
-import com.github.dactiv.framework.spring.security.audit.AuditProperties;
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedSecurityContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.provider.AnonymousUserAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentPointcutAdvisor;
+import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
+import com.github.dactiv.framework.spring.security.concurrent.key.support.SpelExpressionKeyGenerator;
 import com.github.dactiv.framework.spring.security.entity.AnonymousUser;
 import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
@@ -53,7 +54,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @AutoConfigureBefore(RedisAutoConfiguration.class)
-@EnableConfigurationProperties(SpringSecuritySupportProperties.class)
+@EnableConfigurationProperties({SpringSecuritySupportProperties.class, SecurityProperties.class})
 @ConditionalOnProperty(prefix = "spring.security.support", value = "enabled", matchIfMissing = true)
 public class SpringSecuritySupportAutoConfiguration {
 
@@ -242,8 +243,14 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(KeyGenerator.class)
+    KeyGenerator keyGenerator() {
+        return new SpelExpressionKeyGenerator();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(ConcurrentPointcutAdvisor.class)
-    ConcurrentPointcutAdvisor concurrentPointcutAdvisor(RedissonClient redissonClient) {
-        return new ConcurrentPointcutAdvisor(new ConcurrentInterceptor(redissonClient));
+    ConcurrentPointcutAdvisor concurrentPointcutAdvisor(RedissonClient redissonClient, KeyGenerator keyGenerator) {
+        return new ConcurrentPointcutAdvisor(new ConcurrentInterceptor(redissonClient, keyGenerator));
     }
 }

@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.security.concurrent.service;
 
-import com.github.dactiv.framework.spring.security.concurrent.annotation.ConcurrentProcess;
+import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
 import com.github.dactiv.framework.spring.security.entity.SocketUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,28 +13,28 @@ public class ConcurrentDataService {
 
     public static int count = 0;
 
-    @ConcurrentProcess("increment:count")
+    @Concurrent("increment:count")
     public int increment() {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);
         return count;
     }
 
-    @ConcurrentProcess(value = "increment:wait:count", waitTime = 3000)
+    @Concurrent(value = "increment:wait:count", waitTime = 3000)
     public int incrementWait() {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);
         return count;
     }
 
-    @ConcurrentProcess(value = "'increment:spring-el:count:' + count")
+    @Concurrent(value = "increment:spring-el:count")
     public int incrementSpringEl() {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);
         return count;
     }
 
-    @ConcurrentProcess(value = "increment:spring-el:count:#socketUserDetails.id")
+    @Concurrent(value = "increment:spring-el:count:[#socketUserDetails.id]")
     public int incrementArgs(SocketUserDetails socketUserDetails) {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);

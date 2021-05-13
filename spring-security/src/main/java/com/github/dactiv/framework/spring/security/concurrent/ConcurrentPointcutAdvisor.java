@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.security.concurrent;
 
-import com.github.dactiv.framework.spring.security.concurrent.annotation.ConcurrentProcess;
+import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
@@ -9,7 +9,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import java.lang.reflect.Method;
 
 /**
- * 并发处理的饥饿且实现
+ * 并发处理的切面实现
  *
  * @author maurice
  */
@@ -26,7 +26,7 @@ public class ConcurrentPointcutAdvisor extends AbstractPointcutAdvisor {
         return new StaticMethodMatcherPointcut() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                return method.isAnnotationPresent(ConcurrentProcess.class) || targetClass.isAnnotationPresent(ConcurrentProcess.class);
+                return method.isAnnotationPresent(Concurrent.class) || targetClass.isAnnotationPresent(Concurrent.class);
             }
 
         };

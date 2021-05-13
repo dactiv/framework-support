@@ -1,5 +1,8 @@
 package com.github.dactiv.framework.spring.security.concurrent.annotation;
 
+import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
+import com.github.dactiv.framework.spring.security.concurrent.key.support.SpelExpressionKeyGenerator;
+
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ConcurrentProcess {
+public @interface Concurrent {
 
     /**
      * 并发的 key

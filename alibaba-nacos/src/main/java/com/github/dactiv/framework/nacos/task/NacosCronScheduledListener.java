@@ -2,6 +2,7 @@ package com.github.dactiv.framework.nacos.task;
 
 import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
+import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -30,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.util.SystemPropertyUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -45,11 +48,6 @@ import java.util.stream.Collectors;
 public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPostProcessor, EmbeddedValueResolverAware, ApplicationContextAware, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosCronScheduledListener.class);
-
-    /**
-     * Yml 转 Properties 类型
-     */
-    private final YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
 
     /**
      * 找不到 NacosCronScheduled 注解的类，用于在 postProcessAfterInitialization 寻找
@@ -91,11 +89,13 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
      *
      * @param configInfo 更新的配置聂荣
      */
-    protected void onConfigReceive(String dataId, String configInfo) {
+    protected void configReceive(String dataId, String configInfo) throws IOException {
+
+        // 获取后缀名
+        String fileExtension = StringUtils.substringAfterLast(dataId, PropertiesBeanDefinitionReader.SEPARATOR);
 
         // 通过 configInfo 创建配置信息
-        // FIXME 这里只能支持 yml 的格式内容，不够通用。
-        Properties properties = createProperties(configInfo);
+        Map<String, Object> properties = NacosDataParserHandler.getInstance().parseNacosData(configInfo, fileExtension);
 
         // 创建临时记录改变了调度内容的集合对象
         List<NacosCronScheduledInfo> changeScheduledInfos = new LinkedList<>();
@@ -106,13 +106,20 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             List<MatchEvaluation> result = matchEvaluations
                     .stream()
                     // 匹配等于条件的值
-                    .filter(m -> properties.containsKey(m.getMatch()))
+                    .filter(m -> properties.containsKey(m.getMatch().toString()))
                     // 匹配不等于注视掉的值
-                    .filter(m ->ScheduledTaskRegistrar.CRON_DISABLED.equals(properties.get(m.getMatch()).toString()))
+                    .filter(m -> !ScheduledTaskRegistrar.CRON_DISABLED.equals(properties.get(m.getMatch().toString()).toString()))
                     .collect(Collectors.toList());
 
-            if (result.stream().anyMatch(m -> m.evaluation(m.getMatch(), properties.get(m.getMatch()), target))
-                    && !changeScheduledInfos.contains(target)) {
+            boolean update = false;
+
+            for (MatchEvaluation m : result) {
+                if (m.evaluation(properties.get(m.getMatch().toString()), target)) {
+                    update = true;
+                }
+            }
+
+            if (update) {
                 changeScheduledInfos.add(target);
             }
 
@@ -134,18 +141,6 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             // 记录当前调度内容，用于下次更新时可以直接通过该属性取消
             c.setScheduledTask(scheduledTask);
         });
-    }
-
-    /**
-     * 创建 Properties 类
-     *
-     * @param content yml 内容
-     *
-     * @return Properties 类
-     */
-    protected Properties createProperties(String content) {
-        yamlPropertiesFactoryBean.setResources(new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
-        return Objects.requireNonNull(yamlPropertiesFactoryBean.getObject());
     }
 
     /**
@@ -476,7 +471,11 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             nacosConfigManager.getConfigService().addListener(c.getDataId(), c.getGroup(), new AbstractSharedListener() {
                 @Override
                 public void innerReceive(String dataId, String group, String configInfo) {
-                    onConfigReceive(dataId, configInfo);
+                    try {
+                        configReceive(dataId, configInfo);
+                    } catch (Exception e) {
+                        LOGGER.error("执行接受配置文件变化[" + dataId + "," + group + "]出错", e);
+                    }
                 }
             });
         }

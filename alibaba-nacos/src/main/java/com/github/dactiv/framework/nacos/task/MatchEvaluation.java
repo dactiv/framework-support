@@ -100,6 +100,10 @@ public class MatchEvaluation {
         this.value = value;
     }
 
+    public boolean evaluation(Object value, Object target) {
+        return evaluation(null, value, target);
+    }
+
     /**
      * 定值
      *
@@ -111,7 +115,7 @@ public class MatchEvaluation {
      */
     public boolean evaluation(Object match, Object value, Object target) {
 
-        if (!Objects.equals(match, this.match)) {
+        if (Objects.nonNull(match) && !Objects.equals(match, this.match)) {
             return false;
         }
 

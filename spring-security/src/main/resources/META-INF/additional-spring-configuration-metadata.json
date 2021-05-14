@@ -14,7 +14,7 @@
     {
       "name": "spring.security.support.override-http-security",
       "type": "java.lang.Boolean",
-      "description": "是否充血 spring security http .",
+      "description": "是否重写 spring security http .",
       "defaultValue": true
     }
   ]

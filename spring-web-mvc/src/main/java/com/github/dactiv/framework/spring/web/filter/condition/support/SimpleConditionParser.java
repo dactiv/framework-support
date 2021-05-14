@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -117,19 +118,13 @@ public class SimpleConditionParser implements ConditionParser {
                 type = NameEnumUtils.parse(StringUtils.capitalize(typeValue), ConditionType.class, true);
 
                 if (Objects.isNull(type)) {
-                    throw new SystemException(
-                            "找不到条件类型，请检查格式是否存在问，" +
-                            "标准的条件格式为 " + conditionNamePrefix + fieldOpenPrefix +
-                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix + " 如果多个条件，" +
-                            "请记得添加 or 或者 and 关联下一个条件的, 如: " + conditionNamePrefix + fieldOpenPrefix +
-                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix +
-                            fieldConditionSeparators + "and" + fieldOpenPrefix + "字段名" +
-                            fieldConditionSeparators + "通配符" + fieldCloseSuffix +
-                            " = where 字段名 通配符 值 and 字段名 通配符 值 , " + conditionNamePrefix + fieldOpenPrefix +
-                            "字段名" + fieldConditionSeparators + "通配符" + fieldCloseSuffix +
-                            fieldConditionSeparators + "or" + fieldOpenPrefix + "字段名" + fieldConditionSeparators +
-                            "通配符" + fieldCloseSuffix + " = where 字段名 通配符 值 and 字段名 通配符 值 , "
-                    );
+                    String msg = MessageFormat.format(
+                            "找不到条件类型，请检查格式是否存在问题，标准的条件格式为 {0}{1}字段名{2}通配符{3} " +
+                                    "如果多个条件，请记得添加 or 或者 and 关联下一个条件的, " +
+                                    "如: {0}{1}字段名{2}通配符{3}{2}<and|ro>{1}字段名{2}通配符{3} " +
+                                    "= where 字段名 通配符 值 <and|ro> 字段名 通配符 值。",
+                            conditionNamePrefix, fieldOpenPrefix, fieldConditionSeparators, fieldCloseSuffix);
+                    throw new SystemException(msg);
                 }
             }
 

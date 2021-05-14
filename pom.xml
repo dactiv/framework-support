@@ -82,6 +82,7 @@
         <module>access-crypto</module>
         <module>spring-web-mvc</module>
         <module>spring-security</module>
+        <module>alibaba-nacos</module>
     </modules>
 
 </project>

@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author maurice
  */
-public class LoggingClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+public class LoggingClientHttpRequestInterceptor implements CustomClientHttpRequestInterceptor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(LoggingClientHttpRequestInterceptor.class);
 

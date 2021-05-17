@@ -10,7 +10,6 @@ import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -44,8 +43,12 @@ public class Casts {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired(required = false)
-    public void setObjectMapper(ObjectMapper objectMapper) {
+    /**
+     * 设置 jackson objectMapper
+     *
+     * @param objectMapper objectMapper
+     */
+    public static void setObjectMapper(ObjectMapper objectMapper) {
         Casts.objectMapper = objectMapper;
     }
 

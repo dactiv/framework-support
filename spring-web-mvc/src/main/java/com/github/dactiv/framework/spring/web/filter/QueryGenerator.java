@@ -3,7 +3,6 @@ package com.github.dactiv.framework.spring.web.filter;
 import com.github.dactiv.framework.spring.web.filter.condition.Condition;
 import com.github.dactiv.framework.spring.web.filter.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.filter.generator.WildcardParser;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 

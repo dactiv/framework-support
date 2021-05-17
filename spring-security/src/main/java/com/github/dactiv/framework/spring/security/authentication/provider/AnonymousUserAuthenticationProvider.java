@@ -3,13 +3,15 @@ package com.github.dactiv.framework.spring.security.authentication.provider;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.entity.AnonymousUser;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,32 +27,33 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
 
     private PasswordEncoder passwordEncoder;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedissonClient redissonClient;
 
-    private static final String DEFAULT_KEY_PREFIX = UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME;
-
-    public AnonymousUserAuthenticationProvider(RedisTemplate<String, Object> redisTemplate) {
+    public AnonymousUserAuthenticationProvider(RedissonClient redissonClient) {
         setForcePrincipalAsString(true);
-        this.redisTemplate = redisTemplate;
+        this.redissonClient = redissonClient;
     }
 
     public void createUser(AnonymousUser user) {
-        redisTemplate.opsForValue().set(DEFAULT_KEY_PREFIX + user.getUsername(), user);
+        RBucket<User> bucket = redissonClient.getBucket(user.getUsername());
+
+        if (bucket.isExists()) {
+            bucket.setAsync(user);
+        }
     }
 
     public void deleteUser(String username) {
-        redisTemplate.delete(DEFAULT_KEY_PREFIX + username);
+        RBucket<User> bucket = redissonClient.getBucket(username);
+
+        if (bucket.isExists()) {
+            bucket.deleteAsync();
+        }
     }
 
     public void updateUser(AnonymousUser user) {
-
-        Assert.isTrue(userExists(user.getUsername()), "不存在[" + user.getUsername() + "]");
-
-        redisTemplate.opsForValue().set(DEFAULT_KEY_PREFIX + user.getUsername(), user);
-    }
-
-    public boolean userExists(String username) {
-        return redisTemplate.opsForValue().get(DEFAULT_KEY_PREFIX + username) != null;
+        RBucket<User> bucket = redissonClient.getBucket(user.getUsername());
+        Assert.isTrue(bucket.isExists(), "不存在[" + user.getUsername() + "]");
+        bucket.set(user);
     }
 
     @Override
@@ -95,7 +98,7 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
 
             AnonymousUser loadedUser = null;
 
-            Object value = redisTemplate.opsForValue().get(DEFAULT_KEY_PREFIX + username);
+            Object value = getUserBucket(username).get();
 
             if (value != null) {
                 loadedUser = Casts.cast(value);
@@ -120,8 +123,24 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
         }
     }
 
+    /**
+     * 设置密码编码器
+     *
+     * @param passwordEncoder 密码编码器
+     */
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
+    }
+
+    /**
+     * 获取用户缓存
+     *
+     * @param username
+     *
+     * @return
+     */
+    public RBucket<User> getUserBucket(String username) {
+        return redissonClient.getBucket(UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME + username);
     }
 
 }

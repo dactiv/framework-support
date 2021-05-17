@@ -1,17 +1,18 @@
 package com.github.dactiv.framework.spring.security.authentication.provider;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import org.redisson.api.RBucket;
+import org.redisson.api.RList;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -20,7 +21,6 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -43,11 +43,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      */
     private List<UserDetailsService> userDetailsServices;
 
-    /**
-     * redis template
-     */
-    @Autowired
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedissonClient redissonClient;
 
     /**
      * 隐藏找不到用户异常，用登陆账户或密码错误异常
@@ -58,12 +54,10 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      * 当前用户认证供应者实现
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
-     * @param redisTemplate       redis 模版
      */
-    public PrincipalAuthenticationProvider(List<UserDetailsService> userDetailsServices,
-                                           RedisTemplate<String, Object> redisTemplate) {
+    public PrincipalAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
-        this.redisTemplate = redisTemplate;
+        this.redissonClient = redissonClient;
     }
 
     @Override
@@ -85,11 +79,13 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
 
         SecurityUserDetails userDetails = null;
 
+        CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(token);
+
         // 如果启用认证缓存，从认证缓存里获取用户
-        if (userDetailsService.isEnabledAuthenticationCache()) {
-            String key = userDetailsService.getAuthenticationCacheName(token);
-            Object value = redisTemplate.opsForValue().get(key);
-            userDetails = Casts.cast(value);
+        if (Objects.nonNull(authenticationCache)) {
+            RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
+
+            userDetails = bucket.get();
         }
 
         //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
@@ -123,13 +119,16 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
 
         userDetails.setType(token.getType());
 
+        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
+
         Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
 
         // 如果启用授权缓存，从授权缓存获取用户授权信息
-        if (userDetailsService.isEnabledAuthorizationCache() && grantedAuthorities != null) {
-            String key = userDetailsService.getAuthorizationCacheName(token);
-            Object value = redisTemplate.opsForValue().get(key);
-            grantedAuthorities = Casts.cast(value);
+        if (Objects.nonNull(authorizationCache) && grantedAuthorities != null) {
+
+            RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
+
+            grantedAuthorities = list.range(0, list.size());
         }
 
         // 如果找不到授权信息，调用 UserDetailsService 的 getPrincipalAuthorities 方法获取当前用户授权信息
@@ -137,32 +136,31 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
 
             grantedAuthorities = userDetailsService.getPrincipalAuthorities(userDetails);
 
-            if (userDetailsService.isEnabledAuthorizationCache()) {
+            if (Objects.nonNull(authorizationCache)) {
 
-                TimeProperties expiresTime = userDetailsService.getAuthorizationCacheExpiresTime();
+                RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
 
-                String key = userDetailsService.getAuthorizationCacheName(token);
+                list.addAllAsync(grantedAuthorities);
 
-                if (expiresTime == null) {
-                    redisTemplate.opsForValue().set(key, grantedAuthorities);
-                } else {
-                    redisTemplate.opsForValue().set(key, grantedAuthorities, expiresTime.getValue(), expiresTime.getUnit());
+                if (Objects.nonNull(authorizationCache.getExpiresTime())) {
+                    list.expireAsync(authorizationCache.getExpiresTime().getValue(), authorizationCache.getExpiresTime().getUnit());
                 }
             }
 
         }
 
         // 如果启用认证缓存，存储用户信息到缓存里
-        if (userDetailsService.isEnabledAuthenticationCache()) {
+        if (Objects.nonNull(authenticationCache)) {
+            RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
 
-            Duration expiresTime = userDetailsService.getAuthenticationCacheExpiresTime();
-
-            String key = userDetailsService.getAuthenticationCacheName(token);
-
-            if (expiresTime == null) {
-                redisTemplate.opsForValue().set(key, userDetails);
+            if (Objects.isNull(authenticationCache.getExpiresTime())) {
+                bucket.set(userDetails);
             } else {
-                redisTemplate.opsForValue().set(key, userDetails, expiresTime);
+                bucket.set(
+                        userDetails,
+                        authenticationCache.getExpiresTime().getValue(),
+                        authenticationCache.getExpiresTime().getUnit()
+                );
             }
         }
 
@@ -171,6 +169,20 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
         userDetailsService.onSuccessAuthentication(result);
 
         return result;
+    }
+
+    /**
+     * 获取授权集合
+     *
+     * @param token token 值
+     * @param userDetailsService 用户明细服务实现类
+     *
+     * @return redis 集合
+     */
+    public RList<GrantedAuthority> getAuthorizationList(RequestAuthenticationToken token, UserDetailsService userDetailsService) {
+        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
+
+        return redissonClient.getList(authorizationCache.getName());
     }
 
     /**

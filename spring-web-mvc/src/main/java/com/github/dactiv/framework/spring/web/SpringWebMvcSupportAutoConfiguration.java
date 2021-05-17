@@ -1,7 +1,6 @@
 package com.github.dactiv.framework.spring.web;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;

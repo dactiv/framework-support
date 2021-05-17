@@ -1,9 +1,7 @@
 package com.github.dactiv.framework.commons;
 
-import com.github.dactiv.framework.commons.exception.ServiceException;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.objenesis.instantiator.util.ClassUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;

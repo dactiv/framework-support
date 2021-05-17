@@ -4,13 +4,8 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.audit.PropertyIndexGenerator;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.Index;
-import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;

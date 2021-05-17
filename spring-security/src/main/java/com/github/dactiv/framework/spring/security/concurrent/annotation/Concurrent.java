@@ -1,8 +1,5 @@
 package com.github.dactiv.framework.spring.security.concurrent.annotation;
 
-import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
-import com.github.dactiv.framework.spring.security.concurrent.key.support.SpelExpressionKeyGenerator;
-
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
@@ -50,5 +47,7 @@ public @interface Concurrent {
      * @return 时间单位
      */
     TimeUnit unit() default TimeUnit.MILLISECONDS;
+
+
 
 }

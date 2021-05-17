@@ -1,6 +1,9 @@
 package com.github.dactiv.framework.spring.security;
 
+import com.github.dactiv.framework.commons.CacheProperties;
+import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedSecurityContextRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
 /**
  * spring security 扩展的配置内容
@@ -11,24 +14,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SpringSecuritySupportProperties {
 
     /**
-     * 默认存储在 redis 的 security context key 名称
-     */
-    public final static String DEFAULT_SPRING_SECURITY_CONTEXT_KEY = "spring:security:context:";
-
-    /**
-     * 默认登陆处理 url
-     */
-    public final static String DEFAULT_LOGIN_PROCESSING_URL = "/login";
-
-    /**
      * 安唯一识别存储于在 redis 的当前用户信息 key 前缀
      */
-    private String springSecurityContextKey = DEFAULT_SPRING_SECURITY_CONTEXT_KEY;
+    private CacheProperties cache = DeviceIdentifiedSecurityContextRepository.DEFAULT_CACHE;
 
     /**
      * 登陆 url
      */
-    private String loginProcessingUrl = DEFAULT_LOGIN_PROCESSING_URL;
+    private String loginProcessingUrl = DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL;
 
     /**
      * 是否允许 session 创建，默认为 true
@@ -44,21 +37,21 @@ public class SpringSecuritySupportProperties {
     }
 
     /**
-     * 获取安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     * 获取缓存配置
      *
-     * @return 安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     * @return 缓存配置
      */
-    public String getSpringSecurityContextKey() {
-        return springSecurityContextKey;
+    public CacheProperties getCache() {
+        return cache;
     }
 
     /**
-     * 设置安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     * 设置缓存配置
      *
-     * @param springSecurityContextKey 安唯一识别存储于在 redis 的当前用户信息 key 前缀
+     * @param cache 缓存配置
      */
-    public void setSpringSecurityContextKey(String springSecurityContextKey) {
-        this.springSecurityContextKey = springSecurityContextKey;
+    public void setCache(CacheProperties cache) {
+        this.cache = cache;
     }
 
     /**

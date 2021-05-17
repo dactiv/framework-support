@@ -50,7 +50,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         String concurrentKey = keyGenerator.generate(key, invocation);
 
-        RLock lock = redissonClient.getLock(concurrentKey);
+        RLock lock = redissonClient.getFairLock(concurrentKey);
 
         boolean tryLock;
 

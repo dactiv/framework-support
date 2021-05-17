@@ -1,11 +1,14 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
@@ -15,8 +18,8 @@ import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 设备唯一识别的 spring security context 仓库实现,用于移动端通过设备唯一识别获取当前 security context 使用
@@ -26,37 +29,45 @@ import java.util.Objects;
  */
 public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecurityContextRepository {
 
+    /**
+     * 默认的用户 id 头名称
+     */
     public final static String DEFAULT_USER_ID_HEADER_NAME = "X-ACCESS-USER-ID";
 
     /**
-     * 默认存储在 redis 的 security context key 的过期时间
+     * 默认存储在 redis 的 security context key 名称
      */
-    private final static long DEFAULT_EXPIRES_TIME = 2592000;
+    public final static String DEFAULT_SPRING_SECURITY_CONTEXT_KEY = "spring:security:context:";
 
     /**
-     * 存储在 redis 的 security context key 名称
+     * 默认存储在 redis 的 security context key 缓存配置
      */
-    private String springSecurityContextKey;
+    public final static CacheProperties DEFAULT_CACHE = new CacheProperties(
+            DEFAULT_SPRING_SECURITY_CONTEXT_KEY,
+            new TimeProperties(2592000, TimeUnit.SECONDS)
+    );
 
-    private RedisTemplate<String, Object> redisTemplate;
+    private CacheProperties cache = DEFAULT_CACHE;
+
+    private RedissonClient redissonClient;
 
     private String loginProcessingUrl;
 
     public DeviceIdentifiedSecurityContextRepository() {
     }
 
-    public DeviceIdentifiedSecurityContextRepository(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public DeviceIdentifiedSecurityContextRepository(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
     }
 
-    public DeviceIdentifiedSecurityContextRepository(String springSecurityContextKey, RedisTemplate<String, Object> redisTemplate) {
-        this.springSecurityContextKey = springSecurityContextKey;
-        this.redisTemplate = redisTemplate;
+    public DeviceIdentifiedSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient) {
+        this.cache = cache;
+        this.redissonClient = redissonClient;
     }
 
-    public DeviceIdentifiedSecurityContextRepository(String springSecurityContextKey, RedisTemplate<String, Object> redisTemplate, String loginProcessingUrl) {
-        this.springSecurityContextKey = springSecurityContextKey;
-        this.redisTemplate = redisTemplate;
+    public DeviceIdentifiedSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient, String loginProcessingUrl) {
+        this.cache = cache;
+        this.redissonClient = redissonClient;
         this.loginProcessingUrl = loginProcessingUrl;
     }
 
@@ -75,10 +86,9 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
 
             if (StringUtils.isNotEmpty(userId)) {
 
-                String key = getSpringSecurityContextKey(token);
+                RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
 
-                Object value = redisTemplate.opsForValue().get(key);
-                SecurityContext cacheSecurityContext = Casts.cast(value);
+                SecurityContext cacheSecurityContext = bucket.get();
 
                 if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
                     return cacheSecurityContext;
@@ -131,37 +141,33 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
 
                 if (details != null && SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
 
-                    String key = getSpringSecurityContextKey(token);
-
-                    Object value = redisTemplate.opsForValue().get(key);
-                    SecurityContext cacheSecurityContext = Casts.cast(value);
+                    RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
+                    SecurityContext cacheSecurityContext = bucket.get();
 
                     if (cacheSecurityContext != null) {
 
                         String userId = request.getHeader(DEFAULT_USER_ID_HEADER_NAME);
 
                         if (StringUtils.isEmpty(userId) && StringUtils.equals(request.getRequestURI(), loginProcessingUrl)) {
-                            redisTemplate.opsForValue().set(key, context, Duration.ofSeconds(DEFAULT_EXPIRES_TIME));
+                            bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
                             SecurityContextHolder.setContext(context);
                         } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
-
-                            String temp = key;
 
                             if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
 
                                 MobileUserDetails mobileUserDetails = Casts.cast(details);
 
                                 if (StringUtils.isNotEmpty(mobileUserDetails.getDeviceIdentified())) {
-                                    temp = getSpringSecurityContextKey(mobileUserDetails.getDeviceIdentified());
+                                    bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
                                 }
                             }
 
-                            redisTemplate.opsForValue().set(temp, context, Duration.ofSeconds(DEFAULT_EXPIRES_TIME));
+                            bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
                             SecurityContextHolder.setContext(context);
                         }
 
                     } else {
-                        redisTemplate.opsForValue().set(key, context, Duration.ofSeconds(DEFAULT_EXPIRES_TIME));
+                        bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
                         SecurityContextHolder.setContext(context);
                     }
 
@@ -179,15 +185,14 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
         String id = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
         if (StringUtils.isNotEmpty(id)) {
-            String token = getSpringSecurityContextKey(id);
 
-            Object value = redisTemplate.opsForValue().get(token);
+            RBucket<SecurityContext> bucket = getSecurityContextBucket(id);
 
-            SecurityContext securityContext = Casts.cast(value);
+            SecurityContext securityContext = bucket.get();
 
             String userId = request.getHeader(DEFAULT_USER_ID_HEADER_NAME);
 
-            result = isCurrentUserSecurityContext(userId, securityContext, token) || securityContext != null;
+            result = isCurrentUserSecurityContext(userId, securityContext, id) || securityContext != null;
         }
 
         if (!result) {
@@ -197,33 +202,8 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
         return result;
     }
 
-    @Override
-    public void setSpringSecurityContextKey(String springSecurityContextKey) {
-        super.setSpringSecurityContextKey(springSecurityContextKey);
-        this.springSecurityContextKey = springSecurityContextKey;
+    public RBucket<SecurityContext> getSecurityContextBucket(String key) {
+        return redissonClient.getBucket(cache.getName() + key);
     }
 
-    public String getSpringSecurityContextKey(String token) {
-        return springSecurityContextKey + token;
-    }
-
-    public RedisTemplate<String, Object> getRedisTemplate() {
-        return redisTemplate;
-    }
-
-    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
-
-    public String getSpringSecurityContextKey() {
-        return springSecurityContextKey;
-    }
-
-    public String getLoginProcessingUrl() {
-        return loginProcessingUrl;
-    }
-
-    public void setLoginProcessingUrl(String loginProcessingUrl) {
-        this.loginProcessingUrl = loginProcessingUrl;
-    }
 }

@@ -20,7 +20,6 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 

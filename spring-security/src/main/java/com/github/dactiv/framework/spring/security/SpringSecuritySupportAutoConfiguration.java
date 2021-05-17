@@ -13,13 +13,13 @@ import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.version.AccessVersionControlHandlerInterceptor;
 import org.redisson.api.RedissonClient;
+import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -27,9 +27,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
@@ -53,7 +50,7 @@ import java.util.stream.Collectors;
  * @author maurice
  */
 @Configuration
-@AutoConfigureBefore(RedisAutoConfiguration.class)
+@AutoConfigureAfter(RedissonAutoConfiguration.class)
 @EnableConfigurationProperties({SpringSecuritySupportProperties.class, SecurityProperties.class})
 @ConditionalOnProperty(prefix = "spring.security.support", value = "enabled", matchIfMissing = true)
 public class SpringSecuritySupportAutoConfiguration {
@@ -143,18 +140,6 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
-    RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
-
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setConnectionFactory(factory);
-        redisTemplate.afterPropertiesSet();
-
-        return redisTemplate;
-    }
-
-    @Bean
     UserTypeVoter userTypeVoter() {
         return new UserTypeVoter();
     }
@@ -176,14 +161,15 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
-    DeviceIdentifiedSecurityContextRepository deviceIdentifiedSecurityContextRepository(
-            RedisTemplate<String, Object> redisTemplate,
-            SpringSecuritySupportProperties properties) {
+    DeviceIdentifiedSecurityContextRepository deviceIdentifiedSecurityContextRepository(RedissonClient redissonClient,
+                                                                                        SpringSecuritySupportProperties properties) {
 
-        DeviceIdentifiedSecurityContextRepository repository = new DeviceIdentifiedSecurityContextRepository(redisTemplate);
+        DeviceIdentifiedSecurityContextRepository repository = new DeviceIdentifiedSecurityContextRepository(
+                properties.getCache(),
+                redissonClient,
+                properties.getLoginProcessingUrl()
+        );
 
-        repository.setSpringSecurityContextKey(properties.getSpringSecurityContextKey());
-        repository.setLoginProcessingUrl(properties.getLoginProcessingUrl());
         repository.setAllowSessionCreation(properties.getAllowSessionCreation());
         repository.setDisableUrlRewriting(properties.getDisableUrlRewriting());
 
@@ -221,9 +207,9 @@ public class SpringSecuritySupportAutoConfiguration {
     @Bean
     AnonymousUserAuthenticationProvider anonymousUserAuthenticationProvider(PasswordEncoder passwordEncoder,
                                                                             SecurityProperties securityProperties,
-                                                                            RedisTemplate<String, Object> redisTemplate) {
+                                                                            RedissonClient redissonClient) {
 
-        AnonymousUserAuthenticationProvider authenticationProvider = new AnonymousUserAuthenticationProvider(redisTemplate);
+        AnonymousUserAuthenticationProvider authenticationProvider = new AnonymousUserAuthenticationProvider(redissonClient);
 
         authenticationProvider.setPasswordEncoder(passwordEncoder);
 

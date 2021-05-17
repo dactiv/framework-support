@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
@@ -8,9 +9,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 账户认证的用户明细服务
@@ -61,39 +62,16 @@ public interface UserDetailsService {
     PasswordEncoder getPasswordEncoder();
 
     /**
-     * 获取认证缓存才能超时时间
+     * 获取授权缓存
      *
-     * @return 超时时间
+     * @param token 当前用户认证 token
+     * @return 缓存名称
      */
-    default Duration getAuthenticationCacheExpiresTime() {
-        return null;
-    }
-
-    /**
-     * 获取授权缓存才能超时时间
-     *
-     * @return 超时时间
-     */
-    default TimeProperties getAuthorizationCacheExpiresTime() {
-        return null;
-    }
-
-    /**
-     * 是否启用认证缓存
-     *
-     * @return true 是，否则 false
-     */
-    default boolean isEnabledAuthenticationCache() {
-        return true;
-    }
-
-    /**
-     * 是否启用授权缓存
-     *
-     * @return true 是，否则 false
-     */
-    default boolean isEnabledAuthorizationCache() {
-        return true;
+    default CacheProperties getAuthorizationCache(PrincipalAuthenticationToken token) {
+        return new CacheProperties(
+                DEFAULT_AUTHORIZATION_KEY_NAME + token.getType() + ":" + token.getPrincipal(),
+                new TimeProperties(7, TimeUnit.DAYS)
+        );
     }
 
     /**
@@ -102,18 +80,11 @@ public interface UserDetailsService {
      * @param token 当前用户认证 token
      * @return 缓存名称
      */
-    default String getAuthorizationCacheName(PrincipalAuthenticationToken token) {
-        return DEFAULT_AUTHORIZATION_KEY_NAME + token.getType() + ":" + token.getPrincipal();
-    }
-
-    /**
-     * 获取授权缓存名称
-     *
-     * @param token 当前用户认证 token
-     * @return 缓存名称
-     */
-    default String getAuthenticationCacheName(PrincipalAuthenticationToken token) {
-        return DEFAULT_AUTHENTICATION_KEY_NAME + token.getType() + ":" + token.getPrincipal();
+    default CacheProperties getAuthenticationCache(PrincipalAuthenticationToken token) {
+        return new CacheProperties(
+                DEFAULT_AUTHENTICATION_KEY_NAME + token.getType() + ":" + token.getPrincipal(),
+                new TimeProperties(7, TimeUnit.DAYS)
+        );
     }
 
     /**

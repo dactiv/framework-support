@@ -31,6 +31,7 @@ import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -42,6 +43,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -87,21 +89,36 @@ public class SpringSecuritySupportAutoConfiguration {
         @Autowired
         private AnonymousUserAuthenticationProvider anonymousUserAuthenticationProvider;
 
+        @Autowired
+        private DaoAuthenticationProvider daoAuthenticationProvider;
+
         @Override
-        protected void configure(AuthenticationManagerBuilder auth) {
-            auth.authenticationProvider(anonymousUserAuthenticationProvider);
+        protected void configure(AuthenticationManagerBuilder managerBuilder) {
+
+            managerBuilder
+                    .authenticationProvider(daoAuthenticationProvider)
+                    .authenticationProvider(anonymousUserAuthenticationProvider);
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
 
             http.authorizeRequests()
-                    .anyRequest().permitAll()
-                    .and().formLogin().disable().logout().disable()
-                    .httpBasic().and()
-                    .cors().disable()
-                    .csrf().disable()
-                    .requestCache().disable()
+                    .anyRequest()
+                    .permitAll()
+                    .and()
+                    .formLogin()
+                    .disable()
+                    .logout()
+                    .disable()
+                    .httpBasic()
+                    .and()
+                    .cors()
+                    .disable()
+                    .csrf()
+                    .disable()
+                    .requestCache()
+                    .disable()
                     .securityContext()
                     .securityContextRepository(deviceIdentifiedSecurityContextRepository);
 
@@ -205,6 +222,33 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(DaoAuthenticationProvider.class)
+    DaoAuthenticationProvider daoAuthenticationProvider(SecurityProperties securityProperties,
+                                                        PasswordEncoder passwordEncoder) {
+        InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager();
+
+        SecurityProperties.User user = securityProperties.getUser();
+
+        inMemoryUserDetailsManager.createUser(
+                new AnonymousUser(
+                        user.getName(),
+                        passwordEncoder.encode(user.getPassword()),
+                        user.getPassword(),
+                        user.getRoles()
+                                .stream()
+                                .map(r -> new SimpleGrantedAuthority(RoleAuthority.DEFAULT_ROLE_PREFIX + r))
+                                .collect(Collectors.toList())
+                )
+        );
+
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        daoAuthenticationProvider.setUserDetailsService(inMemoryUserDetailsManager);
+
+        return daoAuthenticationProvider;
+    }
+
+    @Bean
     AnonymousUserAuthenticationProvider anonymousUserAuthenticationProvider(PasswordEncoder passwordEncoder,
                                                                             SecurityProperties securityProperties,
                                                                             RedissonClient redissonClient) {
@@ -215,15 +259,16 @@ public class SpringSecuritySupportAutoConfiguration {
 
         SecurityProperties.User user = securityProperties.getUser();
 
-        authenticationProvider.createUser(new AnonymousUser(
-                user.getName(),
-                passwordEncoder.encode(user.getPassword()),
-                user.getPassword(),
-                user.getRoles()
-                        .stream()
-                        .map(r -> new SimpleGrantedAuthority(RoleAuthority.DEFAULT_ROLE_PREFIX + r))
-                        .collect(Collectors.toList())
-        ));
+        authenticationProvider.createUser(
+                new AnonymousUser(
+                        passwordEncoder.encode(user.getPassword()),
+                        UUID.randomUUID().toString(),
+                        user.getRoles()
+                                .stream()
+                                .map(r -> new SimpleGrantedAuthority(RoleAuthority.DEFAULT_ROLE_PREFIX + AnonymousUser.DEFAULT_ANONYMOUS_USERNAME))
+                                .collect(Collectors.toList())
+                )
+        );
 
         return authenticationProvider;
     }

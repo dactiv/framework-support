@@ -20,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -124,7 +125,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
         Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
 
         // 如果启用授权缓存，从授权缓存获取用户授权信息
-        if (Objects.nonNull(authorizationCache) && grantedAuthorities != null) {
+        if (Objects.nonNull(authorizationCache) && CollectionUtils.isEmpty(grantedAuthorities)) {
 
             RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
 
@@ -132,7 +133,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
         }
 
         // 如果找不到授权信息，调用 UserDetailsService 的 getPrincipalAuthorities 方法获取当前用户授权信息
-        if (grantedAuthorities == null) {
+        if (CollectionUtils.isEmpty(grantedAuthorities)) {
 
             grantedAuthorities = userDetailsService.getPrincipalAuthorities(userDetails);
 

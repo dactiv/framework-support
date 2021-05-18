@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security.authentication.provider;
 
-import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.entity.AnonymousUser;
 import org.redisson.api.RBucket;
@@ -11,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,23 +33,15 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
     }
 
     public void createUser(AnonymousUser user) {
-        RBucket<User> bucket = redissonClient.getBucket(user.getUsername());
-
-        if (bucket.isExists()) {
-            bucket.setAsync(user);
-        }
+        getUserBucket(user.getUsername()).setAsync(user);
     }
 
     public void deleteUser(String username) {
-        RBucket<User> bucket = redissonClient.getBucket(username);
-
-        if (bucket.isExists()) {
-            bucket.deleteAsync();
-        }
+        getUserBucket(username).deleteAsync();
     }
 
     public void updateUser(AnonymousUser user) {
-        RBucket<User> bucket = redissonClient.getBucket(user.getUsername());
+        RBucket<AnonymousUser> bucket = getUserBucket(user.getUsername());
         Assert.isTrue(bucket.isExists(), "不存在[" + user.getUsername() + "]");
         bucket.set(user);
     }
@@ -95,14 +85,7 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         try {
 
-
-            AnonymousUser loadedUser = null;
-
-            Object value = getUserBucket(username).get();
-
-            if (value != null) {
-                loadedUser = Casts.cast(value);
-            }
+            AnonymousUser loadedUser = getUserBucket(username).get();
 
             if (loadedUser == null) {
                 throw new BadCredentialsException(messages.getMessage(
@@ -135,11 +118,11 @@ public class AnonymousUserAuthenticationProvider extends AbstractUserDetailsAuth
     /**
      * 获取用户缓存
      *
-     * @param username
+     * @param username 用户名
      *
-     * @return
+     * @return redis 桶
      */
-    public RBucket<User> getUserBucket(String username) {
+    public RBucket<AnonymousUser> getUserBucket(String username) {
         return redissonClient.getBucket(UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME + username);
     }
 

@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.crypto.access;
 
-import java.time.Duration;
+import com.github.dactiv.framework.commons.TimeProperties;
+
 import java.time.LocalDateTime;
 
 /**
@@ -41,14 +42,14 @@ public interface ExpirationToken extends AccessToken {
      *
      * @param interval 时间
      */
-    void setMaxInactiveInterval(Duration interval);
+    void setMaxInactiveInterval(TimeProperties interval);
 
     /**
      * 获取最大超时时间
      *
      * @return 持续时间
      */
-    Duration getMaxInactiveInterval();
+    TimeProperties getMaxInactiveInterval();
 
     /**
      * 判断是否超时

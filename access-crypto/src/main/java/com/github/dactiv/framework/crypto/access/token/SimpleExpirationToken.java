@@ -1,10 +1,11 @@
 package com.github.dactiv.framework.crypto.access.token;
 
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.crypto.access.AccessToken;
 import com.github.dactiv.framework.crypto.access.ExpirationToken;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 简单的可过期的 token 实现
@@ -28,12 +29,12 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     /**
      * 超时时间
      */
-    private Duration maxInactiveInterval = Duration.ofSeconds(DEFAULT_MAX_INACTIVE_INTERVAL_SECONDS);
+    private TimeProperties maxInactiveInterval = new TimeProperties(DEFAULT_MAX_INACTIVE_INTERVAL_SECONDS, TimeUnit.SECONDS);
 
     /**
      * 时间超时时间
      */
-    private LocalDateTime expirationTime = lastAccessedTime.plusSeconds(maxInactiveInterval.getSeconds());
+    private LocalDateTime expirationTime = lastAccessedTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
 
     /**
      * 超时的 token
@@ -41,10 +42,10 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
      * @param token               访问 token
      * @param maxInactiveInterval 最大超时时间
      */
-    public SimpleExpirationToken(AccessToken token, Duration maxInactiveInterval) {
+    public SimpleExpirationToken(AccessToken token, TimeProperties maxInactiveInterval) {
         super(token.getType(), token.getToken(), token.getName(), token.getKey());
         this.maxInactiveInterval = maxInactiveInterval;
-        this.expirationTime = creationTime.plusSeconds(maxInactiveInterval.getSeconds());
+        this.expirationTime = creationTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
     }
 
     /**
@@ -75,22 +76,28 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     @Override
     public void setLastAccessedTime(LocalDateTime lastAccessedTime) {
         this.lastAccessedTime = lastAccessedTime;
-        expirationTime = lastAccessedTime.plusSeconds(maxInactiveInterval.getSeconds());
+        this.expirationTime = lastAccessedTime.plus(
+                maxInactiveInterval.getValue(),
+                maxInactiveInterval.getUnit().toChronoUnit()
+        );
     }
 
     @Override
-    public Duration getMaxInactiveInterval() {
+    public TimeProperties getMaxInactiveInterval() {
         return maxInactiveInterval;
     }
 
     @Override
     public boolean isExpired() {
-        return !this.maxInactiveInterval.isNegative() &&
-                LocalDateTime.now().plus(this.maxInactiveInterval).isAfter(this.lastAccessedTime);
+
+        return LocalDateTime
+                .now()
+                .plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit())
+                .isAfter(this.lastAccessedTime);
     }
 
     @Override
-    public void setMaxInactiveInterval(Duration maxInactiveInterval) {
+    public void setMaxInactiveInterval(TimeProperties maxInactiveInterval) {
         this.maxInactiveInterval = maxInactiveInterval;
     }
 

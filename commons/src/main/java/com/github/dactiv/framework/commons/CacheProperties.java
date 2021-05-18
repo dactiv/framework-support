@@ -1,11 +1,15 @@
 package com.github.dactiv.framework.commons;
 
+import java.io.Serializable;
+
 /**
  * 缓存配置
  *
  * @author maurice.chen
  */
-public class CacheProperties {
+public class CacheProperties implements Serializable {
+
+    private static final long serialVersionUID = 3266643181504654737L;
 
     /**
      * 缓存名称

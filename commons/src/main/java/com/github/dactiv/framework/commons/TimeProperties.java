@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -7,8 +8,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author maurice.chen
  */
-public class TimeProperties {
+public class TimeProperties implements Serializable {
 
+    private static final long serialVersionUID = 2842217678288186207L;
     /**
      * 值
      */

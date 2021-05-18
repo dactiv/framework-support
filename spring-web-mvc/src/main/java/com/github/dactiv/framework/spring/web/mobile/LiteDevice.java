@@ -7,6 +7,8 @@ package com.github.dactiv.framework.spring.web.mobile;
  */
 public class LiteDevice implements Device {
 
+    private static final long serialVersionUID = 8856638145041417705L;
+
     public static final LiteDevice NORMAL_INSTANCE = new LiteDevice(DeviceType.NORMAL);
 
     public static final LiteDevice MOBILE_INSTANCE = new LiteDevice(DeviceType.MOBILE);

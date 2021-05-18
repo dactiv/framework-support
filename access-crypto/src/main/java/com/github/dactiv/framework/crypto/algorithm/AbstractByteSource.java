@@ -25,10 +25,8 @@ import java.util.Arrays;
  * @author maurice
  */
 public abstract class AbstractByteSource implements ByteSource, Serializable {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 6895494995913376511L;
     /**
      * 缓存 16 进制值的变量
      */

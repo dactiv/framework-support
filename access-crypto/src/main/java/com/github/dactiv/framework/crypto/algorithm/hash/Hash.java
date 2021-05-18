@@ -31,6 +31,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Hash extends AbstractByteSource implements Serializable {
 
+    private static final long serialVersionUID = 6396657711027799821L;
+
     /**
      * 默认的迭代次数
      */

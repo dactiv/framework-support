@@ -17,7 +17,7 @@ public class AuditEventEntity implements Serializable {
 
     public static final String DEFAULT_INDEX_NAME = "audit-event";
 
-    private static final long serialVersionUID = -8633684304971875621L;
+    private static final long serialVersionUID = 8633684304971875621L;
 
     /**
      * 主键 id

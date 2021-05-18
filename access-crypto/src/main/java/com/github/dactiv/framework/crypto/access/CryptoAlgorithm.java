@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class CryptoAlgorithm implements Serializable {
 
-    private static final long serialVersionUID = -3207978889614838003L;
+    private static final long serialVersionUID = 3207978889614838003L;
     /**
      * 算法
      */

@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.concurrent;
 
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
 import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -50,7 +51,15 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         String concurrentKey = keyGenerator.generate(key, invocation);
 
-        RLock lock = redissonClient.getFairLock(concurrentKey);
+        RLock lock;
+
+        if (LockType.FairLock.equals(concurrent.type())) {
+            lock = redissonClient.getFairLock(concurrentKey);
+        } else if (LockType.Lock.equals(concurrent.type())) {
+            lock = redissonClient.getLock(concurrentKey);
+        } else {
+            throw new SystemException("找不到对 [" + concurrent.type() + "] 的所类型支持");
+        }
 
         boolean tryLock;
 

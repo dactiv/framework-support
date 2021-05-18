@@ -31,13 +31,9 @@ public class TimeProperties {
      * @param value 时间值
      * @param unit 单位
      */
-    private TimeProperties(long value, TimeUnit unit) {
+    public TimeProperties(long value, TimeUnit unit) {
         this.value = value;
         this.unit = unit;
-    }
-
-    public static TimeProperties of(long value, TimeUnit unit) {
-        return new TimeProperties(value, unit);
     }
 
     /**

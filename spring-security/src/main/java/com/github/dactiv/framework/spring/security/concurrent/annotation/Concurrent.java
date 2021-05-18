@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.spring.security.concurrent.annotation;
 
+import com.github.dactiv.framework.spring.security.concurrent.LockType;
+
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +50,11 @@ public @interface Concurrent {
      */
     TimeUnit unit() default TimeUnit.MILLISECONDS;
 
-
+    /**
+     * 锁类型
+     *
+     * @return 所类型
+     */
+    LockType type() default LockType.FairLock;
 
 }

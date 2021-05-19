@@ -118,6 +118,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param cipherText 密文
      * @param key        密钥
      * @param iv         向量值
+     *
      * @return 解密后的字节原
      */
     private ByteSource decrypt(byte[] cipherText, byte[] key, byte[] iv) {
@@ -163,6 +164,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param out 解密后需要返回明文的输出流
      * @param key 密钥
      * @param iv  向量值
+     *
      * @throws CryptoException 加密错误时抛出
      */
     private void decrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
@@ -206,6 +208,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param out 加密后需要返回明文的输出流
      * @param key 密钥
      * @param iv  向量值
+     *
      * @throws CryptoException 加密出错时抛出
      */
     private void encrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
@@ -226,6 +229,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param plaintext 需要加密的内容
      * @param key       密钥
      * @param iv        向量值
+     *
      * @return 加密后的字节原
      */
     protected ByteSource encrypt(byte[] plaintext, byte[] key, byte[] iv) {
@@ -251,6 +255,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * 生成向量
      *
      * @param streaming 是否为调用 encrypt(InputStream in, OutputStream out, byte[] encryptionKey) 方法
+     *
      * @return 向量字节
      */
     protected byte[] generateInitializationVector(boolean streaming) {
@@ -276,6 +281,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param key       密钥
      * @param iv        向量值
      * @param mode      加密模型
+     *
      * @return 加密或解密的字节数组
      */
     protected byte[] crypt(byte[] plaintext, byte[] key, byte[] iv, int mode) {
@@ -297,6 +303,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param key  密钥
      * @param iv   向量值
      * @param mode cipher 模型
+     *
      * @throws CryptoException 加密或解密错误时抛出
      */
     private void crypt(InputStream in, OutputStream out, byte[] key, byte[] iv, int mode) throws CryptoException {
@@ -332,6 +339,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      *
      * @param cipherInfo 暗号信息类
      * @param text       文本内容
+     *
      * @return 加密或解密后的字节
      */
     private byte[] crypt(CipherInfo cipherInfo, byte[] text) {
@@ -387,6 +395,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param key       密钥
      * @param iv        向量值
      * @param streaming 是否为调用 encrypt(InputStream in, OutputStream out, byte[] encryptionKey) 方法
+     *
      * @return 一个新的 Cipher 实例
      */
     private CipherInfo initNewCipher(int mode, byte[] key, byte[] iv, boolean streaming) {
@@ -411,6 +420,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * @param mode          Cipher 的 MODE 值
      * @param key           密钥字节数组
      * @param algorithmName 算法名称
+     *
      * @return 密钥接口
      */
     protected abstract Key getCipherSecretKey(int mode, byte[] key, String algorithmName);
@@ -428,6 +438,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      * 获取 jca 的 Cipher 转型名称
      *
      * @param streaming 是否为调用 encrypt(InputStream in, OutputStream out, byte[] encryptionKey) 方法
+     *
      * @return 转型名称
      */
     protected String getCipherTransformation(boolean streaming) {

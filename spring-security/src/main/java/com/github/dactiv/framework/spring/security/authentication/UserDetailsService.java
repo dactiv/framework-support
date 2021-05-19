@@ -34,7 +34,9 @@ public interface UserDetailsService {
      * 获取认证用户明细
      *
      * @param token 请求认证 token
+     *
      * @return 用户明细
+     *
      * @throws AuthenticationException 认证错误抛出的异常
      */
     SecurityUserDetails getAuthenticationUserDetails(RequestAuthenticationToken token) throws AuthenticationException;
@@ -43,6 +45,7 @@ public interface UserDetailsService {
      * 获取用户授权集合
      *
      * @param userDetails 当前用户明细
+     *
      * @return 用户授权集合
      */
     Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityUserDetails userDetails);
@@ -65,6 +68,7 @@ public interface UserDetailsService {
      * 获取授权缓存
      *
      * @param token 当前用户认证 token
+     *
      * @return 缓存名称
      */
     default CacheProperties getAuthorizationCache(PrincipalAuthenticationToken token) {
@@ -78,6 +82,7 @@ public interface UserDetailsService {
      * 获取授权缓存名称
      *
      * @param token 当前用户认证 token
+     *
      * @return 缓存名称
      */
     default CacheProperties getAuthenticationCache(PrincipalAuthenticationToken token) {
@@ -102,6 +107,7 @@ public interface UserDetailsService {
      * @param presentedPassword 提交过来的密码
      * @param token             请求认证 token
      * @param userDetails       spring security 用户实现
+     *
      * @return true 是，否则 false
      */
     default boolean matchesPassword(String presentedPassword,

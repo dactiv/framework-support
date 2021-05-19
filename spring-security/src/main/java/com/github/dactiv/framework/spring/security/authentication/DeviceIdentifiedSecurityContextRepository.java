@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
  * 设备唯一识别的 spring security context 仓库实现,用于移动端通过设备唯一识别获取当前 security context 使用
  *
  * @author maurice
- *
  */
 public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecurityContextRepository {
 
@@ -135,7 +134,7 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
                     SaveContextOnUpdateOrErrorResponseWrapper.class
             );
 
-            if (Objects.nonNull(responseWrapper) && !responseWrapper.isContextSaved() && Objects.nonNull(context.getAuthentication()) && context.getAuthentication().isAuthenticated()){
+            if (Objects.nonNull(responseWrapper) && !responseWrapper.isContextSaved() && Objects.nonNull(context.getAuthentication()) && context.getAuthentication().isAuthenticated()) {
 
                 Object details = context.getAuthentication().getDetails();
 

@@ -108,7 +108,9 @@ public class Hash extends AbstractByteSource implements Serializable {
      * @param source         需要 hash 的原
      * @param salt           盐值
      * @param hashIterations hash 迭代次数
+     *
      * @return hash 后的字节数组
+     *
      * @throws CodecException            当编码失败时抛出
      * @throws UnknownAlgorithmException 出现未知的 hash 算法时抛出
      */
@@ -125,7 +127,9 @@ public class Hash extends AbstractByteSource implements Serializable {
      * @param bytes          字节数组
      * @param salt           盐值
      * @param hashIterations hash 迭代次数
+     *
      * @return hash 后的字节数组
+     *
      * @throws UnknownAlgorithmException 出现未知的 hash 算法时抛出
      */
     protected byte[] hash(byte[] bytes, byte[] salt, int hashIterations) throws UnknownAlgorithmException {
@@ -153,7 +157,9 @@ public class Hash extends AbstractByteSource implements Serializable {
      * 获取原生的 hash 算法实现
      *
      * @param algorithmName 算法
+     *
      * @return {@link MessageDigest}
+     *
      * @throws UnknownAlgorithmException 出现未知的 hash 算法时抛出
      */
     private MessageDigest getDigest(String algorithmName) throws UnknownAlgorithmException {

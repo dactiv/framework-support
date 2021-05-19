@@ -48,6 +48,7 @@ public class JacksonDesensitize extends JsonSerializer<String> {
      *
      * @param s    字符串
      * @param left 是否左边脱敏，true 是，否则 false
+     *
      * @return 脱敏后的字符串
      */
     private String serializeString(String s, boolean left) {

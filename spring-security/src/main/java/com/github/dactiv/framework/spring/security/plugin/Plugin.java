@@ -48,6 +48,7 @@ public @interface Plugin {
      * 类型，默认为 ResourceType.MENU
      *
      * @return 类型
+     *
      * @see ResourceType
      */
     ResourceType type() default ResourceType.Security;
@@ -63,6 +64,7 @@ public @interface Plugin {
      * 来源 ，默认为 PluginSource.ADMIN
      *
      * @return 来源
+     *
      * @see ResourceSource
      */
     ResourceSource[] source() default ResourceSource.All;

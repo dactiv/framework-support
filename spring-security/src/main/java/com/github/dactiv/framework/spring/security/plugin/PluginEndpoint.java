@@ -93,7 +93,7 @@ public class PluginEndpoint {
     /**
      * 找不到父类的插件信息
      */
-    private Map<String,PluginInfo> parent = new LinkedHashMap<>();
+    private Map<String, PluginInfo> parent = new LinkedHashMap<>();
 
     /**
      * 并发锁
@@ -207,7 +207,7 @@ public class PluginEndpoint {
             pluginInfoList.addAll(buildPluginInfo(methodList, parent));
         }
 
-        parent.values().forEach(p->{
+        parent.values().forEach(p -> {
             p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
 
             if (StringUtils.isEmpty(p.getSource())) {
@@ -234,7 +234,6 @@ public class PluginEndpoint {
      *
      * @param methodList 方法集合
      * @param parent     根节点信息
-     *
      */
     private List<PluginInfo> buildPluginInfo(List<Method> methodList, PluginInfo parent) {
         List<PluginInfo> result = new ArrayList<>();
@@ -362,7 +361,8 @@ public class PluginEndpoint {
      * 获取多个请求 uri 信息，并用 ，（逗号）分割
      *
      * @param targetValue 目标 url 值
-     * @param parent 父类 plugin
+     * @param parent      父类 plugin
+     *
      * @return 多个请求 uri 信息，并用 ，（逗号）分割
      */
     private String getRequestValueString(String targetValue, PluginInfo parent) {
@@ -385,6 +385,7 @@ public class PluginEndpoint {
      *
      * @param method 方法
      * @param parent 父类节点
+     *
      * @return 请求值集合
      */
     private List<String> getRequestValues(Method method, PluginInfo parent) {

@@ -21,6 +21,7 @@ public interface RandomNumberGenerator {
      * 生成下一个字节元
      *
      * @param numBytes 字节数
+     *
      * @return 字节原
      */
     ByteSource nextBytes(int numBytes);

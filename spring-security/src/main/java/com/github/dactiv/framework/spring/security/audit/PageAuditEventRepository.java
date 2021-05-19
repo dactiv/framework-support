@@ -17,12 +17,12 @@ public interface PageAuditEventRepository extends AuditEventRepository {
     /**
      * 获取分页信息
      *
-     * @param pageable 分页请求
+     * @param pageable  分页请求
      * @param principal 当前人
-     * @param after 在什么时间之后的
-     * @param type 类型
+     * @param after     在什么时间之后的
+     * @param type      类型
      *
      * @return 分页信息
      */
-    Page<AuditEvent> findPage(Pageable pageable,String principal, Instant after, String type);
+    Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type);
 }

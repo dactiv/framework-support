@@ -46,7 +46,9 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      *
      * @param request  http servlet request
      * @param response http servlet response
+     *
      * @return 当前用户认证 token
+     *
      * @throws AuthenticationException 认证异常
      */
     protected Authentication createToken(HttpServletRequest request,
@@ -83,6 +85,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      * 获取类型
      *
      * @param request http servlet request
+     *
      * @return 类型
      */
     protected String obtainType(HttpServletRequest request) {

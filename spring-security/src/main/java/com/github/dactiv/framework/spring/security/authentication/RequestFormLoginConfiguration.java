@@ -46,6 +46,7 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * 登陆账户参数名
      *
      * @param usernameParameter 登陆账户参数名
+     *
      * @return 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration<H> usernameParameter(String usernameParameter) {
@@ -57,6 +58,7 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * 登陆账户密码参数名
      *
      * @param passwordParameter 登陆账户密码参数名
+     *
      * @return 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration<H> passwordParameter(String passwordParameter) {
@@ -68,6 +70,7 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * 用户类型 header 名
      *
      * @param typeHeaderName 用户类型 header 名
+     *
      * @return 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration<H> typeHeaderName(String typeHeaderName) {
@@ -79,6 +82,7 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * 认证失败 forward url
      *
      * @param forwardUrl 认证失败 forward url
+     *
      * @return 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration<H> failureForwardUrl(String forwardUrl) {
@@ -90,6 +94,7 @@ public class RequestFormLoginConfiguration<H extends HttpSecurityBuilder<H>> ext
      * 认证成功 forward url
      *
      * @param forwardUrl 认证成功 forward url
+     *
      * @return 当前用户 from 登陆配置类
      */
     public RequestFormLoginConfiguration<H> successForwardUrl(String forwardUrl) {

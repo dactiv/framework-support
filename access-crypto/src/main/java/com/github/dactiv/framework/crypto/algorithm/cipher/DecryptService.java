@@ -20,7 +20,9 @@ public interface DecryptService {
      *
      * @param cipherText 需要解密的内容
      * @param key        密钥
+     *
      * @return 解密后的内容字节元素
+     *
      * @throws CryptoException 解密出错时抛出
      */
     ByteSource decrypt(byte[] cipherText, byte[] key) throws CryptoException;
@@ -31,6 +33,7 @@ public interface DecryptService {
      * @param in  需要解密的内容输入流
      * @param out 解密后需要返回明文的输出流
      * @param key 密钥
+     *
      * @throws CryptoException 解密出错时抛出
      */
     void decrypt(InputStream in, OutputStream out, byte[] key) throws CryptoException;

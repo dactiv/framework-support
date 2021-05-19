@@ -40,6 +40,7 @@ public class SymmetricCipherService extends AbstractBlockCipherService {
      * 生成密钥
      *
      * @param keySize 密钥大小
+     *
      * @return 密钥
      */
     public Key generateKey(int keySize) {

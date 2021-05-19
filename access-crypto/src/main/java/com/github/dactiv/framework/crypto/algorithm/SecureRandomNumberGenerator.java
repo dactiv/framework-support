@@ -43,6 +43,7 @@ public class SecureRandomNumberGenerator implements RandomNumberGenerator {
      * 设置 jdk SecureRandom
      *
      * @param random {@link SecureRandom}
+     *
      * @throws IllegalArgumentException random 参数为 null 时抛出
      */
     public void setSecureRandom(SecureRandom random) throws IllegalArgumentException {
@@ -65,6 +66,7 @@ public class SecureRandomNumberGenerator implements RandomNumberGenerator {
      * 是个直下个随机值的字节大小
      *
      * @param nextBytesSize 下个随机值的字节大小
+     *
      * @throws IllegalArgumentException 下个随机值的字节大小小于等于 0 时抛出
      */
     public void setNextBytesSize(int nextBytesSize) throws IllegalArgumentException {

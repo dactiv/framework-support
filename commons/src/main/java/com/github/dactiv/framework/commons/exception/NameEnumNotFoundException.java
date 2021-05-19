@@ -28,6 +28,7 @@ public class NameEnumNotFoundException extends SystemException {
      *
      * @param message 异常信息
      * @param cause   异常类
+     *
      * @since 1.4
      */
     public NameEnumNotFoundException(String message, Throwable cause) {
@@ -38,6 +39,7 @@ public class NameEnumNotFoundException extends SystemException {
      * 带有名称枚举找不到内容异常
      *
      * @param cause 异常类
+     *
      * @since 1.4
      */
     public NameEnumNotFoundException(Throwable cause) {

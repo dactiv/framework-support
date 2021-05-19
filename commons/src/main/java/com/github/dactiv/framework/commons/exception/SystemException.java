@@ -28,6 +28,7 @@ public class SystemException extends RuntimeException {
      *
      * @param message 异常信息
      * @param cause   异常类
+     *
      * @since 1.4
      */
     public SystemException(String message, Throwable cause) {
@@ -38,6 +39,7 @@ public class SystemException extends RuntimeException {
      * 系统异常
      *
      * @param cause 异常类
+     *
      * @since 1.4
      */
     public SystemException(Throwable cause) {

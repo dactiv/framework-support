@@ -21,6 +21,7 @@ public class Hex {
      * as a String.
      *
      * @param bytes the byte array to Hex-encode.
+     *
      * @return A String representation of the resultant hex-encoded char array.
      */
     public static String encodeToString(byte[] bytes) {
@@ -34,6 +35,7 @@ public class Hex {
      * given byte.
      *
      * @param data byte[] to convert to Hex characters
+     *
      * @return A char[] containing hexadecimal characters
      */
     public static char[] encode(byte[] data) {
@@ -59,8 +61,10 @@ public class Hex {
      * number of elements.
      *
      * @param array An array of character bytes containing hexadecimal digits
+     *
      * @return A byte array containing binary data decoded from
      * the supplied byte array (representing characters).
+     *
      * @throws IllegalArgumentException Thrown if an odd number of characters is supplied
      *                                  to this function
      * @see #decode(char[])
@@ -76,6 +80,7 @@ public class Hex {
      * argument's hex.toCharArray() value.
      *
      * @param hex a Hex-encoded String.
+     *
      * @return A byte array containing binary data decoded from the supplied String's char array.
      */
     public static byte[] decode(String hex) {
@@ -90,8 +95,10 @@ public class Hex {
      * number of elements.
      *
      * @param data An array of characters containing hexadecimal digits
+     *
      * @return A byte array containing binary data decoded from
      * the supplied char array.
+     *
      * @throws IllegalArgumentException if an odd number or illegal of characters
      *                                  is supplied
      */
@@ -122,7 +129,9 @@ public class Hex {
      *
      * @param ch    A character to convert to an integer digit
      * @param index The index of the character in the source
+     *
      * @return An integer
+     *
      * @throws IllegalArgumentException if ch is an illegal hex character
      */
     protected static int toDigit(char ch, int index) throws IllegalArgumentException {

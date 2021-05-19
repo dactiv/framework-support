@@ -94,6 +94,7 @@ public abstract class AbstractBlockCipherService extends AbstractJcaCipherServic
      * @param mode      密码分组模式
      * @param scheme    填充方案
      * @param blockSize 块大小
+     *
      * @return 字符串
      */
     private String buildTransformationString(OperationMode mode, PaddingScheme scheme, int blockSize) {
@@ -114,6 +115,7 @@ public abstract class AbstractBlockCipherService extends AbstractJcaCipherServic
      * 判断密码分组模式是否支持初始化向量
      *
      * @param mode 密码分组模式
+     *
      * @return true 为是，否则 false
      */
     private boolean isModeInitializationVectorSupport(OperationMode mode) {

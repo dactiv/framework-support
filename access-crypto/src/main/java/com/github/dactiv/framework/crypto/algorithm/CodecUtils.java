@@ -26,6 +26,7 @@ public class CodecUtils {
      * 将 char 数组转型成字节数组
      *
      * @param chars char 数组
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(char[] chars) {
@@ -37,7 +38,9 @@ public class CodecUtils {
      *
      * @param chars    char 数组
      * @param encoding 内容编码
+     *
      * @return 字节数组
+     *
      * @throws CodecException 编码出错时抛出
      */
     public static byte[] toBytes(char[] chars, String encoding) throws CodecException {
@@ -48,6 +51,7 @@ public class CodecUtils {
      * 将 string 类型转型成字节数组
      *
      * @param source 字符串
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(String source) {
@@ -59,7 +63,9 @@ public class CodecUtils {
      *
      * @param source   字符串
      * @param encoding 内容编码
+     *
      * @return 字节数组
+     *
      * @throws CodecException 编码出错时抛出
      */
     public static byte[] toBytes(String source, String encoding) throws CodecException {
@@ -75,6 +81,7 @@ public class CodecUtils {
      * 将字节数组转型成 String 类型
      *
      * @param bytes 字节数组
+     *
      * @return string 类型内容
      */
     public static String toString(byte[] bytes) {
@@ -86,7 +93,9 @@ public class CodecUtils {
      *
      * @param bytes    字节数组
      * @param encoding 内容编码
+     *
      * @return string 类型内容
+     *
      * @throws CodecException 编码出错时抛出
      */
     public static String toString(byte[] bytes, String encoding) throws CodecException {
@@ -102,6 +111,7 @@ public class CodecUtils {
      * 将字节数组转成成 char 数组
      *
      * @param bytes 字节数组
+     *
      * @return char 数组
      */
     public static char[] toChars(byte[] bytes) {
@@ -113,7 +123,9 @@ public class CodecUtils {
      *
      * @param bytes    字节数组
      * @param encoding 内容编码
+     *
      * @return char 数组
+     *
      * @throws CodecException 编码出错时抛出
      */
     public static char[] toChars(byte[] bytes, String encoding) throws CodecException {
@@ -124,6 +136,7 @@ public class CodecUtils {
      * 将 file 类型转型成字节数组
      *
      * @param file file 类型
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(File file) {
@@ -135,6 +148,7 @@ public class CodecUtils {
      *
      * @param file       file 类型
      * @param bufferSize 初始化流大小
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(File file, int bufferSize) {
@@ -153,6 +167,7 @@ public class CodecUtils {
      * 将 input 流转型成字节数组
      *
      * @param in input 流
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(InputStream in) {
@@ -164,6 +179,7 @@ public class CodecUtils {
      *
      * @param in         input 流
      * @param bufferSize 初始化流大小
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(InputStream in, int bufferSize) {
@@ -200,6 +216,7 @@ public class CodecUtils {
      * 将 ByteSource、char[]、String、File、InputStream 转型成字节数组
      *
      * @param o ByteSource、char[]、String、File、InputStream 对象
+     *
      * @return 字节数组
      */
     public static byte[] toBytes(Object o) {

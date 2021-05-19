@@ -21,7 +21,7 @@ public interface ConditionParser {
     /**
      * 获取条件
      *
-     * @param name 参数名称
+     * @param name  参数名称
      * @param value 参数值
      *
      * @return 条件

@@ -39,6 +39,7 @@ public class ErrorCodeException extends SystemException {
      * @param message   异常信息
      * @param cause     异常类
      * @param errorCode 错误代码
+     *
      * @since 1.4
      */
     public ErrorCodeException(String message, Throwable cause, String errorCode) {
@@ -51,6 +52,7 @@ public class ErrorCodeException extends SystemException {
      *
      * @param cause     异常类
      * @param errorCode 错误代码
+     *
      * @since 1.4
      */
     public ErrorCodeException(Throwable cause, String errorCode) {

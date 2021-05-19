@@ -17,7 +17,7 @@ public @interface Concurrent {
 
     /**
      * 并发的 key
-     * <p>
+     *
      * @return key 名称
      */
     String value();

@@ -4,9 +4,7 @@ import com.github.dactiv.framework.commons.exception.SystemException;
 import org.springframework.beans.BeanUtils;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -21,8 +19,8 @@ public class ReflectionUtils {
     /**
      * 设置对象的字段值
      *
-     * @param o 对象
-     * @param name 字段名称
+     * @param o     对象
+     * @param name  字段名称
      * @param value 值
      */
     public static void setFieldValue(Object o, String name, Object value) {
@@ -40,7 +38,7 @@ public class ReflectionUtils {
     /**
      * 获取对象的字段值
      *
-     * @param o 对象
+     * @param o    对象
      * @param name 字段名称
      *
      * @return 值
@@ -60,7 +58,7 @@ public class ReflectionUtils {
     /**
      * 通过 get 方法获取字段内容
      *
-     * @param o 对象
+     * @param o    对象
      * @param name 字段名称
      * @param args 参数
      *
@@ -80,8 +78,8 @@ public class ReflectionUtils {
     /**
      * 通过 set 方法设置字段内容
      *
-     * @param o 对象
-     * @param name 字段名称
+     * @param o     对象
+     * @param name  字段名称
      * @param value 值
      */
     public static void setWriteProperty(Object o, String name, Object value) {
@@ -98,9 +96,9 @@ public class ReflectionUtils {
     /**
      * 执行对象方法
      *
-     * @param o 对象
+     * @param o          对象
      * @param methodName 方法名称
-     * @param args 参数值
+     * @param args       参数值
      * @param paramTypes 参数类型
      *
      * @return 返回值
@@ -118,22 +116,21 @@ public class ReflectionUtils {
     /**
      * 执行对象方法
      *
-     * @param o 对象
+     * @param o      对象
      * @param method 方法
-     * @param args 参数
+     * @param args   参数
      *
      * @return 返回值
      */
-    public static Object invokeMethod(Object o, Method method, List<Object> args) {
+    private static Object invokeMethod(Object o, Method method, List<Object> args) {
         method.setAccessible(true);
-
         return org.springframework.util.ReflectionUtils.invokeMethod(method, o, args.toArray());
     }
 
     /**
      * 查找对象中的字段属性说明
      *
-     * @param o 对象
+     * @param o    对象
      * @param name 字段名称
      *
      * @return 字段属性说明
@@ -143,5 +140,34 @@ public class ReflectionUtils {
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性"));
+    }
+
+    /**
+     * 获取范型对象类型
+     *
+     * @param target 目标对象
+     * @param index  范型索引位置
+     *
+     * @return 范型类型
+     */
+    public static Class<?> getGenericClass(Object target, int index) {
+
+        Type genType = target.getClass().getGenericSuperclass();
+
+        if (!(genType instanceof ParameterizedType)) {
+            return Object.class;
+        }
+
+        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
+
+        if (index >= params.length || index < 0) {
+            throw new RuntimeException("Index outof bounds");
+        }
+
+        if (!(params[index] instanceof Class)) {
+            return Object.class;
+        }
+
+        return Casts.cast(params[index]);
     }
 }

@@ -131,6 +131,7 @@ public class SpelExpressionKeyGenerator implements KeyGenerator {
 
     /**
      * 获取变量截取的开始字符
+     *
      * @return 变量截取的开始字符
      */
     public String getOpenCharacter() {

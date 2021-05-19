@@ -74,7 +74,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 List<FieldError> filedErrorResult = bindingResult.getAllErrors()
                         .stream()
                         .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
-                        .map(o -> (FieldError)o)
+                        .map(o -> (FieldError) o)
                         .collect(Collectors.toList());
 
                 List<Map<String, Object>> data = new LinkedList<>();

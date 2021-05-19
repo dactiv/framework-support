@@ -186,8 +186,8 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 过滤数据属性
      *
-     * @param data 当前数据
-     * @param properties 要过滤的属性名称
+     * @param data             当前数据
+     * @param properties       要过滤的属性名称
      * @param includeOrExclude true 仅仅引入 properties 的属性，false 仅仅去除 properties 的属性
      *
      * @return 新的数据信息

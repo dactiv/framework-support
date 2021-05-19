@@ -51,6 +51,7 @@ public class HashService {
      * 计算 hash
      *
      * @param request hash 请求对象
+     *
      * @return hash 对象
      */
     public Hash computeHash(HashRequest request) {
@@ -81,6 +82,7 @@ public class HashService {
      * 获取公共盐
      *
      * @param request hash 请求
+     *
      * @return 公共盐
      */
     protected ByteSource getPublicSalt(HashRequest request) {
@@ -111,6 +113,7 @@ public class HashService {
      *
      * @param privateSalt 私有盐
      * @param publicSalt  共有盐
+     *
      * @return 组合盐字节原
      */
     protected ByteSource getCombineSalt(ByteSource privateSalt, ByteSource publicSalt) {
@@ -144,6 +147,7 @@ public class HashService {
      * 获取算法名称
      *
      * @param request hash 请求
+     *
      * @return 算法名称
      */
     protected String getAlgorithmName(HashRequest request) {
@@ -158,6 +162,7 @@ public class HashService {
      * 获取 hash 迭代次数
      *
      * @param request hash 请求
+     *
      * @return 迭代次数
      */
     protected int getIterations(HashRequest request) {

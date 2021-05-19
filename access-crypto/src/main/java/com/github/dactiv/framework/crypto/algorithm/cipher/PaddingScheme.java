@@ -91,6 +91,7 @@ public enum PaddingScheme {
      * 获取实际的 Cipher 转型名称
      *
      * @return 转型名称
+     *
      * @see javax.crypto.Cipher#getInstance(String)
      */
     public String getTransformationName() {
@@ -101,6 +102,7 @@ public enum PaddingScheme {
      * 通过 Cipher 转型名称获取本枚举
      *
      * @param name Cipher 转型名称
+     *
      * @return PaddingScheme
      */
     public static PaddingScheme getPaddingScheme(String name) {

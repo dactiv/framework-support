@@ -34,7 +34,7 @@ public interface Retryable {
      *
      * @return 时间（毫秒为单位）
      */
-    default TimeProperties getNextRetryTimeInMillisecond(){
+    default TimeProperties getNextRetryTimeInMillisecond() {
         return DEFAULT_POW_INTERVAL_TIME;
     }
 

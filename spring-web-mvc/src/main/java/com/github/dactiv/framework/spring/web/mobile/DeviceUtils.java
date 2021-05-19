@@ -28,6 +28,7 @@ public class DeviceUtils {
      * 从 Web 请求中提取当前设备.
      *
      * @param request the servlet request
+     *
      * @return 当前设备, 如果尚未为请求解析任何设备，则为null
      */
     public static Device getCurrentDevice(HttpServletRequest request) {
@@ -38,6 +39,7 @@ public class DeviceUtils {
      * 从 Web 请求中提取当前设备,如果当前设备尚未解析，则抛出运行时异常。
      *
      * @param request the servlet request
+     *
      * @return 当前设备
      */
     public static Device getRequiredCurrentDevice(HttpServletRequest request) {
@@ -52,6 +54,7 @@ public class DeviceUtils {
      * 从 spring mvc 请求属性映射中提取当前设备.
      *
      * @param attributes the request attributes
+     *
      * @return 当前设备, 如果尚未为请求解析任何设备，则为null
      */
     public static Device getCurrentDevice(RequestAttributes attributes) {

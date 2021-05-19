@@ -19,6 +19,7 @@ public class TreeUtils {
      * @param <P>  树形父类类型
      * @param <T>  属性孩子类型
      * @param <R>  返回类型
+     *
      * @return 绑定后的树形结合
      */
     public static <P, T, R extends Tree<P, T>> List<R> buildGenericTree(List<? extends Tree<P, T>> list) {
@@ -39,6 +40,7 @@ public class TreeUtils {
      * @param list 树形集合
      * @param <P>  树形父类类型
      * @param <T>  属性孩子类型
+     *
      * @return 绑定后的树形结合
      */
     public static <P, T> List<Tree<P, T>> buildTree(List<? extends Tree<P, T>> list) {
@@ -60,9 +62,9 @@ public class TreeUtils {
 
             for (Tree<P, T> root : list) {
 
-                for (Tree<P,T > child : list) {
+                for (Tree<P, T> child : list) {
 
-                    if (child.isChildren(root) ) {
+                    if (child.isChildren(root)) {
                         children.add(child);
                     }
 

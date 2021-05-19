@@ -140,6 +140,7 @@ public class HashRequest {
      * 设置算法
      *
      * @param algorithmName hash 算法
+     *
      * @see HashAlgorithmMode
      */
     public void setAlgorithmName(String algorithmName) {

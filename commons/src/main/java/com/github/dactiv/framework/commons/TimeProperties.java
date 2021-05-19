@@ -31,7 +31,7 @@ public class TimeProperties implements Serializable {
      * 创建一个时间配置
      *
      * @param value 时间值
-     * @param unit 单位
+     * @param unit  单位
      */
     public TimeProperties(long value, TimeUnit unit) {
         this.value = value;

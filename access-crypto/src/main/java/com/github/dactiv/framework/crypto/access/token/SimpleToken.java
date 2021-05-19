@@ -117,6 +117,7 @@ public class SimpleToken implements AccessToken {
      * @param type 类型
      * @param name 名称
      * @param key  密钥
+     *
      * @return 简单的 token
      */
     public static SimpleToken build(String type, String name, ByteSource key) {
@@ -128,6 +129,7 @@ public class SimpleToken implements AccessToken {
      *
      * @param name 名称
      * @param key  密钥
+     *
      * @return 简单的 token
      */
     public static SimpleToken generate(String name, ByteSource key) {
@@ -139,6 +141,7 @@ public class SimpleToken implements AccessToken {
      *
      * @param name 名称
      * @param key  密钥
+     *
      * @return 简单的 token
      */
     public static SimpleToken requestDecrypt(String name, ByteSource key) {
@@ -150,6 +153,7 @@ public class SimpleToken implements AccessToken {
      *
      * @param name 名称
      * @param key  密钥
+     *
      * @return 简单的 token
      */
     public static SimpleToken responseEncrypt(String name, ByteSource key) {

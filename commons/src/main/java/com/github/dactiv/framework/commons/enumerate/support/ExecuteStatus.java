@@ -54,7 +54,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 成功设置值
      *
-     * @param body 数据体
+     * @param body    数据体
      * @param message 消息
      */
     public static void success(Body body, String message) {
@@ -66,7 +66,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 失败设置值
      *
-     * @param body 数据体
+     * @param body    数据体
      * @param message 消息
      */
     public static void failure(Body body, String message) {

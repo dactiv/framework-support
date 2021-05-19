@@ -28,6 +28,7 @@ public class ValueEnumNotFoundException extends SystemException {
      *
      * @param message 异常信息
      * @param cause   异常类
+     *
      * @since 1.4
      */
     public ValueEnumNotFoundException(String message, Throwable cause) {
@@ -38,6 +39,7 @@ public class ValueEnumNotFoundException extends SystemException {
      * key value 枚举找不到内容异常
      *
      * @param cause 异常类
+     *
      * @since 1.4
      */
     public ValueEnumNotFoundException(Throwable cause) {

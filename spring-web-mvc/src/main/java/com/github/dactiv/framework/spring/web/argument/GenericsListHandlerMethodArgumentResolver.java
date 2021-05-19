@@ -108,6 +108,7 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
      *
      * @param name       参数名称
      * @param webRequest request 对象
+     *
      * @return 参数信息集合
      */
     private List<Map<String, Object>> getParameter(String name, NativeWebRequest webRequest) {

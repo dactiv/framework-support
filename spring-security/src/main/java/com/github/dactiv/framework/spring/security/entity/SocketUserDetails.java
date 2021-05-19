@@ -48,6 +48,7 @@ public class SocketUserDetails extends MobileUserDetails {
         this.connectStatus = connectStatus;
         setType(ResourceSource.SocketUser.toString());
     }
+
     /**
      * 获取链接状态
      *

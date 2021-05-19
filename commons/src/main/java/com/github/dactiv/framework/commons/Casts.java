@@ -56,8 +56,8 @@ public class Casts {
      * 将值转换成指定类型的对象
      *
      * @param value 值
-     * @param type 指定类型
-     * @param <T> 对象范型实体值
+     * @param type  指定类型
+     * @param <T>   对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -69,8 +69,8 @@ public class Casts {
      * 将值转换成指定类型的对象
      *
      * @param value 值
-     * @param type 引用类型
-     * @param <T> 对象范型实体值
+     * @param type  引用类型
+     * @param <T>   对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -98,7 +98,7 @@ public class Casts {
      *
      * @param json json 字符串
      * @param type 指定类型的对象 class
-     * @param <T> 对象范型实体值
+     * @param <T>  对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -117,7 +117,7 @@ public class Casts {
      *
      * @param json json 字符串
      * @param type 引用类型
-     * @param <T> 对象范型实体值
+     * @param <T>  对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -132,7 +132,6 @@ public class Casts {
     }
 
     /**
-     *
      * 将格式为 name=value&name2=value2&name3=value3 的字符串转型为成 MultiValueMap
      *
      * @param body 数据题
@@ -256,7 +255,7 @@ public class Casts {
      * 通过路径获取 map 实体
      *
      * @param source map 数据源
-     * @param path 路径，多个以点(".")分割
+     * @param path   路径，多个以点(".")分割
      *
      * @return map 实体
      */
@@ -266,7 +265,7 @@ public class Casts {
 
         String[] strings = StringUtils.split(path, DEFAULT_POINT_SYMBOL);
 
-        for (String s: strings) {
+        for (String s : strings) {
             result = Casts.cast(result.get(s));
         }
 
@@ -279,6 +278,7 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
+     *
      * @return 转型后的值
      */
     public static <T> T cast(Object value) {
@@ -293,6 +293,7 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
+     *
      * @return 转型后的值
      */
     public static <T> T castIfNotNull(Object value) {
@@ -309,6 +310,7 @@ public class Casts {
      * @param value 值
      * @param type  值类型 class
      * @param <T>   值类型
+     *
      * @return 转型后的值
      */
     public static <T> T cast(Object value, Class<T> type) {
@@ -320,6 +322,7 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
+     *
      * @return Optional
      */
     public static <T> Optional<T> castOptional(Object value) {
@@ -332,6 +335,7 @@ public class Casts {
      * @param value 值
      * @param type  值类型 class
      * @param <T>   值类型
+     *
      * @return 转型后的值
      */
     public static <T> T castIfNotNull(Object value, Class<T> type) {

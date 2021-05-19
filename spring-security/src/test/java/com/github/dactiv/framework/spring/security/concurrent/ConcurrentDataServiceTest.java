@@ -38,7 +38,7 @@ public class ConcurrentDataServiceTest {
 
         Thread.sleep(3000);
 
-        while(threadPoolTaskExecutor.getActiveCount() == 0){
+        while (threadPoolTaskExecutor.getActiveCount() == 0) {
             break;
         }
 
@@ -51,7 +51,7 @@ public class ConcurrentDataServiceTest {
 
         Thread.sleep(3000);
 
-        while(threadPoolTaskExecutor.getActiveCount() == 0){
+        while (threadPoolTaskExecutor.getActiveCount() == 0) {
             break;
         }
 

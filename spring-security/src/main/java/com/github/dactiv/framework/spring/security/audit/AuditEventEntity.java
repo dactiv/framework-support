@@ -101,6 +101,7 @@ public class AuditEventEntity implements Serializable {
 
     /**
      * 获取当事人
+     *
      * @return 当事人
      */
     public String getPrincipal() {
@@ -155,7 +156,7 @@ public class AuditEventEntity implements Serializable {
     /**
      * 转换为 spring 默认的审计事件
      *
-     * @return  spring 默认审计事件
+     * @return spring 默认审计事件
      */
     public AuditEvent toAuditEvent() {
         return new AuditEvent(creationTime.atZone(ZoneId.systemDefault()).toInstant(), principal, type, data);

@@ -22,6 +22,7 @@ public class NameEnumUtils {
      *
      * @param value     枚举值
      * @param enumClass 枚举类型
+     *
      * @return name 值
      */
     public static String getName(String value, Class<? extends Enum<? extends NameEnum>> enumClass) {
@@ -34,6 +35,7 @@ public class NameEnumUtils {
      * @param value          枚举值
      * @param enumClass      枚举类型
      * @param ignoreNotFound 如果找不到是否抛出异常, true:抛出，否则 false
+     *
      * @return name 值
      */
     public static String getName(String value, Class<? extends Enum<? extends NameEnum>> enumClass, boolean ignoreNotFound) {
@@ -59,6 +61,7 @@ public class NameEnumUtils {
      * 将带有名称的枚举类转型为 map
      *
      * @param enumClass 带有名称的枚举
+     *
      * @return map， key 为枚举的 name，value 为枚举的 getName()
      */
     public static Map<String, Object> castMap(Class<? extends Enum<? extends NameEnum>> enumClass) {
@@ -70,6 +73,7 @@ public class NameEnumUtils {
      *
      * @param enumClass 带有名称的枚举
      * @param ignore    要过滤的值（枚举的 name() 值）
+     *
      * @return map， key 为枚举的 name()，value 为枚举的 getName()
      */
     public static Map<String, Object> castMap(Class<? extends Enum<? extends NameEnum>> enumClass, String... ignore) {
@@ -114,6 +118,7 @@ public class NameEnumUtils {
      * @param value     枚举值
      * @param enumClass 带有名称的枚举
      * @param <T>       带有名称的枚举接口子类
+     *
      * @return 带有名称的枚举接口实现类
      */
     public static <T extends Enum<? extends NameEnum>> T parse(String value, Class<T> enumClass) {
@@ -127,6 +132,7 @@ public class NameEnumUtils {
      * @param enumClass      带有名称的枚举
      * @param ignoreNotFound 如果找不到是否抛出异常, true:抛出，否则 false
      * @param <T>            带有名称的枚举接口子类
+     *
      * @return 带有名称的枚举接口实现类
      */
     public static <T extends Enum<? extends NameEnum>> T parse(String value, Class<T> enumClass, boolean ignoreNotFound) {
@@ -151,7 +157,7 @@ public class NameEnumUtils {
 
         List<String> ignoreList = new ArrayList<>();
 
-        JsonIgnoreProperties jsonIgnoreProperties =  AnnotationUtils.findAnnotation(enumClass,JsonIgnoreProperties.class);
+        JsonIgnoreProperties jsonIgnoreProperties = AnnotationUtils.findAnnotation(enumClass, JsonIgnoreProperties.class);
 
         if (jsonIgnoreProperties != null) {
             ignoreList.addAll(Arrays.asList(jsonIgnoreProperties.value()));
@@ -160,7 +166,7 @@ public class NameEnumUtils {
         Field[] fieldList = enumClass.getFields();
 
         for (Field field : fieldList) {
-            JsonIgnore jsonIgnore = AnnotationUtils.findAnnotation(field,JsonIgnore.class);
+            JsonIgnore jsonIgnore = AnnotationUtils.findAnnotation(field, JsonIgnore.class);
             if (jsonIgnore != null) {
                 ignoreList.add(field.getName());
             }

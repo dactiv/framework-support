@@ -6,7 +6,6 @@ import com.github.dactiv.framework.commons.enumerate.NameEnum;
  * 条件类型
  *
  * @author maurice.chen
- *
  */
 public enum ConditionType implements NameEnum {
 

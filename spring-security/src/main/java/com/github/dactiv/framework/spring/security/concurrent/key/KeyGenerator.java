@@ -12,7 +12,7 @@ public interface KeyGenerator {
     /**
      * 生成 key
      *
-     * @param key 当前 key
+     * @param key        当前 key
      * @param invocation 方法调用
      *
      * @return key 实际值

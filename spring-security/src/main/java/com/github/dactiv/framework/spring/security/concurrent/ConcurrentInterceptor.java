@@ -74,7 +74,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         if (tryLock) {
             try {
                 return invocation.proceed();
-            }  finally {
+            } finally {
                 lock.unlock();
             }
         }

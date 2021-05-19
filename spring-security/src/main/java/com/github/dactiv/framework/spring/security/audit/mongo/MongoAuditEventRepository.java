@@ -88,7 +88,7 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
      * 创建查询条件
      *
      * @param after 在什么时间之后的
-     * @param type 类型
+     * @param type  类型
      *
      * @return 查询条件
      */

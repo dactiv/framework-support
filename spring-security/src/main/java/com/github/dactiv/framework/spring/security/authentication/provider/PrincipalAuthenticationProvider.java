@@ -175,7 +175,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
     /**
      * 获取授权集合
      *
-     * @param token token 值
+     * @param token              token 值
      * @param userDetailsService 用户明细服务实现类
      *
      * @return redis 集合
@@ -237,6 +237,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      * @param userDetails        当前用户
      * @param token              当前认真 token
      * @param grantedAuthorities 当亲啊用户授权信息
+     *
      * @return spring security 认证信息
      */
     protected PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
@@ -256,6 +257,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      * 获取账户认证的用户明细服务
      *
      * @param token 当前用户认证 token
+     *
      * @return 用户明细服务
      */
     public Optional<UserDetailsService> getUserDetailsService(PrincipalAuthenticationToken token) {

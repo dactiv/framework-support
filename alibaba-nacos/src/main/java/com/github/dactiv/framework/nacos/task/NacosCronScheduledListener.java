@@ -163,7 +163,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
      * 重写 postProcessAfterInitialization 方法，用于扫描所有类下带有 NacosCronScheduled 的方法，
      * 并构造出 {@link #CACHE} 对象
      *
-     * @param bean 当前类对象
+     * @param bean     当前类对象
      * @param beanName 当前类名称
      *
      * @return 当前类信息
@@ -207,7 +207,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
         }
 
         // 循环构造 CACHE 对象
-        annotatedMethods.forEach((k,v) -> {
+        annotatedMethods.forEach((k, v) -> {
 
             // 创建 cron 调度信息
             CronScheduledInfo cronScheduledInfo = createCronScheduledInfo(v, k, bean);
@@ -217,7 +217,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 // 定义 key 内容
                 List<MatchEvaluation> matchEvaluations = new LinkedList<>();
 
-                NacosCronScheduledInfo info = (NacosCronScheduledInfo)cronScheduledInfo;
+                NacosCronScheduledInfo info = (NacosCronScheduledInfo) cronScheduledInfo;
 
                 // 定义表达式匹配定值类
                 MatchEvaluation cronEvaluation = new MatchEvaluation(
@@ -261,8 +261,8 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
      * 通过 NacosCronScheduled 注解构造 cron 调度信息
      *
      * @param scheduled NacosCronScheduled 注解
-     * @param method 使用 NacosCronScheduled 注解的方法类
-     * @param bean 使用 NacosCronScheduled 注解方法的类对象
+     * @param method    使用 NacosCronScheduled 注解的方法类
+     * @param bean      使用 NacosCronScheduled 注解方法的类对象
      *
      * @return cron 调度信息
      */
@@ -283,8 +283,8 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
         // 如果 corn 带有 spring el 表达式，构造 NacosCronScheduledInfo 对象，用于在 nacos 配置刷新时候，
         // 能够通过 cronPropertyName 和 zonePropertyName 刷新当前值，否则直接使用 CronScheduledInfo
         // 来做无刷新的 cron 调度，该调度不会加入到 CACHE 对象中。
-        if (StringUtils.startsWith(cron,SystemPropertyUtils.PLACEHOLDER_PREFIX)
-                && StringUtils.endsWith(cron,SystemPropertyUtils.PLACEHOLDER_SUFFIX)) {
+        if (StringUtils.startsWith(cron, SystemPropertyUtils.PLACEHOLDER_PREFIX)
+                && StringUtils.endsWith(cron, SystemPropertyUtils.PLACEHOLDER_SUFFIX)) {
 
             // 如果 spring el 的变量内容
             String cronPropertyName = getPropertyName(cron);
@@ -292,8 +292,8 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             String zonePropertyName = zone;
 
             // 如果时区也是 spring el 变量，在获取时区的变量内容
-            if (StringUtils.startsWith(zone,SystemPropertyUtils.PLACEHOLDER_PREFIX)
-                    && StringUtils.endsWith(zone,SystemPropertyUtils.PLACEHOLDER_SUFFIX)) {
+            if (StringUtils.startsWith(zone, SystemPropertyUtils.PLACEHOLDER_PREFIX)
+                    && StringUtils.endsWith(zone, SystemPropertyUtils.PLACEHOLDER_SUFFIX)) {
                 zonePropertyName = getPropertyName(zone);
             }
 
@@ -447,7 +447,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .getExtensionConfigs()
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
-                    .map(c-> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
+                    .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
                     .collect(Collectors.toList());
 
             list.addAll(result);
@@ -460,7 +460,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .getSharedConfigs()
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
-                    .map(c-> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
+                    .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
                     .collect(Collectors.toList());
 
             list.addAll(result);

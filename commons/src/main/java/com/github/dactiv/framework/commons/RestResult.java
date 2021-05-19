@@ -135,7 +135,6 @@ public class RestResult<T> implements Serializable {
      * 获取状态
      *
      * @return 状态
-     *
      */
     public int getStatus() {
         return status;
@@ -145,7 +144,6 @@ public class RestResult<T> implements Serializable {
      * 设置状态
      *
      * @param status 状态
-     *
      */
     public void setStatus(int status) {
         this.status = status;
@@ -278,6 +276,7 @@ public class RestResult<T> implements Serializable {
      * @param message 响应消息
      * @param data    响应数据
      * @param <T>     响应数据类型
+     *
      * @return 消息结果集
      */
     public static <T> Result<T> build(String message, T data) {
@@ -288,6 +287,7 @@ public class RestResult<T> implements Serializable {
      * 创建消息结果集
      *
      * @param message 响应消息
+     *
      * @return 消息结果集
      */
     public static Result<Map<String, Object>> build(String message) {

@@ -7,7 +7,7 @@ import org.springframework.scheduling.config.CronTask;
  *
  * @author maurice.chen
  */
-public class NacosCronScheduledInfo extends CronScheduledInfo{
+public class NacosCronScheduledInfo extends CronScheduledInfo {
 
     /**
      * 调度配置变量名

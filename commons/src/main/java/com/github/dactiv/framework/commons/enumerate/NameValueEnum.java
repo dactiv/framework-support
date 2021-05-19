@@ -5,6 +5,7 @@ package com.github.dactiv.framework.commons.enumerate;
  * 父类，该类用于在某些实体类中使用值存储，但值又有对应的名称使用。
  *
  * @param <V> 值类型
+ *
  * @author maurice
  */
 public interface NameValueEnum<V> extends NameEnum {

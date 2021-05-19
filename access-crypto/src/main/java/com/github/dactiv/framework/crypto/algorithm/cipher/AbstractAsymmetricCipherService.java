@@ -65,6 +65,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      *
      * @param plainText 明文内容
      * @param key       签名 key
+     *
      * @return 签名的字节原
      */
     public ByteSource sign(byte[] plainText, byte[] key) {
@@ -78,6 +79,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * @param signature 签名的算法实现
      * @param plainText 明文内容
      * @param key       签名 key
+     *
      * @return 签名的字节原
      */
     public ByteSource sign(Signature signature, byte[] plainText, byte[] key) {
@@ -98,6 +100,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * @param cipherText 密文内容
      * @param key        验证 key
      * @param sign       签名内容
+     *
      * @return true 验证成功，否则 false
      */
     public boolean verify(byte[] cipherText, byte[] key, byte[] sign) {
@@ -113,6 +116,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * @param cipherText 密文内容
      * @param key        验证 key
      * @param sign       签名内容
+     *
      * @return true 验证成功，否则 false
      */
     public boolean verify(Signature signature, byte[] cipherText, byte[] key, byte[] sign) {
@@ -167,6 +171,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 创建一个新的签名
      *
      * @param algorithmName 算法名称
+     *
      * @return 签名
      */
     public Signature newSignatureInstance(String algorithmName) {
@@ -197,6 +202,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 生成密钥对
      *
      * @param keySize 密钥大小
+     *
      * @return 密钥对
      */
     public KeyPair generateKeyPair(int keySize) {
@@ -229,6 +235,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 获取公共密钥
      *
      * @param key 密钥值
+     *
      * @return 公共密钥
      */
     protected abstract PublicKey getPublicKey(byte[] key);
@@ -237,6 +244,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 获取私有密钥
      *
      * @param key 密钥值
+     *
      * @return 私有密钥
      */
     protected abstract PrivateKey getPrivateKey(byte[] key);

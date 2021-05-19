@@ -79,7 +79,7 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
         String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
 
-        Criteria criteria  = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
             criteria = criteria.and("principal").is(principal);
@@ -99,7 +99,7 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
 
         String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
 
-        Criteria criteria  = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type);
 
         if (StringUtils.isNotEmpty(principal)) {
             criteria = criteria.and("principal").contains(principal);
@@ -119,7 +119,7 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
      * 创建查询条件
      *
      * @param after 在什么时间之后的
-     * @param type 类型
+     * @param type  类型
      *
      * @return 查询条件
      */

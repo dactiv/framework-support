@@ -18,6 +18,7 @@ public class NameValueEnumUtils {
      *
      * @param enumClass key value 枚举
      * @param <V>       值泛型类型
+     *
      * @return 以 {@link NameValueEnum#getName()} 为 key {@link NameValueEnum#getValue()} 位置的 map 集合
      */
     public static <V> Map<String, V> castMap(Class<? extends Enum<? extends NameValueEnum<V>>> enumClass) {
@@ -30,6 +31,7 @@ public class NameValueEnumUtils {
      * @param enumClass key value 枚举
      * @param ignore    要忽略的值
      * @param <V>       值泛型类型
+     *
      * @return 以 {@link NameValueEnum#getName()} 为 key {@link NameValueEnum#getValue()} 位置的 map 集合
      */
     public static <V> Map<String, V> castMap(Class<? extends Enum<? extends NameValueEnum<V>>> enumClass, V... ignore) {
@@ -75,6 +77,7 @@ public class NameValueEnumUtils {
      *
      * @param value     值
      * @param enumClass key value 枚举
+     *
      * @return 对应的名称值
      */
     public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum>> enumClass) {
@@ -87,6 +90,7 @@ public class NameValueEnumUtils {
      * @param value          值
      * @param enumClass      key value 枚举
      * @param ignoreNotFound 如果找不到是否抛出异常, true:抛出，否则 false
+     *
      * @return 对应的名称值
      */
     public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum>> enumClass, boolean ignoreNotFound) {
@@ -118,6 +122,7 @@ public class NameValueEnumUtils {
      * @param value     值
      * @param enumClass key value 枚举
      * @param <E>       key value 枚举实现类
+     *
      * @return key value 枚举实现类
      */
     public static <E extends Enum<? extends NameValueEnum>> E parse(Object value, Class<E> enumClass) {
@@ -131,6 +136,7 @@ public class NameValueEnumUtils {
      * @param enumClass      key value 枚举
      * @param ignoreNotFound 如果找不到是否抛出异常, true:抛出，否则 false
      * @param <E>            key value 枚举实现类
+     *
      * @return key value 枚举实现类
      */
     public static <E extends Enum<? extends NameValueEnum>> E parse(Object value, Class<E> enumClass, boolean ignoreNotFound) {

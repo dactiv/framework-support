@@ -42,6 +42,7 @@ public class SpringMvcUtils {
      *
      * @param name attribute 名称
      * @param <T>  attribute 类型
+     *
      * @return attribute 值
      */
     public static <T> T getRequestAttribute(String name) {
@@ -51,7 +52,7 @@ public class SpringMvcUtils {
     /**
      * 设置 session 的 attribute
      *
-     * @param name attribute 名称
+     * @param name  attribute 名称
      * @param value 值
      */
     public static void setSessionAttribute(String name, Object value) {
@@ -61,7 +62,7 @@ public class SpringMvcUtils {
     /**
      * 设置 request 的 attribute
      *
-     * @param name attribute 名称
+     * @param name  attribute 名称
      * @param value 值
      */
     public static void setRequestAttribute(String name, Object value) {
@@ -73,6 +74,7 @@ public class SpringMvcUtils {
      *
      * @param name attribute 名称
      * @param <T>  attribute 类型
+     *
      * @return attribute 值
      */
     public static <T> T getSessionAttribute(String name) {
@@ -126,6 +128,7 @@ public class SpringMvcUtils {
      * 获取 http 响应状态
      *
      * @param httpServletResponse http servlet response
+     *
      * @return http 响应状态
      */
     public static HttpStatus getHttpStatus(HttpServletResponse httpServletResponse) {
@@ -174,6 +177,7 @@ public class SpringMvcUtils {
      * 获取设备唯一识别
      *
      * @param request http servlet request
+     *
      * @return 设备唯一识别
      */
     public static String getDeviceIdentified(HttpServletRequest request) {
@@ -204,7 +208,7 @@ public class SpringMvcUtils {
      * 创建下载类型的 ResponseEntity
      *
      * @param fileName 下载文件名称
-     * @param path 文件路径
+     * @param path     文件路径
      *
      * @return 下载类型的 ResponseEntity
      *
@@ -234,6 +238,7 @@ public class SpringMvcUtils {
      * 获取 ip 地址
      *
      * @param request request http servlet reques
+     *
      * @return ip 地址
      */
     public static String getIpAddress(HttpServletRequest request) {

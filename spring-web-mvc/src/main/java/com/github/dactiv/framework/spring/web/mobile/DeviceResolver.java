@@ -13,6 +13,7 @@ public interface DeviceResolver {
      * 解析并得到设备
      *
      * @param request HttpServletRequest
+     *
      * @return 设备信息
      */
     default Device resolveDevice(HttpServletRequest request) {

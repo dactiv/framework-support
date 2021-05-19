@@ -49,7 +49,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     /**
      * 创建一个 Mybatis-Plus 查询生成器实现
      *
-     * @param wildcardParsers 通配符解析器集合
+     * @param wildcardParsers  通配符解析器集合
      * @param conditionParsers 条件解析器集合
      */
     public MybatisPlusQueryGenerator(List<WildcardParser> wildcardParsers, List<ConditionParser> conditionParsers) {
@@ -126,7 +126,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * 通过 request 获取指定的查询对象
      *
      * @param request http servelt request
-     * @param <S> 查询条件包装器范型类型
+     * @param <S>     查询条件包装器范型类型
      *
      * @return 包装器
      */
@@ -138,7 +138,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * 转换分页为 spring 分页
      *
      * @param page 分页结果对象
-     * @param <S> 分页范型类型
+     * @param <S>  分页范型类型
      *
      * @return spring data 分页
      */
@@ -147,7 +147,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
         if (page.orders().isEmpty()) {
             return new PageImpl<>(
                     page.getRecords(),
-                    PageRequest.of((int)page.getCurrent(), (int)page.getSize()),
+                    PageRequest.of((int) page.getCurrent(), (int) page.getSize()),
                     page.getTotal()
             );
         } else {
@@ -174,7 +174,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * 创建查询分页
      *
      * @param pageable spring data 分页请求对象
-     * @param <S> 分页范型类型
+     * @param <S>      分页范型类型
      *
      * @return Mybatis 分页查询对象
      */

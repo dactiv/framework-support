@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.security.concurrent.service;
 
 import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
-import com.github.dactiv.framework.spring.security.entity.SocketUserDetails;
+import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,8 +34,8 @@ public class ConcurrentDataService {
         return count;
     }
 
-    @Concurrent(value = "increment:spring-el:count:[#socketUserDetails.id]")
-    public int incrementArgs(SocketUserDetails socketUserDetails) {
+    @Concurrent(value = "increment:spring-el:count:[#roleAuthority.name]")
+    public int incrementArgs(RoleAuthority roleAuthority) {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);
         return count;

@@ -1,10 +1,7 @@
 package com.github.dactiv.framework.spring.security.concurrent;
 
 import com.github.dactiv.framework.spring.security.concurrent.service.ConcurrentDataService;
-import com.github.dactiv.framework.spring.security.entity.SocketUserDetails;
-import com.github.dactiv.framework.spring.security.enumerate.ConnectStatus;
-import com.github.dactiv.framework.spring.web.mobile.DeviceType;
-import com.github.dactiv.framework.spring.web.mobile.LiteDevice;
+import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.UUID;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -61,7 +56,7 @@ public class ConcurrentDataServiceTest {
         concurrentDataService.incrementSpringEl();
         concurrentDataService.setCount(1);
 
-        concurrentDataService.incrementArgs(new SocketUserDetails(1, "test", "123456", UUID.randomUUID().toString().replace("-", ""), new LiteDevice(DeviceType.MOBILE), ConnectStatus.Connect.getValue()));
+        concurrentDataService.incrementArgs(new RoleAuthority("123","234"));
         concurrentDataService.setCount(2);
     }
 

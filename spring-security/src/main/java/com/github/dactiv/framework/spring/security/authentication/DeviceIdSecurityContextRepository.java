@@ -9,6 +9,7 @@ import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author maurice
  */
-public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecurityContextRepository {
+public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContextRepository {
 
     /**
      * 默认的用户 id 头名称
@@ -52,19 +53,19 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
 
     private String loginProcessingUrl;
 
-    public DeviceIdentifiedSecurityContextRepository() {
+    public DeviceIdSecurityContextRepository() {
     }
 
-    public DeviceIdentifiedSecurityContextRepository(RedissonClient redissonClient) {
+    public DeviceIdSecurityContextRepository(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
     }
 
-    public DeviceIdentifiedSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient) {
+    public DeviceIdSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient) {
         this.cache = cache;
         this.redissonClient = redissonClient;
     }
 
-    public DeviceIdentifiedSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient, String loginProcessingUrl) {
+    public DeviceIdSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient, String loginProcessingUrl) {
         this.cache = cache;
         this.redissonClient = redissonClient;
         this.loginProcessingUrl = loginProcessingUrl;
@@ -201,8 +202,32 @@ public class DeviceIdentifiedSecurityContextRepository extends HttpSessionSecuri
         return result;
     }
 
-    public RBucket<SecurityContext> getSecurityContextBucket(String key) {
-        return redissonClient.getBucket(cache.getName() + key);
+    /**
+     * 获取 spring 安全上下文的 桶
+     *
+     * @param deviceIdentified 设备唯一识别
+     *
+     * @return redis 桶
+     */
+    public RBucket<SecurityContext> getSecurityContextBucket(String deviceIdentified) {
+        return redissonClient.getBucket(cache.getName() + deviceIdentified);
+    }
+
+    /**
+     * 创建设备识别认证的头信息
+     *
+     * @param deviceIdentified 设备唯一识别
+     * @param userId 用户 id
+     *
+     * @return 头信息
+     */
+    public static HttpHeaders createDeviceIdAuthHeaders(String deviceIdentified, Object userId) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+        httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
+        httpHeaders.add(DEFAULT_USER_ID_HEADER_NAME, userId.toString());
+
+        return httpHeaders;
     }
 
 }

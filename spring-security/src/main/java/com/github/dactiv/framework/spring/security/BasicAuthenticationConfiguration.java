@@ -32,6 +32,9 @@ public class BasicAuthenticationConfiguration {
     /**
      * 创建 basic 认证的头信息
      *
+     * @param username 认证账户
+     * @param password 认证密码
+     *
      * @return 头信息
      */
     public static HttpHeaders createBasicAuthHttpHeaders(String username, String password) {
@@ -39,5 +42,16 @@ public class BasicAuthenticationConfiguration {
         String base64 = Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8));
         httpHeaders.add("Authorization", "Basic " + base64);
         return httpHeaders;
+    }
+
+    /**
+     * 创建 basic 认证的头信息
+     *
+     * @param properties spring 安全配置
+     *
+     * @return 头信息
+     */
+    public static HttpHeaders createBasicAuthHttpHeaders(SecurityProperties properties) {
+        return createBasicAuthHttpHeaders(properties.getUser().getName(),properties.getUser().getPassword());
     }
 }

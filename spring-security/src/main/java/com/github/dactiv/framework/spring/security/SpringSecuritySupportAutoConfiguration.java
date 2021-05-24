@@ -2,7 +2,7 @@ package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.asscess.UserTypeVoter;
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
-import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedSecurityContextRepository;
+import com.github.dactiv.framework.spring.security.authentication.DeviceIdSecurityContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.provider.AnonymousUserAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentPointcutAdvisor;
@@ -84,7 +84,7 @@ public class SpringSecuritySupportAutoConfiguration {
     static class DefaultConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
-        private DeviceIdentifiedSecurityContextRepository deviceIdentifiedSecurityContextRepository;
+        private DeviceIdSecurityContextRepository deviceIdSecurityContextRepository;
 
         @Autowired
         private AnonymousUserAuthenticationProvider anonymousUserAuthenticationProvider;
@@ -120,7 +120,7 @@ public class SpringSecuritySupportAutoConfiguration {
                     .requestCache()
                     .disable()
                     .securityContext()
-                    .securityContextRepository(deviceIdentifiedSecurityContextRepository);
+                    .securityContextRepository(deviceIdSecurityContextRepository);
 
             addConsensusBasedToMethodSecurityInterceptor(http);
 
@@ -178,10 +178,10 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
-    DeviceIdentifiedSecurityContextRepository deviceIdentifiedSecurityContextRepository(RedissonClient redissonClient,
-                                                                                        SpringSecuritySupportProperties properties) {
+    DeviceIdSecurityContextRepository deviceIdentifiedSecurityContextRepository(RedissonClient redissonClient,
+                                                                                SpringSecuritySupportProperties properties) {
 
-        DeviceIdentifiedSecurityContextRepository repository = new DeviceIdentifiedSecurityContextRepository(
+        DeviceIdSecurityContextRepository repository = new DeviceIdSecurityContextRepository(
                 properties.getCache(),
                 redissonClient,
                 properties.getLoginProcessingUrl()

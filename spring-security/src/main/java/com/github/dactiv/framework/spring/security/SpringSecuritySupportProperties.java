@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.commons.CacheProperties;
-import com.github.dactiv.framework.spring.security.authentication.DeviceIdentifiedSecurityContextRepository;
+import com.github.dactiv.framework.spring.security.authentication.DeviceIdSecurityContextRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
@@ -16,7 +16,7 @@ public class SpringSecuritySupportProperties {
     /**
      * 安唯一识别存储于在 redis 的当前用户信息 key 前缀
      */
-    private CacheProperties cache = DeviceIdentifiedSecurityContextRepository.DEFAULT_CACHE;
+    private CacheProperties cache = DeviceIdSecurityContextRepository.DEFAULT_CACHE;
 
     /**
      * 登陆 url

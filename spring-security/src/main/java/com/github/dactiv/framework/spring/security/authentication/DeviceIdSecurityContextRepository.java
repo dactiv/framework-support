@@ -9,6 +9,8 @@ import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -221,13 +223,25 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
      *
      * @return 头信息
      */
-    public static HttpHeaders createDeviceIdAuthHeaders(String deviceIdentified, Object userId) {
+    public static HttpHeaders ofHttpHeaders(String deviceIdentified, Object userId) {
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
         httpHeaders.add(DEFAULT_USER_ID_HEADER_NAME, userId.toString());
 
         return httpHeaders;
+    }
+
+    /**
+     * 创建带设备识别认证的头信息的 http 实体
+     *
+     * @param deviceIdentified 设备唯一识别
+     * @param userId 用户 id
+     *
+     * @return 头信息
+     */
+    public static <T> HttpEntity<T> ofHttpEntity(T body, String deviceIdentified, Object userId) {
+        return new HttpEntity<>(body, ofHttpHeaders(deviceIdentified, userId));
     }
 
 }

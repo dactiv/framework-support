@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.MultiValueMap;
 
 import java.nio.charset.StandardCharsets;
 
@@ -37,7 +38,7 @@ public class BasicAuthenticationConfiguration {
      *
      * @return 头信息
      */
-    public static HttpHeaders createBasicAuthHttpHeaders(String username, String password) {
+    public static HttpHeaders of(String username, String password) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String base64 = Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8));
         httpHeaders.add("Authorization", "Basic " + base64);
@@ -51,7 +52,30 @@ public class BasicAuthenticationConfiguration {
      *
      * @return 头信息
      */
-    public static HttpHeaders createBasicAuthHttpHeaders(SecurityProperties properties) {
-        return createBasicAuthHttpHeaders(properties.getUser().getName(),properties.getUser().getPassword());
+    public static HttpHeaders of(SecurityProperties properties) {
+        return of(properties.getUser().getName(),properties.getUser().getPassword());
+    }
+
+    /**
+     * 创建带 basic 认证的 http 实体
+     *
+     * @param username 认证账户
+     * @param password 认证密码
+     *
+     * @return 头信息
+     */
+    public static <T> HttpEntity<T> ofHttpEntity(T body, String username, String password) {
+        return new HttpEntity<>(body, of(username, password));
+    }
+
+    /**
+     * 创建带 basic 认证的 http 实体
+     *
+     * @param properties spring 安全配置
+     *
+     * @return 头信息
+     */
+    public static <T> HttpEntity<T> ofHttpEntity(T body, SecurityProperties properties) {
+        return new HttpEntity<>(body, of(properties));
     }
 }

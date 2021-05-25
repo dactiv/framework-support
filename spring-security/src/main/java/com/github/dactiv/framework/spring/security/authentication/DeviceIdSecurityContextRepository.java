@@ -9,7 +9,6 @@ import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;

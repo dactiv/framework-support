@@ -67,7 +67,7 @@ public @interface Plugin {
      *
      * @see ResourceSource
      */
-    ResourceSource[] source() default ResourceSource.All;
+    String[] sources() default {};
 
     /**
      * 顺序值，默认为 0

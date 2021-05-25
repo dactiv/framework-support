@@ -167,9 +167,9 @@ public class PluginEndpoint {
 
             if (plugin != null) {
 
-                List<ResourceSource> sources = Arrays.asList(plugin.source());
+                List<String> sources = Arrays.asList(plugin.sources());
 
-                if (sources.contains(ResourceSource.Console) || sources.contains(ResourceSource.All)) {
+                if (sources.contains(ResourceSource.Console.toString()) || sources.contains(ResourceSource.All.toString())) {
                     parent = new PluginInfo(plugin);
 
                     // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
@@ -246,11 +246,16 @@ public class PluginEndpoint {
                 continue;
             }
 
-            List<ResourceSource> sources = Arrays.asList(plugin.source());
+            List<String> sources = Arrays.asList(plugin.sources());
 
-            if (!sources.contains(ResourceSource.Console) && !sources.contains(ResourceSource.All)) {
+            if (!sources.contains(ResourceSource.Console.toString())) {
                 continue;
             }
+
+            if (!sources.contains(ResourceSource.All.toString())) {
+                continue;
+            }
+
             // 获取请求 url 值
             List<String> values = getRequestValues(method, parent);
 

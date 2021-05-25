@@ -48,9 +48,9 @@ public class UserTypeVoter implements AccessDecisionVoter<MethodInvocation> {
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
-        List<ResourceSource> resourceTypes = Arrays.asList(plugin.source());
+        List<String> resourceTypes = Arrays.asList(plugin.sources());
 
-        if (resourceTypes.contains(ResourceSource.All)) {
+        if (resourceTypes.contains(ResourceSource.All.toString())) {
             return AccessDecisionVoter.ACCESS_GRANTED;
         }
 
@@ -58,7 +58,7 @@ public class UserTypeVoter implements AccessDecisionVoter<MethodInvocation> {
 
             SecurityUserDetails userDetails = Casts.cast(authentication.getDetails(), SecurityUserDetails.class);
 
-            if (!resourceTypes.contains(ResourceSource.valueOf(userDetails.getType()))) {
+            if (!resourceTypes.contains(userDetails.getType())) {
                 return AccessDecisionVoter.ACCESS_DENIED;
             } else {
                 return AccessDecisionVoter.ACCESS_GRANTED;

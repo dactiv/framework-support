@@ -106,7 +106,7 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
         this.icon = plugin.icon();
         this.sort = plugin.sort();
         this.setType(plugin.type().toString());
-        this.setSource(StringUtils.join(plugin.source(), ","));
+        this.setSource(StringUtils.join(plugin.sources(), ","));
         this.remark = plugin.remark();
     }
 

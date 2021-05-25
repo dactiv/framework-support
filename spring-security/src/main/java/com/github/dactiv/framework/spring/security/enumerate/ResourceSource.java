@@ -26,10 +26,6 @@ public enum ResourceSource implements NameEnum {
      */
     AnonymousUser("匿名用户"),
     /**
-     * socket 用户
-     */
-    SocketUser("socket 用户"),
-    /**
      * 系统
      */
     System("系统"),

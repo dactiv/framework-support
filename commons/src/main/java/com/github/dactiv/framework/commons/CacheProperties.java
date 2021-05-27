@@ -74,7 +74,7 @@ public class CacheProperties implements Serializable {
      *
      * @return 缓存名称 + 后缀值，如果缓存名称没有 ":" 符号，会自动加上。
      */
-    public String getName(String suffix) {
-        return StringUtils.appendIfMissing(getName(),":") + suffix;
+    public String getName(Object suffix) {
+        return StringUtils.appendIfMissing(getName(),":") + suffix.toString();
     }
 }

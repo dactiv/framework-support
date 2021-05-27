@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.commons;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 
 /**
@@ -63,5 +65,16 @@ public class CacheProperties implements Serializable {
      */
     public void setExpiresTime(TimeProperties expiresTime) {
         this.expiresTime = expiresTime;
+    }
+
+    /**
+     * 获取缓存名称
+     *
+     * @param suffix 后缀值
+     *
+     * @return 缓存名称 + 后缀值，如果缓存名称没有 ":" 符号，会自动加上。
+     */
+    public String getName(String suffix) {
+        return StringUtils.appendIfMissing(getName(),":") + suffix;
     }
 }

@@ -211,7 +211,7 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
      * @return redis 桶
      */
     public RBucket<SecurityContext> getSecurityContextBucket(String deviceIdentified) {
-        return redissonClient.getBucket(cache.getName() + deviceIdentified);
+        return redissonClient.getBucket(cache.getName(deviceIdentified));
     }
 
     /**

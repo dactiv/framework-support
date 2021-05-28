@@ -1,7 +1,6 @@
 package com.github.dactiv.framework.commons;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
-import org.springframework.beans.BeanUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
@@ -66,13 +65,17 @@ public class ReflectionUtils {
      */
     public static Object getReadProperty(Object o, String name, Object... args) {
 
-        PropertyDescriptor propertyDescriptor = findPropertyDescriptor(o, name);
+        try {
+            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, o.getClass());
 
-        if (!Modifier.isPublic(propertyDescriptor.getReadMethod().getDeclaringClass().getModifiers())) {
-            throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
+            if (!Modifier.isPublic(propertyDescriptor.getReadMethod().getDeclaringClass().getModifiers())) {
+                throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
+            }
+
+            return invokeMethod(o, propertyDescriptor.getReadMethod(), Arrays.asList(args));
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
-
-        return invokeMethod(o, propertyDescriptor.getReadMethod(), Arrays.asList(args));
     }
 
     /**
@@ -84,13 +87,18 @@ public class ReflectionUtils {
      */
     public static void setWriteProperty(Object o, String name, Object value) {
 
-        PropertyDescriptor propertyDescriptor = findPropertyDescriptor(o, name);
+        try {
+            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, o.getClass());
 
-        if (!Modifier.isPublic(propertyDescriptor.getWriteMethod().getDeclaringClass().getModifiers())) {
-            throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
+            if (!Modifier.isPublic(propertyDescriptor.getWriteMethod().getDeclaringClass().getModifiers())) {
+                throw new SystemException("[" + o.getClass() + "] 的 [" + name + "] 属性为非 public 属性");
+            }
+
+            invokeMethod(o, propertyDescriptor.getWriteMethod(), Collections.singletonList(value));
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
 
-        invokeMethod(o, propertyDescriptor.getWriteMethod(), Collections.singletonList(value));
     }
 
     /**
@@ -135,12 +143,12 @@ public class ReflectionUtils {
      *
      * @return 字段属性说明
      */
-    private static PropertyDescriptor findPropertyDescriptor(Object o, String name) {
+    /*private static PropertyDescriptor findPropertyDescriptor(Object o, String name) {
         return Arrays.stream(BeanUtils.getPropertyDescriptors(o.getClass()))
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性"));
-    }
+    }*/
 
     /**
      * 获取范型对象类型

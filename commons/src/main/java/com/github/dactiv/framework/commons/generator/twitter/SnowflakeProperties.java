@@ -43,6 +43,19 @@ public class SnowflakeProperties {
     }
 
     /**
+     * twitter 的 snowflake id 生成算法配置信息
+     *
+     * @param dataCenterId 数据中心编号，最大支持数据中心节点数 0~31，一共 32 个
+     * @param serviceId 服务编号（业务编号），共3位以字符串组成，000~999，共1000个
+     * @param workerId 工作机器编号，最大支持机器节点数 0~31，一共 32 个
+     */
+    public SnowflakeProperties(long dataCenterId, String serviceId, long workerId) {
+        this.dataCenterId = dataCenterId;
+        this.serviceId = serviceId;
+        this.workerId = workerId;
+    }
+
+    /**
      * 获取数据中心编号，最大支持数据中心节点数0~31，一共32个
      *
      * @return 数据中心编号

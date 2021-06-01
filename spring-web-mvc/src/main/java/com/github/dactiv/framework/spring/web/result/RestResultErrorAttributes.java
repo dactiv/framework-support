@@ -56,7 +56,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
-        RestResult<Object> result = new RestResult<>(
+        RestResult<Object> result = RestResult.of(
                 ErrorCodeException.DEFAULT_ERROR_MESSAGE,
                 status.value(),
                 ErrorCodeException.DEFAULT_EXCEPTION_CODE,

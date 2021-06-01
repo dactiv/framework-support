@@ -108,7 +108,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                 data = getFilterPropertyData(data, includeFields, true);
             }
 
-            RestResult<Object> result = new RestResult<>(
+            RestResult<Object> result = RestResult.of(
                     message,
                     status.value(),
                     RestResult.SUCCESS_EXECUTE_CODE,

@@ -18,6 +18,8 @@ public class RestResult<T> implements Serializable {
 
     public static final String SUCCESS_EXECUTE_CODE = "200";
 
+    public static final String FAIL_EXECUTE_CODE = "500";
+
     public static final String DEFAULT_MESSAGE_NAME = "message";
 
     public static final String DEFAULT_DATA_NAME = "data";
@@ -53,16 +55,168 @@ public class RestResult<T> implements Serializable {
      */
     private Date timestamp = new Date();
 
+    /**
+     * 创建一个抽象的 rest 结果集实体类
+     *
+     */
     public RestResult() {
+    }
+
+    /**
+     * 创建一个抽象的 rest 结果集实体类
+     *
+     * @param message 响应信息
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> of(String message) {
+        return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE));
+    }
+
+    /**
+     * 创建一个抽象的 rest 结果集实体类
+     *
+     * @param message 响应信息
+     * @param status  执行状态
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> of(String message, int status) {
+        return new RestResult<>(message, status, SUCCESS_EXECUTE_CODE);
+    }
+
+    /**
+     * 创建一个抽象的 rest 结果集实体类
+     *
+     * @param message     响应信息
+     * @param status      执行状态
+     * @param executeCode 执行代码
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> of(String message, int status, String executeCode) {
+        return new RestResult<>(message, status, executeCode, null);
+    }
+
+    /**
+     * 创建一个抽象的 rest 结果集实体类
+     *
+     * @param message     响应信息
+     * @param status      执行状态
+     * @param executeCode 执行代码
+     * @param data        响应数据
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> of(String message, int status, String executeCode, T data) {
+        return new RestResult<>(message, status, executeCode, data);
+    }
+
+    /**
+     * 创建一个成功的抽象 rest 结果集实体类
+     *
+     * @param data 响应内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofSuccess(T data) {
+        return ofSuccess("ok", SUCCESS_EXECUTE_CODE, data);
+    }
+
+    /**
+     * 创建一个成功的抽象 rest 结果集实体类
+     *
+     * @param message 响应信息
+     * @param data 响应内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofSuccess(String message, T data) {
+        return ofSuccess(message, SUCCESS_EXECUTE_CODE, data);
+    }
+
+    /**
+     * 创建一个成功的抽象 rest 结果集实体类
+     *
+     * @param message 响应信息
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofSuccess(String message) {
+        return ofSuccess(message, SUCCESS_EXECUTE_CODE);
+    }
+
+    /**
+     * 创建一个成功的抽象 rest 结果集实体类
+     *
+     * @param message 响应信息
+     * @param executeCode 执行代码
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofSuccess(String message, String executeCode) {
+        return ofSuccess(message, executeCode, null);
+    }
+
+    /**
+     * 创建一个成功的抽象 rest 结果集实体类
+     *
+     * @param message 响应信息
+     * @param executeCode 执行代码
+     * @param data 响应内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofSuccess(String message, String executeCode, T data) {
+        return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE), executeCode, data);
+    }
+
+    /**
+     * 创建一个异常的抽象 rest 结果集实体类
+     *
+     * @param throwable 异常信息
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofException(Throwable throwable) {
+        return of(throwable.getMessage(), Integer.parseInt(FAIL_EXECUTE_CODE), FAIL_EXECUTE_CODE, null);
+    }
+
+    /**
+     * 创建一个异常的抽象 rest 结果集实体类
+     *
+     * @param executeCode 执行代码
+     * @param throwable 异常信息
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofException(String executeCode, Throwable throwable) {
+        return of(throwable.getMessage(), Integer.parseInt(FAIL_EXECUTE_CODE), executeCode, null);
+    }
+
+    /**
+     * 创建一个异常的抽象 rest 结果集实体类
+     *
+     * @param executeCode 执行代码
+     * @param throwable 异常信息
+     * @param data 数据内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofException(String executeCode, Throwable throwable, T data) {
+        return of(throwable.getMessage(), Integer.parseInt(FAIL_EXECUTE_CODE), executeCode, data);
     }
 
     /**
      * 抽象的 rest 结果集实体类
      *
      * @param message 响应信息
+
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public RestResult(String message) {
-        this(message, Integer.valueOf(SUCCESS_EXECUTE_CODE));
+        this(message, Integer.parseInt(SUCCESS_EXECUTE_CODE));
     }
 
     /**
@@ -70,7 +224,10 @@ public class RestResult<T> implements Serializable {
      *
      * @param message 响应信息
      * @param status  执行状态
+
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public RestResult(String message, int status) {
         this(message, status, SUCCESS_EXECUTE_CODE);
     }
@@ -81,7 +238,10 @@ public class RestResult<T> implements Serializable {
      * @param message     响应信息
      * @param status      执行状态
      * @param executeCode 执行代码
+
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public RestResult(String message, int status, String executeCode) {
         this(message, status, executeCode, null);
     }
@@ -93,7 +253,9 @@ public class RestResult<T> implements Serializable {
      * @param status      执行状态
      * @param executeCode 执行代码
      * @param data        响应数据
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public RestResult(String message, int status, String executeCode, T data) {
         this.message = message;
         this.status = status;
@@ -106,7 +268,9 @@ public class RestResult<T> implements Serializable {
      *
      * @param executeCode 执行代码
      * @param e           异常信息
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public RestResult(String executeCode, Throwable e) {
         this.executeCode = executeCode;
         this.status = Integer.parseInt(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
@@ -207,7 +371,10 @@ public class RestResult<T> implements Serializable {
      * 消息结果集
      *
      * @param <T> 数据类型
+     *
+     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
      */
+    @Deprecated
     public static class Result<T> {
         /**
          * 响应数据

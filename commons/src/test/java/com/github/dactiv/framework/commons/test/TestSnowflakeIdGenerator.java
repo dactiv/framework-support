@@ -26,6 +26,5 @@ public class TestSnowflakeIdGenerator {
         SnowflakeIdGenerator snowflakeIdGenerator = new SnowflakeIdGenerator(snowflakeProperties);
 
         Assert.assertEquals(snowflakeIdGenerator.generateId().length(), 32);
-
     }
 }

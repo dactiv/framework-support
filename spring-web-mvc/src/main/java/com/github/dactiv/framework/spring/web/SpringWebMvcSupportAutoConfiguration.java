@@ -12,6 +12,7 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -64,6 +65,7 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public RestResponseBodyAdvice restResponseBodyAdvice() {
         return new RestResponseBodyAdvice();
@@ -81,7 +83,7 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RestTemplate.class)
+    @ConditionalOnBean(RestTemplate.class)
     public RestTemplate restTemplate(List<CustomClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
         RestTemplate restTemplate = new RestTemplate();
 

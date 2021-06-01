@@ -24,6 +24,11 @@ public class CacheProperties implements Serializable {
     private TimeProperties expiresTime;
 
     public CacheProperties() {
+
+    }
+
+    public CacheProperties(String name) {
+        this(name, null);
     }
 
     public CacheProperties(String name, TimeProperties expiresTime) {

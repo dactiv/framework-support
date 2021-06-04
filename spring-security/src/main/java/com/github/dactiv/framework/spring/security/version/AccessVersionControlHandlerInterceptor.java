@@ -82,7 +82,7 @@ public class AccessVersionControlHandlerInterceptor extends HandlerInterceptorAd
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-            RestResult<Map<String, Object>> r = new RestResult<>(
+            RestResult<Map<String, Object>> r = RestResult.of(
                     versionControl.responseStrategy().getName(),
                     versionControl.responseStrategy().getValue(),
                     ErrorCodeException.DEFAULT_EXCEPTION_CODE

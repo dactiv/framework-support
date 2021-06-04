@@ -12,7 +12,6 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -59,13 +58,29 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(RestResultErrorAttributes.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public RestResultErrorAttributes servletRestResultErrorAttributes() {
         return new RestResultErrorAttributes();
     }
 
+
     @Bean
-    @ConditionalOnBean(RestResponseBodyAdvice.class)
+    @ConditionalOnMissingBean(RestTemplate.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public RestTemplate restTemplate(List<CustomClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(clientHttpRequestInterceptors);
+
+        interceptors.add(new LoggingClientHttpRequestInterceptor());
+        restTemplate.setInterceptors(interceptors);
+
+        return restTemplate;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public RestResponseBodyAdvice restResponseBodyAdvice() {
         return new RestResponseBodyAdvice();
@@ -77,20 +92,4 @@ public class SpringWebMvcSupportAutoConfiguration {
         return new EnumerateEndpoint(infoContributors);
     }
 
-    @Bean
-    public LoggingClientHttpRequestInterceptor loggingClientHttpRequestInterceptor() {
-        return new LoggingClientHttpRequestInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnBean(RestTemplate.class)
-    public RestTemplate restTemplate(List<CustomClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(clientHttpRequestInterceptors);
-
-        restTemplate.setInterceptors(interceptors);
-
-        return restTemplate;
-    }
 }

@@ -30,6 +30,7 @@ public class RestResult<T> implements Serializable {
 
     public static final String DEFAULT_TIMESTAMP_NAME = "timestamp";
 
+    public static final String DEFAULT_SUCCESS_MESSAGE = "ok";
     /**
      * 信息
      */
@@ -82,7 +83,7 @@ public class RestResult<T> implements Serializable {
      * @return rest 结果集
      */
     public static <T> RestResult<T> of(String message, int status) {
-        return new RestResult<>(message, status, SUCCESS_EXECUTE_CODE);
+        return of(message, status, SUCCESS_EXECUTE_CODE);
     }
 
     /**
@@ -120,7 +121,7 @@ public class RestResult<T> implements Serializable {
      * @return rest 结果集
      */
     public static <T> RestResult<T> ofSuccess(T data) {
-        return ofSuccess("ok", SUCCESS_EXECUTE_CODE, data);
+        return ofSuccess(DEFAULT_SUCCESS_MESSAGE, SUCCESS_EXECUTE_CODE, data);
     }
 
     /**
@@ -210,52 +211,12 @@ public class RestResult<T> implements Serializable {
     /**
      * 抽象的 rest 结果集实体类
      *
-     * @param message 响应信息
-
-     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
-     */
-    @Deprecated
-    public RestResult(String message) {
-        this(message, Integer.parseInt(SUCCESS_EXECUTE_CODE));
-    }
-
-    /**
-     * 抽象的 rest 结果集实体类
-     *
-     * @param message 响应信息
-     * @param status  执行状态
-
-     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
-     */
-    @Deprecated
-    public RestResult(String message, int status) {
-        this(message, status, SUCCESS_EXECUTE_CODE);
-    }
-
-    /**
-     * 抽象的 rest 结果集实体类
-     *
-     * @param message     响应信息
-     * @param status      执行状态
-     * @param executeCode 执行代码
-
-     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
-     */
-    @Deprecated
-    public RestResult(String message, int status, String executeCode) {
-        this(message, status, executeCode, null);
-    }
-
-    /**
-     * 抽象的 rest 结果集实体类
-     *
      * @param message     响应信息
      * @param status      执行状态
      * @param executeCode 执行代码
      * @param data        响应数据
-     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
+     *
      */
-    @Deprecated
     public RestResult(String message, int status, String executeCode, T data) {
         this.message = message;
         this.status = status;

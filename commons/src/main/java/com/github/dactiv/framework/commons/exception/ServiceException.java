@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.commons.exception;
 
 /**
- * 业务逻辑异常实现
+ * 业务逻辑异常实现.
  *
  * @author maurice.chen
  **/

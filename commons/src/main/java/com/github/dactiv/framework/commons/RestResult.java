@@ -18,6 +18,8 @@ public class RestResult<T> implements Serializable {
 
     public static final String SUCCESS_EXECUTE_CODE = "200";
 
+    public static final String DEFAULT_SUCCESS_MESSAGE = "ok";
+
     public static final String FAIL_EXECUTE_CODE = "500";
 
     public static final String DEFAULT_MESSAGE_NAME = "message";
@@ -30,7 +32,6 @@ public class RestResult<T> implements Serializable {
 
     public static final String DEFAULT_TIMESTAMP_NAME = "timestamp";
 
-    public static final String DEFAULT_SUCCESS_MESSAGE = "ok";
     /**
      * 信息
      */

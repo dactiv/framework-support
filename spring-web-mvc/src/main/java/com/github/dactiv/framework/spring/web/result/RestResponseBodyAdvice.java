@@ -65,13 +65,16 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         List<String> clients = request.getHeaders().get(DEFAULT_CLIENT_NAME);
 
+        // 获取是否执行控制器的某个方法遇到错误走以下流程，该值在 RestResultErrorAttributes 中设置，
+        // 仅仅是为了不跟 RestResultErrorAttributes 冲突而已
         Boolean errorExecute = SpringMvcUtils.getRequestAttribute(RestResultErrorAttributes.DEFAULT_ERROR_EXECUTE_ATTR_NAME);
-
+        // 从请求属性中获取是否不需要格式发，
         Boolean notFormat = SpringMvcUtils.getRequestAttribute(DEFAULT_NOT_FORMAT_ATTR_NAME);
 
         ServletServerHttpRequest httpRequest = Casts.cast(request);
         ServletServerHttpResponse httpResponse = Casts.cast(response);
 
+        // 如果为空，在 headers 中获取是否存在不需要格式化字段，兼容两个模式
         if (notFormat == null || !notFormat) {
             List<String> list = request.getHeaders().get(DEFAULT_NOT_FORMAT_ATTR_NAME);
 
@@ -80,33 +83,24 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             }
         }
 
+        // 判断是否执行格式化
         boolean execute = (notFormat == null || !notFormat) && (errorExecute == null || !errorExecute);
 
+        // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
         boolean support = clients != null && clients.stream().anyMatch(this::isSupportClient);
 
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 
+            // 获取要忽略的字段集合
             List<String> excludeFields = getParameterValues(httpRequest.getServletRequest(), DEFAULT_EXCLUDE_FIELDS_PARAM_NAME);
+            // 获取要仅仅引入的字段集合
             List<String> includeFields = getParameterValues(httpRequest.getServletRequest(), DEFAULT_INCLUDE_FIELDS_PARAM_NAME);
 
             HttpStatus status = HttpStatus.valueOf(httpResponse.getServletResponse().getStatus());
-
+            // 获取执行状态
             String message = status.getReasonPhrase();
+            // 获取实际要响应的 data 内容
             Object data = body == null ? new LinkedHashMap<>() : body;
-
-            if (body != null && RestResult.Result.class.isAssignableFrom(body.getClass())) {
-                RestResult.Result<?> result = Casts.cast(body);
-
-                message = result.getMassage();
-                data = result.getData();
-
-            }
-
-            if (Objects.nonNull(data)) {
-                data = getFilterPropertyData(data, excludeFields, false);
-
-                data = getFilterPropertyData(data, includeFields, true);
-            }
 
             RestResult<Object> result = RestResult.of(
                     message,
@@ -115,12 +109,32 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                     data
             );
 
-            if (body != null && RestResult.class.isAssignableFrom(body.getClass())) {
+            // 如果响应的 body 有值，并且是 RestResult，获取 data信息，看看是否需要过滤字段
+            if (Objects.nonNull(body) && RestResult.class.isAssignableFrom(body.getClass())) {
+
                 result = Casts.cast(body);
-            } else if (HttpStatus.OK == status) {
-                result.setExecuteCode(RestResult.SUCCESS_EXECUTE_CODE);
-            } else {
-                result.setExecuteCode(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
+
+                data = result.getData();
+            }
+
+            // 如果 data 不为空。直接过滤一次属性内容
+            if (Objects.nonNull(data)) {
+
+                Object excludeObject = getFilterPropertyData(data, excludeFields, false);
+
+                Object includeObject = getFilterPropertyData(excludeObject, includeFields, true);
+
+                result.setData(includeObject);
+            }
+
+            // 如果没设置执行代码。根据状态值来设置执行代码
+            if (Objects.isNull(result.getExecuteCode())){
+
+                if (HttpStatus.OK == status) {
+                    result.setExecuteCode(RestResult.SUCCESS_EXECUTE_CODE);
+                } else {
+                    result.setExecuteCode(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
+                }
             }
 
             return result;
@@ -130,7 +144,6 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     }
 
-    @SuppressWarnings("unchecked")
     private Object getFilterPropertyData(Object data, List<String> properties, boolean includeOrExclude) {
 
         Object result = filterDataProperty(
@@ -149,8 +162,6 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         if (CollectionUtils.isNotEmpty(nextProperties)) {
 
-            Map<String, Object> resultMap = Casts.convertValue(result, Map.class);
-
             Map<String, List<String>> excludeFieldsMap = new LinkedHashMap<>();
 
             for (String next : nextProperties) {
@@ -165,22 +176,42 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
             for (Map.Entry<String, List<String>> entry : excludeFieldsMap.entrySet()) {
 
-                Object o = resultMap.get(entry.getKey());
+                if (List.class.isAssignableFrom(result.getClass())) {
 
-                if (Objects.isNull(o)) {
-                    continue;
+                    List<Object> list = Casts.cast(result);
+
+                    result = list
+                            .stream()
+                            .map(i -> getFilterPropertyData(i, entry.getKey(), entry.getValue(), includeOrExclude))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
+
+                } else {
+
+                    result = getFilterPropertyData(result, entry.getKey(), entry.getValue(), includeOrExclude);
                 }
-
-                Object newValue = getFilterPropertyData(o, entry.getValue(), includeOrExclude);
-
-                resultMap.put(entry.getKey(), newValue);
             }
-
-            result = resultMap;
 
         }
 
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getFilterPropertyData(Object o, String propertyName, List<String> properties, boolean includeOrExclude) {
+        Map<String, Object> resultMap = Casts.convertValue(o, Map.class);
+
+        Object fieldObject = resultMap.get(propertyName);
+
+        if (Objects.isNull(fieldObject)) {
+            return null;
+        }
+
+        Object newValue = getFilterPropertyData(fieldObject, properties, includeOrExclude);
+
+        resultMap.put(propertyName, newValue);
+
+        return resultMap;
     }
 
     /**

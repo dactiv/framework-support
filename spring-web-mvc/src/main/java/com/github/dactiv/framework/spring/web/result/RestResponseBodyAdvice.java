@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.web.result;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -92,9 +93,9 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 
             // 获取要忽略的字段集合
-            List<String> excludeFields = getParameterValues(httpRequest.getServletRequest(), DEFAULT_EXCLUDE_FIELDS_PARAM_NAME);
+            List<FilterProperty> excludeFields = getFilterProperty(httpRequest.getServletRequest(), DEFAULT_EXCLUDE_FIELDS_PARAM_NAME);
             // 获取要仅仅引入的字段集合
-            List<String> includeFields = getParameterValues(httpRequest.getServletRequest(), DEFAULT_INCLUDE_FIELDS_PARAM_NAME);
+            List<FilterProperty> includeFields = getFilterProperty(httpRequest.getServletRequest(), DEFAULT_INCLUDE_FIELDS_PARAM_NAME);
 
             HttpStatus status = HttpStatus.valueOf(httpResponse.getServletResponse().getStatus());
             // 获取执行状态
@@ -144,161 +145,209 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     }
 
-    private Object getFilterPropertyData(Object data, List<String> properties, boolean includeOrExclude) {
-
-        Object result = filterDataProperty(
-                data,
-                properties
-                        .stream()
-                        .filter(s -> !StringUtils.contains(s, Casts.DEFAULT_POINT_SYMBOL))
-                        .collect(Collectors.toList()),
-                includeOrExclude
-        );
-
-        List<String> nextProperties = properties
-                .stream()
-                .filter(s -> StringUtils.contains(s, Casts.DEFAULT_POINT_SYMBOL))
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isNotEmpty(nextProperties)) {
-
-            Map<String, List<String>> excludeFieldsMap = new LinkedHashMap<>();
-
-            for (String next : nextProperties) {
-
-                String before = StringUtils.substringBefore(next, Casts.DEFAULT_POINT_SYMBOL);
-
-                String after = StringUtils.substringAfter(next, Casts.DEFAULT_POINT_SYMBOL);
-
-                excludeFieldsMap.computeIfAbsent(before, k -> new LinkedList<>()).add(after);
-
-            }
-
-            for (Map.Entry<String, List<String>> entry : excludeFieldsMap.entrySet()) {
-
-                if (List.class.isAssignableFrom(result.getClass())) {
-
-                    List<Object> list = Casts.cast(result);
-
-                    result = list
-                            .stream()
-                            .map(i -> getFilterPropertyData(i, entry.getKey(), entry.getValue(), includeOrExclude))
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-
-                } else {
-
-                    result = getFilterPropertyData(result, entry.getKey(), entry.getValue(), includeOrExclude);
-                }
-            }
-
-        }
-
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getFilterPropertyData(Object o, String propertyName, List<String> properties, boolean includeOrExclude) {
-        Map<String, Object> resultMap = Casts.convertValue(o, Map.class);
-
-        Object fieldObject = resultMap.get(propertyName);
-
-        if (Objects.isNull(fieldObject)) {
-            return null;
-        }
-
-        Object newValue = getFilterPropertyData(fieldObject, properties, includeOrExclude);
-
-        resultMap.put(propertyName, newValue);
-
-        return resultMap;
-    }
-
     /**
-     * 过滤数据属性
+     * 获取过滤后的数据
      *
-     * @param data             当前数据
-     * @param properties       要过滤的属性名称
-     * @param includeOrExclude true 仅仅引入 properties 的属性，false 仅仅去除 properties 的属性
+     * @param data 当前数据
+     * @param properties 要过滤的属性值
+     * @param includeOrExclude true 仅仅引入 properties 参数的数据，false， 去除掉 properties 参数的数据
      *
-     * @return 新的数据信息
+     * @return 新的数据
      */
     @SuppressWarnings("unchecked")
-    public Object filterDataProperty(Object data, List<String> properties, boolean includeOrExclude) {
+    private Object getFilterPropertyData(Object data, List<FilterProperty> properties, boolean includeOrExclude) {
 
-        if (CollectionUtils.isEmpty(properties)) {
-            return data;
-        }
-
+        // 如果是集合，从集合里逐个过滤对象信息。
         if (List.class.isAssignableFrom(data.getClass())) {
 
             List<Object> list = Casts.cast(data);
 
-            return list.stream()
-                    .map(o -> filterDataProperty(o, properties, includeOrExclude))
+            return list
+                    .stream()
+                    .map(o -> getFilterPropertyData(o, properties, includeOrExclude))
                     .collect(Collectors.toList());
 
-        }
+        } else {
+            // 定义要忽略的字段对象返回值
+            Map<String, Object> excludeResult = Casts.convertValue(data, Map.class);
+            // 定义要引入的字段对象返回值
+            Map<String, Object> includeResult = new LinkedHashMap<>();
 
-        try {
+            // 循环过滤对象
+            for (FilterProperty property : properties) {
 
-            Map<String, Object> newData = Casts.convertValue(data, Map.class);
-
-            Map<String, Object> result = new LinkedHashMap<>();
-
-            List<String> keys;
-
-            if (includeOrExclude) {
-                keys = newData
-                        .keySet()
-                        .stream()
-                        .filter(properties::contains)
-                        .collect(Collectors.toList());
-            } else {
-                keys = newData
-                        .keySet()
-                        .stream()
-                        .filter(s -> !properties.contains(s))
-                        .collect(Collectors.toList());
+                // 如果属性里存在子属性递归一次过滤子属性条件
+                if (!property.childrenList.isEmpty()) {
+                    // 获取子属性
+                    Object child = excludeResult.get(property.name);
+                    // 如果为空什么都不做
+                    if (Objects.isNull(child)) {
+                        continue;
+                    }
+                    // 递归过滤子属性条件
+                    Object childResult = getFilterPropertyData(child, property.childrenList, includeOrExclude);
+                    // 得到返回值后覆盖当前 map值
+                    excludeResult.put(property.name, childResult);
+                } else {
+                    // 如果是仅仅引入字段，通过 excludeResult 对象里将值添加到 includeResult，
+                    // 否则从 excludeResult 对象里移除对象
+                    if (includeOrExclude) {
+                        includeResult.put(property.name, excludeResult.get(property.name));
+                    } else {
+                        excludeResult.remove(property.name);
+                    }
+                }
             }
 
-            for (String key : keys) {
-                result.put(key, newData.get(key));
-            }
-
-            return result;
-        } catch (IllegalArgumentException e) {
-            LOGGER.warn("json 处理出现异常", e);
+            // 如果 includeResult 有值 表示仅仅引入数据操作。返回 includeResult 否则 返回 excludeResult
+            return includeResult.isEmpty() ? excludeResult : includeResult;
         }
 
-        return data;
     }
 
-    private List<String> getParameterValues(HttpServletRequest request, String paramName) {
+    /**
+     * 获取要过滤的属性
+     *
+     * @param request http servlet request
+     * @param paramName 参数名称
+     *
+     * @return 过滤属性集合
+     */
+    private List<FilterProperty> getFilterProperty(HttpServletRequest request, String paramName) {
 
         String[] array = request.getParameterValues(paramName);
 
-        List<String> result = new ArrayList<>();
-
-        if (ArrayUtils.isNotEmpty(array)) {
-
-            result = Arrays.asList(array);
-
-            if (1 == array.length) {
-                String value = request.getParameter(paramName);
-                array = StringUtils.split(StringUtils.trimToEmpty(value), SpringMvcUtils.COMMA_STRING);
-                result = Arrays.asList(array);
-            }
+        if (ArrayUtils.isEmpty(array)) {
+            return new ArrayList<>();
         }
 
+        return Arrays.stream(array).flatMap(s -> splitFilterProperty(s).stream()).collect(Collectors.toList());
+    }
+
+    /**
+     * 通过表达式分割过滤属性，表达式格式为"字段名"加逗号","分割，如果对象中存在子对象时，通过自对象名称加 "_[" "]" 符号括住
+     *
+     * <p>
+     *     如: creationTime,id,subObject_[creationTime,id,subObject_[creationTime,id,]]
+     * </p>
+     *
+     * @param value 表达式值
+     *
+     * @return 过滤属性集合
+     */
+    private List<FilterProperty> splitFilterProperty(String value) {
+
+        // 定义过滤 builder
+        StringBuilder filterBuilder = new StringBuilder(value);
+
+        int end;
+
+        List<FilterProperty> result = new LinkedList<>();
+        // 从字符串的左到右去查找有没有 "]" 字符，如果有，优先处理这一类的字符
+        while ((end = filterBuilder.indexOf(FilterProperty.FIELD_CLOSE_SUFFIX)) > 0) {
+            // 获取字符串的左到右的 "]" 字符位置
+            int lastIndex = end + FilterProperty.FIELD_CLOSE_SUFFIX.length();
+
+            // 截取第一段字符
+            String s = filterBuilder.substring(0, lastIndex);
+
+            // 在从上一段字符中从右到左去查找 "_[" 字段服位置
+            int firstIndex = s.lastIndexOf(FilterProperty.FIELD_OPEN_PREFIX);
+
+            // 如果小于 0 表示表达式错误，少了开始符号，直接报错。
+            if(firstIndex < 0) {
+                throw new SystemException("过滤属性语法错误");
+            }
+
+            String bracketString = filterBuilder.substring(firstIndex + FilterProperty.FIELD_OPEN_PREFIX.length(), end);
+
+            String bracketBeforeString = s.substring(0, s.indexOf(bracketString));
+
+            // 获取开始符号前面的字段名称
+            String name = bracketBeforeString.substring(
+                    bracketBeforeString.lastIndexOf(SpringMvcUtils.COMMA_STRING) + 1,
+                    bracketBeforeString.lastIndexOf(FilterProperty.FIELD_OPEN_PREFIX));
+
+            // 创建过滤条件
+            FilterProperty property = new FilterProperty(name);
+
+            // 获取子属性集合
+            String childrenString = filterBuilder.substring(firstIndex + FilterProperty.FIELD_OPEN_PREFIX.length(), end);
+
+            // 递归在分割一次属性得到子属性值
+            List<FilterProperty> properties = splitFilterProperty(childrenString);
+            // 添加子属性集合
+            property.childrenList.addAll(properties);
+            // 添加返回值
+            result.add(property);
+
+            // 将处理过的字符串删除掉，让循环有结束条件
+            filterBuilder.delete(s.lastIndexOf(name), lastIndex + SpringMvcUtils.COMMA_STRING.length());
+        }
+
+        // 分割字符串
+        String[] fields = StringUtils.splitByWholeSeparator(filterBuilder.toString(), SpringMvcUtils.COMMA_STRING);
+
+        List<FilterProperty> item = Arrays
+                .stream(fields)
+                .filter(StringUtils::isNotEmpty) // 过滤空字符串
+                .map(FilterProperty::new)
+                .collect(Collectors.toList());
+
+        result.addAll(item);
+        // 返回过滤属性
         return result;
     }
 
+    /**
+     * 是否支持客户端格式化
+     *
+     * @param client 客户端
+     *
+     * @return true 是，否则 false
+     */
     private boolean isSupportClient(String client) {
         return supportClients.contains(client);
     }
 
+    /**
+     * 设置可支持格式化的客户端信息
+     *
+     * @param supportClients 客户端信息
+     */
     public void setSupportClients(List<String> supportClients) {
         this.supportClients = supportClients;
+    }
+
+    /**
+     * 过滤属性
+     *
+     * @author maurice.chen
+     */
+    private static class FilterProperty {
+
+        // 子属性括号开始符
+        public final static String FIELD_OPEN_PREFIX = "(";
+        // 子属性括号结束符
+        public final static String FIELD_CLOSE_SUFFIX = ")";
+
+        /**
+         * 属性名
+         */
+        public String name;
+
+        /**
+         * 子属性集合
+         */
+        public List<FilterProperty> childrenList = new LinkedList<>();
+
+        public FilterProperty(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name + (childrenList.isEmpty() ? "" : "_" + childrenList);
+        }
     }
 }

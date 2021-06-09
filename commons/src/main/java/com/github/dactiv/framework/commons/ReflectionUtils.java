@@ -1,8 +1,11 @@
 package com.github.dactiv.framework.commons;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,21 +137,6 @@ public class ReflectionUtils {
         method.setAccessible(true);
         return org.springframework.util.ReflectionUtils.invokeMethod(method, o, args.toArray());
     }
-
-    /**
-     * 查找对象中的字段属性说明
-     *
-     * @param o    对象
-     * @param name 字段名称
-     *
-     * @return 字段属性说明
-     */
-    /*private static PropertyDescriptor findPropertyDescriptor(Object o, String name) {
-        return Arrays.stream(BeanUtils.getPropertyDescriptors(o.getClass()))
-                .filter(p -> p.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new SystemException("在 [" + o.getClass() + "] 类中找不到 [" + name + "] 属性"));
-    }*/
 
     /**
      * 获取范型对象类型

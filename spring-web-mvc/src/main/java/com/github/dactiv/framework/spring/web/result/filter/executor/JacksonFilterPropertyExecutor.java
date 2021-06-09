@@ -2,8 +2,10 @@ package com.github.dactiv.framework.spring.web.result.filter.executor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.ServiceException;
 import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
 import com.github.dactiv.framework.spring.web.result.filter.annotation.ExcludeProperties;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -61,67 +63,15 @@ public class JacksonFilterPropertyExecutor implements FilterPropertyExecutor {
 
             if (Objects.nonNull(field)) {
 
-                ExcludeProperties fieldFilter = AnnotationUtils.findAnnotation(field, ExcludeProperties.class);
+                filterFieldOrMethod(id, field, descriptor.getName(), returnValue);
 
-                if (Objects.nonNull(fieldFilter) && fieldFilter.value().equals(id)) {
-
-                    Object value = returnValue.get(descriptor.getName());
-
-                    List<String> filterProperties = Arrays.stream(fieldFilter.properties()).collect(Collectors.toList());
-
-                    if (fieldFilter.filterClassType()) {
-
-                        ExcludeProperties classExcludeProperties = AnnotationUtils.findAnnotation(field.getType(), ExcludeProperties.class);
-
-                        if (Objects.nonNull(classExcludeProperties) && classExcludeProperties.value().equals(id)) {
-                            filterProperties.addAll(Arrays.stream(classExcludeProperties.properties()).collect(Collectors.toList()));
-                        }
-                    }
-
-                    Object valueResult = filter(value, filterProperties);
-
-                    returnValue.put(field.getName(), valueResult);
-                }
-
-            }
-
-            if (Objects.nonNull(field)) {
-                ExcludeProperties.Exclude exclude = AnnotationUtils.findAnnotation(field, ExcludeProperties.Exclude.class);
-
-                if (Objects.nonNull(exclude) && exclude.value().equals(id)) {
-                    returnValue.remove(field.getName());
-                }
             }
 
             Method readMethod = descriptor.getReadMethod();
 
             if (Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-                ExcludeProperties methodFilter = AnnotationUtils.findAnnotation(readMethod, ExcludeProperties.class);
 
-                if (Objects.nonNull(methodFilter)) {
-                    Object value = returnValue.get(descriptor.getName());
-
-                    List<String> filterProperties = Arrays.stream(methodFilter.properties()).collect(Collectors.toList());
-
-                    if (methodFilter.filterClassType()) {
-
-                        ExcludeProperties classExcludeProperties = AnnotationUtils.findAnnotation(readMethod.getReturnType(), ExcludeProperties.class);
-
-                        if (Objects.nonNull(classExcludeProperties) && classExcludeProperties.value().equals(id)) {
-                            filterProperties.addAll(Arrays.stream(classExcludeProperties.properties()).collect(Collectors.toList()));
-                        }
-                    }
-
-                    Object valueResult = filter(value, filterProperties);
-
-                    returnValue.put(descriptor.getName(), valueResult);
-                }
-
-                ExcludeProperties.Exclude exclude = AnnotationUtils.findAnnotation(readMethod, ExcludeProperties.Exclude.class);
-
-                if (Objects.nonNull(exclude) && exclude.value().equals(id)) {
-                    returnValue.remove(descriptor.getName());
-                }
+                filterFieldOrMethod(id, readMethod, descriptor.getName(), returnValue);
             }
 
         }
@@ -131,6 +81,45 @@ public class JacksonFilterPropertyExecutor implements FilterPropertyExecutor {
         }
 
         return returnValue;
+    }
+
+    private void filterFieldOrMethod(String id, Object target, String name, Map<String, Object> returnValue) {
+
+        ExcludeProperties excludeProperties;
+
+        ExcludeProperties.Exclude exclude;
+
+        if (Field.class.isAssignableFrom(target.getClass())) {
+            Field value = Casts.cast(target);
+            excludeProperties = AnnotationUtils.findAnnotation(value, ExcludeProperties.class);
+            exclude = AnnotationUtils.findAnnotation(value, ExcludeProperties.Exclude.class);
+        } else if (Method.class.isAssignableFrom(target.getClass())) {
+            Method value = Casts.cast(target);
+            excludeProperties = AnnotationUtils.findAnnotation(value, ExcludeProperties.class);
+            exclude = AnnotationUtils.findAnnotation(value, ExcludeProperties.Exclude.class);
+        } else {
+            throw new ServiceException("不支持 [" + target.getClass().getName() + "] 的过滤");
+        }
+
+        List<String> filterProperties = new LinkedList<>();
+
+        if (Objects.nonNull(excludeProperties) && excludeProperties.value().equals(id)) {
+
+            filterProperties.addAll(Arrays.stream(excludeProperties.properties()).collect(Collectors.toList()));
+        }
+
+        if (Objects.nonNull(exclude) && exclude.value().equals(id)) {
+            returnValue.remove(name);
+        }
+
+        if (CollectionUtils.isNotEmpty(filterProperties)) {
+            Object value = returnValue.get(name);
+
+            if (Objects.nonNull(value)) {
+                Object valueResult = filter(value, filterProperties);
+                returnValue.put(name, valueResult);
+            }
+        }
     }
 
     private Object filter(Object value, List<String> properties) {

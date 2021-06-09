@@ -42,7 +42,6 @@ public class TestJacksonFilterPropertyExecutor {
 
         testUser.setNoFilterPropertiesUser(testUser2);
         testUser.setFilterPropertiesUser(testUser2);
-        testUser.setClassTypeFilterPropertiesUser(testUser2);
 
         TestUser testUser3 = new TestUser();
 
@@ -73,18 +72,14 @@ public class TestJacksonFilterPropertyExecutor {
 
         Map<String, Object> noFilterPropertiesUser = Casts.convertValue(map.get("noFilterPropertiesUser"), Map.class);
 
-        Assert.assertEquals(noFilterPropertiesUser.size(),10);
+        Assert.assertEquals(noFilterPropertiesUser.size(),9);
 
         Map<String, Object> filterPropertiesUser = Casts.convertValue(map.get("filterPropertiesUser"), Map.class);
 
-        Assert.assertEquals(filterPropertiesUser.size(),7);
-
-        Map<String, Object> classTypeFilterPropertiesUser = Casts.convertValue(map.get("classTypeFilterPropertiesUser"), Map.class);
-
-        Assert.assertEquals(classTypeFilterPropertiesUser.size(),6);
+        Assert.assertEquals(filterPropertiesUser.size(),6);
 
         List<Map<String, Object>> userList = Casts.convertValue(map.get("userList"), List.class);
 
-        userList.forEach(m -> Assert.assertEquals(m.size(),7));
+        userList.forEach(m -> Assert.assertEquals(m.size(),6));
     }
 }

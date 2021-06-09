@@ -72,6 +72,10 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      */
     private FilterPropertyExecutor filterPropertyExecutor = new JacksonFilterPropertyExecutor();
 
+    public RestResponseBodyAdvice(FilterPropertyExecutor filterPropertyExecutor) {
+        this.filterPropertyExecutor = filterPropertyExecutor;
+    }
+
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);

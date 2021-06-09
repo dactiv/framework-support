@@ -28,10 +28,6 @@ public class TestUser {
     @ExcludeProperties(value = "unity", properties = {"id", "creationTime","age"})
     private TestUser filterPropertiesUser;
 
-    @ExcludeProperties(value = "unity", properties = {"id", "creationTime","age"}, filterClassType = true)
-    private TestUser classTypeFilterPropertiesUser;
-
-
     @ExcludeProperties(value = "unity", properties = {"id", "creationTime","sex"})
     private List<TestUser> userList = new LinkedList<>();
 
@@ -98,14 +94,6 @@ public class TestUser {
 
     public void setFilterPropertiesUser(TestUser filterPropertiesUser) {
         this.filterPropertiesUser = filterPropertiesUser;
-    }
-
-    public TestUser getClassTypeFilterPropertiesUser() {
-        return classTypeFilterPropertiesUser;
-    }
-
-    public void setClassTypeFilterPropertiesUser(TestUser classTypeFilterPropertiesUser) {
-        this.classTypeFilterPropertiesUser = classTypeFilterPropertiesUser;
     }
 
     public List<TestUser> getUserList() {

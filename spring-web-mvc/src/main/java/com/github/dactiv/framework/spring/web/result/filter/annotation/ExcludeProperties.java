@@ -28,13 +28,6 @@ public @interface ExcludeProperties {
     String[] properties();
 
     /**
-     * 是否过滤类型的注解，用于在字段或方法返回值里，如果返回值或字段类型的累也有 {@link ExcludeProperties} 注解是否一起过滤
-     *
-     * @return true 是，否则 false
-     */
-    boolean filterClassType() default false;
-
-    /**
      * 忽略此注解下的字段
      *
      * @author maurice.chen

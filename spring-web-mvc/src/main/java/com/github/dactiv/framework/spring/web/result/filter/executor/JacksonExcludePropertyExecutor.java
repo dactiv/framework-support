@@ -3,7 +3,7 @@ package com.github.dactiv.framework.spring.web.result.filter.executor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
-import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.ExcludePropertyExecutor;
 import com.github.dactiv.framework.spring.web.result.filter.annotation.ExcludeProperties;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  *
  */
-public class JacksonFilterPropertyExecutor implements FilterPropertyExecutor {
+public class JacksonExcludePropertyExecutor implements ExcludePropertyExecutor {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public JacksonFilterPropertyExecutor() {
+    public JacksonExcludePropertyExecutor() {
     }
 
     @Override
@@ -139,4 +139,7 @@ public class JacksonFilterPropertyExecutor implements FilterPropertyExecutor {
         return o;
     }
 
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 }

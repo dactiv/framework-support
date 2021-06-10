@@ -4,8 +4,8 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.ExcludePropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonExcludePropertyExecutor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,31 +36,40 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestResponseBodyAdvice.class);
 
-    private static final String DEFAULT_CLIENT_NAME = "X-REQUEST-CLIENT";
+    /**
+     * 默认的请求客户端头名称
+     */
+    private static final String DEFAULT_CLIENT_HEADER_NAME = "X-REQUEST-CLIENT";
 
+    /**
+     * 不需要格式化的属性名称
+     */
     public static final String DEFAULT_NOT_FORMAT_ATTR_NAME = "REST_RESULT_NOT_FORMAT";
 
+    /**
+     * 默认支持的客户端类型集合
+     */
     private static final List<String> DEFAULT_SUPPORT_CLIENT = Collections.singletonList("SPRING_GATEWAY");
 
     /**
      * 默认过过滤属性的 id 头名称
      */
-    public static final String DEFAULT_FILTER_PROPERTY_ID_HEADER_NAME = "X-FILTER-PROPERTY-ID";
+    public static final String DEFAULT_EXCLUDE_PROPERTY_ID_HEADER_NAME = "X-EXCLUDE-PROPERTY-ID";
 
     /**
      * 默认过滤属性的 id 参数名称
      */
-    public static final String DEFAULT_FILTER_PROPERTY_ID_PARAM_NAME = "filterPropertyId";
+    public static final String DEFAULT_EXCLUDE_PROPERTY_ID_PARAM_NAME = "excludePropertyId";
 
     /**
      * 过滤属性的 id 头名称
      */
-    private String filterPropertyIdHeaderName = DEFAULT_FILTER_PROPERTY_ID_HEADER_NAME;
+    private String excludePropertyIdHeaderName = DEFAULT_EXCLUDE_PROPERTY_ID_HEADER_NAME;
 
     /**
      * 过滤属性的 id 参数名称
      */
-    private String filterPropertyIdParamName = DEFAULT_FILTER_PROPERTY_ID_PARAM_NAME;
+    private String excludePropertyIdParamName = DEFAULT_EXCLUDE_PROPERTY_ID_PARAM_NAME;
 
     /**
      * 支持格式化的客户端集合
@@ -70,10 +79,10 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 过滤属性执行器
      */
-    private FilterPropertyExecutor filterPropertyExecutor = new JacksonFilterPropertyExecutor();
+    private ExcludePropertyExecutor excludePropertyExecutor;
 
-    public RestResponseBodyAdvice(FilterPropertyExecutor filterPropertyExecutor) {
-        this.filterPropertyExecutor = filterPropertyExecutor;
+    public RestResponseBodyAdvice(ExcludePropertyExecutor excludePropertyExecutor) {
+        this.excludePropertyExecutor = excludePropertyExecutor;
     }
 
     @Override
@@ -90,7 +99,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
 
-        List<String> clients = request.getHeaders().get(DEFAULT_CLIENT_NAME);
+        List<String> clients = request.getHeaders().get(DEFAULT_CLIENT_HEADER_NAME);
 
         // 获取是否执行控制器的某个方法遇到错误走以下流程，该值在 RestResultErrorAttributes 中设置，
         // 仅仅是为了不跟 RestResultErrorAttributes 冲突而已
@@ -142,14 +151,20 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             // 如果 data 不为空。直接过滤一次属性内容
             if (Objects.nonNull(data)) {
 
-                String id = httpRequest.getHeaders().getFirst(filterPropertyIdHeaderName);
+                String id = httpRequest.getHeaders().getFirst(excludePropertyIdHeaderName);
 
                 if (StringUtils.isEmpty(id)) {
-                    id = httpRequest.getServletRequest().getParameter(filterPropertyIdParamName);
+                    id = httpRequest.getServletRequest().getParameter(excludePropertyIdParamName);
                 }
 
                 if (StringUtils.isNotEmpty(id)) {
-                    data = filterPropertyExecutor.filter(id, data);
+
+                    data = excludePropertyExecutor.filter(id, data);
+
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("忽略属性执行器执行完成后数据为:{}", data);
+                    }
+
                 }
 
                 result.setData(data);
@@ -195,27 +210,27 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 设置过滤属性的 id 头名称
      *
-     * @param filterPropertyIdHeaderName 名称
+     * @param excludePropertyIdHeaderName 名称
      */
-    public void setFilterPropertyIdHeaderName(String filterPropertyIdHeaderName) {
-        this.filterPropertyIdHeaderName = filterPropertyIdHeaderName;
+    public void setExcludePropertyIdHeaderName(String excludePropertyIdHeaderName) {
+        this.excludePropertyIdHeaderName = excludePropertyIdHeaderName;
     }
 
     /**
      * 设置过滤属性的 id 参数名称
      *
-     * @param filterPropertyIdParamName 名称
+     * @param excludePropertyIdParamName 名称
      */
-    public void setFilterPropertyIdParamName(String filterPropertyIdParamName) {
-        this.filterPropertyIdParamName = filterPropertyIdParamName;
+    public void setExcludePropertyIdParamName(String excludePropertyIdParamName) {
+        this.excludePropertyIdParamName = excludePropertyIdParamName;
     }
 
     /**
      * 设置过滤属性执行器
      *
-     * @param filterPropertyExecutor 过滤属性执行器
+     * @param excludePropertyExecutor 过滤属性执行器
      */
-    public void setFilterPropertyExecutor(FilterPropertyExecutor filterPropertyExecutor) {
-        this.filterPropertyExecutor = filterPropertyExecutor;
+    public void setFilterPropertyExecutor(ExcludePropertyExecutor excludePropertyExecutor) {
+        this.excludePropertyExecutor = excludePropertyExecutor;
     }
 }

@@ -1,13 +1,11 @@
 package com.github.dactiv.framework.spring.web.result.filter;
 
-import java.util.Map;
-
 /**
  * 过滤属性执行器
  *
  * @author maurice.chen
  */
-public interface FilterPropertyExecutor {
+public interface ExcludePropertyExecutor {
 
     /**
      * 过滤属性

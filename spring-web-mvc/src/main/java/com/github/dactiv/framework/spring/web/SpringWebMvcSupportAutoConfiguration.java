@@ -9,8 +9,8 @@ import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpReque
 import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
-import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.ExcludePropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonExcludePropertyExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -82,15 +82,15 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FilterPropertyExecutor.class)
-    public JacksonFilterPropertyExecutor filterPropertyExecutor() {
-        return new JacksonFilterPropertyExecutor();
+    @ConditionalOnMissingBean(ExcludePropertyExecutor.class)
+    public JacksonExcludePropertyExecutor filterPropertyExecutor() {
+        return new JacksonExcludePropertyExecutor();
     }
 
     @Bean
     @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResponseBodyAdvice restResponseBodyAdvice(JacksonFilterPropertyExecutor filterPropertyExecutor) {
+    public RestResponseBodyAdvice restResponseBodyAdvice(JacksonExcludePropertyExecutor filterPropertyExecutor) {
         return new RestResponseBodyAdvice(filterPropertyExecutor);
     }
 

@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.spring.web.test.result.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.dactiv.framework.spring.web.result.filter.annotation.ExcludeProperties;
 
 import java.util.LinkedList;
@@ -16,7 +18,7 @@ public class TestUser {
 
     private String nickname;
 
-    @ExcludeProperties.Exclude("unity")
+    @ExcludeProperties("unity")
     private String username;
 
     private String sex;
@@ -31,7 +33,7 @@ public class TestUser {
     @ExcludeProperties(value = "unity", properties = {"id", "creationTime","sex"})
     private List<TestUser> userList = new LinkedList<>();
 
-    @ExcludeProperties.Exclude("unity")
+    @ExcludeProperties("unity")
     public Integer getId() {
         return id;
     }

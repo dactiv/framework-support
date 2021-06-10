@@ -19,6 +19,32 @@ import java.util.List;
 public class ReflectionUtils {
 
     /**
+     * 查找对象中的字段
+     *
+     * @param o 对象
+     * @param name 字段名称
+     *
+     * @return 字段信息
+     */
+    public static Field findFiled(Object o, String name) {
+        return org.springframework.util.ReflectionUtils.findField(o.getClass(), name);
+    }
+
+    /**
+     * 获取字段值
+     *
+     * @param field 字段
+     * @param o 对象
+     *
+     * @return 字段值
+     */
+    public static Object getFieldValue(Field field, Object o) {
+        field.setAccessible(true);
+
+        return org.springframework.util.ReflectionUtils.getField(field, o);
+    }
+
+    /**
      * 设置对象的字段值
      *
      * @param o     对象
@@ -133,7 +159,7 @@ public class ReflectionUtils {
      *
      * @return 返回值
      */
-    private static Object invokeMethod(Object o, Method method, List<Object> args) {
+    public static Object invokeMethod(Object o, Method method, List<Object> args) {
         method.setAccessible(true);
         return org.springframework.util.ReflectionUtils.invokeMethod(method, o, args.toArray());
     }

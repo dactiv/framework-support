@@ -25,23 +25,5 @@ public @interface ExcludeProperties {
      *
      * @return 名称数组
      */
-    String[] properties();
-
-    /**
-     * 忽略此注解下的字段
-     *
-     * @author maurice.chen
-     */
-    @Documented
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD})
-    @interface Exclude {
-
-        /**
-         * 匹配值，用于针对不同领域的业务响应不同结果的配置使用
-         *
-         * @return 值
-         */
-        String value();
-    }
+    String[] properties() default {};
 }

@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.web.test.result;
 
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.SimpleFilterPropertyExecutor;
 import com.github.dactiv.framework.spring.web.test.result.entity.TestUser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(BlockJUnit4ClassRunner.class)
-public class TestJacksonFilterPropertyExecutor {
+public class TestSimpleFilterPropertyExecutor {
 
-    private final JacksonFilterPropertyExecutor filterPropertyExecutor = new JacksonFilterPropertyExecutor();
+    private final SimpleFilterPropertyExecutor filterPropertyExecutor = new SimpleFilterPropertyExecutor();
 
     @SuppressWarnings("unchecked")
     @Test
@@ -76,10 +76,10 @@ public class TestJacksonFilterPropertyExecutor {
 
         Map<String, Object> filterPropertiesUser = Casts.convertValue(map.get("filterPropertiesUser"), Map.class);
 
-        Assert.assertEquals(filterPropertiesUser.size(),6);
+        Assert.assertEquals(filterPropertiesUser.size(),4);
 
         List<Map<String, Object>> userList = Casts.convertValue(map.get("userList"), List.class);
 
-        userList.forEach(m -> Assert.assertEquals(m.size(),6));
+        userList.forEach(m -> Assert.assertEquals(m.size(),4));
     }
 }

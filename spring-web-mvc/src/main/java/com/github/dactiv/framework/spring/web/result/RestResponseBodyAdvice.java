@@ -5,7 +5,7 @@ import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.SimpleFilterPropertyExecutor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +70,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 过滤属性执行器
      */
-    private FilterPropertyExecutor filterPropertyExecutor = new JacksonFilterPropertyExecutor();
+    private FilterPropertyExecutor filterPropertyExecutor = new SimpleFilterPropertyExecutor();
 
     public RestResponseBodyAdvice(FilterPropertyExecutor filterPropertyExecutor) {
         this.filterPropertyExecutor = filterPropertyExecutor;

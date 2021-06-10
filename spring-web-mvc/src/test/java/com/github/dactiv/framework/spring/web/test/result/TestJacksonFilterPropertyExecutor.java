@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.web.test.result;
 
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.spring.web.result.filter.executor.SimpleFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
 import com.github.dactiv.framework.spring.web.test.result.entity.TestUser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(BlockJUnit4ClassRunner.class)
-public class TestSimpleFilterPropertyExecutor {
+public class TestJacksonFilterPropertyExecutor {
 
-    private final SimpleFilterPropertyExecutor filterPropertyExecutor = new SimpleFilterPropertyExecutor();
+    private final JacksonFilterPropertyExecutor filterPropertyExecutor = new JacksonFilterPropertyExecutor();
 
     @SuppressWarnings("unchecked")
     @Test

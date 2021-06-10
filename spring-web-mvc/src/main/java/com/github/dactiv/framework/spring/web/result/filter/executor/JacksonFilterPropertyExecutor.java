@@ -23,16 +23,24 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  *
  */
-public class SimpleFilterPropertyExecutor implements FilterPropertyExecutor {
+public class JacksonFilterPropertyExecutor implements FilterPropertyExecutor {
 
-    public SimpleFilterPropertyExecutor() {
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    public JacksonFilterPropertyExecutor() {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object filter(String id, Object data) {
 
         if (Objects.isNull(data)) {
             return null;
+        }
+
+        if (Collection.class.isAssignableFrom(data.getClass())) {
+            Collection<Object> collection = Casts.cast(data);
+            return collection.stream().map(o -> filter(id, o));
         }
 
         List<String> properties = new LinkedList<>();
@@ -49,11 +57,11 @@ public class SimpleFilterPropertyExecutor implements FilterPropertyExecutor {
             return data;
         }
 
-        Map<String, Object> returnValue = new LinkedHashMap<>();
+        Map<String, Object> returnValue = objectMapper.convertValue(data, Map.class);
 
         for (PropertyDescriptor descriptor : propertyDescriptors) {
 
-            if (descriptor.getPropertyType().equals(Class.class) || properties.contains(descriptor.getName())) {
+            if(!returnValue.containsKey(descriptor.getName())) {
                 continue;
             }
 
@@ -73,9 +81,10 @@ public class SimpleFilterPropertyExecutor implements FilterPropertyExecutor {
 
                     Object value = ReflectionUtils.getFieldValue(field, data);
                     returnValue.put(descriptor.getName(), getPropertyValue(id, value, fieldProperties));
-                }
 
-                continue;
+                } else {
+                    properties.add(descriptor.getName());
+                }
 
             } else {
 
@@ -93,16 +102,17 @@ public class SimpleFilterPropertyExecutor implements FilterPropertyExecutor {
                             Object value = ReflectionUtils.invokeMethod(data, readMethod, new LinkedList<>());
                             returnValue.put(descriptor.getName(), getPropertyValue(id, value, fieldProperties));
 
+                        } else {
+                            properties.add(descriptor.getName());
                         }
 
-                        continue;
                     }
-
                 }
             }
 
-            returnValue.put(descriptor.getName(), ReflectionUtils.getFieldValue(field, data));
         }
+
+        properties.forEach(returnValue::remove);
 
         return returnValue;
     }

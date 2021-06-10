@@ -10,7 +10,7 @@ import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterc
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.filter.FilterPropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.SimpleFilterPropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonFilterPropertyExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -83,14 +83,14 @@ public class SpringWebMvcSupportAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(FilterPropertyExecutor.class)
-    public SimpleFilterPropertyExecutor filterPropertyExecutor() {
-        return new SimpleFilterPropertyExecutor();
+    public JacksonFilterPropertyExecutor filterPropertyExecutor() {
+        return new JacksonFilterPropertyExecutor();
     }
 
     @Bean
     @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResponseBodyAdvice restResponseBodyAdvice(SimpleFilterPropertyExecutor filterPropertyExecutor) {
+    public RestResponseBodyAdvice restResponseBodyAdvice(JacksonFilterPropertyExecutor filterPropertyExecutor) {
         return new RestResponseBodyAdvice(filterPropertyExecutor);
     }
 

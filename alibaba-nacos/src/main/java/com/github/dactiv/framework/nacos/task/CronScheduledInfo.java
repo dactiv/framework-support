@@ -14,6 +14,16 @@ import java.util.TimeZone;
 public class CronScheduledInfo {
 
     /**
+     * 默认表达式的字段名称
+     */
+    public static final String DEFAULT_EXPRESSION_FIELD_NAME = "expression";
+
+    /**
+     * 默认表达式的时区名称
+     */
+    public static final String DEFAULT_TIME_ZONE_FIELD_NAME = "timeZone";
+
+    /**
      * 调度名称
      */
     private String name;

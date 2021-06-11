@@ -107,19 +107,9 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     // 匹配等于条件的值
                     .filter(m -> properties.containsKey(m.getMatch().toString()))
-                    // 匹配不等于注视掉的值
-                    .filter(m -> !ScheduledTaskRegistrar.CRON_DISABLED.equals(properties.get(m.getMatch().toString()).toString()))
                     .collect(Collectors.toList());
 
-            boolean update = false;
-
-            for (MatchEvaluation m : result) {
-                if (m.evaluation(properties.get(m.getMatch().toString()), target)) {
-                    update = true;
-                }
-            }
-
-            if (update) {
+            if (result.stream().anyMatch(m -> m.evaluation(properties.get(m.getMatch().toString()), target))) {
                 changeScheduledInfos.add(target);
             }
 
@@ -136,10 +126,14 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             );
             // 取消当前调度
             c.getScheduledTask().cancel();
-            // 开启新的调度
-            ScheduledTask scheduledTask = scheduledTaskRegistrar.scheduleCronTask(c.createCronTask());
-            // 记录当前调度内容，用于下次更新时可以直接通过该属性取消
-            c.setScheduledTask(scheduledTask);
+            // 如果不等于注视字符，重新创建调度并加入到调度任务中，否则直接取消。
+            if (!ScheduledTaskRegistrar.CRON_DISABLED.equals(c.getExpression())) {
+                // 开启新的调度
+                ScheduledTask scheduledTask = scheduledTaskRegistrar.scheduleCronTask(c.createCronTask());
+                // 记录当前调度内容，用于下次更新时可以直接通过该属性取消
+                c.setScheduledTask(scheduledTask);
+            }
+
         });
     }
 
@@ -210,7 +204,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
         annotatedMethods.forEach((k, v) -> {
 
             // 创建 cron 调度信息
-            CronScheduledInfo cronScheduledInfo = createCronScheduledInfo(v, k, bean);
+            CronScheduledInfo cronScheduledInfo = createCronScheduledInfo(k, v, bean);
 
             // 如果该类型为 NacosCronScheduledInfo 时，加入到 CACHE 中
             if (NacosCronScheduledInfo.class.isAssignableFrom(cronScheduledInfo.getClass())) {
@@ -222,7 +216,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 // 定义表达式匹配定值类
                 MatchEvaluation cronEvaluation = new MatchEvaluation(
                         info.getCronPropertyName(),
-                        "expression",
+                        CronScheduledInfo.DEFAULT_EXPRESSION_FIELD_NAME,
                         info.getExpression()
                 );
 
@@ -233,7 +227,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
                     MatchEvaluation zoneEvaluation = new MatchEvaluation(
                             info.getTimeZonePropertyName(),
-                            "timeZone",
+                            CronScheduledInfo.DEFAULT_TIME_ZONE_FIELD_NAME,
                             info.getTimeZone(),
                             (value, target) -> getTimeZone(v.toString())
                     );
@@ -260,13 +254,13 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     /**
      * 通过 NacosCronScheduled 注解构造 cron 调度信息
      *
-     * @param scheduled NacosCronScheduled 注解
      * @param method    使用 NacosCronScheduled 注解的方法类
+     * @param scheduled NacosCronScheduled 注解
      * @param bean      使用 NacosCronScheduled 注解方法的类对象
      *
      * @return cron 调度信息
      */
-    protected CronScheduledInfo createCronScheduledInfo(NacosCronScheduled scheduled, Method method, Object bean) {
+    protected CronScheduledInfo createCronScheduledInfo(Method method, NacosCronScheduled scheduled, Object bean) {
         // 获取注解的名称，该名称用于展示日志而使用。
         String name = scheduled.name();
 

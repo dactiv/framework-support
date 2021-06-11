@@ -1,85 +1,55 @@
 package com.github.dactiv.framework.spring.web.test.result;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonExcludePropertyExecutor;
-import com.github.dactiv.framework.spring.web.test.result.entity.TestUser;
+import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
+import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
+import com.github.dactiv.framework.spring.web.test.result.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class TestJacksonExcludePropertyExecutor {
 
-    private final JacksonExcludePropertyExecutor filterPropertyExecutor = new JacksonExcludePropertyExecutor();
-
     @SuppressWarnings("unchecked")
     @Test
     public void testFilter() {
 
-        TestUser testUser = new TestUser();
+        User user = new User();
 
-        testUser.setId(1);
-        testUser.setAge(31);
-        testUser.setNickname("maurice.chen");
-        testUser.setUsername("1877892****");
-        testUser.setSex("1");
-        testUser.setCreationTime((int)new Date().getTime());
+        user.generateRole(5);
 
-        TestUser testUser2 = new TestUser();
+        List<String> basePackages = Collections.singletonList("com.github.dactiv.framework.spring.web.test.result.entity");
 
-        testUser2.setId(2);
-        testUser2.setAge(31);
-        testUser2.setNickname("maurice.chen");
-        testUser2.setUsername("1877892****");
-        testUser2.setSex("1");
-        testUser2.setCreationTime((int)new Date().getTime());
+        FilterResultAnnotationBuilder builder = new FilterResultAnnotationBuilder(basePackages);
 
-        testUser.setNoFilterPropertiesUser(testUser2);
-        testUser.setFilterPropertiesUser(testUser2);
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        TestUser testUser3 = new TestUser();
+        objectMapper.setFilterProvider(builder.getFilterProvider(objectMapper.getSerializationConfig()));
 
-        testUser3.setId(2);
-        testUser3.setAge(31);
-        testUser3.setNickname("maurice.chen");
-        testUser3.setUsername("1877892****");
-        testUser3.setSex("1");
-        testUser3.setCreationTime((int)new Date().getTime());
+        objectMapper.setAnnotationIntrospector(builder);
 
-        TestUser testUser4 = new TestUser();
+        Casts.setObjectMapper(objectMapper);
 
-        testUser4.setId(2);
-        testUser4.setAge(31);
-        testUser4.setNickname("maurice.chen");
-        testUser4.setUsername("1877892****");
-        testUser4.setSex("1");
-        testUser4.setCreationTime((int)new Date().getTime());
+        FilterResultHolder.set("unity");
 
-        testUser.getUserList().add(testUser3);
-        testUser.getUserList().add(testUser4);
+        Map<String, Object> userMap = Casts.convertValue(user, Map.class);
 
-        Object result = filterPropertyExecutor.filter("unity", testUser);
+        Assert.assertEquals(userMap.size(), 3);
 
-        Map<String, Object> map = Casts.convertValue(result, Map.class);
+        Map<String, Object> userDetailMap = Casts.cast(userMap.get("userDetail"));
 
-        Arrays.stream(TestUser.DEFAULT_FILTER_PROPERTIES).forEach(s -> Assert.assertFalse(map.containsKey(s)));
+        Assert.assertEquals(userDetailMap.size(), 4);
 
-        Map<String, Object> noFilterPropertiesUser = Casts.convertValue(map.get("noFilterPropertiesUser"), Map.class);
+        List<Map<String, Object>> rolesList = Casts.cast(userMap.get("roles"));
 
-        Assert.assertEquals(noFilterPropertiesUser.size(),9);
+        rolesList.forEach(r -> Assert.assertEquals(r.size(), 4));
 
-        Map<String, Object> filterPropertiesUser = Casts.convertValue(map.get("filterPropertiesUser"), Map.class);
-
-        Assert.assertEquals(filterPropertiesUser.size(),4);
-
-        List<Map<String, Object>> userList = Casts.convertValue(map.get("userList"), List.class);
-
-        userList.forEach(m -> Assert.assertEquals(m.size(),4));
     }
 }

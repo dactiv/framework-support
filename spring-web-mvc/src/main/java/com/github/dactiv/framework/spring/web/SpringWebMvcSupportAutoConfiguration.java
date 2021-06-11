@@ -9,8 +9,7 @@ import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpReque
 import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
-import com.github.dactiv.framework.spring.web.result.filter.ExcludePropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonExcludePropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.FilterResultHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -19,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -37,6 +37,7 @@ import java.util.List;
  */
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
+@EnableConfigurationProperties(SpringWebSupportProperties.class)
 @ConditionalOnProperty(prefix = "spring.web.mvc.support", value = "enabled", matchIfMissing = true)
 public class SpringWebMvcSupportAutoConfiguration {
 
@@ -44,8 +45,12 @@ public class SpringWebMvcSupportAutoConfiguration {
     private List<InfoContributor> infoContributors;
 
     @Configuration
+    @EnableConfigurationProperties(SpringWebSupportProperties.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
+
+        @Autowired
+        private SpringWebSupportProperties properties;
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -56,6 +61,7 @@ public class SpringWebMvcSupportAutoConfiguration {
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(new DeviceResolverHandlerInterceptor());
+            registry.addInterceptor(new FilterResultHandlerInterceptor(properties));
         }
     }
 
@@ -82,16 +88,10 @@ public class SpringWebMvcSupportAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ExcludePropertyExecutor.class)
-    public JacksonExcludePropertyExecutor filterPropertyExecutor() {
-        return new JacksonExcludePropertyExecutor();
-    }
-
-    @Bean
     @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResponseBodyAdvice restResponseBodyAdvice(JacksonExcludePropertyExecutor filterPropertyExecutor) {
-        return new RestResponseBodyAdvice(filterPropertyExecutor);
+    public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebSupportProperties properties) {
+        return new RestResponseBodyAdvice(properties);
     }
 
     @Bean

@@ -3,9 +3,9 @@ package com.github.dactiv.framework.spring.web.result;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
+import com.github.dactiv.framework.spring.web.SpringWebSupportProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import com.github.dactiv.framework.spring.web.result.filter.ExcludePropertyExecutor;
-import com.github.dactiv.framework.spring.web.result.filter.executor.JacksonExcludePropertyExecutor;
+import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * rest 响应同一格式实现类
@@ -49,40 +52,12 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 默认支持的客户端类型集合
      */
-    private static final List<String> DEFAULT_SUPPORT_CLIENT = Collections.singletonList("SPRING_GATEWAY");
+    public static final List<String> DEFAULT_SUPPORT_CLIENT = Collections.singletonList("SPRING_GATEWAY");
 
-    /**
-     * 默认过过滤属性的 id 头名称
-     */
-    public static final String DEFAULT_EXCLUDE_PROPERTY_ID_HEADER_NAME = "X-EXCLUDE-PROPERTY-ID";
+    private final SpringWebSupportProperties properties;
 
-    /**
-     * 默认过滤属性的 id 参数名称
-     */
-    public static final String DEFAULT_EXCLUDE_PROPERTY_ID_PARAM_NAME = "excludePropertyId";
-
-    /**
-     * 过滤属性的 id 头名称
-     */
-    private String excludePropertyIdHeaderName = DEFAULT_EXCLUDE_PROPERTY_ID_HEADER_NAME;
-
-    /**
-     * 过滤属性的 id 参数名称
-     */
-    private String excludePropertyIdParamName = DEFAULT_EXCLUDE_PROPERTY_ID_PARAM_NAME;
-
-    /**
-     * 支持格式化的客户端集合
-     */
-    private final List<String> supportClients = DEFAULT_SUPPORT_CLIENT;
-
-    /**
-     * 过滤属性执行器
-     */
-    private ExcludePropertyExecutor excludePropertyExecutor;
-
-    public RestResponseBodyAdvice(ExcludePropertyExecutor excludePropertyExecutor) {
-        this.excludePropertyExecutor = excludePropertyExecutor;
+    public RestResponseBodyAdvice(SpringWebSupportProperties properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -123,7 +98,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         boolean execute = (notFormat == null || !notFormat) && (errorExecute == null || !errorExecute);
 
         // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
-        boolean support = clients != null && clients.stream().anyMatch(this::isSupportClient);
+        boolean support = clients != null && clients.stream().anyMatch(c -> properties.isSupportClient(c));
 
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 
@@ -145,29 +120,6 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
                 result = Casts.cast(body);
 
-                data = result.getData();
-            }
-
-            // 如果 data 不为空。直接过滤一次属性内容
-            if (Objects.nonNull(data)) {
-
-                String id = httpRequest.getHeaders().getFirst(excludePropertyIdHeaderName);
-
-                if (StringUtils.isEmpty(id)) {
-                    id = httpRequest.getServletRequest().getParameter(excludePropertyIdParamName);
-                }
-
-                if (StringUtils.isNotEmpty(id)) {
-
-                    data = excludePropertyExecutor.filter(id, data);
-
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("忽略属性执行器执行完成后数据为:{}", data);
-                    }
-
-                }
-
-                result.setData(data);
             }
 
             // 如果没设置执行代码。根据状态值来设置执行代码
@@ -187,50 +139,5 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     }
 
-    /**
-     * 是否支持客户端格式化
-     *
-     * @param client 客户端
-     *
-     * @return true 是，否则 false
-     */
-    private boolean isSupportClient(String client) {
-        return supportClients.contains(client);
-    }
 
-    /**
-     * 设置可支持格式化的客户端信息
-     *
-     * @param supportClients 客户端信息
-     */
-    public void setSupportClients(List<String> supportClients) {
-        this.supportClients.addAll(supportClients);
-    }
-
-    /**
-     * 设置过滤属性的 id 头名称
-     *
-     * @param excludePropertyIdHeaderName 名称
-     */
-    public void setExcludePropertyIdHeaderName(String excludePropertyIdHeaderName) {
-        this.excludePropertyIdHeaderName = excludePropertyIdHeaderName;
-    }
-
-    /**
-     * 设置过滤属性的 id 参数名称
-     *
-     * @param excludePropertyIdParamName 名称
-     */
-    public void setExcludePropertyIdParamName(String excludePropertyIdParamName) {
-        this.excludePropertyIdParamName = excludePropertyIdParamName;
-    }
-
-    /**
-     * 设置过滤属性执行器
-     *
-     * @param excludePropertyExecutor 过滤属性执行器
-     */
-    public void setFilterPropertyExecutor(ExcludePropertyExecutor excludePropertyExecutor) {
-        this.excludePropertyExecutor = excludePropertyExecutor;
-    }
 }

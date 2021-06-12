@@ -4,6 +4,7 @@ import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.env.PropertySource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -87,18 +89,25 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     /**
      * 当 nacos 配置发生变化时，进入此方法
      *
-     * @param configInfo 更新的配置聂荣
+     * @param dataId 数据 id
+     * @param configInfo 更新的配置内容
      */
     protected void configReceive(String dataId, String configInfo) throws IOException {
 
         // 获取后缀名
-        String fileExtension = StringUtils.substringAfterLast(dataId, PropertiesBeanDefinitionReader.SEPARATOR);
+        String fileExtension = StringUtils.substringAfterLast(dataId, Casts.DEFAULT_POINT_SYMBOL);
 
         // 通过 configInfo 创建配置信息
-        Map<String, Object> properties = NacosDataParserHandler.getInstance().parseNacosData(configInfo, fileExtension);
+        List<PropertySource<?>> properties = NacosDataParserHandler.getInstance().parseNacosData(dataId, configInfo, fileExtension);
 
         // 创建临时记录改变了调度内容的集合对象
         List<NacosCronScheduledInfo> changeScheduledInfos = new LinkedList<>();
+
+        PropertySource<?> propertySource = properties
+                .stream()
+                .filter(p -> p.getName().equals(dataId))
+                .findFirst()
+                .orElseThrow();
 
         // 通过缓存内容去匹配有哪些调度修改了值，并添加到 changeScheduledInfos 中
         CACHE.forEach((matchEvaluations, target) -> {
@@ -106,10 +115,10 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             List<MatchEvaluation> result = matchEvaluations
                     .stream()
                     // 匹配等于条件的值
-                    .filter(m -> properties.containsKey(m.getMatch().toString()))
+                    .filter(m -> propertySource.containsProperty(m.getMatch().toString()))
                     .collect(Collectors.toList());
 
-            if (result.stream().anyMatch(m -> m.evaluation(properties.get(m.getMatch().toString()), target))) {
+            if (result.stream().anyMatch(m -> m.evaluation(propertySource.getProperty(m.getMatch().toString()), target))) {
                 changeScheduledInfos.add(target);
             }
 
@@ -132,6 +141,8 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 ScheduledTask scheduledTask = scheduledTaskRegistrar.scheduleCronTask(c.createCronTask());
                 // 记录当前调度内容，用于下次更新时可以直接通过该属性取消
                 c.setScheduledTask(scheduledTask);
+            } else {
+                LOGGER.info("停止对 {} 的任务调度", c.getName());
             }
 
         });

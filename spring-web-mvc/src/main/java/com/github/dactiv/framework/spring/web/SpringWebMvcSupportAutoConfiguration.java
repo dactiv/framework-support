@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.web;
 
 
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
@@ -9,6 +10,7 @@ import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpReque
 import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
+import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
@@ -16,12 +18,14 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -93,6 +97,21 @@ public class SpringWebMvcSupportAutoConfiguration {
     public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebSupportProperties properties) {
         return new RestResponseBodyAdvice(properties);
     }
+
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer filterResultJackson2ObjectMapperBuilderCustomizer(SpringWebSupportProperties properties) {
+        return jacksonObjectMapperBuilder -> {
+
+            FilterResultAnnotationBuilder filterResultAnnotationBuilder = new FilterResultAnnotationBuilder(properties.getBasePackages());
+
+            jacksonObjectMapperBuilder.annotationIntrospector(filterResultAnnotationBuilder);
+
+            SerializationConfig config = jacksonObjectMapperBuilder.build().getSerializationConfig();
+
+            jacksonObjectMapperBuilder.filters(filterResultAnnotationBuilder.getFilterProvider(config));
+        };
+    }
+
 
     @Bean
     @ConfigurationProperties("enumerate")

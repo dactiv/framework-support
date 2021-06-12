@@ -34,9 +34,9 @@ public enum UserStatus implements NameValueEnum<Integer> {
         this.name = name;
     }
 
-    private String name;
+    private final String name;
 
-    private Integer value;
+    private final Integer value;
 
     @Override
     public Integer getValue() {

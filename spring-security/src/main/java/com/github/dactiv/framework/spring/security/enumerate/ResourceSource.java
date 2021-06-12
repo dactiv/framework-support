@@ -50,7 +50,7 @@ public enum ResourceSource implements NameEnum {
     /**
      * 中文名称
      */
-    private String name;
+    private final String name;
 
     @Override
     public String getName() {

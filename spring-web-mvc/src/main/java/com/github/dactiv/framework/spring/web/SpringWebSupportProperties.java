@@ -5,6 +5,7 @@ import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultHandlerInterceptor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,6 +16,11 @@ import java.util.List;
  */
 @ConfigurationProperties("spring.web.support")
 public class SpringWebSupportProperties {
+
+    /**
+     * 需要扫描的包路径，用于指定哪个包下面的类引入了 filter 注解，通过该配置自动添加 jackson filter
+     */
+    private List<String> basePackages = new ArrayList<>();
 
     /**
      * 过滤属性的 id 头名称
@@ -32,6 +38,24 @@ public class SpringWebSupportProperties {
     private List<String> supportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
 
     public SpringWebSupportProperties() {
+    }
+
+    /**
+     * 获取需要扫描的包路径
+     *
+     * @return 需要扫描的包路径
+     */
+    public List<String> getBasePackages() {
+        return basePackages;
+    }
+
+    /**
+     * 设置需要扫描的包路径
+     *
+     * @param basePackages 需要扫描的包路径
+     */
+    public void setBasePackages(List<String> basePackages) {
+        this.basePackages = basePackages;
     }
 
     /**

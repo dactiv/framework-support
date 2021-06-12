@@ -122,7 +122,7 @@ public class RestResult<T> implements Serializable {
      * @return rest 结果集
      */
     public static <T> RestResult<T> ofSuccess(T data) {
-        return ofSuccess(DEFAULT_SUCCESS_MESSAGE, SUCCESS_EXECUTE_CODE, data);
+        return ofSuccess(DEFAULT_SUCCESS_MESSAGE, data);
     }
 
     /**
@@ -134,18 +134,7 @@ public class RestResult<T> implements Serializable {
      * @return rest 结果集
      */
     public static <T> RestResult<T> ofSuccess(String message, T data) {
-        return ofSuccess(message, SUCCESS_EXECUTE_CODE, data);
-    }
-
-    /**
-     * 创建一个成功的抽象 rest 结果集实体类
-     *
-     * @param message 响应信息
-     *
-     * @return rest 结果集
-     */
-    public static <T> RestResult<T> ofSuccess(String message) {
-        return ofSuccess(message, SUCCESS_EXECUTE_CODE);
+        return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE), SUCCESS_EXECUTE_CODE, data);
     }
 
     /**
@@ -157,21 +146,9 @@ public class RestResult<T> implements Serializable {
      * @return rest 结果集
      */
     public static <T> RestResult<T> ofSuccess(String message, String executeCode) {
-        return ofSuccess(message, executeCode, null);
+        return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE), executeCode, null);
     }
 
-    /**
-     * 创建一个成功的抽象 rest 结果集实体类
-     *
-     * @param message 响应信息
-     * @param executeCode 执行代码
-     * @param data 响应内容
-     *
-     * @return rest 结果集
-     */
-    public static <T> RestResult<T> ofSuccess(String message, String executeCode, T data) {
-        return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE), executeCode, data);
-    }
 
     /**
      * 创建一个异常的抽象 rest 结果集实体类
@@ -223,20 +200,6 @@ public class RestResult<T> implements Serializable {
         this.status = status;
         this.executeCode = executeCode;
         this.data = data;
-    }
-
-    /**
-     * rest 结果集实体类
-     *
-     * @param executeCode 执行代码
-     * @param e           异常信息
-     * @deprecated 使用 {@link #of, #ofException, ofSuccess} 代替
-     */
-    @Deprecated
-    public RestResult(String executeCode, Throwable e) {
-        this.executeCode = executeCode;
-        this.status = Integer.parseInt(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
-        this.message = e.getMessage();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.web.argument;
 
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.argument.annotation.GenericsList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -57,11 +58,21 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
         Objects.requireNonNull(genericsList, parameter + "找不到 GenericsList 注解");
 
         String name = StringUtils.isEmpty(genericsList.name()) ? parameter.getParameterName() : genericsList.name();
+
+        if (StringUtils.isEmpty(name)) {
+            throw new SystemException("无法解除参数名称");
+        }
+
         // 获取参数为 name 做前缀的参数集合
         List<Map<String, Object>> param = getParameter(name, webRequest);
 
         // 获取该参数的泛型 class
         Class<?> type = ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();
+
+        if (Objects.isNull(type)) {
+            throw new SystemException("找不到参数名为 [" + name + "] 的范型 class 类型");
+        }
+
         // 如果参数为空
         if (param.isEmpty()) {
             // 并且 GenericsList 注解的 required 等于 true， 表示该值必须要传，但又没转，直接抛出异常
@@ -87,7 +98,7 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
 
                 Valid valid = parameter.getParameterAnnotation(Valid.class);
 
-                if (valid != null && validator instanceof org.springframework.validation.Validator) {
+                if (valid != null && Objects.nonNull(validator)) {
                     binder.setValidator(validator);
                     binder.validate();
                     if (binder.getBindingResult().hasErrors()) {
@@ -116,12 +127,7 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
         List<Map<String, Object>> result = new ArrayList<>();
 
         // 排序树 map
-        Map<Integer, Map<String, Object>> temp = new TreeMap<>(new Comparator<Integer>() {
-            @Override
-            public int compare(Integer target, Integer source) {
-                return target.compareTo(source);
-            }
-        });
+        Map<Integer, Map<String, Object>> temp = new TreeMap<>(Integer::compareTo);
 
         putParameterValue(temp, name, webRequest.getParameterMap());
 

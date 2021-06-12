@@ -2,16 +2,13 @@ package com.github.dactiv.framework.spring.security.concurrent;
 
 import com.github.dactiv.framework.spring.security.concurrent.service.ConcurrentDataService;
 import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 public class ConcurrentDataServiceTest {
 
     @Autowired
@@ -37,7 +34,7 @@ public class ConcurrentDataServiceTest {
             break;
         }
 
-        Assert.assertEquals(concurrentDataService.getCount(), 1);
+        Assertions.assertEquals(concurrentDataService.getCount(), 1);
         concurrentDataService.setCount(0);
 
         for (int i = 1; i <= 10; i++) {
@@ -50,7 +47,7 @@ public class ConcurrentDataServiceTest {
             break;
         }
 
-        Assert.assertEquals(concurrentDataService.getCount(), 10);
+        Assertions.assertEquals(concurrentDataService.getCount(), 10);
         concurrentDataService.setCount(0);
 
         concurrentDataService.incrementSpringEl();

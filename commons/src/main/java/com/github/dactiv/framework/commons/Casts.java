@@ -132,7 +132,7 @@ public class Casts {
     }
 
     /**
-     * 将格式为 name=value&name2=value2&name3=value3 的字符串转型为成 MultiValueMap
+     * 将格式为 http query string 的字符串转型为成 MultiValueMap
      *
      * @param body 数据题
      *

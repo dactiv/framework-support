@@ -172,12 +172,12 @@ public class ReflectionUtils {
      *
      * @return 范型类型
      */
-    public static Class<?> getGenericClass(Object target, int index) {
+    public static <T> Class<T> getGenericClass(Object target, int index) {
 
         Type genType = target.getClass().getGenericSuperclass();
 
         if (!(genType instanceof ParameterizedType)) {
-            return Object.class;
+            return Casts.cast(Object.class);
         }
 
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
@@ -187,7 +187,7 @@ public class ReflectionUtils {
         }
 
         if (!(params[index] instanceof Class)) {
-            return Object.class;
+            return Casts.cast(Object.class);
         }
 
         return Casts.cast(params[index]);

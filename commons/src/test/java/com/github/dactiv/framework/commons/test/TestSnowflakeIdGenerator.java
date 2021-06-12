@@ -2,17 +2,14 @@ package com.github.dactiv.framework.commons.test;
 
 import com.github.dactiv.framework.commons.generator.twitter.SnowflakeIdGenerator;
 import com.github.dactiv.framework.commons.generator.twitter.SnowflakeProperties;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * 测试雪环 id 生成器
  *
  * @author maurice.chen
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class TestSnowflakeIdGenerator {
 
     @Test
@@ -25,6 +22,6 @@ public class TestSnowflakeIdGenerator {
 
         SnowflakeIdGenerator snowflakeIdGenerator = new SnowflakeIdGenerator(snowflakeProperties);
 
-        Assert.assertEquals(snowflakeIdGenerator.generateId().length(), 32);
+        Assertions.assertEquals(snowflakeIdGenerator.generateId().length(), 32);
     }
 }

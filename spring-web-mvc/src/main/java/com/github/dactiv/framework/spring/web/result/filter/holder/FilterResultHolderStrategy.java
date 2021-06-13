@@ -23,7 +23,7 @@ public interface FilterResultHolderStrategy {
     /**
      * 设置值
      *
-     * @param 值
+     * @param value 值
      */
-    void set(String result);
+    void set(String value);
 }

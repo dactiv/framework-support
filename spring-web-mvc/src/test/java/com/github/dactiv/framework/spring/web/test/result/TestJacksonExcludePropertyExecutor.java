@@ -2,7 +2,9 @@ package com.github.dactiv.framework.spring.web.test.result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
+import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import com.github.dactiv.framework.spring.web.test.result.entity.User;
 import org.junit.jupiter.api.Assertions;
@@ -23,11 +25,15 @@ public class TestJacksonExcludePropertyExecutor {
 
         user.generateRole(5);
 
+        RestResult<User> result = RestResult.ofSuccess(user);
+
         List<String> basePackages = Collections.singletonList("com.github.dactiv.framework.spring.web.test.result.entity");
 
         FilterResultAnnotationBuilder builder = new FilterResultAnnotationBuilder(basePackages);
 
         ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.setSerializerProvider(new FilterResultSerializerProvider());
 
         objectMapper.setFilterProvider(builder.getFilterProvider(objectMapper.getSerializationConfig()));
 
@@ -48,6 +54,22 @@ public class TestJacksonExcludePropertyExecutor {
         List<Map<String, Object>> rolesList = Casts.cast(userMap.get("roles"));
 
         rolesList.forEach(r -> Assertions.assertEquals(r.size(), 4));
+
+        // -----------------------------
+
+        FilterResultHolder.clear();
+
+        userMap = Casts.convertValue(user, Map.class);
+
+        Assertions.assertEquals(userMap.size(), 8);
+
+        userDetailMap = Casts.cast(userMap.get("userDetail"));
+
+        Assertions.assertEquals(userDetailMap.size(), 5);
+
+        rolesList = Casts.cast(userMap.get("roles"));
+
+        rolesList.forEach(r -> Assertions.assertEquals(r.size(), 5));
 
     }
 }

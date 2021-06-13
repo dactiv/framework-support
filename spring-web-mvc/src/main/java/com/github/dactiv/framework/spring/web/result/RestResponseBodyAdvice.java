@@ -48,6 +48,15 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      * 不需要格式化的属性名称
      */
     public static final String DEFAULT_NOT_FORMAT_ATTR_NAME = "REST_RESULT_NOT_FORMAT";
+    /**
+     * 默认过滤属性的 id 头名称
+     */
+    public static final String DEFAULT_FILTER_RESULT_ID_HEADER_NAME = "X-FILTER-RESULT-ID";
+
+    /**
+     * 默认过滤属性的 id 参数名称
+     */
+    public static final String DEFAULT_FILTER_RESULT_ID_PARAM_NAME = "filterResultId";
 
     /**
      * 默认支持的客户端类型集合
@@ -98,7 +107,23 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         boolean execute = (notFormat == null || !notFormat) && (errorExecute == null || !errorExecute);
 
         // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
-        boolean support = clients != null && clients.stream().anyMatch(c -> properties.isSupportClient(c));
+        boolean support = clients != null && clients.stream().anyMatch(properties::isSupportClient);
+
+        String id = httpRequest.getServletRequest().getHeader(properties.getFilterResultIdHeaderName());
+
+        if (StringUtils.isEmpty(id)) {
+            id = httpRequest.getServletRequest().getParameter(properties.getFilterResultIdParamName());
+        }
+
+        if (StringUtils.isNotEmpty(id)) {
+
+            FilterResultHolder.set(id);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("本次请求需要使用排除值 ID 为 [{}] 的响应排除", id);
+            }
+
+        }
 
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 

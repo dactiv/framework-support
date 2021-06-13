@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.web;
 
 
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
-import com.github.dactiv.framework.spring.web.result.filter.FilterResultHandlerInterceptor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -25,12 +24,12 @@ public class SpringWebSupportProperties {
     /**
      * 过滤属性的 id 头名称
      */
-    private String filterPropertyIdHeaderName = FilterResultHandlerInterceptor.DEFAULT_FILTER_PROPERTY_ID_HEADER_NAME;
+    private String filterResultIdHeaderName = RestResponseBodyAdvice.DEFAULT_FILTER_RESULT_ID_HEADER_NAME;
 
     /**
      * 过滤属性的 id 参数名称
      */
-    private String filterPropertyIdParamName = FilterResultHandlerInterceptor.DEFAULT_FILTER_PROPERTY_ID_PARAM_NAME;
+    private String filterResultIdParamName = RestResponseBodyAdvice.DEFAULT_FILTER_RESULT_ID_PARAM_NAME;
 
     /**
      * 支持格式化的客户端集合
@@ -63,17 +62,17 @@ public class SpringWebSupportProperties {
      *
      * @return 过滤属性的 id 头名称
      */
-    public String getFilterPropertyIdHeaderName() {
-        return filterPropertyIdHeaderName;
+    public String getFilterResultIdHeaderName() {
+        return filterResultIdHeaderName;
     }
 
     /**
      * 设置过滤属性的 id 头名称
      *
-     * @param filterPropertyIdHeaderName 过滤属性的 id 头名称
+     * @param filterResultIdHeaderName 过滤属性的 id 头名称
      */
-    public void setFilterPropertyIdHeaderName(String filterPropertyIdHeaderName) {
-        this.filterPropertyIdHeaderName = filterPropertyIdHeaderName;
+    public void setFilterResultIdHeaderName(String filterResultIdHeaderName) {
+        this.filterResultIdHeaderName = filterResultIdHeaderName;
     }
 
     /**
@@ -81,17 +80,17 @@ public class SpringWebSupportProperties {
      *
      * @return 过滤属性的 id 参数名称
      */
-    public String getFilterPropertyIdParamName() {
-        return filterPropertyIdParamName;
+    public String getFilterResultIdParamName() {
+        return filterResultIdParamName;
     }
 
     /**
      * 设置过滤属性的 id 参数名称
      *
-     * @param filterPropertyIdParamName 过滤属性的 id 参数名称
+     * @param filterResultIdParamName 过滤属性的 id 参数名称
      */
-    public void setFilterPropertyIdParamName(String filterPropertyIdParamName) {
-        this.filterPropertyIdParamName = filterPropertyIdParamName;
+    public void setFilterResultIdParamName(String filterResultIdParamName) {
+        this.filterResultIdParamName = filterResultIdParamName;
     }
 
     /**

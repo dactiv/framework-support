@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.web.result.filter;
 
 import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.*;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -353,6 +354,11 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
         }
 
         return returnValue || super._isIgnorable(a);
+    }
+
+    @Override
+    public PropertyName findNameForSerialization(Annotated a) {
+        return super.findNameForSerialization(a);
     }
 
     /**

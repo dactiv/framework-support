@@ -351,8 +351,8 @@ public class Casts {
     /**
      * 创建一个新的对象，并将 source 参数内容拷贝到创建的对象中
      *
-     * @param source 原数据
-     * @param targetClass 新的对象类型
+     * @param source           原数据
+     * @param targetClass      新的对象类型
      * @param ignoreProperties 要忽略的属性值
      *
      * @return 新的对象内容

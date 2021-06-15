@@ -361,7 +361,7 @@ public class Casts {
 
         T result = ClassUtils.newInstance(targetClass);
 
-        BeanUtils.copyProperties(source, result);
+        BeanUtils.copyProperties(source, result, ignoreProperties);
 
         return result;
     }

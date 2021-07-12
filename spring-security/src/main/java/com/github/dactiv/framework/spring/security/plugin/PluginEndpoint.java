@@ -129,9 +129,9 @@ public class PluginEndpoint {
                     info.putAll(details);
                 }
 
-                List<Tree<String, PluginInfo>> enumMap = resolvePlugin();
+                List<Tree<String, PluginInfo>> pluginList = resolvePlugin();
 
-                info.put(DEFAULT_PLUGIN_KEY_NAME, enumMap);
+                info.put(DEFAULT_PLUGIN_KEY_NAME, pluginList);
 
                 cache.putAll(info);
             }
@@ -249,10 +249,6 @@ public class PluginEndpoint {
             List<String> sources = Arrays.asList(plugin.sources());
 
             if (!sources.contains(ResourceSource.Console.toString())) {
-                continue;
-            }
-
-            if (!sources.contains(ResourceSource.All.toString())) {
                 continue;
             }
 

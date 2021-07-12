@@ -1,9 +1,11 @@
 package com.github.dactiv.framework.commons.tree;
 
 import com.github.dactiv.framework.commons.Casts;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 树工具类，用户合并或拆解等
@@ -47,10 +49,14 @@ public class TreeUtils {
         List<Tree<P, T>> result = new ArrayList<>();
 
         for (Tree<P, T> root : list) {
+
             //顶级节点的根节点为NULL
-            if (root.getParent() == null || "".equals(root.getParent())) {
+            if (isParent(root)) {
+
                 findChildren(root, list);
+
                 result.add(root);
+
             }
         }
 
@@ -95,14 +101,31 @@ public class TreeUtils {
     private static <P, T> void findChildren(Tree<P, T> parent, List<? extends Tree<P, T>> list) {
 
         for (Tree<P, T> entity : list) {
-            if (entity.getParent() == null || "".equals(entity.getParent())) {
+
+            if (isParent(entity)) {
                 continue;
             }
+
             if (entity.isChildren(parent)) {
+
                 findChildren(entity, list);
+
                 parent.getChildren().add(entity);
+
             }
+
         }
+    }
+
+    /**
+     * 是否父类节点
+     *
+     * @param tree 节点对象
+     *
+     * @return true 是，否则 false
+     */
+    public static <P, T> boolean isParent(Tree<P, T> tree) {
+        return StringUtils.isEmpty(tree.getParent()) || Tree.ROOT_VALUE.equals(tree.getParent().toString());
     }
 
 }

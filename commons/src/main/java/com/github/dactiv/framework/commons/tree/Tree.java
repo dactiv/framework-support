@@ -13,6 +13,11 @@ import java.util.List;
 public interface Tree<P, C> {
 
     /**
+     * 根节点集合
+     */
+    String ROOT_VALUE = "root";
+
+    /**
      * 获取孩子节点集合
      *
      * @return 孩子节点集合

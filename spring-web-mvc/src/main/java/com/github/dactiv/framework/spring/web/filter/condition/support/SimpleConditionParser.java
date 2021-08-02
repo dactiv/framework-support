@@ -97,7 +97,7 @@ public class SimpleConditionParser implements ConditionParser {
 
             if (CollectionUtils.isEmpty(value)) {
                 propertyValue = null;
-            } else if (value.size() > 1) {
+            } else if (value.size() == 1) {
                 propertyValue = value.iterator().next();
             }
 

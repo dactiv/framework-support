@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDto;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.filter.QueryGenerator;
 import com.github.dactiv.framework.spring.web.filter.condition.Condition;
@@ -178,11 +179,9 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      *
      * @return Mybatis 分页查询对象
      */
-    public static <S> com.baomidou.mybatisplus.extension.plugins.pagination.Page<S> createQueryPage(Pageable pageable) {
+    public static <S> PageDto<S> createQueryPage(Pageable pageable) {
 
-        com.baomidou.mybatisplus.extension.plugins.pagination.Page<S> page;
-
-        page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(
+        PageDto<S> page = new PageDto<>(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 false

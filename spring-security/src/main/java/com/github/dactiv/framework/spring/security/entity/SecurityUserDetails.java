@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.dactiv.framework.commons.enumerate.NameEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
@@ -58,6 +59,7 @@ public class SecurityUserDetails implements UserDetails {
     private String username;
     @JsonIgnore
     private List<ResourceAuthority> resourceAuthorities = new ArrayList<>();
+    @JsonIgnore
     private List<RoleAuthority> roleAuthorities = new ArrayList<>();
     @JsonIgnore
     private boolean accountNonExpired = true;
@@ -97,6 +99,7 @@ public class SecurityUserDetails implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         List<SimpleGrantedAuthority> result = new ArrayList<>();
@@ -220,30 +223,85 @@ public class SecurityUserDetails implements UserDetails {
         return DisabledOrEnabled.Enabled.getValue().equals(status);
     }
 
+    /**
+     * 获取資源类型的授权信息
+     *
+     * @return 授权信息集合
+     */
+    @JsonIgnore
     public List<ResourceAuthority> getResourceAuthorities() {
         return resourceAuthorities;
     }
 
+    /**
+     * 获取字符串集合的資源类型授权信息
+     *
+     * @return 字符串集合的資源类型授权信息
+     */
+    public List<String> getResourceAuthorityStrings() {
+        return resourceAuthorities.stream().map(ResourceAuthority::getAuthority).collect(Collectors.toList());
+    }
+
+    /**
+     * 设置資源类型的授权信息
+     *
+     * @param resourceAuthorities 資源类型的授权信息
+     */
     public void setResourceAuthorities(List<ResourceAuthority> resourceAuthorities) {
         this.resourceAuthorities = resourceAuthorities;
     }
 
+    /**
+     * 获取角色类型的授权信息
+     *
+     * @return 角色类型的授权信息
+     */
+    @JsonIgnore
     public List<RoleAuthority> getRoleAuthorities() {
         return roleAuthorities;
     }
 
+    /**
+     * 获取字符串集合的角色类型授权信息
+     *
+     * @return 字符串集合的角色类型授权信息
+     */
+    public List<String> getRoleAuthorityStrings() {
+        return roleAuthorities.stream().map(RoleAuthority::getAuthority).collect(Collectors.toList());
+    }
+
+    /**
+     * 设置角色类型的授权信息
+     *
+     * @param roleAuthorities 角色类型的授权信息
+     */
     public void setRoleAuthorities(List<RoleAuthority> roleAuthorities) {
         this.roleAuthorities = roleAuthorities;
     }
 
+    /**
+     * 设置账户是否过期
+     *
+     * @param accountNonExpired true 是，否则 false
+     */
     public void setAccountNonExpired(boolean accountNonExpired) {
         this.accountNonExpired = accountNonExpired;
     }
 
+    /**
+     * 是否账户是否被锁定
+     *
+     * @param accountNonLocked true 是，否则 false
+     */
     public void setAccountNonLocked(boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
 
+    /**
+     * 设置登陆凭证是否过期
+     *
+     * @param credentialsNonExpired true 是，否则 false
+     */
     public void setCredentialsNonExpired(boolean credentialsNonExpired) {
         this.credentialsNonExpired = credentialsNonExpired;
     }
@@ -257,6 +315,11 @@ public class SecurityUserDetails implements UserDetails {
         return type;
     }
 
+    /**
+     * 设置用户类型
+     *
+     * @param type 用户类型
+     */
     public void setType(String type) {
         this.type = type;
     }

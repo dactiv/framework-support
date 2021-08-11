@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDto;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.page.Page;
+import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.spring.web.filter.QueryGenerator;
 import com.github.dactiv.framework.spring.web.filter.condition.Condition;
 import com.github.dactiv.framework.spring.web.filter.condition.ConditionParser;
@@ -13,7 +15,6 @@ import com.github.dactiv.framework.spring.web.filter.condition.ConditionType;
 import com.github.dactiv.framework.spring.web.filter.condition.support.SimpleConditionParser;
 import com.github.dactiv.framework.spring.web.filter.generator.WildcardParser;
 import com.github.dactiv.framework.spring.web.filter.generator.mybatis.wildcard.*;
-import org.springframework.data.domain.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -145,58 +146,26 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      */
     public static <S> Page<S> convertResultPage(IPage<S> page) {
 
-        if (page.orders().isEmpty()) {
-            return new PageImpl<>(
-                    page.getRecords(),
-                    PageRequest.of((int) page.getCurrent(), (int) page.getSize()),
-                    page.getTotal()
-            );
-        } else {
-
-            List<Sort.Order> orders = new LinkedList<>();
-
-            page.orders().forEach(o -> {
-                if (o.isAsc()) {
-                    orders.add(new Sort.Order(Sort.Direction.ASC, o.getColumn()));
-                } else {
-                    orders.add(new Sort.Order(Sort.Direction.DESC, o.getColumn()));
-                }
-            });
-
-            return new PageImpl<>(
-                    page.getRecords(),
-                    PageRequest.of((int) page.getCurrent(), (int) page.getSize(), Sort.by(orders)),
-                    page.getTotal()
-            );
-        }
+        return new Page<>(
+                new PageRequest((int)page.getCurrent(), (int)page.getSize()),
+                page.getRecords()
+        );
     }
 
     /**
      * 创建查询分页
      *
-     * @param pageable spring data 分页请求对象
+     * @param pageRequest 分页请求
      * @param <S>      分页范型类型
      *
      * @return Mybatis 分页查询对象
      */
-    public static <S> PageDto<S> createQueryPage(Pageable pageable) {
+    public static <S> PageDto<S> createQueryPage(PageRequest pageRequest) {
 
-        PageDto<S> page = new PageDto<>(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
+        return new PageDto<>(
+                pageRequest.getPageNumber(),
+                pageRequest.getPageSize(),
                 false
         );
-
-        pageable.getSort().stream().forEach(o -> {
-
-            if (o.isAscending()) {
-                page.getOrders().add(OrderItem.asc(o.getProperty()));
-            } else {
-                page.getOrders().add(OrderItem.desc(o.getProperty()));
-            }
-
-        });
-
-        return page;
     }
 }

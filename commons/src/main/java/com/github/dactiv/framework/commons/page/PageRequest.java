@@ -24,7 +24,7 @@ public class PageRequest implements Serializable {
     /**
      * 页号
      */
-    private int page = DEFAULT_PAGE;
+    private int number = DEFAULT_PAGE;
     /**
      * 每页大小
      */
@@ -44,7 +44,7 @@ public class PageRequest implements Serializable {
      * @param size 内容大小
      */
     public PageRequest(int page, int size) {
-        this.page = page;
+        this.number = page;
         this.size = size;
     }
 
@@ -53,7 +53,7 @@ public class PageRequest implements Serializable {
      *
      * @return 内容数量
      */
-    public int getPageSize() {
+    public int getSize() {
         return size;
     }
 
@@ -62,17 +62,17 @@ public class PageRequest implements Serializable {
      *
      * @return 页号
      */
-    public int getPageNumber() {
-        return page;
+    public int getNumber() {
+        return number;
     }
 
     /**
      * 设置当前页号
      *
-     * @param page 页号
+     * @param number 页号
      */
-    public void setPageNumber(int page) {
-        this.page = page;
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     /**
@@ -80,7 +80,7 @@ public class PageRequest implements Serializable {
      *
      * @param size 内容数量
      */
-    public void setPageSize(int size) {
+    public void setSize(int size) {
         this.size = size;
     }
 
@@ -90,7 +90,7 @@ public class PageRequest implements Serializable {
      * @return 偏移量
      */
     public int getOffset() {
-        int offset = (page - DEFAULT_PAGE) * size;
+        int offset = (number - DEFAULT_PAGE) * size;
         if (offset < 0) {
             offset = 0;
         }

@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.web.filter.generator.mybatis;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDto;
 import com.github.dactiv.framework.commons.Casts;
@@ -19,7 +18,6 @@ import com.github.dactiv.framework.spring.web.filter.generator.mybatis.wildcard.
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -163,8 +161,8 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     public static <S> PageDto<S> createQueryPage(PageRequest pageRequest) {
 
         return new PageDto<>(
-                pageRequest.getPageNumber(),
-                pageRequest.getPageSize(),
+                pageRequest.getNumber(),
+                pageRequest.getSize(),
                 false
         );
     }

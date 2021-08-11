@@ -44,7 +44,7 @@ public class Page<T> implements Serializable {
      * @return 页号
      */
     public int getNumber() {
-        return pageRequest == null ? 0 : pageRequest.getPageNumber();
+        return pageRequest == null ? 0 : pageRequest.getNumber();
     }
 
     /**
@@ -53,7 +53,7 @@ public class Page<T> implements Serializable {
      * @return 内容数量
      */
     public int getSize() {
-        return pageRequest == null ? 0 : pageRequest.getPageSize();
+        return pageRequest == null ? 0 : pageRequest.getSize();
     }
 
     /**

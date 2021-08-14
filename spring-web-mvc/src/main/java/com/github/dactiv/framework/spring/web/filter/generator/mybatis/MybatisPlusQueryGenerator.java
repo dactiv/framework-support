@@ -101,6 +101,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      */
     public List<WildcardParser> getDefaultWildcardParserList() {
         return Arrays.asList(
+                new BetweenWildcardParser(),
                 new EqWildcardParser(),
                 new NeWildcardParser(),
                 new LikeWildcardParser(),

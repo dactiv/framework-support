@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public class IdEntity<T> implements Serializable {
 
+    private static final long serialVersionUID = -1430010950223063423L;
+
     /**
      * id 字段名称
      */

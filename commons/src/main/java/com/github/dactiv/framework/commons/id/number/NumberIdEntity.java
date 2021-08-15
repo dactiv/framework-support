@@ -2,6 +2,7 @@ package com.github.dactiv.framework.commons.id.number;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Date;
  *
  * @author maurice.chen
  */
-public interface NumberIdEntity<T extends Number> {
+public interface NumberIdEntity<T extends Number> extends Serializable {
 
     /**
      * 获取主键 id

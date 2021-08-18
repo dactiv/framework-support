@@ -3,12 +3,18 @@ package com.github.dactiv.framework.spring.security.audit.elasticsearch.index.su
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.spring.security.audit.PropertyIndexGenerator;
+import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,7 +54,7 @@ public class DateIndexGenerator extends PropertyIndexGenerator {
 
         List<String> result = super.afterAppend(object);
 
-        Object date = ReflectionUtils.getReadProperty(object, datePropertyName);
+        Object date = ReflectionUtils.getFieldValue(object, datePropertyName);
 
         if (ChronoLocalDateTime.class.isAssignableFrom(date.getClass())) {
 
@@ -59,11 +65,19 @@ public class DateIndexGenerator extends PropertyIndexGenerator {
         } else if (Date.class.isAssignableFrom(date.getClass())) {
             Date d = Casts.cast(date);
             result.add(new SimpleDateFormat(pattern).format(d));
+        } else if (Instant.class.isAssignableFrom(date.getClass())){
+            Instant i = Casts.cast(date);
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(i, ZoneId.systemDefault());
+            result.add(localDateTime.format(DateTimeFormatter.ofPattern(pattern)));
         } else {
             throw new SystemException("对象 [" + object.getClass().getName() + "] 的 [" + datePropertyName + "] 属性非日期类型");
         }
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new DateIndexGenerator(PluginAuditEvent.DEFAULT_INDEX_NAME, "-", "timestamp").generateIndex(new AuditEvent(Instant.now(), "", "", new HashMap<>())));
     }
 
     /**

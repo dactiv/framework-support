@@ -111,8 +111,6 @@ public class SpringSecuritySupportAutoConfiguration {
                     .disable()
                     .logout()
                     .disable()
-                    //.httpBasic()
-                    //.and()
                     .cors()
                     .disable()
                     .csrf()

@@ -1,21 +1,22 @@
 package com.github.dactiv.framework.spring.security.audit.mongo;
 
-import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
+import com.github.dactiv.framework.commons.page.Page;
+import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,12 +45,12 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
     @Override
     public void add(AuditEvent event) {
 
-        AuditEventEntity auditEventEntity = new AuditEventEntity(event);
+        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
         try {
 
-            if (!auditEventEntity.getPrincipal().equals(securityProperties.getUser().getName())) {
-                mongoTemplate.save(auditEventEntity, AuditEventEntity.DEFAULT_INDEX_NAME);
+            if (!pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
+                mongoTemplate.save(pluginAuditEvent, PluginAuditEvent.DEFAULT_INDEX_NAME);
             }
 
         } catch (Exception e) {
@@ -63,25 +64,43 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
 
         Criteria criteria = createCriteria(after, type);
 
-        return mongoTemplate
-                .find(new Query(criteria), AuditEventEntity.class, AuditEventEntity.DEFAULT_INDEX_NAME)
-                .stream()
-                .map(AuditEventEntity::toAuditEvent)
-                .collect(Collectors.toList());
+        Query query = new Query(criteria).with(Sort.by(Sort.Order.desc("timestamp")));
+
+        //noinspection rawtypes
+        List<Map> result = mongoTemplate.find(query, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+
+        return result.stream().map(this::createPluginAuditEvent).collect(Collectors.toList());
     }
 
     @Override
-    public Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type) {
+    public Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type) {
 
         Criteria criteria = createCriteria(after, type);
 
-        List<AuditEvent> data = mongoTemplate
-                .find(new Query(criteria).with(pageable).with(pageable.getSort()), AuditEventEntity.class, AuditEventEntity.DEFAULT_INDEX_NAME)
-                .stream()
-                .map(AuditEventEntity::toAuditEvent)
-                .collect(Collectors.toList());
+        Query query = new Query(criteria)
+                .with(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()))
+                .with(Sort.by(Sort.Order.desc("timestamp")));
 
-        return new PageImpl<>(data, pageable, data.size());
+        //noinspection rawtypes
+        List<Map> data = mongoTemplate.find(query, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+
+        return new Page<>(pageRequest, data.stream().map(this::createPluginAuditEvent).collect(Collectors.toList()));
+    }
+
+    /**
+     * 创建插件审计事件
+     *
+     * @param map map 数据源
+     *
+     * @return 插件审计事件
+     */
+    public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
+        AuditEvent auditEvent = createAuditEvent(map);
+
+        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
+        pluginAuditEvent.setId(map.get("_id").toString());
+
+        return pluginAuditEvent;
     }
 
     /**

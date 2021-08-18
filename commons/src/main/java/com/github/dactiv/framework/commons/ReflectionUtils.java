@@ -33,12 +33,12 @@ public class ReflectionUtils {
     /**
      * 获取字段值
      *
-     * @param field 字段
      * @param o 对象
+     * @param field 字段
      *
      * @return 字段值
      */
-    public static Object getFieldValue(Field field, Object o) {
+    public static Object getFieldValue(Object o, Field field) {
         field.setAccessible(true);
 
         return org.springframework.util.ReflectionUtils.getField(field, o);

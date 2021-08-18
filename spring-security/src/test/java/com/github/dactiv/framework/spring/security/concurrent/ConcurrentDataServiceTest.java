@@ -15,7 +15,7 @@ public class ConcurrentDataServiceTest {
     private ConcurrentDataService concurrentDataService;
 
     @Test
-    public void testIncrement() throws InterruptedException {
+    public void testConcurrent() throws InterruptedException {
 
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 

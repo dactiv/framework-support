@@ -17,6 +17,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
@@ -128,7 +129,7 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
             }
         }
 
-        AuditEvent auditEvent = new AuditEvent(LocalDateTime.now().toInstant(ZoneOffset.UTC), principal, type, data);
+        AuditEvent auditEvent = new AuditEvent(Instant.now(), principal, type, data);
 
         // 推送审计事件
         applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));

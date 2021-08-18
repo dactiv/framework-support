@@ -1,7 +1,9 @@
 package com.github.dactiv.framework.spring.security.audit.elasticsearch;
 
-import com.github.dactiv.framework.spring.security.audit.AuditEventEntity;
+import com.github.dactiv.framework.commons.page.Page;
+import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -9,18 +11,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -47,26 +51,27 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
         this.securityProperties = securityProperties;
 
-        this.indexGenerator = new DateIndexGenerator(AuditEventEntity.DEFAULT_INDEX_NAME, "-", "creationTime");
+        this.indexGenerator = new DateIndexGenerator(PluginAuditEvent.DEFAULT_INDEX_NAME, "-", "timestamp");
     }
 
     @Override
     public void add(AuditEvent event) {
 
-        AuditEventEntity auditEventEntity = new AuditEventEntity(event);
+        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
+
+        if (pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
+            return ;
+        }
 
         try {
 
-            String index = indexGenerator.generateIndex(auditEventEntity).toLowerCase();
+            String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
 
-            if (!auditEventEntity.getPrincipal().equals(securityProperties.getUser().getName())) {
+            IndexQueryBuilder indexQueryBuilder = new IndexQueryBuilder()
+                    .withId(pluginAuditEvent.getId())
+                    .withObject(pluginAuditEvent);
 
-                IndexQueryBuilder indexQueryBuilder = new IndexQueryBuilder()
-                        .withId(auditEventEntity.getId())
-                        .withObject(auditEventEntity);
-
-                elasticsearchRestTemplate.index(indexQueryBuilder.build(), IndexCoordinates.of(index));
-            }
+            elasticsearchRestTemplate.index(indexQueryBuilder.build(), IndexCoordinates.of(index));
 
         } catch (Exception e) {
             LOGGER.error("新增" + event.getPrincipal() + "审计事件失败", e);
@@ -77,42 +82,58 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
 
-        String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
+        String index = getIndex(after, principal, type);
 
-        Criteria criteria = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type, principal);
 
-        if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").is(principal);
-            index = AuditEventEntity.DEFAULT_INDEX_NAME + "-" + principal + "-*";
-        }
+        Query query = new CriteriaQuery(criteria).addSort(Sort.by(Sort.Order.desc("timestamp")));
 
         return elasticsearchRestTemplate
-                .search(new CriteriaQuery(criteria), AuditEventEntity.class, IndexCoordinates.of(index))
+                .search(query, Map.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
-                .map(AuditEventEntity::toAuditEvent)
+                .map(this::createPluginAuditEvent)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type) {
+    public Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type) {
 
-        String index = AuditEventEntity.DEFAULT_INDEX_NAME + "-*";
+        String index = getIndex(after, principal, type);
 
-        Criteria criteria = createCriteria(after, type);
+        Criteria criteria = createCriteria(after, type, principal);
 
-        if (StringUtils.isNotEmpty(principal)) {
-            criteria = criteria.and("principal").contains(principal);
-            index = AuditEventEntity.DEFAULT_INDEX_NAME + "-" + principal + "-*";
-        }
+        Query query = new CriteriaQuery(
+                criteria,
+                org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize())
+        );
 
-        List<AuditEvent> content = elasticsearchRestTemplate
-                .search(new CriteriaQuery(criteria, pageable), AuditEventEntity.class, IndexCoordinates.of(index))
-                .stream().map(SearchHit::getContent)
-                .map(AuditEventEntity::toAuditEvent)
+        query.addSort(Sort.by(Sort.Order.desc("timestamp")));
+
+        List<PluginAuditEvent> content = elasticsearchRestTemplate
+                .search(query, Map.class, IndexCoordinates.of(index))
+                .stream()
+                .map(SearchHit::getContent)
+                .map(this::createPluginAuditEvent)
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(content, pageable, content.size());
+        return new Page<>(pageRequest, new ArrayList<>(content));
+    }
+
+    /**
+     * 创建插件审计事件
+     *
+     * @param map map 数据源
+     *
+     * @return 插件审计事件
+     */
+    public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
+        AuditEvent auditEvent = createAuditEvent(map);
+
+        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
+        pluginAuditEvent.setId(map.get("id").toString());
+
+        return pluginAuditEvent;
     }
 
     /**
@@ -120,10 +141,11 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
      *
      * @param after 在什么时间之后的
      * @param type  类型
+     * @param principal 操作人
      *
      * @return 查询条件
      */
-    private Criteria createCriteria(Instant after, String type) {
+    private Criteria createCriteria(Instant after, String type, String principal) {
 
         Criteria criteria = new Criteria();
 
@@ -135,7 +157,37 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
             criteria = criteria.and("type").greaterThanEqual(type);
         }
 
+        if (StringUtils.isNotEmpty(principal)) {
+            criteria = criteria.and("principal").contains(principal);
+        }
+
         return criteria;
+    }
+
+    /**
+     * 获取当前 index
+     *
+     * @param after 在什么时间之后
+     * @param type 类型
+     * @param principal 操作人
+     *
+     * @return index 信息
+     */
+    private String getIndex(Instant after, String type, String principal) {
+        try {
+
+            AuditEvent auditEvent = new AuditEvent(
+                    after,
+                    StringUtils.defaultString(principal,""),
+                    StringUtils.defaultString(type,""),
+                    new LinkedHashMap<>()
+            );
+
+            return indexGenerator.generateIndex(auditEvent).toLowerCase();
+
+        } catch (Exception e) {
+            return PluginAuditEvent.DEFAULT_INDEX_NAME + "-*";
+        }
     }
 
     /**

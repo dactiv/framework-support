@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.plugin;
 
 import com.github.dactiv.framework.commons.exception.ServiceException;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.tree.Tree;
 import com.github.dactiv.framework.commons.tree.TreeUtils;
 import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
@@ -151,60 +152,63 @@ public class PluginEndpoint {
         List<Tree<String, PluginInfo>> result = new ArrayList<>();
 
         // 扫描所有带 Controller 注解的类
-        Set<Class<?>> classes = resolvePlaceholders();
+        Set<Object> targetSet = resolvePlaceholders();
         // 如果找不到，什么都不做
-        if (CollectionUtils.isEmpty(classes)) {
+        if (CollectionUtils.isEmpty(targetSet)) {
             return result;
         }
 
         List<PluginInfo> pluginInfoList = new ArrayList<>();
 
         // 循环解析类中的方法
-        for (Class<?> target : classes) {
+        for (Object target : targetSet) {
 
-            Plugin plugin = AnnotationUtils.findAnnotation(target, Plugin.class);
-            PluginInfo parent = null;
+            if (Class.class.isAssignableFrom(target.getClass())) {
 
-            if (plugin != null) {
+                Class<?> classTarget = (Class<?>) target;
 
-                List<String> sources = Arrays.asList(plugin.sources());
+                Plugin plugin = AnnotationUtils.findAnnotation(classTarget, Plugin.class);
 
-                if (sources.contains(ResourceSource.Console.toString()) || sources.contains(ResourceSource.All.toString())) {
-                    parent = new PluginInfo(plugin);
+                PluginInfo parent = createPluginInfo(plugin, classTarget);
 
-                    // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
-                    RequestMapping mapping = AnnotationUtils.findAnnotation(target, RequestMapping.class);
-
-                    if (mapping != null) {
-
-                        List<String> uri = new ArrayList<>();
-
-                        for (String value : mapping.value()) {
-                            // 添加 /** 通配符，作用是为了可能某些需要带参数过来
-                            String url = StringUtils.appendIfMissing(value, "/**");
-                            // 删除.（逗号）后缀的所有内容，作用是可能有些配置是
-                            // 有.html 和 .json的类似配置，但其实一个就够了
-                            uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
-                        }
-
-                        parent.setValue(StringUtils.join(uri, ","));
-
-                    }
-
-                    pluginInfoList.add(parent);
-
+                // 如果该 plugin 配置没有 id 值，就直接用类名做 id 值
+                if (parent != null && StringUtils.isEmpty(parent.getId())) {
+                    parent.setId(classTarget.getName());
                 }
+
+                pluginInfoList.add(parent);
+
+                Method[] methods = classTarget.isInterface() ? classTarget.getMethods() : classTarget.getDeclaredMethods();
+                List<Method> methodList = Arrays.asList(methods);
+                // 遍历方法级别的 plugin 注解。并添加到 parent 中
+                pluginInfoList.addAll(buildPluginInfo(methodList, parent));
+
+            } else if (Method.class.isAssignableFrom(target.getClass())){
+                Method method = (Method) target;
+
+                Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
+
+                if (Objects.isNull(plugin)) {
+                    continue;
+                }
+
+                PluginInfo temp = null;
+
+                if (StringUtils.isNotEmpty(plugin.parent())) {
+
+                    temp = parent
+                            .values()
+                            .stream()
+                            .filter(p -> p.getId().equals(plugin.parent()))
+                            .findFirst()
+                            .orElseThrow(() -> new SystemException("找不到" + plugin.parent() + "的父类插件信息"));
+                }
+
+                pluginInfoList.addAll(buildPluginInfo(Collections.singletonList(method), temp));
+            } else {
+                throw new SystemException("Plugin 注解只支持 Class 或 Method 类型, ");
             }
 
-            // 如果该 plugin 配置没有 id 值，就直接用类名做 id 值
-            if (parent != null && StringUtils.isEmpty(parent.getId())) {
-                parent.setId(target.getName());
-            }
-
-            Method[] methods = target.isInterface() ? target.getMethods() : target.getDeclaredMethods();
-            List<Method> methodList = Arrays.asList(methods);
-            // 遍历方法级别的 plugin 注解。并添加到 parent 中
-            pluginInfoList.addAll(buildPluginInfo(methodList, parent));
         }
 
         parent.values().forEach(p -> {
@@ -227,6 +231,38 @@ public class PluginEndpoint {
         result = TreeUtils.buildTree(pluginInfoList);
 
         return result;
+    }
+
+    public PluginInfo createPluginInfo(Plugin plugin, Class<?> target) {
+
+        PluginInfo parent = new PluginInfo(plugin);
+
+        List<String> sources = Arrays.asList(plugin.sources());
+
+        if (sources.contains(ResourceSource.Console.toString()) || sources.contains(ResourceSource.All.toString())) {
+
+            // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
+            RequestMapping mapping = AnnotationUtils.findAnnotation(target, RequestMapping.class);
+
+            if (mapping != null) {
+
+                List<String> uri = new ArrayList<>();
+
+                for (String value : mapping.value()) {
+                    // 添加 /** 通配符，作用是为了可能某些需要带参数过来
+                    String url = StringUtils.appendIfMissing(value, "/**");
+                    // 删除.（逗号）后缀的所有内容，作用是可能有些配置是
+                    // 有.html 和 .json的类似配置，但其实一个就够了
+                    uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
+                }
+
+                parent.setValue(StringUtils.join(uri, ","));
+
+            }
+
+        }
+
+        return parent;
     }
 
     /**
@@ -370,6 +406,10 @@ public class PluginEndpoint {
 
         List<String> uri = new ArrayList<>();
 
+        if (StringUtils.isEmpty(parent.getValue())) {
+            return targetValue;
+        }
+
         for (String parentValue : StringUtils.split(parent.getValue())) {
             for (String value : StringUtils.split(targetValue)) {
                 parentValue = StringUtils.remove(parentValue, "**");
@@ -465,8 +505,8 @@ public class PluginEndpoint {
      *
      * @return 包含 Controller 注解的所有类
      */
-    private Set<Class<?>> resolvePlaceholders() {
-        Set<Class<?>> classes = new HashSet<>();
+    private Set<Object> resolvePlaceholders() {
+        Set<Object> target = new HashSet<>();
 
         for (String basePackage : basePackages) {
             String classPath = ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage)) + "/**/*.class";
@@ -478,18 +518,36 @@ public class PluginEndpoint {
 
                 for (Resource resource : resources) {
                     if (resource.isReadable()) {
+
                         MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+                        Class<?> targetClass = Class.forName(metadataReader.getClassMetadata().getClassName());
+
                         if (filter.match(metadataReader, metadataReaderFactory)) {
-                            classes.add(Class.forName(metadataReader.getClassMetadata().getClassName()));
+                            target.add(targetClass);
+                        } else {
+
+                            Method[] methods = targetClass.getDeclaredMethods();
+
+                            for (Method method: methods) {
+
+                                Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
+
+                                if (Objects.nonNull(plugin)) {
+                                    target.add(method);
+                                }
+
+                            }
+
                         }
                     }
                 }
+
             } catch (Exception e) {
                 throw new ServiceException(e);
             }
         }
 
-        return classes;
+        return target;
     }
 
     public Map<String, PluginInfo> getParent() {

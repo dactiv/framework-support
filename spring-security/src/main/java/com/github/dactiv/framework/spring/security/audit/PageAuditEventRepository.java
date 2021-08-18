@@ -1,11 +1,13 @@
 package com.github.dactiv.framework.spring.security.audit;
 
+import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.page.Page;
+import com.github.dactiv.framework.commons.page.PageRequest;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.Map;
 
 /**
  * 支持分页查询审计事件的仓库实现
@@ -17,12 +19,28 @@ public interface PageAuditEventRepository extends AuditEventRepository {
     /**
      * 获取分页信息
      *
-     * @param pageable  分页请求
-     * @param principal 当前人
-     * @param after     在什么时间之后的
-     * @param type      类型
-     *
+     * @param pageRequest 分页请求
+     * @param principal   当前人
+     * @param after       在什么时间之后的
+     * @param type        类型
      * @return 分页信息
      */
-    Page<AuditEvent> findPage(Pageable pageable, String principal, Instant after, String type);
+    Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type);
+
+    /**
+     * 创建审计事件
+     *
+     * @param map map 数据源
+     *
+     * @return 审计事件
+     */
+    default AuditEvent createAuditEvent(Map<String, Object> map) {
+        Instant instant = Instant.ofEpochMilli(Casts.cast(map.get("timestamp"), Long.class));
+        String principal = map.get("principal").toString();
+        String type = map.get("type").toString();
+        //noinspection unchecked
+        Map<String, Object> data = Casts.cast(map.get("data"), Map.class);
+
+        return new AuditEvent(instant, principal, type, data);
+    }
 }

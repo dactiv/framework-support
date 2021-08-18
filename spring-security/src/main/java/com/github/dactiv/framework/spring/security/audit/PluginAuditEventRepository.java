@@ -10,11 +10,11 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * 支持分页查询审计事件的仓库实现
+ * 插件审计事件的仓库实现
  *
  * @author maurice.chen
  */
-public interface PageAuditEventRepository extends AuditEventRepository {
+public interface PluginAuditEventRepository extends AuditEventRepository {
 
     /**
      * 获取分页信息
@@ -26,6 +26,15 @@ public interface PageAuditEventRepository extends AuditEventRepository {
      * @return 分页信息
      */
     Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type);
+
+    /**
+     * 通过 id 获取数据
+     *
+     * @param id 唯一识别;
+     *
+     * @return 审计事件
+     */
+    AuditEvent get(Object id);
 
     /**
      * 创建审计事件

@@ -151,8 +151,8 @@ public class AuditConfiguration {
     public static class MongoAuditConfiguration {
 
         @Bean
-        public PageAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
-                                                             SecurityProperties securityProperties) {
+        public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
+                                                               SecurityProperties securityProperties) {
 
             return new MongoAuditEventRepository(mongoTemplate, securityProperties);
 
@@ -171,8 +171,8 @@ public class AuditConfiguration {
     public static class ElasticsearchAuditConfiguration {
 
         @Bean
-        public PageAuditEventRepository auditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
-                                                             SecurityProperties securityProperties) {
+        public PluginAuditEventRepository auditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
+                                                               SecurityProperties securityProperties) {
 
             return new ElasticsearchAuditEventRepository(elasticsearchRestTemplate, securityProperties);
 

@@ -2,10 +2,11 @@ package com.github.dactiv.framework.spring.security.audit.elasticsearch;
 
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
-import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.support.DateIndexGenerator;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class ElasticsearchAuditEventRepository implements PageAuditEventRepository {
+public class ElasticsearchAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
@@ -118,6 +119,23 @@ public class ElasticsearchAuditEventRepository implements PageAuditEventReposito
                 .collect(Collectors.toList());
 
         return new Page<>(pageRequest, new ArrayList<>(content));
+    }
+
+    @Override
+    public AuditEvent get(Object id) {
+
+        //noinspection unchecked
+        Map<String, Object> map = elasticsearchRestTemplate.get(
+                id.toString(),
+                Map.class,
+                IndexCoordinates.of(PluginAuditEvent.DEFAULT_INDEX_NAME + "-*")
+        );
+
+        if (MapUtils.isNotEmpty(map)) {
+            return createPluginAuditEvent(map);
+        }
+
+        return null;
     }
 
     /**

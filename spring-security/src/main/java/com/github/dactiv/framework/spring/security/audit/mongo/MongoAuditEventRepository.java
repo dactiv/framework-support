@@ -2,8 +2,9 @@ package com.github.dactiv.framework.spring.security.audit.mongo;
 
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
-import com.github.dactiv.framework.spring.security.audit.PageAuditEventRepository;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class MongoAuditEventRepository implements PageAuditEventRepository {
+public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
@@ -50,7 +51,7 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
         try {
 
             if (!pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-                mongoTemplate.save(pluginAuditEvent, PluginAuditEvent.DEFAULT_INDEX_NAME);
+                event = mongoTemplate.save(pluginAuditEvent, PluginAuditEvent.DEFAULT_INDEX_NAME);
             }
 
         } catch (Exception e) {
@@ -85,6 +86,19 @@ public class MongoAuditEventRepository implements PageAuditEventRepository {
         List<Map> data = mongoTemplate.find(query, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
 
         return new Page<>(pageRequest, data.stream().map(this::createPluginAuditEvent).collect(Collectors.toList()));
+    }
+
+    @Override
+    public AuditEvent get(Object id) {
+
+        //noinspection unchecked
+        Map<String, Object> map = mongoTemplate.findById(id, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+
+        if (MapUtils.isNotEmpty(map)) {
+            return createPluginAuditEvent(map);
+        }
+
+        return null;
     }
 
     /**

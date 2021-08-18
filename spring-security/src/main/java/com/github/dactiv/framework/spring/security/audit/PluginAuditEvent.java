@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security.audit;
 
-import com.github.dactiv.framework.commons.Casts;
 import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.time.Instant;

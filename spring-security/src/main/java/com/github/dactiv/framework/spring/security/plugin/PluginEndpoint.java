@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.plugin;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.ServiceException;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.tree.Tree;
@@ -97,6 +98,11 @@ public class PluginEndpoint {
     private Map<String, PluginInfo> parent = new LinkedHashMap<>();
 
     /**
+     * 找不到父类的插件信息
+     */
+    private final Map<String, List<Method>> missingParentMap = new LinkedHashMap<>();
+
+    /**
      * 并发锁
      */
     private final Lock lock = new ReentrantLock();
@@ -179,11 +185,18 @@ public class PluginEndpoint {
                 pluginInfoList.add(parent);
 
                 Method[] methods = classTarget.isInterface() ? classTarget.getMethods() : classTarget.getDeclaredMethods();
-                List<Method> methodList = Arrays.asList(methods);
-                // 遍历方法级别的 plugin 注解。并添加到 parent 中
-                pluginInfoList.addAll(buildPluginInfo(methodList, parent));
 
-            } else if (Method.class.isAssignableFrom(target.getClass())){
+                List<Method> methodList = Arrays.asList(methods);
+
+                TargetObject targetObject = new TargetObject(target, methodList);
+
+                // 遍历方法级别的 plugin 注解。并添加到 parent 中
+                List<PluginInfo> pluginInfos = buildPluginInfo(targetObject, parent);
+
+                pluginInfoList.addAll(pluginInfos);
+
+            } else if (Method.class.isAssignableFrom(target.getClass())) {
+
                 Method method = (Method) target;
 
                 Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
@@ -200,11 +213,19 @@ public class PluginEndpoint {
                             .values()
                             .stream()
                             .filter(p -> p.getId().equals(plugin.parent()))
-                            .findFirst()
-                            .orElseThrow(() -> new SystemException("找不到" + plugin.parent() + "的父类插件信息"));
-                }
+                            .findFirst().orElse(null);
 
-                pluginInfoList.addAll(buildPluginInfo(Collections.singletonList(method), temp));
+                    if (Objects.isNull(temp)) {
+                        List<Method> methods = missingParentMap.computeIfAbsent(plugin.parent(), s -> new ArrayList<>());
+                        methods.add(method);
+                        continue;
+                    }
+                }
+                TargetObject targetObject = new TargetObject(method, Collections.singletonList(method));
+
+                List<PluginInfo> pluginInfos = buildPluginInfo(targetObject, temp);
+
+                pluginInfoList.addAll(pluginInfos);
             } else {
                 throw new SystemException("Plugin 注解只支持 Class 或 Method 类型, ");
             }
@@ -268,13 +289,14 @@ public class PluginEndpoint {
     /**
      * 遍历方法级别的 {@link Plugin} 信息，并将值合并的 {@link PluginInfo#getChildren()} 中
      *
-     * @param methodList 方法集合
-     * @param parent     根节点信息
+     * @param targetObject 目标对象
+     * @param parent       根节点信息
      */
-    private List<PluginInfo> buildPluginInfo(List<Method> methodList, PluginInfo parent) {
+    private List<PluginInfo> buildPluginInfo(TargetObject targetObject, PluginInfo parent) {
+
         List<PluginInfo> result = new ArrayList<>();
 
-        for (Method method : methodList) {
+        for (Method method : targetObject.getMethodList()) {
             // 如果找不到 PluginInfo 注解，什么都不做
             Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
 
@@ -289,7 +311,7 @@ public class PluginEndpoint {
             }
 
             // 获取请求 url 值
-            List<String> values = getRequestValues(method, parent);
+            List<String> values = getRequestValues(targetObject.getTarget(), method, parent);
 
             if (values.isEmpty()) {
                 continue;
@@ -315,6 +337,16 @@ public class PluginEndpoint {
             }
 
             result.add(target);
+
+            if (missingParentMap.containsKey(target.getId())) {
+
+                List<Method> subMethods = missingParentMap.get(target.getId());
+
+                TargetObject subObject = new TargetObject(targetObject, subMethods);
+
+                result.addAll(buildPluginInfo(subObject, target));
+            }
+
         }
 
         return result;
@@ -397,25 +429,39 @@ public class PluginEndpoint {
     /**
      * 获取多个请求 uri 信息，并用 ，（逗号）分割
      *
+     * @param target 目标对象
      * @param targetValue 目标 url 值
      * @param parent      父类 plugin
-     *
      * @return 多个请求 uri 信息，并用 ，（逗号）分割
      */
-    private String getRequestValueString(String targetValue, PluginInfo parent) {
+    private String getRequestValueString(Object target, String targetValue, PluginInfo parent) {
 
         List<String> uri = new ArrayList<>();
 
         if (StringUtils.isEmpty(parent.getValue())) {
-            return targetValue;
+            return StringUtils.appendIfMissing(targetValue, "/**");
+        } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
+
+            TargetObject targetObject = Casts.cast(target);
+
+            if (Method.class.isAssignableFrom(targetObject.getTarget().getClass())) {
+                return StringUtils.appendIfMissing(targetValue, "/**");
+            }
+
         }
 
         for (String parentValue : StringUtils.split(parent.getValue())) {
+
             for (String value : StringUtils.split(targetValue)) {
+
                 parentValue = StringUtils.remove(parentValue, "**");
+
                 String url = StringUtils.appendIfMissing(parentValue, value + "/**");
+
                 uri.add(RegExUtils.removeAll(url, "\\{.*\\}"));
+
             }
+
         }
 
         return StringUtils.join(uri, ",");
@@ -424,12 +470,12 @@ public class PluginEndpoint {
     /**
      * 获取方法名请求值
      *
+     * @param target 构建目标
      * @param method 方法
      * @param parent 父类节点
-     *
      * @return 请求值集合
      */
-    private List<String> getRequestValues(Method method, PluginInfo parent) {
+    private List<String> getRequestValues(Object target, Method method, PluginInfo parent) {
 
         // 获取 RequestMapping 的 value 信息
         List<String> values = new ArrayList<>();
@@ -496,7 +542,7 @@ public class PluginEndpoint {
         }
 
         return values.stream()
-                .map(v -> parent == null ? v : getRequestValueString(v, parent))
+                .map(v -> parent == null ? v : getRequestValueString(target, v, parent))
                 .collect(Collectors.toList());
     }
 
@@ -528,7 +574,7 @@ public class PluginEndpoint {
 
                             Method[] methods = targetClass.getDeclaredMethods();
 
-                            for (Method method: methods) {
+                            for (Method method : methods) {
 
                                 Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
 

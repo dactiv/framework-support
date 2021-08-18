@@ -1,9 +1,12 @@
 package com.github.dactiv.framework.spring.security.audit.elasticsearch;
 
+import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.spring.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
+import com.github.dactiv.framework.spring.security.audit.StringIdEntity;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.collections.MapUtils;
@@ -122,13 +125,19 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     }
 
     @Override
-    public AuditEvent get(Object id) {
+    public AuditEvent get(Object target) {
+
+        if (!StringIdEntity.class.isAssignableFrom(target.getClass())) {
+            throw new SystemException("目标对象不是 StringIdEntity 对象");
+        }
+
+        StringIdEntity stringIdEntity = Casts.cast(target);
 
         //noinspection unchecked
         Map<String, Object> map = elasticsearchRestTemplate.get(
-                id.toString(),
+                stringIdEntity.getId(),
                 Map.class,
-                IndexCoordinates.of(PluginAuditEvent.DEFAULT_INDEX_NAME + "-*")
+                IndexCoordinates.of(indexGenerator.generateIndex(stringIdEntity))
         );
 
         if (MapUtils.isNotEmpty(map)) {

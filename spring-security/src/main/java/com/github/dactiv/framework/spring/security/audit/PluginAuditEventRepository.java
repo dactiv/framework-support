@@ -28,13 +28,13 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
     Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type);
 
     /**
-     * 通过 id 获取数据
+     * 通过唯一识别获取数据
      *
-     * @param id 唯一识别;
+     * @param target 唯一识别;
      *
      * @return 审计事件
      */
-    AuditEvent get(Object id);
+    AuditEvent get(Object target);
 
     /**
      * 创建审计事件

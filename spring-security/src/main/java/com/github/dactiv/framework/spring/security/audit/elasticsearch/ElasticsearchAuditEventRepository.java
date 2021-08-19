@@ -25,10 +25,7 @@ import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +61,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
         if (pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-            return ;
+            return;
         }
 
         try {
@@ -151,7 +148,6 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      * 创建插件审计事件
      *
      * @param map map 数据源
-     *
      * @return 插件审计事件
      */
     public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
@@ -166,10 +162,9 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     /**
      * 创建查询条件
      *
-     * @param after 在什么时间之后的
-     * @param type  类型
+     * @param after     在什么时间之后的
+     * @param type      类型
      * @param principal 操作人
-     *
      * @return 查询条件
      */
     private Criteria createCriteria(Instant after, String type, String principal) {
@@ -180,8 +175,8 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
             criteria = criteria.and("type").is(type);
         }
 
-        if (after != null) {
-            criteria = criteria.and("type").greaterThanEqual(type);
+        if (Objects.nonNull(after)) {
+            criteria = criteria.and("timestamp").greaterThanEqual(after.getEpochSecond());
         }
 
         if (StringUtils.isNotEmpty(principal)) {
@@ -194,10 +189,9 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     /**
      * 获取当前 index
      *
-     * @param after 在什么时间之后
-     * @param type 类型
+     * @param after     在什么时间之后
+     * @param type      类型
      * @param principal 操作人
-     *
      * @return index 信息
      */
     private String getIndex(Instant after, String type, String principal) {
@@ -205,8 +199,8 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
             AuditEvent auditEvent = new AuditEvent(
                     after,
-                    StringUtils.defaultString(principal,""),
-                    StringUtils.defaultString(type,""),
+                    StringUtils.defaultString(principal, ""),
+                    StringUtils.defaultString(type, ""),
                     new LinkedHashMap<>()
             );
 

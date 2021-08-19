@@ -9,6 +9,7 @@ import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 控制器审计方法拦截器
@@ -77,8 +77,6 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
 
         HandlerMethod handlerMethod = Casts.cast(handler);
 
-        Map<String, Object> data;
-
         String type;
 
         String principal;
@@ -90,15 +88,6 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
             principal = getPrincipal(auditable.principal(), request);
 
             type = auditable.type();
-
-            data = getData(request, response, handler);
-
-            if (ex == null) {
-                type = type + ":" + successSuffixName;
-            } else {
-                type = type + ":" + failureSuffixName;
-                data.put(exceptionKeyName, ex.getMessage());
-            }
 
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
@@ -115,25 +104,40 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
                     type = root.name() + ":" + type;
                 }
 
-                data = getData(request, response, handler);
-
-                if (ex == null) {
-                    type = type + ":" + successSuffixName;
-                } else {
-                    type = type + ":" + failureSuffixName;
-                    data.put(exceptionKeyName, ex.getMessage());
-                }
+                createAuditEvent(principal, type, request, response, handler, ex);
 
             } else {
                 return;
             }
         }
 
-        AuditEvent auditEvent = new AuditEvent(Instant.now(), principal, type, data);
+        AuditEvent auditEvent = createAuditEvent(principal, type, request, response, handler, ex);
 
         // 推送审计事件
         applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));
 
+    }
+
+    private AuditEvent createAuditEvent(String principal,
+                                        String type,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Object handler,
+                                        Exception ex) {
+
+        Map<String, Object> data = getData(request, response, handler);
+
+        if (ex == null && HttpStatus.OK.value() == response.getStatus()) {
+            type = type + ":" + successSuffixName;
+        } else {
+            type = type + ":" + failureSuffixName;
+
+            if (Objects.nonNull(ex)) {
+                data.put(exceptionKeyName, ex.getMessage());
+            }
+        }
+
+        return new AuditEvent(Instant.now(), principal, type, data);
     }
 
     private Map<String, Object> getData(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -201,4 +205,5 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
     public String getExceptionKeyName() {
         return exceptionKeyName;
     }
+
 }

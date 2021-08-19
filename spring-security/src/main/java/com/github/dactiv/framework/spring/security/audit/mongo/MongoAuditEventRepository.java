@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +64,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
 
-        Criteria criteria = createCriteria(after, type);
+        Criteria criteria = createCriteria(principal, after, type);
 
         Query query = new Query(criteria).with(Sort.by(Sort.Order.desc("timestamp")));
 
@@ -76,7 +77,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
     @Override
     public Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type) {
 
-        Criteria criteria = createCriteria(after, type);
+        Criteria criteria = createCriteria(principal, after, type);
 
         Query query = new Query(criteria)
                 .with(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()))
@@ -105,7 +106,6 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
      * 创建插件审计事件
      *
      * @param map map 数据源
-     *
      * @return 插件审计事件
      */
     public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
@@ -120,21 +120,25 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
     /**
      * 创建查询条件
      *
-     * @param after 在什么时间之后的
-     * @param type  类型
-     *
+     * @param principal 操作人
+     * @param after     在什么时间之后的
+     * @param type      类型
      * @return 查询条件
      */
-    private Criteria createCriteria(Instant after, String type) {
+    private Criteria createCriteria(String principal, Instant after, String type) {
 
         Criteria criteria = new Criteria();
+
+        if (StringUtils.isNotEmpty(principal)) {
+            criteria = criteria.and("principal").is(principal);
+        }
 
         if (StringUtils.isNotEmpty(type)) {
             criteria = criteria.and("type").is(type);
         }
 
-        if (after != null) {
-            criteria = criteria.and("type").gte(type);
+        if (Objects.nonNull(after)) {
+            criteria = criteria.and("timestamp").gte(after);
         }
 
         return criteria;

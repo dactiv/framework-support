@@ -25,6 +25,13 @@ public interface Retryable {
     /**
      * 设置当前重试次数
      *
+     * @param retryCount 当前重试次数
+     */
+    void setRetryCount(Integer retryCount);
+
+    /**
+     * 设置当前重试次数
+     *
      * @return 重试次数
      */
     Integer getMaxRetryCount();

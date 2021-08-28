@@ -37,6 +37,8 @@ public class SpringMvcUtils {
 
     public final static String COMMA_STRING = ",";
 
+    public final static String DEFAULT_ATTACHMENT_NAME = "attachment;filename=";
+
     /**
      * 获取 request 的 attribute
      *
@@ -218,7 +220,7 @@ public class SpringMvcUtils {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, fileName);
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(new File(path)), headers, HttpStatus.CREATED);
 
 

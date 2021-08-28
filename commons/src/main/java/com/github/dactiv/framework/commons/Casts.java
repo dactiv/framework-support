@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 转型工具类
@@ -41,6 +42,16 @@ public class Casts {
      * 默认 and 符号
      */
     public static final String DEFAULT_AND_SYMBOL = "&";
+
+    /**
+     * 路径变量开始符号
+     */
+    public static final String PATH_VARIABLE_SYMBOL_START = "{";
+
+    /**
+     * 路径变量结束符号
+     */
+    public static final String PATH_VARIABLE_SYMBOL_END = "}";
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -346,6 +357,36 @@ public class Casts {
         }
 
         return cast(value, type);
+    }
+
+    /**
+     * 设置 url 路径变量值
+     *
+     * @param url url 路径
+     * @param variableValue url 路径的变量对应值 map
+     *
+     * @return 新的 url 路径
+     */
+    public static String setUrlPathVariableValue(String url, Map<String, String> variableValue) {
+
+        String[] vars = StringUtils.substringsBetween(url, PATH_VARIABLE_SYMBOL_START, PATH_VARIABLE_SYMBOL_END);
+
+        List<String> varList = Arrays.asList(vars);
+
+        List<String> existList = varList
+                .stream()
+                .map(StringUtils::trimToEmpty)
+                .filter(variableValue::containsKey)
+                .collect(Collectors.toList());
+
+        String temp = url;
+
+        for (String s : existList) {
+            String searchString = PATH_VARIABLE_SYMBOL_START + s + PATH_VARIABLE_SYMBOL_END;
+            temp = StringUtils.replace(temp, searchString, variableValue.get(s));
+        }
+
+        return temp;
     }
 
     /**

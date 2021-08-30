@@ -1,12 +1,15 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,23 +21,31 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    /**
-     * 默认的认证类型 header 名称
-     */
-    public static final String SPRING_SECURITY_FORM_TYPE_HEADER_NAME = "X-AUTHENTICATION-TYPE";
-    public static final String SPRING_SECURITY_FORM_TYPE_PARAM_NAME = "authenticationType";
+    private final AuthenticationProperties properties;
 
-    public final static String SPRING_SECURITY_ANONYMOUS_USER_TYPE = "AnonymousUser";
-    /**
-     * 认证类型 header 名称
-     */
-    private String typeHeaderName = SPRING_SECURITY_FORM_TYPE_HEADER_NAME;
+    public RequestAuthenticationFilter(AuthenticationProperties properties) {
+        this.properties = properties;
 
-    private String typeParamName = SPRING_SECURITY_FORM_TYPE_PARAM_NAME;
+        setRequiresAuthenticationRequestMatcher(
+                new AntPathRequestMatcher(properties.getLoginProcessingUrl(), HttpMethod.POST.name())
+        );
+
+        setUsernameParameter(properties.getUsernameParamName());
+        setPasswordParameter(properties.getPasswordParamName());
+    }
+
+    @Override
+    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        return super.requiresAuthentication(request, response) || StringUtils.isNotEmpty(obtainType(request));
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
+
+        if (!HttpMethod.POST.matches(request.getMethod()) && super.requiresAuthentication(request, response)) {
+            throw new AuthenticationServiceException("不支持 [" + request.getMethod() + "] 方式的登陆请求");
+        }
 
         Authentication token = createToken(request, response);
 
@@ -51,8 +62,14 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      *
      * @throws AuthenticationException 认证异常
      */
-    protected Authentication createToken(HttpServletRequest request,
-                                         HttpServletResponse response) throws AuthenticationException {
+    public Authentication createToken(HttpServletRequest request,
+                                      HttpServletResponse response) throws AuthenticationException {
+
+        String type = obtainType(request);
+
+        if (StringUtils.isEmpty(type)) {
+            throw new AuthenticationServiceException("授权类型不正确");
+        }
 
         String username = obtainUsername(request);
         String password = obtainPassword(request);
@@ -67,17 +84,9 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         username = username.trim();
 
-        String type = obtainType(request);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 
-        if (StringUtils.isEmpty(type)) {
-            throw new AuthenticationServiceException("授权类型不正确");
-        }
-
-        if (type.equals(SPRING_SECURITY_ANONYMOUS_USER_TYPE)) {
-            return new UsernamePasswordAuthenticationToken(username, password);
-        } else {
-            return new RequestAuthenticationToken(request, response, username, password, type);
-        }
+        return new RequestAuthenticationToken(request, response, token, type);
 
     }
 
@@ -89,42 +98,15 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      * @return 类型
      */
     protected String obtainType(HttpServletRequest request) {
-        return request.getHeader(typeHeaderName);
+
+        String type =  request.getHeader(properties.getTypeHeaderName());
+
+        if (StringUtils.isEmpty(type)) {
+            type = request.getParameter(properties.getTypeParamName());
+        }
+
+        return type;
     }
 
-    /**
-     * 获取认证类型 header 名称
-     *
-     * @return 认证类型 header 名称
-     */
-    public String getTypeHeaderName() {
-        return typeHeaderName;
-    }
 
-    /**
-     * 设置认证类型 header 名称
-     *
-     * @param typeHeaderName 认证类型 header 名称
-     */
-    public void setTypeHeaderName(String typeHeaderName) {
-        this.typeHeaderName = typeHeaderName;
-    }
-
-    /**
-     * 获取认证类型参数名称
-     *
-     * @return 参数名称
-     */
-    public String getTypeParamName() {
-        return typeParamName;
-    }
-
-    /**
-     * 设置认证类型参数名称
-     *
-     * @param typeParamName 参数名称
-     */
-    public void setTypeParamName(String typeParamName) {
-        this.typeParamName = typeParamName;
-    }
 }

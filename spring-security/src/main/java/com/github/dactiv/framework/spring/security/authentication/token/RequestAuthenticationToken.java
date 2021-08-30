@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.spring.security.authentication.token;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,16 +29,15 @@ public class RequestAuthenticationToken extends PrincipalAuthenticationToken {
      *
      * @param httpServletRequest  http servlet request
      * @param httpServletResponse http servlet response
-     * @param principal           当前用户
-     * @param credentials         凭证
+     * @param token               登陆账户密码认证令牌
      * @param type                认证类型
      */
     public RequestAuthenticationToken(HttpServletRequest httpServletRequest,
                                       HttpServletResponse httpServletResponse,
-                                      Object principal,
-                                      Object credentials,
+                                      UsernamePasswordAuthenticationToken token,
                                       String type) {
-        super(principal, credentials, type);
+        super(token, type);
+
         this.httpServletResponse = httpServletResponse;
         this.httpServletRequest = httpServletRequest;
     }

@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author maurice.chen
  */
-@ConfigurationProperties("spring.security.support.audit")
+@ConfigurationProperties("authentication.audit")
 public class AuditProperties {
 
     /**

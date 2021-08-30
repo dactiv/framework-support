@@ -1,8 +1,8 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
-import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.config.DeviceIdProperties;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
@@ -21,55 +21,21 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 设备唯一识别的 spring security context 仓库实现,用于移动端通过设备唯一识别获取当前 security context 使用
  *
  * @author maurice
  */
-public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContextRepository {
+public class DeviceIdContextRepository extends HttpSessionSecurityContextRepository {
 
-    /**
-     * 默认的用户 id 头名称
-     */
-    public final static String DEFAULT_USER_ID_HEADER_NAME = "X-ACCESS-USER-ID";
+    private final AuthenticationProperties properties;
 
-    /**
-     * 默认存储在 redis 的 security context key 名称
-     */
-    public final static String DEFAULT_SPRING_SECURITY_CONTEXT_KEY = "spring:security:context:";
+    private final RedissonClient redissonClient;
 
-    /**
-     * 默认存储在 redis 的 security context key 缓存配置
-     */
-    public final static CacheProperties DEFAULT_CACHE = new CacheProperties(
-            DEFAULT_SPRING_SECURITY_CONTEXT_KEY,
-            new TimeProperties(2592000, TimeUnit.SECONDS)
-    );
-
-    private CacheProperties cache = DEFAULT_CACHE;
-
-    private RedissonClient redissonClient;
-
-    private String loginProcessingUrl;
-
-    public DeviceIdSecurityContextRepository() {
-    }
-
-    public DeviceIdSecurityContextRepository(RedissonClient redissonClient) {
+    public DeviceIdContextRepository(AuthenticationProperties properties, RedissonClient redissonClient) {
+        this.properties = properties;
         this.redissonClient = redissonClient;
-    }
-
-    public DeviceIdSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient) {
-        this.cache = cache;
-        this.redissonClient = redissonClient;
-    }
-
-    public DeviceIdSecurityContextRepository(CacheProperties cache, RedissonClient redissonClient, String loginProcessingUrl) {
-        this.cache = cache;
-        this.redissonClient = redissonClient;
-        this.loginProcessingUrl = loginProcessingUrl;
     }
 
     @Override
@@ -83,7 +49,7 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
 
         if (StringUtils.isNotEmpty(token)) {
 
-            String userId = request.getHeader(DEFAULT_USER_ID_HEADER_NAME);
+            String userId = request.getHeader(DeviceIdProperties.DEFAULT_SPRING_SECURITY_CONTEXT_KEY);
 
             if (StringUtils.isNotEmpty(userId)) {
 
@@ -116,9 +82,9 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
             } else {
                 return token.equals(userId);
             }
-        } else {
-            return false;
         }
+
+        return false;
 
     }
 
@@ -129,53 +95,71 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
 
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
-        if (StringUtils.isNotEmpty(token)) {
-
-            SaveContextOnUpdateOrErrorResponseWrapper responseWrapper = WebUtils.getNativeResponse(
-                    response,
-                    SaveContextOnUpdateOrErrorResponseWrapper.class
-            );
-
-            if (Objects.nonNull(responseWrapper) && !responseWrapper.isContextSaved() && Objects.nonNull(context.getAuthentication()) && context.getAuthentication().isAuthenticated()) {
-
-                Object details = context.getAuthentication().getDetails();
-
-                if (details != null && SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
-
-                    RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
-                    SecurityContext cacheSecurityContext = bucket.get();
-
-                    if (cacheSecurityContext != null) {
-
-                        String userId = request.getHeader(DEFAULT_USER_ID_HEADER_NAME);
-
-                        if (StringUtils.isEmpty(userId) && StringUtils.equals(request.getRequestURI(), loginProcessingUrl)) {
-                            bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
-                            SecurityContextHolder.setContext(context);
-                        } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
-
-                            if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
-
-                                MobileUserDetails mobileUserDetails = Casts.cast(details);
-
-                                if (StringUtils.isNotEmpty(mobileUserDetails.getDeviceIdentified())) {
-                                    bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
-                                }
-                            }
-
-                            bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
-                            SecurityContextHolder.setContext(context);
-                        }
-
-                    } else {
-                        bucket.set(context, cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
-                        SecurityContextHolder.setContext(context);
-                    }
-
-                }
-            }
+        if (StringUtils.isEmpty(token)) {
+            return ;
         }
 
+        SaveContextOnUpdateOrErrorResponseWrapper responseWrapper = WebUtils.getNativeResponse(
+                response,
+                SaveContextOnUpdateOrErrorResponseWrapper.class
+        );
+
+        if (Objects.isNull(responseWrapper) || !responseWrapper.isContextSaved()) {
+            return ;
+        }
+
+        if (Objects.isNull(context.getAuthentication()) || !context.getAuthentication().isAuthenticated()) {
+            return ;
+        }
+
+        Object details = context.getAuthentication().getDetails();
+
+        if (Objects.isNull(details) || !SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
+            return ;
+        }
+
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
+        SecurityContext cacheSecurityContext = bucket.get();
+
+        if (Objects.nonNull(cacheSecurityContext)) {
+
+            String userId = request.getHeader(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME);
+
+            if (StringUtils.isEmpty(userId) && StringUtils.equals(request.getRequestURI(), properties.getLoginProcessingUrl())) {
+                setSecurityContext(context, bucket);
+            } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
+
+                if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
+
+                    MobileUserDetails mobileUserDetails = Casts.cast(details);
+
+                    if (StringUtils.isNotEmpty(mobileUserDetails.getDeviceIdentified())) {
+                        bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
+                    }
+                }
+
+                setSecurityContext(context, bucket);
+            }
+
+        } else {
+            setSecurityContext(context, bucket);
+        }
+
+    }
+
+    /**
+     * 设置安全上下文
+     *
+     * @param context 安全上下文
+     * @param bucket 安全上下文的桶对象
+     */
+    private void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
+        bucket.set(
+                context,
+                properties.getDeviceId().getCache().getExpiresTime().getValue(),
+                properties.getDeviceId().getCache().getExpiresTime().getUnit()
+        );
+        SecurityContextHolder.setContext(context);
     }
 
     @Override
@@ -191,7 +175,7 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
 
             SecurityContext securityContext = bucket.get();
 
-            String userId = request.getHeader(DEFAULT_USER_ID_HEADER_NAME);
+            String userId = request.getHeader(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME);
 
             result = isCurrentUserSecurityContext(userId, securityContext, id) || securityContext != null;
         }
@@ -211,7 +195,7 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
      * @return redis 桶
      */
     public RBucket<SecurityContext> getSecurityContextBucket(String deviceIdentified) {
-        return redissonClient.getBucket(cache.getName(deviceIdentified));
+        return redissonClient.getBucket(properties.getDeviceId().getCache().getName(deviceIdentified));
     }
 
     /**
@@ -226,7 +210,7 @@ public class DeviceIdSecurityContextRepository extends HttpSessionSecurityContex
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
-        httpHeaders.add(DEFAULT_USER_ID_HEADER_NAME, userId.toString());
+        httpHeaders.add(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME, userId.toString());
 
         return httpHeaders;
     }

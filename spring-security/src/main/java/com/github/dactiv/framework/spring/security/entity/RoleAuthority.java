@@ -32,12 +32,21 @@ public class RoleAuthority implements GrantedAuthority {
     /**
      * spring security 角色授权现实
      *
+     * @param authority spring security role 的 authority name 值
+     */
+    public RoleAuthority(String authority) {
+        this.authority = authority;
+    }
+
+    /**
+     * spring security 角色授权现实
+     *
      * @param name      名称
      * @param authority spring security role 的 authority name 值
      */
     public RoleAuthority(String name, String authority) {
+        this(authority);
         this.name = name;
-        this.authority = authority;
     }
 
     public RoleAuthority(Map<String, Object> map) {

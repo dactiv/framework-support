@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice
  */
-@Endpoint(id = "plugin")
+@Endpoint(id = PluginEndpoint.DEFAULT_PLUGIN_KEY_NAME)
 public class PluginEndpoint {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PluginEndpoint.class);

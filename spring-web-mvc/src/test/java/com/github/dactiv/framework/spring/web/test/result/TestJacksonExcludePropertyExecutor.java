@@ -10,7 +10,6 @@ import com.github.dactiv.framework.spring.web.test.result.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

@@ -1,9 +1,8 @@
-package com.github.dactiv.framework.spring.security.asscess;
+package com.github.dactiv.framework.spring.security.plugin;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
-import com.github.dactiv.framework.spring.security.plugin.Plugin;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -19,7 +18,7 @@ import java.util.List;
  *
  * @author maurice
  */
-public class UserTypeVoter implements AccessDecisionVoter<MethodInvocation> {
+public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocation> {
 
     @Override
     public boolean supports(ConfigAttribute attribute) {

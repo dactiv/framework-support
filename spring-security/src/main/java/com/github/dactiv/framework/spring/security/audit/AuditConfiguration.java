@@ -32,7 +32,7 @@ import java.util.*;
 @Configuration
 @EnableConfigurationProperties(AuditProperties.class)
 @Import(AuditConfiguration.AuditImportSelector.class)
-@ConditionalOnProperty(prefix = "spring.security.support", value = "enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "authentication", value = "enabled", matchIfMissing = true)
 public class AuditConfiguration {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AuditConfiguration.class);

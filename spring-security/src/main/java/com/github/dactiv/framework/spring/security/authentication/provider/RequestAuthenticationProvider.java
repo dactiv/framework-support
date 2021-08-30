@@ -28,11 +28,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 当前用户认证供应者实现
+ * 请求认证供应者实现
  *
  * @author maurice.chen
  */
-public class PrincipalAuthenticationProvider implements AuthenticationManager, AuthenticationProvider, MessageSourceAware, InitializingBean {
+public class RequestAuthenticationProvider implements AuthenticationManager, AuthenticationProvider, MessageSourceAware, InitializingBean {
 
     /**
      * 国际化信息
@@ -44,6 +44,9 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      */
     private List<UserDetailsService> userDetailsServices;
 
+    /**
+     * redisson 客户端
+     */
     private final RedissonClient redissonClient;
 
     /**
@@ -56,7 +59,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
-    public PrincipalAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService> userDetailsServices) {
+    public RequestAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
         this.redissonClient = redissonClient;
     }
@@ -245,8 +248,7 @@ public class PrincipalAuthenticationProvider implements AuthenticationManager, A
                                                                        Collection<? extends GrantedAuthority> grantedAuthorities) {
 
         return new PrincipalAuthenticationToken(
-                token.getPrincipal(),
-                token.getCredentials(),
+                new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
                 token.getType(),
                 userDetails,
                 grantedAuthorities

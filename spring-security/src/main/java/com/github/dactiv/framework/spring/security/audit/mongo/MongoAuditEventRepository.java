@@ -2,8 +2,8 @@ package com.github.dactiv.framework.spring.security.audit.mongo;
 
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
-import com.github.dactiv.framework.spring.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.framework.spring.security.audit.PluginAuditEvent;
+import com.github.dactiv.framework.spring.security.audit.PluginAuditEventRepository;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

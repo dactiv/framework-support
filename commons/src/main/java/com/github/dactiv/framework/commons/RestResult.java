@@ -1,11 +1,7 @@
 package com.github.dactiv.framework.commons;
 
-import com.github.dactiv.framework.commons.exception.ErrorCodeException;
-
 import java.io.Serializable;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * rest 结果集实体类，用于统一返回指定格式数据使用

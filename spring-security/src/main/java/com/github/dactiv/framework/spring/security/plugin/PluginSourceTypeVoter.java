@@ -7,6 +7,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
@@ -20,14 +21,12 @@ import java.util.List;
  */
 public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocation> {
 
-    @Override
     public boolean supports(ConfigAttribute attribute) {
         return true;
     }
 
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return true;
+    public boolean supports(Class<?> targetClass) {
+        return MethodInvocation.class.isAssignableFrom(targetClass);
     }
 
     @Override
@@ -66,4 +65,5 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
 
         return AccessDecisionVoter.ACCESS_ABSTAIN;
     }
+
 }

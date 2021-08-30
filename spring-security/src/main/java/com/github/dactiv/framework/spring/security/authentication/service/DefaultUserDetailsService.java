@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication.service;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.DefaultUserProperties;
@@ -102,7 +103,16 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
     private void syncSecurityUserDetails(DefaultUserProperties properties) {
 
-        RList<SecurityUserDetails> list = redissonClient.getList(properties.getCache().getName(DEFAULT_TYPES));
+        CacheProperties cache = properties.getCache();
+
+        RList<SecurityUserDetails> list = redissonClient.getList(cache.getName(DEFAULT_TYPES));
+
+        if (Objects.nonNull(cache.getExpiresTime())) {
+            list.expireAsync(
+                    cache.getExpiresTime().getValue(),
+                    cache.getExpiresTime().getUnit()
+            );
+        }
 
         for (SecurityProperties.User user : properties.getData()) {
 
@@ -119,7 +129,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
                     continue;
                 }
 
-                list.remove(redisUser);
+                list.removeAsync(redisUser);
             }
 
             SecurityUserDetails newOne = new SecurityUserDetails(
@@ -140,7 +150,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
             newOne.setType(DEFAULT_TYPES);
 
-            list.add(newOne);
+            list.addAsync(newOne);
         }
     }
 }

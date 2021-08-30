@@ -5,18 +5,31 @@ import com.github.dactiv.framework.spring.security.authentication.JsonAuthentica
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
+import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
+import org.springframework.security.access.vote.AbstractAccessDecisionManager;
+import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * spring security 配置实现
+ *
+ * @author maurice.chen
+ */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(prefix = "authentication.spring.security", value = "override-http-security", matchIfMissing = true)
 public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -29,59 +42,41 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
     private AuthenticationProperties properties;
 
     @Autowired
-    private AccessDecisionManager accessDecisionManager;
-
-    @Autowired
     private JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
 
+    @Autowired(required = false)
+    private List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters = new LinkedList<>();
+
     @Override
-    protected void configure(AuthenticationManagerBuilder managerBuilder) {
-        managerBuilder.authenticationProvider(requestAuthenticationProvider);
+    protected void configure(AuthenticationManagerBuilder managerBuilder) throws Exception {
+        if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
+            for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
+                a.configure(managerBuilder);
+            }
+        } else {
+            managerBuilder.authenticationProvider(requestAuthenticationProvider);
+        }
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
+            for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
+                a.configure(web);
+            }
+        } else {
+            super.configure(web);
+        }
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        installHttpSecurity(http, properties, deviceIdContextRepository, accessDecisionManager);
-        createRequestAuthenticationFilter(properties, jsonAuthenticationFailureHandler);
-        http.addFilter(createRequestAuthenticationFilter(properties, jsonAuthenticationFailureHandler));
-    }
-
-    /**
-     * 创建请求认证 filter
-     *
-     * @param properties 配置信息
-     * @param jsonAuthenticationFailureHandler 响应 json 数据的认证失败处理实现
-     *
-     * @return 请求认证 filter
-     */
-    public static RequestAuthenticationFilter createRequestAuthenticationFilter(AuthenticationProperties properties,
-                                                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler) {
-        RequestAuthenticationFilter requestAuthenticationFilter = new RequestAuthenticationFilter(properties);
-        requestAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-        return requestAuthenticationFilter;
-    }
-
-    /**
-     * 初始化 http security
-     *
-     * @param http http security
-     * @param properties 安全配置信息
-     * @param deviceIdContextRepository 设备唯一识别的安全上下文仓库
-     * @param accessDecisionManager 访问空值管理
-     *
-     * @throws Exception 构造出错时抛出
-     */
-    public static void installHttpSecurity(HttpSecurity http,
-                                    AuthenticationProperties properties,
-                                    DeviceIdContextRepository deviceIdContextRepository,
-                                    AccessDecisionManager accessDecisionManager) throws Exception {
 
         http.authorizeRequests()
-                .antMatchers(properties.getAntMatchers().toArray(new String[0]))
+                .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
-                .accessDecisionManager(accessDecisionManager)
                 .and()
                 .formLogin()
                 .disable()
@@ -95,5 +90,49 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
                 .disable()
                 .securityContext()
                 .securityContextRepository(deviceIdContextRepository);
+
+        if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
+            for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
+                a.configure(http);
+            }
+        } else {
+
+            RequestAuthenticationFilter requestAuthenticationFilter = new RequestAuthenticationFilter(properties);
+            requestAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
+
+            http.addFilter(requestAuthenticationFilter);
+        }
+
+        addConsensusBasedToMethodSecurityInterceptor(http, properties);
     }
+
+    /**
+     * 添加 ConsensusBased 访问管理器到方法拦截器中
+     *
+     * @param http http security
+     */
+    public static void addConsensusBasedToMethodSecurityInterceptor(HttpSecurity http,
+                                                                    AuthenticationProperties properties) {
+        try {
+            MethodSecurityInterceptor methodSecurityInterceptor = http
+                    .getSharedObject(ApplicationContext.class)
+                    .getBean(MethodSecurityInterceptor.class);
+
+            AccessDecisionManager accessDecisionManager = methodSecurityInterceptor.getAccessDecisionManager();
+
+            if (AbstractAccessDecisionManager.class.isAssignableFrom(accessDecisionManager.getClass())) {
+
+                AbstractAccessDecisionManager adm = (AbstractAccessDecisionManager) accessDecisionManager;
+                adm.getDecisionVoters().add(new PluginSourceTypeVoter());
+
+                ConsensusBased consensusBased = new ConsensusBased(adm.getDecisionVoters());
+                consensusBased.setAllowIfEqualGrantedDeniedDecisions(properties.isAllowIfEqualGrantedDeniedDecisions());
+
+                methodSecurityInterceptor.setAccessDecisionManager(consensusBased);
+            }
+        } catch (Exception ignored) {
+
+        }
+    }
+
 }

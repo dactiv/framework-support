@@ -34,7 +34,7 @@ public class AuthenticationProperties {
     /**
      * 方法的接口路径
      */
-    private List<String> antMatchers = new LinkedList<>();
+    private List<String> permitUriAntMatchers = new LinkedList<>();
 
     /**
      * 默认用户配置
@@ -70,6 +70,11 @@ public class AuthenticationProperties {
      * 登陆密码参数名
      */
     private String passwordParamName = SECURITY_FORM_PASSWORD_PARAM_NAME;
+
+    /**
+     * 是否允许访问投票器的拒绝和同意相等时允许访问
+     */
+    private boolean allowIfEqualGrantedDeniedDecisions = false;
 
     /**
      * 获取默认用户信息集合
@@ -202,16 +207,34 @@ public class AuthenticationProperties {
      *
      * @return 开放的接口路径
      */
-    public List<String> getAntMatchers() {
-        return antMatchers;
+    public List<String> getPermitUriAntMatchers() {
+        return permitUriAntMatchers;
     }
 
     /**
      * 设置开放的接口路径
      *
-     * @param antMatchers 开放的接口路径
+     * @param permitUriAntMatchers 开放的接口路径
      */
-    public void setAntMatchers(List<String> antMatchers) {
-        this.antMatchers = antMatchers;
+    public void setPermitUriAntMatchers(List<String> permitUriAntMatchers) {
+        this.permitUriAntMatchers = permitUriAntMatchers;
+    }
+
+    /**
+     * 获取是否允许访问投票器的拒绝和同意相等时允许访问
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isAllowIfEqualGrantedDeniedDecisions() {
+        return allowIfEqualGrantedDeniedDecisions;
+    }
+
+    /**
+     * 设置是否允许访问投票器的拒绝和同意相等时允许访问
+     *
+     * @param allowIfEqualGrantedDeniedDecisions true 是，否则 false
+     */
+    public void setAllowIfEqualGrantedDeniedDecisions(boolean allowIfEqualGrantedDeniedDecisions) {
+        this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 }

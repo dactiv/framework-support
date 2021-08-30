@@ -8,6 +8,7 @@ import com.github.dactiv.framework.spring.security.authentication.token.RequestA
 import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
@@ -94,10 +95,11 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
                 .getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
+                .map(s -> StringUtils.remove(s, RoleAuthority.DEFAULT_ROLE_PREFIX))
                 .collect(Collectors.toList());
 
         return user.getName().equals(details.getUsername())
-                && user.getPassword().equals(details.getPassword())
+                && matchesPassword(user.getPassword(),null, details)
                 && user.getRoles().containsAll(detailsAuthorities);
     }
 
@@ -105,7 +107,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
         CacheProperties cache = properties.getCache();
 
-        RList<SecurityUserDetails> list = redissonClient.getList(cache.getName(DEFAULT_TYPES));
+        RList<SecurityUserDetails> list = redissonClient.getList(cache.getName());
 
         if (Objects.nonNull(cache.getExpiresTime())) {
             list.expireAsync(
@@ -135,7 +137,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
             SecurityUserDetails newOne = new SecurityUserDetails(
                     UUID.randomUUID().toString(),
                     user.getName(),
-                    user.getPassword()
+                    passwordEncoder.encode(user.getPassword())
             );
 
             if (CollectionUtils.isNotEmpty(user.getRoles())) {

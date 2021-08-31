@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.spring.security.authentication;
+package com.github.dactiv.framework.spring.security.authentication.handler;
 
 import com.github.dactiv.framework.commons.RestResult;
 

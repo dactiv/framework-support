@@ -6,13 +6,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 认证 filter 实现, 用于结合 {@link UserDetailsService} 多用户类型认证的统一入口
@@ -50,6 +55,24 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         Authentication token = createToken(request, response);
 
         return getAuthenticationManager().authenticate(token);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+
+        getRememberMeServices().loginSuccess(request, response, authResult);
+
+        // 推送用户成功登陆事件
+        if (this.eventPublisher != null) {
+            eventPublisher.publishEvent(new InteractiveAuthenticationSuccessEvent(authResult, this.getClass()));
+        }
+
+        getSuccessHandler().onAuthenticationSuccess(request, response, chain, authResult);
     }
 
     /**

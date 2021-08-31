@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.security.authentication.service;
 
 import com.github.dactiv.framework.commons.RestResult;
-import com.github.dactiv.framework.spring.security.authentication.JsonAuthenticationFailureResponse;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import org.springframework.http.HttpStatus;
 

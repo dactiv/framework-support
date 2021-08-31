@@ -46,7 +46,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
     @Override
     public SecurityUserDetails getAuthenticationUserDetails(RequestAuthenticationToken token) throws AuthenticationException {
-        return getUser(token.getName());
+        return getUser(token.getPrincipal().toString());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
                 .findFirst()
                 .orElseThrow(() -> new BadCredentialsException("用户名密码错误"));
 
-        RList<SecurityUserDetails> list = redissonClient.getList(defaultUserProperties.getCache().getName(DEFAULT_TYPES));
+        RList<SecurityUserDetails> list = redissonClient.getList(defaultUserProperties.getCache().getName());
 
         return list
                 .stream()

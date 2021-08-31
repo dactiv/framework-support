@@ -2,10 +2,12 @@ package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
-import com.github.dactiv.framework.spring.security.authentication.JsonAuthenticationFailureHandler;
-import com.github.dactiv.framework.spring.security.authentication.JsonAuthenticationFailureResponse;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
@@ -57,7 +59,7 @@ public class SpringSecuritySupportAutoConfiguration {
     private List<InfoContributor> infoContributors;
 
     @Bean
-    @ConfigurationProperties("plugin")
+    @ConfigurationProperties("authentication.plugin")
     PluginEndpoint pluginEndpoint() {
         return new PluginEndpoint(infoContributors);
     }
@@ -85,6 +87,7 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -113,8 +116,16 @@ public class SpringSecuritySupportAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
     public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses) {
         return new JsonAuthenticationFailureHandler(failureResponses);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
+    public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(List<JsonAuthenticationSuccessResponse> successResponses,
+                                                                             AuthenticationProperties properties) {
+        return new JsonAuthenticationSuccessHandler(successResponses, properties);
     }
 
     @Bean

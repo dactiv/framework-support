@@ -1,7 +1,8 @@
-package com.github.dactiv.framework.spring.security.authentication;
+package com.github.dactiv.framework.spring.security.authentication.handler;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class JsonAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private List<JsonAuthenticationFailureResponse> failureResponses;
+    private final List<JsonAuthenticationFailureResponse> failureResponses;
 
     public JsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses) {
         this.failureResponses = failureResponses;
@@ -39,7 +40,9 @@ public class JsonAuthenticationFailureHandler implements AuthenticationFailureHa
                 new LinkedHashMap<>()
         );
 
-        failureResponses.forEach(f -> f.setting(result, request));
+        if (CollectionUtils.isNotEmpty(failureResponses)) {
+            failureResponses.forEach(f -> f.setting(result, request));
+        }
 
         response.setStatus(result.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

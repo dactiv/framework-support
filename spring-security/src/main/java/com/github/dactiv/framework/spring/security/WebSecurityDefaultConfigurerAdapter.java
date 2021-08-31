@@ -1,37 +1,34 @@
 package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
-import com.github.dactiv.framework.spring.security.authentication.JsonAuthenticationFailureHandler;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +53,15 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
     @Autowired
     private JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
+
+    @Autowired
+    private JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired(required = false)
     private List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters = new LinkedList<>();
@@ -125,10 +131,14 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
             }
         } else {
 
-            RequestAuthenticationFilter requestAuthenticationFilter = new RequestAuthenticationFilter(properties);
-            requestAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
+            RequestAuthenticationFilter filter = new RequestAuthenticationFilter(properties);
 
-            httpSecurity.addFilter(requestAuthenticationFilter);
+            filter.setAuthenticationManager(authenticationManager);
+            filter.setApplicationEventPublisher(eventPublisher);
+            filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
+            filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
+
+            httpSecurity.addFilter(filter);
         }
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);

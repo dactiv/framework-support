@@ -6,15 +6,14 @@ import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
+import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,17 +102,27 @@ public class SecurityUserDetails implements UserDetails {
 
         List<SimpleGrantedAuthority> result = new ArrayList<>();
 
-        result.addAll(resourceAuthorities.stream()
-                .filter(x -> StringUtils.isNotEmpty(x.getAuthority()))
-                .filter(x -> !DEFAULT_IS_AUTHENTICATED_METHOD_NAME.equals(x.getAuthority()))
-                .map(x -> new SimpleGrantedAuthority(x.getAuthority()))
-                .distinct()
-                .collect(Collectors.toList()));
+        result.addAll(
+                resourceAuthorities.stream()
+                        .filter(x -> StringUtils.isNotEmpty(x.getAuthority()))
+                        .filter(x -> !DEFAULT_IS_AUTHENTICATED_METHOD_NAME.equals(x.getAuthority()))
+                        .flatMap(x -> Arrays.stream(StringUtils.split(x.getAuthority(), SpringMvcUtils.COMMA_STRING)))
+                        .map(StringUtils::trimToEmpty)
+                        .filter(StringUtils::isNotEmpty)
+                        .filter(x -> StringUtils.startsWith(x, ResourceAuthority.DEFAULT_RESOURCE_PREFIX))
+                        .filter(x -> StringUtils.endsWith(x, ResourceAuthority.DEFAULT_RESOURCE_SUFFIX))
+                        .map(SimpleGrantedAuthority::new)
+                        .distinct()
+                        .collect(Collectors.toList())
+        );
 
-        result.addAll(roleAuthorities.stream()
-                .map(x -> new SimpleGrantedAuthority(RoleAuthority.DEFAULT_ROLE_PREFIX + x.getAuthority()))
-                .distinct()
-                .collect(Collectors.toList()));
+        result.addAll(
+                roleAuthorities.stream()
+                        .map(x -> RoleAuthority.DEFAULT_ROLE_PREFIX + x.getAuthority())
+                        .map(SimpleGrantedAuthority::new)
+                        .distinct()
+                        .collect(Collectors.toList())
+        );
 
         return result;
     }

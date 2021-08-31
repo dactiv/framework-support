@@ -2,6 +2,9 @@ package com.github.dactiv.framework.spring.security.enumerate;
 
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 插件来源枚举
  *
@@ -56,5 +59,10 @@ public enum ResourceSource implements NameEnum {
     public String getName() {
         return name;
     }
+
+    /**
+     * 默认同意通过的来源
+     */
+    public static final List<String> DEFAULT_GRANTED_SOURCES = Arrays.asList(System.toString(), All.toString());
 
 }

@@ -9,10 +9,12 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户类型表决器实现，用于判断当前 controller 方法里面是否带有 {@link Plugin} 注解的记录是否符合当前用户调用
@@ -46,9 +48,12 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
-        List<String> resourceTypes = Arrays.asList(plugin.sources());
+        List<String> resourceTypes = Arrays
+                .stream(plugin.sources())
+                .filter(s -> !ResourceSource.DEFAULT_GRANTED_SOURCES.contains(s))
+                .collect(Collectors.toList());
 
-        if (resourceTypes.contains(ResourceSource.All.toString())) {
+        if (CollectionUtils.isEmpty(resourceTypes)) {
             return AccessDecisionVoter.ACCESS_GRANTED;
         }
 

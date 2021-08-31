@@ -9,6 +9,7 @@ import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceType;
+import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RegExUtils;
@@ -277,7 +278,7 @@ public class PluginEndpoint {
                     uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
                 }
 
-                parent.setValue(StringUtils.join(uri, ","));
+                parent.setValue(StringUtils.join(uri, SpringMvcUtils.COMMA_STRING));
 
             }
 
@@ -304,12 +305,6 @@ public class PluginEndpoint {
                 continue;
             }
 
-            List<String> sources = Arrays.asList(plugin.sources());
-
-            if (!sources.contains(ResourceSource.Console.toString())) {
-                continue;
-            }
-
             // 获取请求 url 值
             List<String> values = getRequestValues(targetObject.getTarget(), method, parent);
 
@@ -328,12 +323,12 @@ public class PluginEndpoint {
                 target.setParent(parent.getId());
             }
 
-            target.setValue(StringUtils.join(values, ","));
+            target.setValue(StringUtils.join(values, SpringMvcUtils.COMMA_STRING));
 
             List<String> authorize = getSecurityAuthorize(method);
 
             if (!authorize.isEmpty()) {
-                target.setAuthority(StringUtils.join(authorize, ","));
+                target.setAuthority(StringUtils.join(authorize, SpringMvcUtils.COMMA_STRING));
             }
 
             result.add(target);
@@ -399,12 +394,11 @@ public class PluginEndpoint {
 
             if (SecurityUserDetails.DEFAULT_SUPPORT_SECURITY_METHOD_NAME.contains(mr.getName())) {
 
-
                 if (mr.getName().equals(SecurityUserDetails.DEFAULT_IS_AUTHENTICATED_METHOD_NAME)) {
                     result.add(SecurityUserDetails.DEFAULT_IS_AUTHENTICATED_METHOD_NAME);
                 } else {
                     for (int i = 0; i < mr.getChildCount(); i++) {
-                        String value = mr.getChild(i).toString().replaceAll("'", "");
+                        String value = mr.getChild(i).toString().replaceAll("'", StringUtils.EMPTY);
 
                         if (SecurityUserDetails.DEFAULT_ROLE_PREFIX_METHOD_NAME.contains(mr.getName())) {
                             value = RoleAuthority.DEFAULT_ROLE_PREFIX + value;
@@ -464,7 +458,7 @@ public class PluginEndpoint {
 
         }
 
-        return StringUtils.join(uri, ",");
+        return StringUtils.join(uri, SpringMvcUtils.COMMA_STRING);
     }
 
     /**
@@ -563,28 +557,30 @@ public class PluginEndpoint {
                 Resource[] resources = this.resourcePatternResolver.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + classPath);
 
                 for (Resource resource : resources) {
-                    if (resource.isReadable()) {
 
-                        MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-                        Class<?> targetClass = Class.forName(metadataReader.getClassMetadata().getClassName());
+                    if (!resource.isReadable()) {
+                        continue;
+                    }
 
-                        if (filter.match(metadataReader, metadataReaderFactory)) {
-                            target.add(targetClass);
-                        } else {
+                    MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+                    Class<?> targetClass = Class.forName(metadataReader.getClassMetadata().getClassName());
 
-                            Method[] methods = targetClass.getDeclaredMethods();
+                    if (filter.match(metadataReader, metadataReaderFactory)) {
+                        target.add(targetClass);
+                    } else {
 
-                            for (Method method : methods) {
+                        Method[] methods = targetClass.getDeclaredMethods();
 
-                                Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
+                        for (Method method : methods) {
 
-                                if (Objects.nonNull(plugin)) {
-                                    target.add(method);
-                                }
+                            Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
 
+                            if (Objects.nonNull(plugin)) {
+                                target.add(method);
                             }
 
                         }
+
                     }
                 }
 

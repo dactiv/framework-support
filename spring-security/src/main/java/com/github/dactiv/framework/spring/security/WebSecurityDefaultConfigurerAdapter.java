@@ -67,7 +67,7 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
                 a.configure(managerBuilder);
             }
         } else {
-            managerBuilder.authenticationProvider(requestAuthenticationProvider);
+            super.configure(managerBuilder);
         }
     }
 
@@ -83,25 +83,24 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
 
         LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> map = new LinkedHashMap<>();
-        map.put(new AntPathRequestMatcher("/**"), (request, response, authException) -> {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
-        });
+        map.put(
+                new AntPathRequestMatcher("/**"),
+                (req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase())
+        );
 
         DelegatingAuthenticationEntryPoint authenticationEntryPoint = new DelegatingAuthenticationEntryPoint(map);
         authenticationEntryPoint.setDefaultEntryPoint(new Http403ForbiddenEntryPoint());
 
-        http.authorizeRequests()
+        httpSecurity.authorizeRequests()
                 .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .anonymous()
                 .authenticationProvider(requestAuthenticationProvider)
-                .disable()
                 .httpBasic()
                 .disable()
                 .formLogin()
@@ -122,17 +121,17 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
         if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
             for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
-                a.configure(http);
+                a.configure(httpSecurity);
             }
         } else {
 
             RequestAuthenticationFilter requestAuthenticationFilter = new RequestAuthenticationFilter(properties);
             requestAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
 
-            http.addFilter(requestAuthenticationFilter);
+            httpSecurity.addFilter(requestAuthenticationFilter);
         }
 
-        addConsensusBasedToMethodSecurityInterceptor(http, properties);
+        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
     }
 
     /**

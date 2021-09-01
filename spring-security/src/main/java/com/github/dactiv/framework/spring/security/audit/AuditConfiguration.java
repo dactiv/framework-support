@@ -84,7 +84,9 @@ public class AuditConfiguration {
 
             try {
 
-                BindResult<AuditType> specified = Binder.get(environment).bind("spring.security.support.audit.type", AuditType.class);
+                BindResult<AuditType> specified = Binder
+                        .get(environment)
+                        .bind("authentication.audit.type", AuditType.class);
 
                 if (AnnotationMetadata.class.isAssignableFrom(metadata.getClass())) {
 

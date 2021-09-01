@@ -7,7 +7,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 

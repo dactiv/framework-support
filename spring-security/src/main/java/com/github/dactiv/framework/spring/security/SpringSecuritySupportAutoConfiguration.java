@@ -2,10 +2,10 @@ package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
-import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
-import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
+import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;

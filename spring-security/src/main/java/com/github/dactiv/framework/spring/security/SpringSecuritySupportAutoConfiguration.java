@@ -9,6 +9,7 @@ import com.github.dactiv.framework.spring.security.authentication.handler.JsonAu
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
+import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import com.github.dactiv.framework.spring.security.concurrent.ConcurrentInterceptor;
@@ -38,6 +39,7 @@ import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -113,6 +115,14 @@ public class SpringSecuritySupportAutoConfiguration {
         repository.setDisableUrlRewriting(properties.getDeviceId().isDisableUrlRewriting());
 
         return repository;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RememberMeServices.class)
+    public CookieRememberService cookieRememberService(AuthenticationProperties properties,
+                                                       RedissonClient redissonClient,
+                                                       List<UserDetailsService> userDetailsServices) {
+        return new CookieRememberService(properties, redissonClient, userDetailsServices);
     }
 
     @Bean

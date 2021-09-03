@@ -77,6 +77,11 @@ public class AuthenticationProperties {
     private boolean allowIfEqualGrantedDeniedDecisions = false;
 
     /**
+     * 记住我配置
+     */
+    private RememberMeProperties rememberMe = new RememberMeProperties();
+
+    /**
      * 获取默认用户信息集合
      *
      * @return 默认用户信息集合
@@ -236,5 +241,13 @@ public class AuthenticationProperties {
      */
     public void setAllowIfEqualGrantedDeniedDecisions(boolean allowIfEqualGrantedDeniedDecisions) {
         this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
+    }
+
+    public RememberMeProperties getRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(RememberMeProperties rememberMe) {
+        this.rememberMe = rememberMe;
     }
 }

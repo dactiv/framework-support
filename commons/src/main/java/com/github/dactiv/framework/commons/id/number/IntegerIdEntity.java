@@ -16,7 +16,7 @@ public class IntegerIdEntity extends IdEntity<Integer> implements NumberIdEntity
     /**
      * 创建时间
      */
-    private Date creationTime;
+    private Date creationTime = new Date();
 
     @Override
     public Date getCreationTime() {

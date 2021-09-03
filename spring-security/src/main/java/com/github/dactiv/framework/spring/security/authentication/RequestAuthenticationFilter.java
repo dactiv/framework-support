@@ -15,6 +15,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,6 +29,25 @@ import java.io.IOException;
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationProperties properties;
+
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            HttpServletRequest request = (HttpServletRequest) req;
+            HttpServletResponse response = (HttpServletResponse) res;
+
+            Authentication rememberMeAuth = getRememberMeServices().autoLogin(request, response);
+
+            if (rememberMeAuth != null) {
+                successfulAuthentication(request, response, chain, rememberMeAuth);
+                return ;
+            }
+        }
+
+        super.doFilter(req, res, chain);
+    }
 
     public RequestAuthenticationFilter(AuthenticationProperties properties) {
         this.properties = properties;

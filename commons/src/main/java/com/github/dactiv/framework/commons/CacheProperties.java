@@ -14,6 +14,11 @@ public class CacheProperties implements Serializable {
     private static final long serialVersionUID = 3266643181504654737L;
 
     /**
+     * 默认缓存分隔符
+     */
+    public static final String DEFAULT_SEPARATOR = ":";
+
+    /**
      * 缓存名称
      */
     private String name;
@@ -80,6 +85,6 @@ public class CacheProperties implements Serializable {
      * @return 缓存名称 + 后缀值，如果缓存名称没有 ":" 符号，会自动加上。
      */
     public String getName(Object suffix) {
-        return StringUtils.appendIfMissing(getName(),":") + suffix.toString();
+        return StringUtils.appendIfMissing(getName(),DEFAULT_SEPARATOR) + suffix.toString();
     }
 }

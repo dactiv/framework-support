@@ -5,4 +5,4 @@ spring:
 
 authentication:
   audit:
-    type: mongo
+    type: memory

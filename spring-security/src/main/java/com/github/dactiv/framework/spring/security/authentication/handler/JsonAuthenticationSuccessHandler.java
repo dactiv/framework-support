@@ -51,9 +51,7 @@ public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHa
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-        Object details = Casts.cast(authentication.getDetails());
-
-        RestResult<Object> result = RestResult.ofSuccess(HttpStatus.OK.getReasonPhrase(), details);
+        RestResult<Object> result = RestResult.ofSuccess(HttpStatus.OK.getReasonPhrase(), authentication.getDetails());
 
         if (CollectionUtils.isNotEmpty(successResponses)) {
             successResponses.forEach(f -> f.setting(result, request));

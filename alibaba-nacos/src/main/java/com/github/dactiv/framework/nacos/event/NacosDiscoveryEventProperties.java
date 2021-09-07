@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * @author maurice.chen
  */
 @ConfigurationProperties("spring.cloud.nacos.discovery.event")
-public class NacosEventProperties {
+public class NacosDiscoveryEventProperties {
 
     /**
      * 扫描并订阅服务的 cron 表达式
@@ -28,10 +28,10 @@ public class NacosEventProperties {
      */
     private TimeProperties expireUnsubscribeTime = new TimeProperties(1, TimeUnit.HOURS);
 
-    public NacosEventProperties() {
+    public NacosDiscoveryEventProperties() {
     }
 
-    public NacosEventProperties(String scanServiceCron) {
+    public NacosDiscoveryEventProperties(String scanServiceCron) {
         this.scanServiceCron = scanServiceCron;
     }
 

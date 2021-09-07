@@ -10,6 +10,7 @@ import com.alibaba.nacos.api.naming.pojo.ListView;
 import com.alibaba.nacos.api.naming.pojo.Service;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -35,14 +36,29 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosSpringEventManager.class);
 
-    private final NacosEventProperties nacosEventProperties;
-
+    /**
+     * nacos 服务发现事件配置
+     */
+    private final NacosDiscoveryEventProperties nacosDiscoveryEventProperties;
+    /**
+     * nacos 服务发现配置
+     */
     private final NacosDiscoveryProperties discoveryProperties;
-
+    /**
+     * nacos 服务管理器
+     */
     private final NacosServiceManager nacosServiceManager;
-
+    /**
+     * 服务订阅校验集合
+     */
+    private final List<ServiceSubscribeValidator> serviceSubscribeValidators;
+    /**
+     * spring 事件推送着
+     */
     private ApplicationEventPublisher applicationEventPublisher;
-
+    /**
+     * spring 任务调度登记者
+     */
     private ScheduledTaskRegistrar scheduledTaskRegistrar;
 
     /**
@@ -52,11 +68,13 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
 
     public NacosSpringEventManager(NacosDiscoveryProperties discoveryProperties,
                                    NacosServiceManager nacosServiceManager,
-                                   NacosEventProperties nacosEventProperties) {
+                                   NacosDiscoveryEventProperties nacosDiscoveryEventProperties,
+                                   List<ServiceSubscribeValidator> serviceSubscribeValidators) {
 
         this.discoveryProperties = discoveryProperties;
         this.nacosServiceManager = nacosServiceManager;
-        this.nacosEventProperties = nacosEventProperties;
+        this.nacosDiscoveryEventProperties = nacosDiscoveryEventProperties;
+        this.serviceSubscribeValidators = serviceSubscribeValidators;
     }
 
     @Override
@@ -64,12 +82,12 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
 
         this.scheduledTaskRegistrar.addTriggerTask(
                 this::scanThenSubscribeService,
-                new CronTrigger(nacosEventProperties.getScanServiceCron())
+                new CronTrigger(nacosDiscoveryEventProperties.getScanServiceCron())
         );
 
         this.scheduledTaskRegistrar.addTriggerTask(
                 this::scanThenUnsubscribeService,
-                new CronTrigger(nacosEventProperties.getScanServiceCron())
+                new CronTrigger(nacosDiscoveryEventProperties.getScanServiceCron())
         );
 
     }
@@ -155,19 +173,41 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
                 }
                 // 创建监听器
                 NacosServiceEventListener listener = new NacosServiceEventListener(
-                        nacosEventProperties.getExpireUnsubscribeTime(),
+                        nacosDiscoveryEventProperties.getExpireUnsubscribeTime(),
                         service,
                         applicationEventPublisher
                 );
+
+                NacosService nacosService = Casts.of(service, NacosService.class);
+                nacosService.setInstances(instanceList);
+
+                if (CollectionUtils.isNotEmpty(serviceSubscribeValidators)) {
+
+                    List<ServiceSubscribeValidator> validators = serviceSubscribeValidators
+                            .stream()
+                            .filter(v -> v.isSupport(nacosService))
+                            .collect(Collectors.toList());
+
+                    boolean isContinue = false;
+
+                    for (ServiceSubscribeValidator v : validators) {
+                        if (!v.valid(nacosService)) {
+                            isContinue = true;
+                            break;
+                        }
+                    }
+
+                    if (isContinue) {
+                        continue;
+                    }
+                }
+
                 // 添加到缓存中
                 listeners.add(listener);
 
                 LOGGER.info("订阅组为 [" + service.getGroupName() + "] 的 [" + s + "] 服务");
                 // 订阅服务
                 namingService.subscribe(service.getName(), service.getGroupName(), listener);
-
-                NacosService nacosService = Casts.of(service, NacosService.class);
-                nacosService.setInstances(instanceList);
                 // 推送订阅事件
                 applicationEventPublisher.publishEvent(new NacosServiceSubscribeEvent(nacosService));
             }

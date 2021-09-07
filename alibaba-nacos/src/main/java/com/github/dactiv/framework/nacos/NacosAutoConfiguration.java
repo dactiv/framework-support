@@ -5,15 +5,19 @@ import com.alibaba.cloud.nacos.NacosConfigAutoConfiguration;
 import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.NacosServiceManager;
-import com.github.dactiv.framework.nacos.event.NacosEventProperties;
+import com.github.dactiv.framework.nacos.event.NacosDiscoveryEventProperties;
 import com.github.dactiv.framework.nacos.event.NacosSpringEventManager;
+import com.github.dactiv.framework.nacos.event.ServiceSubscribeValidator;
 import com.github.dactiv.framework.nacos.task.NacosCronScheduledListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * nacos 自动配置类
@@ -22,8 +26,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @AutoConfigureAfter(NacosConfigAutoConfiguration.class)
-@EnableConfigurationProperties(NacosEventProperties.class)
+@EnableConfigurationProperties(NacosDiscoveryEventProperties.class)
 public class NacosAutoConfiguration {
+
+    @Autowired(required = false)
+    private List<ServiceSubscribeValidator> serviceSubscribeValidatorList;
 
     @Bean
     @ConditionalOnMissingBean(NacosCronScheduledListener.class)
@@ -36,9 +43,14 @@ public class NacosAutoConfiguration {
     @ConditionalOnProperty(prefix = "spring.cloud.nacos.discovery.event", value = "enabled")
     public NacosSpringEventManager nacosServiceEventManager(NacosDiscoveryProperties nacosDiscoveryProperties,
                                                             NacosServiceManager nacosServiceManager,
-                                                            NacosEventProperties nacosEventProperties) {
+                                                            NacosDiscoveryEventProperties nacosDiscoveryEventProperties) {
 
-        return new NacosSpringEventManager(nacosDiscoveryProperties, nacosServiceManager, nacosEventProperties);
+        return new NacosSpringEventManager(
+                nacosDiscoveryProperties,
+                nacosServiceManager,
+                nacosDiscoveryEventProperties,
+                serviceSubscribeValidatorList
+        );
 
     }
 }

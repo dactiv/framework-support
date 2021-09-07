@@ -9,7 +9,6 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.ListView;
 import com.alibaba.nacos.api.naming.pojo.Service;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +23,17 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class NacosServiceEventManager implements SchedulingConfigurer, ApplicationEventPublisherAware,
+/**
+ * nacos 的 spring 事件管理器
+ *
+ * @author maurice.chen
+ */
+public class NacosSpringEventManager implements SchedulingConfigurer, ApplicationEventPublisherAware,
         DisposableBean, InitializingBean, ApplicationListener<InstanceRegisteredEvent<NacosAutoServiceRegistration>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NacosServiceEventManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosSpringEventManager.class);
 
     private final NacosEventProperties nacosEventProperties;
 
@@ -47,9 +50,9 @@ public class NacosServiceEventManager implements SchedulingConfigurer, Applicati
      */
     private final Map<String, List<NacosServiceEventListener>> listenerCache = new LinkedHashMap<>();
 
-    public NacosServiceEventManager(NacosDiscoveryProperties discoveryProperties,
-                                    NacosServiceManager nacosServiceManager,
-                                    NacosEventProperties nacosEventProperties) {
+    public NacosSpringEventManager(NacosDiscoveryProperties discoveryProperties,
+                                   NacosServiceManager nacosServiceManager,
+                                   NacosEventProperties nacosEventProperties) {
 
         this.discoveryProperties = discoveryProperties;
         this.nacosServiceManager = nacosServiceManager;

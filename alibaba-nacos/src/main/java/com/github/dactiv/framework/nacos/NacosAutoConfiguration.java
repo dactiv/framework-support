@@ -6,7 +6,7 @@ import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.NacosServiceManager;
 import com.github.dactiv.framework.nacos.event.NacosEventProperties;
-import com.github.dactiv.framework.nacos.event.NacosServiceEventManager;
+import com.github.dactiv.framework.nacos.event.NacosSpringEventManager;
 import com.github.dactiv.framework.nacos.task.NacosCronScheduledListener;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,11 +34,11 @@ public class NacosAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "spring.cloud.nacos.discovery.event", value = "enabled")
-    public NacosServiceEventManager nacosServiceEventManager(NacosDiscoveryProperties nacosDiscoveryProperties,
-                                                             NacosServiceManager nacosServiceManager,
-                                                             NacosEventProperties nacosEventProperties) {
+    public NacosSpringEventManager nacosServiceEventManager(NacosDiscoveryProperties nacosDiscoveryProperties,
+                                                            NacosServiceManager nacosServiceManager,
+                                                            NacosEventProperties nacosEventProperties) {
 
-        return new NacosServiceEventManager(nacosDiscoveryProperties, nacosServiceManager, nacosEventProperties);
+        return new NacosSpringEventManager(nacosDiscoveryProperties, nacosServiceManager, nacosEventProperties);
 
     }
 }

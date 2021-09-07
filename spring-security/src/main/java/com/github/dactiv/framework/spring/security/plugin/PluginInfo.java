@@ -20,6 +20,21 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
     private static final long serialVersionUID = -6354440242310314107L;
 
     /**
+     * 默认版本号字段名称
+     */
+    public static String DEFAULT_VERSION_NAME = "version";
+
+    /**
+     * 默认插件字段名称
+     */
+    public static String DEFAULT_ARTIFACT_ID_NAME = "artifact-id";
+
+    /**
+     * 默认组字段名称
+     */
+    public static String DEFAULT_GROUP_ID_NAME = "group-id";
+
+    /**
      * 默认的子节点字段名
      */
     public static final String DEFAULT_CHILDREN_NAME = "children";

@@ -29,9 +29,6 @@ import java.util.List;
 @EnableConfigurationProperties(NacosDiscoveryEventProperties.class)
 public class NacosAutoConfiguration {
 
-    @Autowired(required = false)
-    private List<NacosServiceListenerValidator> nacosServiceListenerValidatorList;
-
     @Bean
     @ConditionalOnMissingBean(NacosCronScheduledListener.class)
     @ConditionalOnProperty(prefix = "spring.cloud.nacos.config.schedule", value = "enabled", matchIfMissing = true)
@@ -43,7 +40,8 @@ public class NacosAutoConfiguration {
     @ConditionalOnProperty(prefix = "spring.cloud.nacos.discovery.event", value = "enabled")
     public NacosSpringEventManager nacosServiceEventManager(NacosDiscoveryProperties nacosDiscoveryProperties,
                                                             NacosServiceManager nacosServiceManager,
-                                                            NacosDiscoveryEventProperties nacosDiscoveryEventProperties) {
+                                                            NacosDiscoveryEventProperties nacosDiscoveryEventProperties,
+                                                            List<NacosServiceListenerValidator> nacosServiceListenerValidatorList) {
 
         return new NacosSpringEventManager(
                 nacosDiscoveryProperties,

@@ -3,22 +3,23 @@ package com.github.dactiv.framework.nacos.event;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.NacosServiceManager;
 import com.alibaba.cloud.nacos.registry.NacosAutoServiceRegistration;
+import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingMaintainService;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.ListView;
 import com.alibaba.nacos.api.naming.pojo.Service;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
@@ -31,15 +32,14 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class NacosSpringEventManager implements SchedulingConfigurer, ApplicationEventPublisherAware,
-        DisposableBean, InitializingBean, ApplicationListener<InstanceRegisteredEvent<NacosAutoServiceRegistration>> {
+public class NacosSpringEventManager implements ApplicationEventPublisherAware, DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosSpringEventManager.class);
 
     /**
      * nacos 服务发现事件配置
      */
-    private final NacosDiscoveryEventProperties nacosDiscoveryEventProperties;
+    private final NacosDiscoveryEventProperties discoveryEventProperties;
     /**
      * nacos 服务发现配置
      */
@@ -51,15 +51,11 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
     /**
      * 服务订阅校验集合
      */
-    private final List<ServiceSubscribeValidator> serviceSubscribeValidators;
+    private final List<NacosServiceListenerValidator> nacosServiceListenerValidators;
     /**
      * spring 事件推送着
      */
     private ApplicationEventPublisher applicationEventPublisher;
-    /**
-     * spring 任务调度登记者
-     */
-    private ScheduledTaskRegistrar scheduledTaskRegistrar;
 
     /**
      * 所有监听的缓存，key 为服务组，值为该组下的所有服务监听器
@@ -68,33 +64,37 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
 
     public NacosSpringEventManager(NacosDiscoveryProperties discoveryProperties,
                                    NacosServiceManager nacosServiceManager,
-                                   NacosDiscoveryEventProperties nacosDiscoveryEventProperties,
-                                   List<ServiceSubscribeValidator> serviceSubscribeValidators) {
+                                   NacosDiscoveryEventProperties discoveryEventProperties,
+                                   List<NacosServiceListenerValidator> nacosServiceListenerValidators) {
 
         this.discoveryProperties = discoveryProperties;
         this.nacosServiceManager = nacosServiceManager;
-        this.nacosDiscoveryEventProperties = nacosDiscoveryEventProperties;
-        this.serviceSubscribeValidators = serviceSubscribeValidators;
+        this.discoveryEventProperties = discoveryEventProperties;
+        this.nacosServiceListenerValidators = nacosServiceListenerValidators;
     }
 
-    @Override
-    public void onApplicationEvent(InstanceRegisteredEvent<NacosAutoServiceRegistration> event) {
+    /**
+     * 超时所有监听缓存
+     */
+    public void expiredAllListener() {
+        listenerCache
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .forEach(NacosServiceEventListener::expired);
+    }
 
-        this.scheduledTaskRegistrar.addTriggerTask(
-                this::scanThenSubscribeService,
-                new CronTrigger(nacosDiscoveryEventProperties.getScanServiceCron())
-        );
-
-        this.scheduledTaskRegistrar.addTriggerTask(
-                this::scanThenUnsubscribeService,
-                new CronTrigger(nacosDiscoveryEventProperties.getScanServiceCron())
-        );
-
+    /**
+     * 清除监听缓存
+     */
+    public void clearListenerCache() {
+        listenerCache.clear();
     }
 
     /**
      * 扫描并取消订阅服务
      */
+    @NacosCronScheduled(cron = "${spring.cloud.nacos.discovery.event.unsubscribe-service-cron:0 0/1 * * * ?}")
     public void scanThenUnsubscribeService() {
 
         NamingService namingService = nacosServiceManager.getNamingService(
@@ -131,6 +131,7 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
     /**
      * 扫描并订阅服务
      */
+    @NacosCronScheduled(cron = "${spring.cloud.nacos.discovery.event.subscribe-service-cron:30 0/1 * * * ?}")
     public void scanThenSubscribeService() {
         NamingService namingService = nacosServiceManager.getNamingService(
                 discoveryProperties.getNacosProperties()
@@ -173,7 +174,7 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
                 }
                 // 创建监听器
                 NacosServiceEventListener listener = new NacosServiceEventListener(
-                        nacosDiscoveryEventProperties.getExpireUnsubscribeTime(),
+                        discoveryEventProperties.getExpireUnsubscribeTime(),
                         service,
                         applicationEventPublisher
                 );
@@ -181,17 +182,17 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
                 NacosService nacosService = Casts.of(service, NacosService.class);
                 nacosService.setInstances(instanceList);
 
-                if (CollectionUtils.isNotEmpty(serviceSubscribeValidators)) {
+                if (CollectionUtils.isNotEmpty(nacosServiceListenerValidators)) {
 
-                    List<ServiceSubscribeValidator> validators = serviceSubscribeValidators
+                    List<NacosServiceListenerValidator> validators = nacosServiceListenerValidators
                             .stream()
                             .filter(v -> v.isSupport(nacosService))
                             .collect(Collectors.toList());
 
                     boolean isContinue = false;
 
-                    for (ServiceSubscribeValidator v : validators) {
-                        if (!v.valid(nacosService)) {
+                    for (NacosServiceListenerValidator v : validators) {
+                        if (!v.subscribeValid(nacosService)) {
                             isContinue = true;
                             break;
                         }
@@ -219,11 +220,6 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
     }
 
     @Override
-    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        this.scheduledTaskRegistrar = scheduledTaskRegistrar;
-    }
-
-    @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -241,10 +237,32 @@ public class NacosSpringEventManager implements SchedulingConfigurer, Applicatio
         scanThenUnsubscribeService();
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if (Objects.isNull(this.scheduledTaskRegistrar)) {
-            throw new SystemException("找不到自动调度任务等级者");
-        }
+    /**
+     * 获取 naocs 的命名服务
+     *
+     * @return naocs 的命名服务
+     */
+    public NamingService getNamingService() {
+        return nacosServiceManager.getNamingService(discoveryProperties.getNacosProperties());
     }
+
+    /**
+     * 获取 naocs 的命名维护服务
+     *
+     * @return naocs 的命名维护服务
+     */
+    public NamingMaintainService getNamingMaintainService() {
+        return nacosServiceManager.getNamingMaintainService(discoveryProperties.getNacosProperties());
+    }
+
+    /**
+     * 监听本服务注册完成事件，当注册完成时候，同步所有插件菜单。
+     *
+     * @param event 事件原型
+     */
+    @EventListener
+    public void onInstanceRegisteredEvent(InstanceRegisteredEvent<NacosAutoServiceRegistration> event) {
+        scanThenSubscribeService();
+    }
+
 }

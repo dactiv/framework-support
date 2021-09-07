@@ -21,22 +21,9 @@ public class NacosService extends Service {
 
     /**
      * nacos 服务实体
-     *
-     * @param instances 服务实例集合
      */
-    public NacosService(List<Instance> instances) {
-        this.instances = instances;
-    }
+    public NacosService() {
 
-    /**
-     * nacos 服务实体
-     *
-     * @param name 名称
-     * @param instances nacos 服务实体
-     */
-    public NacosService(String name, List<Instance> instances) {
-        super(name);
-        this.instances = instances;
     }
 
     /**

@@ -7,7 +7,7 @@ import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.NacosServiceManager;
 import com.github.dactiv.framework.nacos.event.NacosDiscoveryEventProperties;
 import com.github.dactiv.framework.nacos.event.NacosSpringEventManager;
-import com.github.dactiv.framework.nacos.event.ServiceSubscribeValidator;
+import com.github.dactiv.framework.nacos.event.NacosServiceListenerValidator;
 import com.github.dactiv.framework.nacos.task.NacosCronScheduledListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -30,7 +30,7 @@ import java.util.List;
 public class NacosAutoConfiguration {
 
     @Autowired(required = false)
-    private List<ServiceSubscribeValidator> serviceSubscribeValidatorList;
+    private List<NacosServiceListenerValidator> nacosServiceListenerValidatorList;
 
     @Bean
     @ConditionalOnMissingBean(NacosCronScheduledListener.class)
@@ -49,7 +49,7 @@ public class NacosAutoConfiguration {
                 nacosDiscoveryProperties,
                 nacosServiceManager,
                 nacosDiscoveryEventProperties,
-                serviceSubscribeValidatorList
+                nacosServiceListenerValidatorList
         );
 
     }

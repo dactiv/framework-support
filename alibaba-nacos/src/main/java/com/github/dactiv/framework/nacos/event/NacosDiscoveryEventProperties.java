@@ -13,15 +13,19 @@ import java.util.concurrent.TimeUnit;
 @ConfigurationProperties("spring.cloud.nacos.discovery.event")
 public class NacosDiscoveryEventProperties {
 
+    public static final String DEFAULT_SUBSCRIBE_SERVICE_CRON = "0 0/1 * * * ?";
+
+    public static final String DEFAULT_UNSUBSCRIBE_SERVICE_CRON = "30 0/1 * * * ?";
+
     /**
      * 扫描并订阅服务的 cron 表达式
      */
-    private String scanServiceCron = "0 0/3 * * * ?";
+    private String subscribeServiceCron = DEFAULT_SUBSCRIBE_SERVICE_CRON;
 
     /**
      * 取消订阅扫描的 cron 表达式
      */
-    private String unsubscribeScanCron = "0 0/3 * * * ?";
+    private String unsubscribeScanCron = DEFAULT_UNSUBSCRIBE_SERVICE_CRON;
 
     /**
      * 过期取消订阅时间
@@ -31,26 +35,22 @@ public class NacosDiscoveryEventProperties {
     public NacosDiscoveryEventProperties() {
     }
 
-    public NacosDiscoveryEventProperties(String scanServiceCron) {
-        this.scanServiceCron = scanServiceCron;
-    }
-
     /**
      * 获取扫描并订阅服务的 cron 表达式
      *
      * @return 扫描并订阅服务的 cron 表达式
      */
-    public String getScanServiceCron() {
-        return scanServiceCron;
+    public String getSubscribeServiceCron() {
+        return subscribeServiceCron;
     }
 
     /**
      * 设置扫描并订阅服务的 cron 表达式
      *
-     * @param scanServiceCron 扫描并订阅服务的 cron 表达式
+     * @param subscribeServiceCron 扫描并订阅服务的 cron 表达式
      */
-    public void setScanServiceCron(String scanServiceCron) {
-        this.scanServiceCron = scanServiceCron;
+    public void setSubscribeServiceCron(String subscribeServiceCron) {
+        this.subscribeServiceCron = subscribeServiceCron;
     }
 
     /**

@@ -6,10 +6,16 @@
   ],
   "properties": [
     {
-      "name": "spring.cloud.nacos.support.enabled",
+      "name": "spring.cloud.nacos.config.schedule.enabled",
       "type": "java.lang.Boolean",
-      "description": "是否开启 nacos 支持 .",
+      "description": "是否开启 @NacosCronScheduled 注解支持.",
       "defaultValue": true
+    },
+    {
+      "name": "spring.cloud.nacos.discovery.event.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启 nacos 事件监听支持.",
+      "defaultValue": false
     }
   ]
 }

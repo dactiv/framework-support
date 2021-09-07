@@ -33,10 +33,7 @@ import org.springframework.util.SystemPropertyUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
@@ -386,6 +383,10 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
      */
     @Override
     public void afterPropertiesSet() throws Exception {
+
+        if (Objects.isNull(this.scheduledTaskRegistrar)) {
+            return ;
+        }
 
         // 需要侦听的配置集合
         List<NacosConfigProperties.Config> list = new LinkedList<>();

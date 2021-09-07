@@ -1,0 +1,207 @@
+package com.github.dactiv.framework.nacos.event;
+
+import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
+import com.alibaba.cloud.nacos.NacosServiceManager;
+import com.alibaba.cloud.nacos.registry.NacosAutoServiceRegistration;
+import com.alibaba.nacos.api.naming.NamingMaintainService;
+import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alibaba.nacos.api.naming.pojo.ListView;
+import com.alibaba.nacos.api.naming.pojo.Service;
+import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.commons.exception.SystemException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+public class NacosServiceEventManager implements SchedulingConfigurer, ApplicationEventPublisherAware,
+        DisposableBean, InitializingBean, ApplicationListener<InstanceRegisteredEvent<NacosAutoServiceRegistration>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosServiceEventManager.class);
+
+    private final NacosEventProperties nacosEventProperties;
+
+    private final NacosDiscoveryProperties discoveryProperties;
+
+    private final NacosServiceManager nacosServiceManager;
+
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    private ScheduledTaskRegistrar scheduledTaskRegistrar;
+
+    /**
+     * 所有监听的缓存，key 为服务组，值为该组下的所有服务监听器
+     */
+    private final Map<String, List<NacosServiceEventListener>> listenerCache = new LinkedHashMap<>();
+
+    public NacosServiceEventManager(NacosDiscoveryProperties discoveryProperties,
+                                    NacosServiceManager nacosServiceManager,
+                                    NacosEventProperties nacosEventProperties) {
+
+        this.discoveryProperties = discoveryProperties;
+        this.nacosServiceManager = nacosServiceManager;
+        this.nacosEventProperties = nacosEventProperties;
+    }
+
+    @Override
+    public void onApplicationEvent(InstanceRegisteredEvent<NacosAutoServiceRegistration> event) {
+
+        this.scheduledTaskRegistrar.addTriggerTask(
+                this::scanThenSubscribeService,
+                new CronTrigger(nacosEventProperties.getScanServiceCron())
+        );
+
+        this.scheduledTaskRegistrar.addTriggerTask(
+                this::scanThenUnsubscribeService,
+                new CronTrigger(nacosEventProperties.getScanServiceCron())
+        );
+
+    }
+
+    /**
+     * 扫描并取消订阅服务
+     */
+    public void scanThenUnsubscribeService() {
+
+        NamingService namingService = nacosServiceManager.getNamingService(
+                discoveryProperties.getNacosProperties()
+        );
+
+        List<NacosServiceEventListener> listeners = listenerCache
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        for (NacosServiceEventListener sel : listeners) {
+
+            if (!sel.isExpired()) {
+                continue;
+            }
+            try {
+
+                LOGGER.info("对服务 [" + sel.getService().getName() + "] 取消订阅");
+
+                namingService.unsubscribe(sel.getService().getName(), sel.getService().getGroupName(), sel);
+
+                List<NacosServiceEventListener> list = listenerCache.get(sel.getService().getGroupName());
+                list.remove(sel);
+
+                applicationEventPublisher.publishEvent(new NacosServiceUnsubscribeEvent(sel.getService()));
+            } catch (Exception e) {
+                LOGGER.error("取消订阅 [" + sel.getService().getName() + "] 服务失败", e);
+            }
+        }
+    }
+
+    /**
+     * 扫描并订阅服务
+     */
+    public void scanThenSubscribeService() {
+        NamingService namingService = nacosServiceManager.getNamingService(
+                discoveryProperties.getNacosProperties()
+        );
+
+        NamingMaintainService namingMaintainService = nacosServiceManager.getNamingMaintainService(
+                discoveryProperties.getNacosProperties()
+        );
+
+        try {
+
+            // 获取所有服务
+            ListView<String> view = namingService.getServicesOfServer(1, Integer.MAX_VALUE);
+
+            for (String s : view.getData()) {
+                // 通过服务名获取服务信息
+                Service service = namingMaintainService.queryService(s);
+                // 通过服务名获取所有服务实例
+                List<Instance> instanceList = namingService.getAllInstances(service.getName(), service.getGroupName());
+                // 创建一组监听缓存，如果存在取当前的数据，否则创建一个
+                List<NacosServiceEventListener> listeners = listenerCache.computeIfAbsent(
+                        service.getGroupName(),
+                        k -> new LinkedList<>()
+                );
+
+                Optional<NacosServiceEventListener> optional = listeners
+                        .stream()
+                        .filter(l -> l.getService().getName().equals(s))
+                        .findFirst();
+                // 如果当前服务已经被监听过，更新一次最后访问时间
+                if (optional.isPresent()) {
+
+                    optional.get().setLastAccessTime(new Date());
+
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("[" + s + "] 服务已订阅，更新创建时间。");
+                    }
+
+                    continue;
+                }
+                // 创建监听器
+                NacosServiceEventListener listener = new NacosServiceEventListener(
+                        nacosEventProperties.getExpireUnsubscribeTime(),
+                        service,
+                        applicationEventPublisher
+                );
+                // 添加到缓存中
+                listeners.add(listener);
+
+                LOGGER.info("订阅组为 [" + service.getGroupName() + "] 的 [" + s + "] 服务");
+                // 订阅服务
+                namingService.subscribe(service.getName(), service.getGroupName(), listener);
+
+                NacosService nacosService = Casts.of(service, NacosService.class);
+                nacosService.setInstances(instanceList);
+                // 推送订阅事件
+                applicationEventPublisher.publishEvent(new NacosServiceSubscribeEvent(nacosService));
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("扫描服务信息出错", e);
+        }
+
+    }
+
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
+        this.scheduledTaskRegistrar = scheduledTaskRegistrar;
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    @Override
+    public void destroy() {
+        LOGGER.info("解除所有服务监听");
+
+        listenerCache
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .forEach(NacosServiceEventListener::expired);
+
+        scanThenUnsubscribeService();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (Objects.isNull(this.scheduledTaskRegistrar)) {
+            throw new SystemException("找不到自动调度任务等级者");
+        }
+    }
+}

@@ -13,6 +13,11 @@ import java.util.Date;
 public interface NumberIdEntity<T extends Number> extends Serializable {
 
     /**
+     * 创建时间字段名称
+     */
+    String CREATION_TIME_FIELD_NAME = "creationTime";
+
+    /**
      * 获取主键 id
      *
      * @return 主键 id

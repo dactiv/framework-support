@@ -3,7 +3,9 @@ package com.github.dactiv.framework.commons.retry;
 import com.github.dactiv.framework.commons.TimeProperties;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,7 +15,15 @@ import java.util.concurrent.TimeUnit;
  */
 public interface Retryable {
 
+    /**
+     * 默认间隔时间次方
+     */
     TimeProperties DEFAULT_POW_INTERVAL_TIME = new TimeProperties(5, TimeUnit.SECONDS);
+
+    /**
+     * 默认支持的重试 http status
+     */
+    List<Integer> DEFAULT_SUPPORT_HTTP_STATUS = Arrays.asList(400, 503);
 
     /**
      * 获取当前重试次数

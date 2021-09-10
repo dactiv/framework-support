@@ -50,12 +50,6 @@ public class IdempotentInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
-        String key = idempotent.key();
-
-        if (StringUtils.isEmpty(key)) {
-            throw new ConcurrentException("幂等处理的 key 不能为空");
-        }
-
         if (isIdempotent(idempotent, invocation.getMethod(), invocation.getArguments())) {
             throw new IdempotentException(idempotent.exception());
         }

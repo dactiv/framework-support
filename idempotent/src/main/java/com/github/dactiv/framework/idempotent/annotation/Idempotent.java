@@ -24,7 +24,7 @@ public @interface Idempotent {
      *
      * @return 锁识别
      */
-    String key();
+    String key() default "";
 
     /**
      * 值，用于记录当前使用什么值去记录幂等行的断言

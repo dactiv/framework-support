@@ -75,8 +75,8 @@ public class TestIdempotentDataService {
             }
         }
 
-        Assertions.assertEquals(idempotentDataService.getData().get(7).size(), 5);
-        Assertions.assertEquals(idempotentDataService.getData().get(8).size(), 5);
+        Assertions.assertEquals(idempotentDataService.getData().get(7).size(), 2);
+        Assertions.assertEquals(idempotentDataService.getData().get(8).size(), 2);
 
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 
@@ -111,8 +111,6 @@ public class TestIdempotentDataService {
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 1);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 2);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 3);
-            idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
-            idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
         }
 

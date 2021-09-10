@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.idempotent.test.concurrent;
 
+import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,13 @@ public class ConcurrentDataServiceTest {
         threadPoolTaskExecutor.initialize();
 
         for (int i = 1; i <= 10; i++) {
-            threadPoolTaskExecutor.execute(() -> concurrentDataService.increment());
+            threadPoolTaskExecutor.execute(() -> {
+                try {
+                    concurrentDataService.increment();
+                } catch (ConcurrentException e) {
+                    Assertions.assertEquals(e.getMessage(), "请不要重复操作");
+                }
+            });
         }
 
         Thread.sleep(3000);
@@ -43,7 +50,13 @@ public class ConcurrentDataServiceTest {
         concurrentDataService.setCount(0);
 
         for (int i = 1; i <= 10; i++) {
-            threadPoolTaskExecutor.execute(() -> concurrentDataService.incrementWait());
+            threadPoolTaskExecutor.execute(() -> {
+                try {
+                    concurrentDataService.incrementWait();
+                } catch (ConcurrentException e) {
+                    Assertions.assertEquals(e.getMessage(), "请不要重复操作");
+                }
+            });
         }
 
         Thread.sleep(3000);

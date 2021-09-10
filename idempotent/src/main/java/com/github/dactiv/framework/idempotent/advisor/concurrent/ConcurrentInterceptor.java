@@ -48,7 +48,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         String key = concurrent.value();
 
         if (StringUtils.isEmpty(key)) {
-            throw new ConcurrentException("并发处理的 key 不能为空");
+            key = invocation.getMethod().getName();
         }
 
         Object concurrentKey = valueGenerator.generate(key, invocation.getMethod(), invocation.getArguments());

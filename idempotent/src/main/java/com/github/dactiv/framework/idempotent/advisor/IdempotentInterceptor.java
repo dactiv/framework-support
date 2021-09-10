@@ -74,7 +74,13 @@ public class IdempotentInterceptor implements MethodInterceptor {
      * @return true 为幂等， 否则 false
      */
     public boolean isIdempotent(Idempotent idempotent, Method method, Object[] arguments) {
-        Object key = valueGenerator.generate(idempotent.key(), method, arguments);
+        String key = idempotent.key();
+
+        if (StringUtils.isEmpty(key)) {
+            key = method.toString();
+        }
+
+        Object keyValue = valueGenerator.generate(key, method, arguments);
 
         List<Object> values = new LinkedList<>();
 
@@ -87,9 +93,9 @@ public class IdempotentInterceptor implements MethodInterceptor {
                     .forEach(values::add);
         }
 
-        RBucket<List<Object>> bucket = redissonClient.getBucket(key.toString());
+        RBucket<List<Object>> bucket = redissonClient.getBucket(keyValue.toString());
 
-        List<Object> existValues = redissonClient.getList(key.toString()).get();
+        List<Object> existValues = redissonClient.getList(keyValue.toString()).get();
 
         if (CollectionUtils.isNotEmpty(existValues) && values.stream().anyMatch(existValues::contains)) {
             return true;

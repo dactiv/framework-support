@@ -23,7 +23,7 @@ public @interface Concurrent {
      * <p>public void save(Vo vo);</p>
      * @return key 名称
      */
-    String value();
+    String value() default "";
 
     /**
      * 异常信息

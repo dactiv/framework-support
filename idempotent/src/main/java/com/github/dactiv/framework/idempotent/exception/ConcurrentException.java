@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.spring.security.concurrent;
+package com.github.dactiv.framework.idempotent.exception;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
 
@@ -8,6 +8,8 @@ import com.github.dactiv.framework.commons.exception.SystemException;
  * @author maurice
  */
 public class ConcurrentException extends SystemException {
+
+    private static final long serialVersionUID = 2181395755678626994L;
 
     public ConcurrentException() {
     }

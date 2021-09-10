@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons.retry;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.framework.commons.TimeProperties;
 
 import java.math.BigDecimal;
@@ -51,6 +52,7 @@ public interface Retryable {
      *
      * @return 时间（毫秒为单位）
      */
+    @JsonIgnore
     default TimeProperties getNextRetryTimeInMillisecond() {
         return DEFAULT_POW_INTERVAL_TIME;
     }
@@ -60,6 +62,7 @@ public interface Retryable {
      *
      * @return 间隔时间戳（毫秒为单位）
      */
+    @JsonIgnore
     default Integer getNextIntervalTime() {
 
         return BigDecimal
@@ -74,6 +77,7 @@ public interface Retryable {
      *
      * @return 重试时间
      */
+    @JsonIgnore
     default Date getNextRetryTime() {
         return new Date(System.currentTimeMillis() + getNextIntervalTime());
     }

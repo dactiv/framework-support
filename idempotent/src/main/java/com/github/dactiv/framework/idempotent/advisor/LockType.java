@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.spring.security.concurrent;
+package com.github.dactiv.framework.idempotent.advisor;
 
 /**
  * 锁类型

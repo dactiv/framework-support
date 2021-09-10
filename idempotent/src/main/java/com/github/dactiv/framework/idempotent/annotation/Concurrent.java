@@ -1,9 +1,9 @@
-package com.github.dactiv.framework.spring.security.concurrent.annotation;
+package com.github.dactiv.framework.idempotent.annotation;
 
-import com.github.dactiv.framework.spring.security.concurrent.LockType;
+import com.github.dactiv.framework.commons.annotation.Time;
+import com.github.dactiv.framework.idempotent.advisor.LockType;
 
 import java.lang.annotation.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 并发处理注解
@@ -17,7 +17,10 @@ public @interface Concurrent {
 
     /**
      * 并发的 key
-     *
+     * <p>spring el 规范: 启用 spring el 时，通过中括号([])识别启用</p>
+     * <p>如:</p>
+     * <p>@Concurrent(value="[#vo.fieldName]")</p>
+     * <p>public void save(Vo vo);</p>
      * @return key 名称
      */
     String value();
@@ -41,14 +44,7 @@ public @interface Concurrent {
      *
      * @return 锁生存/释放时间
      */
-    long leaseTime() default 1000;
-
-    /**
-     * 时间单位
-     *
-     * @return 时间单位
-     */
-    TimeUnit unit() default TimeUnit.MILLISECONDS;
+    Time leaseTime() default @Time(1000);
 
     /**
      * 锁类型

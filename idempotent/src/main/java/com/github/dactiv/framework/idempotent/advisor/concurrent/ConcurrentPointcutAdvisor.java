@@ -1,6 +1,6 @@
-package com.github.dactiv.framework.spring.security.concurrent;
+package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
-import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
+import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
@@ -15,6 +15,8 @@ import java.lang.reflect.Method;
  */
 public class ConcurrentPointcutAdvisor extends AbstractPointcutAdvisor {
 
+    private static final long serialVersionUID = -2797648387592489604L;
+
     private final ConcurrentInterceptor concurrentInterceptor;
 
     public ConcurrentPointcutAdvisor(ConcurrentInterceptor concurrentInterceptor) {
@@ -26,7 +28,7 @@ public class ConcurrentPointcutAdvisor extends AbstractPointcutAdvisor {
         return new StaticMethodMatcherPointcut() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                return method.isAnnotationPresent(Concurrent.class) || targetClass.isAnnotationPresent(Concurrent.class);
+                return method.isAnnotationPresent(Concurrent.class);
             }
 
         };

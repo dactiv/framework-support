@@ -1,10 +1,11 @@
-package com.github.dactiv.framework.spring.security.concurrent.service;
+package com.github.dactiv.framework.idempotent.test.concurrent;
 
-import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
-import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
+import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import javax.swing.text.html.parser.Entity;
 
 @Component
 public class ConcurrentDataService {
@@ -34,8 +35,8 @@ public class ConcurrentDataService {
         return count;
     }
 
-    @Concurrent(value = "increment:spring-el:count:[#roleAuthority.name]")
-    public int incrementArgs(RoleAuthority roleAuthority) {
+    @Concurrent(value = "increment:spring-el:count:[#entity.name]")
+    public int incrementArgs(Entity entity) {
         count = count + 1;
         LOGGER.info("当前自增值为:" + count);
         return count;

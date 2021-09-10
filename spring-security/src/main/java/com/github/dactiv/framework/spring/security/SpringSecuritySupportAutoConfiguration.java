@@ -12,10 +12,6 @@ import com.github.dactiv.framework.spring.security.authentication.provider.Reque
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
-import com.github.dactiv.framework.spring.security.concurrent.ConcurrentInterceptor;
-import com.github.dactiv.framework.spring.security.concurrent.ConcurrentPointcutAdvisor;
-import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
-import com.github.dactiv.framework.spring.security.concurrent.key.support.SpelExpressionKeyGenerator;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.framework.spring.security.version.AccessVersionControlHandlerInterceptor;
@@ -54,14 +50,14 @@ import java.util.List;
 @Configuration
 @AutoConfigureAfter(RedissonAutoConfiguration.class)
 @EnableConfigurationProperties(AuthenticationProperties.class)
-@ConditionalOnProperty(prefix = "authentication.spring.security", value = "enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "dactiv.authentication.spring.security", value = "enabled", matchIfMissing = true)
 public class SpringSecuritySupportAutoConfiguration {
 
     @Autowired(required = false)
     private List<InfoContributor> infoContributors;
 
     @Bean
-    @ConfigurationProperties("authentication.plugin")
+    @ConfigurationProperties("dactiv.authentication.plugin")
     PluginEndpoint pluginEndpoint() {
         return new PluginEndpoint(infoContributors);
     }
@@ -74,18 +70,6 @@ public class SpringSecuritySupportAutoConfiguration {
     @Bean
     AccessVersionControlHandlerInterceptor accessVersionControlHandlerInterceptor() {
         return new AccessVersionControlHandlerInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(KeyGenerator.class)
-    KeyGenerator keyGenerator() {
-        return new SpelExpressionKeyGenerator();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ConcurrentPointcutAdvisor.class)
-    ConcurrentPointcutAdvisor concurrentPointcutAdvisor(RedissonClient redissonClient, KeyGenerator keyGenerator) {
-        return new ConcurrentPointcutAdvisor(new ConcurrentInterceptor(redissonClient, keyGenerator));
     }
 
     @Bean

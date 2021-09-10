@@ -22,6 +22,11 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     Success("执行成功", 1),
 
     /**
+     * 重试中
+     */
+    Retrying("重试中", 3),
+
+    /**
      * 执行失败
      */
     Failure("执行失败", 99);
@@ -54,24 +59,22 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 成功设置值
      *
-     * @param body    数据体
-     * @param message 消息
+     * @param body 数据体
      */
-    public static void success(Body body, String message) {
+    public static void success(Body body) {
         body.setExecuteStatus(ExecuteStatus.Success);
-        body.setRemark(message);
         body.setSuccessTime(new Date());
     }
 
     /**
      * 失败设置值
      *
-     * @param body    数据体
-     * @param message 消息
+     * @param body      数据体
+     * @param exception 异常信息
      */
-    public static void failure(Body body, String message) {
+    public static void failure(Body body, String exception) {
         body.setExecuteStatus(ExecuteStatus.Failure);
-        body.setRemark(message);
+        body.setException(exception);
     }
 
     /**
@@ -81,11 +84,11 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
      */
     public interface Body {
         /**
-         * 设置备注
+         * 设置异常
          *
-         * @param remark 备注
+         * @param exception 异常信息
          */
-        void setRemark(String remark);
+        void setException(String exception);
 
         /**
          * 设置成功时间

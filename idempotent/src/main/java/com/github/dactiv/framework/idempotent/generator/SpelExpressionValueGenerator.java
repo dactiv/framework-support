@@ -1,7 +1,6 @@
-package com.github.dactiv.framework.spring.security.concurrent.key.support;
+package com.github.dactiv.framework.idempotent.generator;
 
-import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
-import org.aopalliance.intercept.MethodInvocation;
+import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -9,28 +8,29 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
  * 简单的 key 生成实现
  * <p>
- * 假如 {@link com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent}("abs[#i]-[#j]")
- * 注解在方法 method(int i,in j) 上,而 i = 1，j = 2 时，生成 key 为: #{@link SpelExpressionKeyGenerator#getKeyPrefix()} + abs1-2
+ * 假如 {@link Concurrent}("abs[#i]-[#j]")
+ * 注解在方法 method(int i,in j) 上,而 i = 1，j = 2 时，生成 key 为: #{@link SpelExpressionValueGenerator#getPrefix()} + abs1-2
  * </p>
  *
  * @author maurice.chen
  */
-public class SpelExpressionKeyGenerator implements KeyGenerator {
+public class SpelExpressionValueGenerator implements ValueGenerator {
 
     /**
      * 默认的并发 key 前缀
      */
-    private static final String DEFAULT_KEY_PREFIX = "redis:concurrent:";
+    private static final String DEFAULT_PREFIX = "spring:el:value:generator:";
 
     /**
      * 并发 key 前缀
      */
-    private String keyPrefix = DEFAULT_KEY_PREFIX;
+    private String prefix = DEFAULT_PREFIX;
 
     /**
      * 变量截取的开始字符
@@ -53,19 +53,21 @@ public class SpelExpressionKeyGenerator implements KeyGenerator {
     private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
     @Override
-    public String generate(String key, MethodInvocation invocation) {
+    public Object generate(String expression, Method method, Object... args) {
 
-        String[] parameterNames = parameterNameDiscoverer.getParameterNames(invocation.getMethod());
+        String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
 
         Map<String, Object> variables = new LinkedHashMap<>();
 
-        for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
-            variables.put(parameterNames[i], invocation.getArguments()[i]);
+        if (ArrayUtils.isNotEmpty(args)) {
+            for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
+                variables.put(parameterNames[i], args[i]);
+            }
         }
 
         List<String> tokens = new LinkedList<>();
 
-        String[] array = StringUtils.substringsBetween(key, openCharacter, closeCharacter);
+        String[] array = StringUtils.substringsBetween(expression, openCharacter, closeCharacter);
 
         if (ArrayUtils.isNotEmpty(array)) {
             tokens = Arrays.asList(array);
@@ -74,7 +76,7 @@ public class SpelExpressionKeyGenerator implements KeyGenerator {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
         evaluationContext.setVariables(variables);
 
-        String result = key;
+        String result = expression;
 
         List<String> replaceToken = new LinkedList<>();
 
@@ -84,20 +86,16 @@ public class SpelExpressionKeyGenerator implements KeyGenerator {
                 continue;
             }
 
-            String value = parser.parseExpression(t).getValue(evaluationContext, String.class);
+            Object value = parser.parseExpression(t).getValue(evaluationContext, String.class);
 
-            result = StringUtils.replace(result, getTokenValue(t), value);
+            if (Objects.nonNull(value)) {
+                result = StringUtils.replace(result, getTokenValue(t), value.toString());
+            }
 
             replaceToken.add(t);
         }
 
-        String prefix = getKeyPrefix();
-
-        if (StringUtils.isEmpty(prefix)) {
-            prefix = "";
-        }
-
-        return prefix + result;
+        return StringUtils.defaultString(getPrefix(), StringUtils.EMPTY) + result;
     }
 
     /**
@@ -116,17 +114,17 @@ public class SpelExpressionKeyGenerator implements KeyGenerator {
      *
      * @return 默认的 key 前缀
      */
-    public String getKeyPrefix() {
-        return keyPrefix;
+    public String getPrefix() {
+        return prefix;
     }
 
     /**
      * 设置默认的 key 前缀
      *
-     * @param keyPrefix 默认的 key 前缀
+     * @param prefix 默认的 key 前缀
      */
-    public void setKeyPrefix(String keyPrefix) {
-        this.keyPrefix = keyPrefix;
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     /**

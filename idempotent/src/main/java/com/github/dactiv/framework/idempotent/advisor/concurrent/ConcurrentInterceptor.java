@@ -1,8 +1,10 @@
-package com.github.dactiv.framework.spring.security.concurrent;
+package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.spring.security.concurrent.annotation.Concurrent;
-import com.github.dactiv.framework.spring.security.concurrent.key.KeyGenerator;
+import com.github.dactiv.framework.idempotent.advisor.LockType;
+import com.github.dactiv.framework.idempotent.annotation.Concurrent;
+import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
+import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
@@ -27,11 +29,11 @@ public class ConcurrentInterceptor implements MethodInterceptor {
     /**
      * key 生成器
      */
-    private final KeyGenerator keyGenerator;
+    private final ValueGenerator valueGenerator;
 
-    public ConcurrentInterceptor(RedissonClient redissonClient, KeyGenerator keyGenerator) {
+    public ConcurrentInterceptor(RedissonClient redissonClient, ValueGenerator valueGenerator) {
         this.redissonClient = redissonClient;
-        this.keyGenerator = keyGenerator;
+        this.valueGenerator = valueGenerator;
     }
 
     @Override
@@ -49,14 +51,14 @@ public class ConcurrentInterceptor implements MethodInterceptor {
             throw new ConcurrentException("并发处理的 key 不能为空");
         }
 
-        String concurrentKey = keyGenerator.generate(key, invocation);
+        Object concurrentKey = valueGenerator.generate(key, invocation.getMethod(), invocation.getArguments());
 
         RLock lock;
 
         if (LockType.FairLock.equals(concurrent.type())) {
-            lock = redissonClient.getFairLock(concurrentKey);
+            lock = redissonClient.getFairLock(concurrentKey.toString());
         } else if (LockType.Lock.equals(concurrent.type())) {
-            lock = redissonClient.getLock(concurrentKey);
+            lock = redissonClient.getLock(concurrentKey.toString());
         } else {
             throw new SystemException("找不到对 [" + concurrent.type() + "] 的所类型支持");
         }
@@ -68,7 +70,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         if (waitTime <= 0) {
             tryLock = lock.tryLock();
         } else {
-            tryLock = lock.tryLock(waitTime, concurrent.leaseTime(), concurrent.unit());
+            tryLock = lock.tryLock(waitTime, concurrent.leaseTime().value(), concurrent.leaseTime().unit());
         }
 
         if (tryLock) {

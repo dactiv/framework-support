@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-@ConfigurationProperties("authentication")
+@ConfigurationProperties("dactiv.authentication")
 public class AuthenticationProperties {
 
     /**

@@ -1,12 +1,12 @@
-package com.github.dactiv.framework.spring.security.concurrent;
+package com.github.dactiv.framework.idempotent.test.concurrent;
 
-import com.github.dactiv.framework.spring.security.concurrent.service.ConcurrentDataService;
-import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import javax.swing.text.html.parser.Entity;
 
 /**
  * 并发注解单元测试
@@ -58,7 +58,7 @@ public class ConcurrentDataServiceTest {
         concurrentDataService.incrementSpringEl();
         concurrentDataService.setCount(1);
 
-        concurrentDataService.incrementArgs(new RoleAuthority("123","234"));
+        concurrentDataService.incrementArgs(new Entity("123",0, "333".toCharArray()));
         concurrentDataService.setCount(2);
     }
 

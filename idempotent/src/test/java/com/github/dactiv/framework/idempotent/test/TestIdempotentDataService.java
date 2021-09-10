@@ -49,7 +49,7 @@ public class TestIdempotentDataService {
         }
 
         for (int i = 0; i < 10; i++) {
-            Thread.sleep(1000);
+            Thread.sleep(1500);
 
             try {
                 idempotentDataService.saveEntityExpirationTime(new Entity("123", 1, null), 5);
@@ -62,6 +62,21 @@ public class TestIdempotentDataService {
 
         Assertions.assertEquals(idempotentDataService.getData().get(5).size(), 5);
         Assertions.assertEquals(idempotentDataService.getData().get(6).size(), 5);
+
+        for (int i = 0; i < 10; i++) {
+            Thread.sleep(1000);
+
+            try {
+                idempotentDataService.saveEntityUnsetValue(new Entity("123", 1, null), 7);
+                idempotentDataService.saveEntityUnsetValue(new Entity("321", 1, null), 8);
+            } catch (IdempotentException e) {
+                LOGGER.warn("出现 IdempotentException 异常，信息为:" + e.getMessage());
+                Assertions.assertEquals(e.getMessage(), "请不要重复操作");
+            }
+        }
+
+        Assertions.assertEquals(idempotentDataService.getData().get(7).size(), 5);
+        Assertions.assertEquals(idempotentDataService.getData().get(8).size(), 5);
 
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 
@@ -78,8 +93,8 @@ public class TestIdempotentDataService {
 
             threadPoolTaskExecutor.execute(() -> {
                 try {
-                    idempotentDataService.saveEntityExpirationTime(new Entity("123", 1, null), 7);
-                    idempotentDataService.saveEntityExpirationTime(new Entity("321", 1, null), 8);
+                    idempotentDataService.saveEntityExpirationTime(new Entity("123", 1, null), 9);
+                    idempotentDataService.saveEntityExpirationTime(new Entity("321", 1, null), 10);
                 } catch (IdempotentException e) {
                     LOGGER.warn("出现 IdempotentException 异常，信息为:" + e.getMessage());
                     Assertions.assertEquals(e.getMessage(), "请不要重复操作");
@@ -89,13 +104,15 @@ public class TestIdempotentDataService {
 
         Thread.sleep(2000);
 
-        Assertions.assertTrue(idempotentDataService.getData().get(7).size() >= 2);
-        Assertions.assertTrue(idempotentDataService.getData().get(8).size() >= 2);
+        Assertions.assertTrue(idempotentDataService.getData().get(9).size() >= 2);
+        Assertions.assertTrue(idempotentDataService.getData().get(10).size() >= 2);
 
         for (int i = 0; i < 9; i++) {
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 1);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 2);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 3);
+            idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
+            idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
             idempotentDataService.nonIdempotentSaveEntity(new Entity("321", 1, null), 4);
         }
 

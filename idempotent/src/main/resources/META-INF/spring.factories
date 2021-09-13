@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.dactiv.framework.idempotent.IdempotentAutoConfiguration,\
-  com.github.dactiv.framework.idempotent.TypeAutoConfiguration
+  com.github.dactiv.framework.idempotent.IdempotentAutoConfiguration

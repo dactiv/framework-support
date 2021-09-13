@@ -4,6 +4,8 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.ServiceException;
+import com.github.dactiv.framework.commons.exception.StatusErrorCodeException;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -14,7 +16,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,8 +43,9 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             "arguments"
     );
 
-    private static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Collections.singletonList(
-            ServiceException.class
+    private static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
+            ServiceException.class,
+            SystemException.class
     );
 
     private static final List<HttpStatus> DEFAULT_HTTP_STATUSES_MESSAGE = Arrays.asList(
@@ -63,49 +69,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 new LinkedHashMap<>()
         );
 
-        Throwable error = getError(webRequest);
-
-        if (error != null) {
-
-            BindingResult bindingResult = extractBindingResult(error);
-
-            if (bindingResult != null && bindingResult.hasErrors()) {
-
-                List<FieldError> filedErrorResult = bindingResult.getAllErrors()
-                        .stream()
-                        .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
-                        .map(o -> (FieldError) o)
-                        .collect(Collectors.toList());
-
-                List<Map<String, Object>> data = new LinkedList<>();
-
-                for (FieldError fieldError : filedErrorResult) {
-
-                    Map<String, Object> map = Casts.convertValue(fieldError, Map.class);
-
-                    map.entrySet().removeIf(i -> DEFAULT_BINDING_RESULT_IGNORE_FIELD.contains(i.getKey()));
-
-                    data.add(map);
-                }
-
-                result.setMessage("参数验证不通过");
-
-                result.setData(data);
-
-            } else if (error instanceof ErrorCodeException) {
-                ErrorCodeException errorCodeException = Casts.cast(error, ErrorCodeException.class);
-
-                result.setExecuteCode(errorCodeException.getErrorCode());
-                result.setMessage(errorCodeException.getMessage());
-            }
-
-            if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
-                result.setMessage(error.getMessage());
-            }
-
-            LOGGER.error("服务器异常", error);
-
-        }
+        setThrowable(webRequest, result);
 
         if (DEFAULT_HTTP_STATUSES_MESSAGE.contains(status)) {
             result.setMessage(status.getReasonPhrase());
@@ -114,6 +78,55 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
         webRequest.setAttribute(DEFAULT_ERROR_EXECUTE_ATTR_NAME, true, RequestAttributes.SCOPE_REQUEST);
 
         return Casts.convertValue(result, Map.class);
+    }
+
+    private void setThrowable(WebRequest webRequest, RestResult<Object> result) {
+        Throwable error = getError(webRequest);
+
+        if (Objects.isNull(error)) {
+            return ;
+        }
+
+        BindingResult bindingResult = extractBindingResult(error);
+
+        if (bindingResult != null && bindingResult.hasErrors()) {
+
+            List<FieldError> filedErrorResult = bindingResult.getAllErrors()
+                    .stream()
+                    .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
+                    .map(o -> (FieldError) o)
+                    .collect(Collectors.toList());
+
+            List<Map<String, Object>> data = new LinkedList<>();
+
+            for (FieldError fieldError : filedErrorResult) {
+                //noinspection unchecked
+                Map<String, Object> map = Casts.convertValue(fieldError, Map.class);
+                map.entrySet().removeIf(i -> DEFAULT_BINDING_RESULT_IGNORE_FIELD.contains(i.getKey()));
+                data.add(map);
+            }
+
+            result.setMessage("参数验证不通过");
+            result.setData(data);
+
+        } else if (ErrorCodeException.class.isAssignableFrom(error.getClass())) {
+            ErrorCodeException exception = Casts.cast(error, ErrorCodeException.class);
+
+            result.setExecuteCode(exception.getErrorCode());
+            result.setMessage(exception.getMessage());
+
+            if (StatusErrorCodeException.class.isAssignableFrom(error.getClass())) {
+                StatusErrorCodeException statusException = Casts.cast(error, StatusErrorCodeException.class);
+
+                result.setStatus(statusException.getStatus());
+            }
+        }
+
+        if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
+            result.setMessage(error.getMessage());
+        }
+
+        LOGGER.error("服务器异常", error);
     }
 
     private BindingResult extractBindingResult(Throwable error) {

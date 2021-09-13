@@ -11,6 +11,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
@@ -35,6 +37,10 @@ public class IdempotentInterceptor implements MethodInterceptor {
      * key 生成器
      */
     private final ValueGenerator valueGenerator;
+    /**
+     * 参数名称发现者，用于获取 Concurrent 注解下的方法参数细信息
+     */
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
     public IdempotentInterceptor(RedissonClient redissonClient, ValueGenerator valueGenerator) {
         this.redissonClient = redissonClient;
@@ -79,7 +85,20 @@ public class IdempotentInterceptor implements MethodInterceptor {
         List<Object> values = new LinkedList<>();
 
         if (ArrayUtils.isEmpty(idempotent.value())) {
-            values.add(Arrays.asList(arguments).hashCode());
+
+            String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
+
+            List<Object> value = new LinkedList<>();
+
+            for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
+                if (ArrayUtils.contains(idempotent.ignore(),parameterNames[i])) {
+                    continue;
+                }
+                value.add(arguments[i]);
+            }
+
+            values.add(Arrays.hashCode(value.toArray()));
+
         } else {
             Arrays
                     .stream(idempotent.value())

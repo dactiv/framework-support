@@ -41,7 +41,7 @@ import java.util.List;
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @EnableConfigurationProperties(SpringWebSupportProperties.class)
-@ConditionalOnProperty(prefix = "spring.web.mvc.support", value = "enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "dactiv.spring-mvc.enabled", value = "enabled", matchIfMissing = true)
 public class SpringWebMvcSupportAutoConfiguration {
 
     @Autowired(required = false)
@@ -51,9 +51,6 @@ public class SpringWebMvcSupportAutoConfiguration {
     @EnableConfigurationProperties(SpringWebSupportProperties.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
-
-        @Autowired
-        private SpringWebSupportProperties properties;
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -73,7 +70,6 @@ public class SpringWebMvcSupportAutoConfiguration {
     public RestResultErrorAttributes servletRestResultErrorAttributes() {
         return new RestResultErrorAttributes();
     }
-
 
     @Bean
     @ConditionalOnMissingBean(RestTemplate.class)
@@ -112,9 +108,8 @@ public class SpringWebMvcSupportAutoConfiguration {
         return objectMapper;
     }
 
-
     @Bean
-    @ConfigurationProperties("enumerate")
+    @ConfigurationProperties("dactiv.enumerate")
     public EnumerateEndpoint enumerateEndpoint() {
         return new EnumerateEndpoint(infoContributors);
     }

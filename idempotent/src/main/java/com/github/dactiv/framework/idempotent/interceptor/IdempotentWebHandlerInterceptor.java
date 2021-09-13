@@ -14,6 +14,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -48,13 +49,10 @@ public class IdempotentWebHandlerInterceptor extends HandlerInterceptorAdapter {
 
     private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
-    private final WebBindingInitializer webBindingInitializer;
+    private final WebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
 
-    public IdempotentWebHandlerInterceptor(IdempotentInterceptor idempotentInterceptor,
-                                           WebBindingInitializer webBindingInitializer) {
-
+    public IdempotentWebHandlerInterceptor(IdempotentInterceptor idempotentInterceptor) {
         this.idempotentInterceptor = idempotentInterceptor;
-        this.webBindingInitializer = webBindingInitializer;
     }
 
     @Override
@@ -68,10 +66,9 @@ public class IdempotentWebHandlerInterceptor extends HandlerInterceptorAdapter {
 
         HandlerMethod handlerMethod = Casts.cast(handler, HandlerMethod.class);
 
-        Idempotent idempotent = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Idempotent.class);
+        Idempotent idempotent = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Idempotent.class);
 
         if (Objects.isNull(idempotent)) {
-
             return true;
         }
 

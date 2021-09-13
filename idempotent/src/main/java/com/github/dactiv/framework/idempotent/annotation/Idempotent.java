@@ -44,6 +44,12 @@ public @interface Idempotent {
     String exception() default "请不要重复操作";
 
     /**
+     * 如果不使用 {@link #value()} 时，要忽略哪个参数不做 hashCode
+     * @return 要忽略的参数
+     */
+    String[] ignore() default {};
+
+    /**
      * 过期时间，用于说明间隔提交时间在什么范围内能在此提交
      *
      * @return 时间

@@ -10,12 +10,13 @@ import java.lang.reflect.Method;
 public interface ValueGenerator {
 
     /**
-     * 生成 key
+     * 生成值
      *
-     * @param key    当前 key
+     * @param token  当前 token
      * @param method 被调用的方法
-     * @param args 参数值
-     * @return key 实际值
+     * @param args   参数值
+     *
+     * @return 实际值
      */
-    Object generate(String key, Method method, Object... args);
+    Object generate(String token, Method method, Object... args);
 }

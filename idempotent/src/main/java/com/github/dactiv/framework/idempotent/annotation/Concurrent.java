@@ -30,7 +30,7 @@ public @interface Concurrent {
      *
      * @return 信息
      */
-    String exceptionMessage() default "请不要重复操作";
+    String exception() default "请不要重复操作";
 
     /**
      * 锁等待时间

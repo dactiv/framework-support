@@ -6,7 +6,7 @@
   ],
   "properties": [
     {
-      "name": "spring.mvc.support.enabled",
+      "name": "dactiv.spring-mvc.enabled",
       "type": "java.lang.Boolean",
       "description": "enabled spring mvc support .",
       "defaultValue": true

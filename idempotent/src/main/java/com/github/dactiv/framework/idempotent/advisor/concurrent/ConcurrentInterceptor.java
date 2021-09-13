@@ -81,7 +81,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
             }
         }
 
-        throw new ConcurrentException(concurrent.exceptionMessage());
+        throw new ConcurrentException(concurrent.exception());
 
     }
 

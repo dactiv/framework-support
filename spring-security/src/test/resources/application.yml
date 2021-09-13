@@ -1,4 +1,4 @@
 dactiv:
   authentication:
     audit:
-      type: elasticsearch
+      type: memory

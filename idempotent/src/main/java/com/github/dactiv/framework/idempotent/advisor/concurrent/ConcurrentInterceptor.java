@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.idempotent.advisor.LockType;
 import com.github.dactiv.framework.idempotent.annotation.Concurrent;
@@ -12,6 +13,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -48,7 +50,8 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         String key = concurrent.value();
 
         if (StringUtils.isEmpty(key)) {
-            key = invocation.getMethod().getName();
+            Method method = invocation.getMethod();
+            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL +  method.getName();
         }
 
         Object concurrentKey = valueGenerator.generate(key, invocation.getMethod(), invocation.getArguments());

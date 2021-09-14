@@ -6,6 +6,7 @@ import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.ServiceException;
 import com.github.dactiv.framework.commons.exception.StatusErrorCodeException;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -34,15 +35,6 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
     public static final String DEFAULT_ERROR_EXECUTE_ATTR_NAME = "REST_ERROR_ATTRIBUTES_EXECUTE";
 
-    private static final List<String> DEFAULT_BINDING_RESULT_IGNORE_FIELD = Arrays.asList(
-            "rejectedValue",
-            "bindingFailure",
-            "objectName",
-            "source",
-            "codes",
-            "arguments"
-    );
-
     private static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
             ServiceException.class,
             SystemException.class
@@ -53,9 +45,16 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             HttpStatus.UNAUTHORIZED
     );
 
+    private final List<ErrorResultResolver> resultResolvers;
+
+    public RestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
+        this.resultResolvers = resultResolvers;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+
         HttpStatus status = getStatus(webRequest);
 
         if (status == null) {
@@ -69,77 +68,40 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 new LinkedHashMap<>()
         );
 
-        setThrowable(webRequest, result);
-
         if (DEFAULT_HTTP_STATUSES_MESSAGE.contains(status)) {
             result.setMessage(status.getReasonPhrase());
         }
 
+        Throwable error = getError(webRequest);
+
+        if (Objects.nonNull(error)) {
+            Optional<ErrorResultResolver> optional = resultResolvers
+                    .stream()
+                    .filter(r -> r.isSupport(error))
+                    .findFirst();
+
+            if (optional.isPresent()) {
+                result = optional.get().resolve(error);
+
+                if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
+                    result.setMessage(error.getMessage());
+                }
+            }
+        }
+
         webRequest.setAttribute(DEFAULT_ERROR_EXECUTE_ATTR_NAME, true, RequestAttributes.SCOPE_REQUEST);
+        LOGGER.error("服务器异常", error);
 
         return Casts.convertValue(result, Map.class);
     }
 
-    private void setThrowable(WebRequest webRequest, RestResult<Object> result) {
-        Throwable error = getError(webRequest);
-
-        if (Objects.isNull(error)) {
-            return ;
-        }
-
-        BindingResult bindingResult = extractBindingResult(error);
-
-        if (bindingResult != null && bindingResult.hasErrors()) {
-
-            List<FieldError> filedErrorResult = bindingResult.getAllErrors()
-                    .stream()
-                    .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
-                    .map(o -> (FieldError) o)
-                    .collect(Collectors.toList());
-
-            List<Map<String, Object>> data = new LinkedList<>();
-
-            for (FieldError fieldError : filedErrorResult) {
-                //noinspection unchecked
-                Map<String, Object> map = Casts.convertValue(fieldError, Map.class);
-                map.entrySet().removeIf(i -> DEFAULT_BINDING_RESULT_IGNORE_FIELD.contains(i.getKey()));
-                data.add(map);
-            }
-
-            result.setMessage("参数验证不通过");
-            result.setData(data);
-
-        } else if (ErrorCodeException.class.isAssignableFrom(error.getClass())) {
-            ErrorCodeException exception = Casts.cast(error, ErrorCodeException.class);
-
-            result.setExecuteCode(exception.getErrorCode());
-            result.setMessage(exception.getMessage());
-
-            if (StatusErrorCodeException.class.isAssignableFrom(error.getClass())) {
-                StatusErrorCodeException statusException = Casts.cast(error, StatusErrorCodeException.class);
-
-                result.setStatus(statusException.getStatus());
-            }
-        }
-
-        if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
-            result.setMessage(error.getMessage());
-        }
-
-        LOGGER.error("服务器异常", error);
-    }
-
-    private BindingResult extractBindingResult(Throwable error) {
-        if (error instanceof BindingResult) {
-            return Casts.cast(error);
-        }
-        if (error instanceof MethodArgumentNotValidException) {
-            return Casts.cast(error, MethodArgumentNotValidException.class).getBindingResult();
-        }
-        return null;
-    }
-
-
+    /**
+     * 获取 http 状态
+     *
+     * @param webRequest web 请求
+     *
+     * @return http 状态
+     */
     private HttpStatus getStatus(WebRequest webRequest) {
 
         Integer status = Casts.cast(webRequest.getAttribute(

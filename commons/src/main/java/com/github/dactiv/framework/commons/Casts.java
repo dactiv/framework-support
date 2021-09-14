@@ -8,8 +8,6 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,12 +24,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class Casts {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Casts.class);
-
     /**
      * 默认点符号
      */
-    public static final String DEFAULT_POINT_SYMBOL = ".";
+    public static final String DEFAULT_DOT_SYMBOL = ".";
 
     /**
      * 默认等于符号
@@ -275,7 +271,7 @@ public class Casts {
 
         Map<String, Object> result = new LinkedHashMap<>(source);
 
-        String[] strings = StringUtils.split(path, DEFAULT_POINT_SYMBOL);
+        String[] strings = StringUtils.split(path, DEFAULT_DOT_SYMBOL);
 
         for (String s : strings) {
             result = Casts.cast(result.get(s));

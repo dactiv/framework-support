@@ -10,6 +10,9 @@ import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpReque
 import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
+import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
+import com.github.dactiv.framework.spring.web.result.error.support.BindingResultErrorResultResolver;
+import com.github.dactiv.framework.spring.web.result.error.support.ErrorCodeResultResolver;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +70,18 @@ public class SpringWebMvcSupportAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RestResultErrorAttributes.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResultErrorAttributes servletRestResultErrorAttributes() {
-        return new RestResultErrorAttributes();
+    public RestResultErrorAttributes servletRestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
+        return new RestResultErrorAttributes(resultResolvers);
+    }
+
+    @Bean
+    public BindingResultErrorResultResolver bindingResultErrorResultResolver() {
+        return new BindingResultErrorResultResolver();
+    }
+
+    @Bean
+    public ErrorCodeResultResolver errorCodeResultResolver() {
+        return new ErrorCodeResultResolver();
     }
 
     @Bean

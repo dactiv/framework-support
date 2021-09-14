@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.idempotent.advisor;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.idempotent.annotation.Idempotent;
-import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
 import com.github.dactiv.framework.idempotent.exception.IdempotentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -77,7 +77,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
         String key = idempotent.key();
 
         if (StringUtils.isEmpty(key)) {
-            key = method.toString();
+            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL +  method.getName();
         }
 
         Object keyValue = valueGenerator.generate(key, method, arguments);

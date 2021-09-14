@@ -4,6 +4,7 @@ import com.github.dactiv.framework.idempotent.advisor.IdempotentInterceptor;
 import com.github.dactiv.framework.idempotent.advisor.IdempotentPointcutAdvisor;
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentPointcutAdvisor;
+import com.github.dactiv.framework.idempotent.exception.IdempotentErrorResultResolver;
 import com.github.dactiv.framework.idempotent.generator.SpelExpressionValueGenerator;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.redisson.api.RedissonClient;
@@ -51,6 +52,11 @@ public class IdempotentAutoConfiguration {
     @Bean
     IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor) {
         return new IdempotentPointcutAdvisor(idempotentInterceptor);
+    }
+
+    @Bean
+    IdempotentErrorResultResolver idempotentErrorResultResolver() {
+        return new IdempotentErrorResultResolver();
     }
 
 }

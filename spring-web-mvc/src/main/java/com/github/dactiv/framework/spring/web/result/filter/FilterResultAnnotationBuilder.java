@@ -311,7 +311,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * @return 排除视图  id 值
      */
     public String getExcludeViewId(ExcludeView view, Annotated a) {
-        return DEFAULT_EXCLUDE_PREFIX + Casts.DEFAULT_POINT_SYMBOL + view.value() + Casts.DEFAULT_POINT_SYMBOL + a.toString();
+        return DEFAULT_EXCLUDE_PREFIX + Casts.DEFAULT_DOT_SYMBOL + view.value() + Casts.DEFAULT_DOT_SYMBOL + a.toString();
     }
 
     /**
@@ -323,7 +323,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * @return 引入视图  id 值
      */
     private String getIncludeViewId(IncludeView view, Annotated a) {
-        return DEFAULT_INCLUDE_PREFIX + Casts.DEFAULT_POINT_SYMBOL + view.value() + Casts.DEFAULT_POINT_SYMBOL + a.toString();
+        return DEFAULT_INCLUDE_PREFIX + Casts.DEFAULT_DOT_SYMBOL + view.value() + Casts.DEFAULT_DOT_SYMBOL + a.toString();
     }
 
     @Override

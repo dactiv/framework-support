@@ -7,7 +7,7 @@ import com.github.dactiv.framework.commons.exception.SystemException;
  *
  * @author maurice
  */
-public class ConcurrentException extends SystemException {
+public class ConcurrentException extends IdempotentException {
 
     private static final long serialVersionUID = 2181395755678626994L;
 

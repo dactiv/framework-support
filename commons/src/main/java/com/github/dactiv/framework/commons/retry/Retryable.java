@@ -48,6 +48,13 @@ public interface Retryable {
     Integer getMaxRetryCount();
 
     /**
+     * 设置最大重试次数
+     *
+     * @param maxRetryCount 最大重试次数
+     */
+    void setMaxRetryCount(Integer maxRetryCount);
+
+    /**
      * 获取下一次重试时间（毫秒为单位）
      *
      * @return 时间（毫秒为单位）

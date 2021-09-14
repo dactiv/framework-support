@@ -39,8 +39,6 @@ public class AuthenticationConfiguration {
 
             SecurityProperties.User user = optional.get();
 
-            requestTemplate.method(Request.HttpMethod.POST);
-
             requestTemplate.header(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
 
             requestTemplate.query(properties.getUsernameParamName(), user.getName());

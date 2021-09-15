@@ -25,8 +25,8 @@ public class ConcurrentDataServiceTest {
 
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 
-        threadPoolTaskExecutor.setMaxPoolSize(1000);
-        threadPoolTaskExecutor.setCorePoolSize(100);
+        threadPoolTaskExecutor.setMaxPoolSize(100);
+        threadPoolTaskExecutor.setCorePoolSize(20);
 
         threadPoolTaskExecutor.initialize();
 
@@ -34,25 +34,6 @@ public class ConcurrentDataServiceTest {
             threadPoolTaskExecutor.execute(() -> {
                 try {
                     concurrentDataService.increment();
-                } catch (ConcurrentException e) {
-                    Assertions.assertEquals(e.getMessage(), "请不要重复操作");
-                }
-            });
-        }
-
-        Thread.sleep(3000);
-
-        while (threadPoolTaskExecutor.getActiveCount() == 0) {
-            break;
-        }
-
-        Assertions.assertEquals(concurrentDataService.getCount(), 1);
-        concurrentDataService.setCount(0);
-
-        for (int i = 1; i <= 10; i++) {
-            threadPoolTaskExecutor.execute(() -> {
-                try {
-                    concurrentDataService.incrementWait();
                 } catch (ConcurrentException e) {
                     Assertions.assertEquals(e.getMessage(), "请不要重复操作");
                 }

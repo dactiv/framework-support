@@ -21,13 +21,6 @@ public class ConcurrentDataService {
         return count;
     }
 
-    @Concurrent(value = "increment:wait:count", waitTime = 3000)
-    public int incrementWait() {
-        count = count + 1;
-        LOGGER.info("当前自增值为:" + count);
-        return count;
-    }
-
     @Concurrent(value = "increment:spring-el:count")
     public int incrementSpringEl() {
         count = count + 1;

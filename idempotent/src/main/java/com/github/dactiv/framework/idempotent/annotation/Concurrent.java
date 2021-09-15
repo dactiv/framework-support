@@ -37,14 +37,14 @@ public @interface Concurrent {
      *
      * @return 锁等待时间
      */
-    long waitTime() default 5000;
+    long waitTime() default 1000;
 
     /**
      * 锁生存/释放时间
      *
      * @return 锁生存/释放时间
      */
-    Time leaseTime() default @Time(10000);
+    Time leaseTime() default @Time(5000);
 
     /**
      * 锁类型

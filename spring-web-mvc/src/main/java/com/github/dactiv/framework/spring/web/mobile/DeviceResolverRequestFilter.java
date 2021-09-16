@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.web.mobile;
 
 import nl.basjes.parse.useragent.UserAgent;
+import org.springframework.core.Ordered;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -14,7 +15,7 @@ import java.io.IOException;
  *
  * @author maurice
  */
-public class DeviceResolverRequestFilter extends OncePerRequestFilter {
+public class DeviceResolverRequestFilter extends OncePerRequestFilter implements Ordered {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -23,5 +24,10 @@ public class DeviceResolverRequestFilter extends OncePerRequestFilter {
         UserAgent device = DeviceUtils.getDevice(request);
         request.setAttribute(DeviceUtils.CURRENT_DEVICE_ATTRIBUTE, device);
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

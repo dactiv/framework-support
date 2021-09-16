@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.web.mobile;
 
+import nl.basjes.parse.useragent.UserAgent;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -15,32 +16,11 @@ import java.io.IOException;
  */
 public class DeviceResolverRequestFilter extends OncePerRequestFilter {
 
-    /**
-     * 设备解析器
-     */
-    private final DeviceResolver deviceResolver;
-
-    /**
-     * 设备解析请求 filter
-     */
-    public DeviceResolverRequestFilter() {
-        this(new LiteDeviceResolver());
-    }
-
-    /**
-     * 设备解析请求 filter
-     *
-     * @param deviceResolver 设备解析器
-     */
-    public DeviceResolverRequestFilter(DeviceResolver deviceResolver) {
-        this.deviceResolver = deviceResolver;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        Device device = deviceResolver.resolveDevice(request);
+        UserAgent device = DeviceUtils.getDevice(request);
         request.setAttribute(DeviceUtils.CURRENT_DEVICE_ATTRIBUTE, device);
         filterChain.doFilter(request, response);
     }

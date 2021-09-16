@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
-import com.github.dactiv.framework.spring.web.mobile.Device;
+import nl.basjes.parse.useragent.UserAgent;
 
 /**
  * 移动端的用户明细实现
@@ -26,7 +26,7 @@ public class MobileUserDetails extends SecurityUserDetails {
      * 设备
      */
     @JsonIgnore
-    private Device device;
+    private UserAgent device;
 
     /**
      * 移动端用户明细实现
@@ -44,7 +44,7 @@ public class MobileUserDetails extends SecurityUserDetails {
      * @param deviceIdentified 设备唯一是被
      * @param device           设备
      */
-    public MobileUserDetails(Integer id, String username, String password, String deviceIdentified, Device device) {
+    public MobileUserDetails(Integer id, String username, String password, String deviceIdentified, UserAgent device) {
         super(id, username, password, UserStatus.Enabled);
         this.deviceIdentified = deviceIdentified;
         this.device = device;
@@ -65,7 +65,7 @@ public class MobileUserDetails extends SecurityUserDetails {
      *
      * @return 设备
      */
-    public Device getDevice() {
+    public UserAgent getDevice() {
         return device;
     }
 
@@ -83,7 +83,7 @@ public class MobileUserDetails extends SecurityUserDetails {
      *
      * @param device 设备信息
      */
-    public void setDevice(Device device) {
+    public void setDevice(UserAgent device) {
         this.device = device;
     }
 }

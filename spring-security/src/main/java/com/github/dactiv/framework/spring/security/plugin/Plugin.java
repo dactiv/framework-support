@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.security.plugin;
 
 import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceType;
-import com.github.dactiv.framework.spring.security.version.VersionControl;
 
 import java.lang.annotation.*;
 
@@ -82,12 +81,5 @@ public @interface Plugin {
      * @return 备注
      */
     String remark() default "";
-
-    /**
-     * 版本控制
-     *
-     * @return 版本控制
-     */
-    VersionControl[] versionControls() default {};
 
 }

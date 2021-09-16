@@ -2,8 +2,8 @@ package com.github.dactiv.framework.spring.web.mvc;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.spring.web.mobile.Device;
 import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
+import nl.basjes.parse.useragent.UserAgent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +148,7 @@ public class SpringMvcUtils {
      *
      * @return 设备
      */
-    public static Device getCurrentDevice() {
+    public static UserAgent getCurrentDevice() {
         return DeviceUtils.getCurrentDevice(RequestContextHolder.currentRequestAttributes());
     }
 
@@ -157,7 +157,7 @@ public class SpringMvcUtils {
      *
      * @return 设备
      */
-    public static Device getRequiredCurrentDevice() {
+    public static UserAgent getRequiredCurrentDevice() {
 
         Optional<HttpServletRequest> optional = getHttpServletRequest();
 
@@ -171,7 +171,6 @@ public class SpringMvcUtils {
      */
     public static String getDeviceIdentified() {
         Optional<HttpServletRequest> optional = getHttpServletRequest();
-
         return getDeviceIdentified(optional.orElseThrow(() -> new SystemException("当前线程中无法获取 HttpServletRequest 信息")));
     }
 
@@ -217,13 +216,12 @@ public class SpringMvcUtils {
      * @throws IOException 获取路径文件失败抛出
      */
     public static ResponseEntity<byte[]> createDownloadResponseEntity(String fileName, String path) throws IOException {
-
         HttpHeaders headers = new HttpHeaders();
+
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, fileName);
+
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(new File(path)), headers, HttpStatus.CREATED);
-
-
     }
 
     /**

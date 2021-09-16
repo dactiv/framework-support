@@ -7,7 +7,7 @@ import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethod
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
-import com.github.dactiv.framework.spring.web.mobile.DeviceResolverHandlerInterceptor;
+import com.github.dactiv.framework.spring.web.mobile.DeviceResolverRequestFilter;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -60,11 +60,6 @@ public class SpringWebMvcSupportAutoConfiguration {
             argumentResolvers.add(new GenericsListHandlerMethodArgumentResolver(getValidator()));
             argumentResolvers.add(new DeviceHandlerMethodArgumentResolver());
         }
-
-        @Override
-        public void addInterceptors(InterceptorRegistry registry) {
-            registry.addInterceptor(new DeviceResolverHandlerInterceptor());
-        }
     }
 
     @Bean
@@ -72,6 +67,11 @@ public class SpringWebMvcSupportAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public RestResultErrorAttributes servletRestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
         return new RestResultErrorAttributes(resultResolvers);
+    }
+
+    @Bean
+    public DeviceResolverRequestFilter deviceResolverRequestFilter() {
+        return new DeviceResolverRequestFilter();
     }
 
     @Bean

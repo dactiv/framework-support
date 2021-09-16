@@ -15,7 +15,6 @@ import com.github.dactiv.framework.spring.security.authentication.service.Defaul
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
-import com.github.dactiv.framework.spring.security.version.AccessVersionControlHandlerInterceptor;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,11 +65,6 @@ public class SpringSecuritySupportAutoConfiguration {
     @Bean
     ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor() {
         return new ControllerAuditHandlerInterceptor();
-    }
-
-    @Bean
-    AccessVersionControlHandlerInterceptor accessVersionControlHandlerInterceptor() {
-        return new AccessVersionControlHandlerInterceptor();
     }
 
     @Bean
@@ -163,13 +157,9 @@ public class SpringSecuritySupportAutoConfiguration {
         @Autowired
         private ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor;
 
-        @Autowired
-        private AccessVersionControlHandlerInterceptor accessVersionControlHandlerInterceptor;
-
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(controllerAuditHandlerInterceptor);
-            registry.addInterceptor(accessVersionControlHandlerInterceptor);
         }
     }
 }

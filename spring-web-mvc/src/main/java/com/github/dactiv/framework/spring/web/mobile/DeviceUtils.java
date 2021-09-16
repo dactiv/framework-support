@@ -1,5 +1,8 @@
 package com.github.dactiv.framework.spring.web.mobile;
 
+import com.github.dactiv.framework.commons.Casts;
+import nl.basjes.parse.useragent.UserAgent;
+import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.springframework.web.context.request.RequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +13,14 @@ import javax.servlet.http.HttpServletRequest;
  * @author maurice
  */
 public class DeviceUtils {
+
+    private static final UserAgentAnalyzer USER_AGENT_ANALYZER = UserAgentAnalyzer
+            .newBuilder()
+            //.withFields("DeviceClass","OperatingSystemClass")
+            .hideMatcherLoadStats()
+            .build();
+
+    public static final String USER_AGENT_HEADER_NAME = "USER-AGENT";
 
     /**
      * 当前设备的 HttpServletRequest 属性的名称。
@@ -31,8 +42,28 @@ public class DeviceUtils {
      *
      * @return 当前设备, 如果尚未为请求解析任何设备，则为null
      */
-    public static Device getCurrentDevice(HttpServletRequest request) {
-        return (Device) request.getAttribute(CURRENT_DEVICE_ATTRIBUTE);
+    public static UserAgent getCurrentDevice(HttpServletRequest request) {
+        return Casts.cast(request.getAttribute(CURRENT_DEVICE_ATTRIBUTE));
+    }
+
+    /**
+     * 获取设备信息
+     *
+     * @param request the servlet request
+     *
+     * @return 设备信息
+     */
+    public static UserAgent getDevice(HttpServletRequest request) {
+        return getDevice(request.getHeader(USER_AGENT_HEADER_NAME));
+    }
+
+    /**
+     * 获取设备信息
+     * @param userAgent user agent
+     * @return 设备信息
+     */
+    public static UserAgent getDevice(String userAgent) {
+        return USER_AGENT_ANALYZER.parse(userAgent);
     }
 
     /**
@@ -42,8 +73,8 @@ public class DeviceUtils {
      *
      * @return 当前设备
      */
-    public static Device getRequiredCurrentDevice(HttpServletRequest request) {
-        Device device = getCurrentDevice(request);
+    public static UserAgent getRequiredCurrentDevice(HttpServletRequest request) {
+        UserAgent device = getCurrentDevice(request);
         if (device == null) {
             throw new IllegalStateException("此请求中未设置任何当前设备，您是否配置了 DeviceResolverRequestFilter ？");
         }
@@ -57,7 +88,7 @@ public class DeviceUtils {
      *
      * @return 当前设备, 如果尚未为请求解析任何设备，则为null
      */
-    public static Device getCurrentDevice(RequestAttributes attributes) {
-        return (Device) attributes.getAttribute(CURRENT_DEVICE_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+    public static UserAgent getCurrentDevice(RequestAttributes attributes) {
+        return (UserAgent) attributes.getAttribute(CURRENT_DEVICE_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
     }
 }

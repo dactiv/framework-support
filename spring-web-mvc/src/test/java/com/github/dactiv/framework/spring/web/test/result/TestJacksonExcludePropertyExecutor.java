@@ -24,8 +24,6 @@ public class TestJacksonExcludePropertyExecutor {
 
         user.generateRole(5);
 
-        RestResult<User> result = RestResult.ofSuccess(user);
-
         List<String> basePackages = Collections.singletonList("com.github.dactiv.framework.spring.web.test.result.entity");
 
         FilterResultAnnotationBuilder builder = new FilterResultAnnotationBuilder(basePackages);

@@ -60,23 +60,19 @@ public class TestIdempotentDataService {
             }
         }
 
-        Assertions.assertEquals(idempotentDataService.getData().get(5).size(), 5);
-        Assertions.assertEquals(idempotentDataService.getData().get(6).size(), 5);
+        Assertions.assertEquals(idempotentDataService.getData().get(5).size(), 1);
+        Assertions.assertEquals(idempotentDataService.getData().get(6).size(), 1);
 
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(1000);
+        for (int i = 0; i < 3; i++) {
+            Thread.sleep(5000);
 
-            try {
-                idempotentDataService.saveEntityUnsetValue("123", 1, 7);
-                idempotentDataService.saveEntityUnsetValue("321", 1, 8);
-            } catch (IdempotentException e) {
-                LOGGER.warn("出现 IdempotentException 异常，信息为:" + e.getMessage());
-                Assertions.assertEquals(e.getMessage(), "请不要重复操作");
-            }
+            idempotentDataService.saveEntityUnsetValue("123", 1, 7);
+            idempotentDataService.saveEntityUnsetValue("321", 1, 8);
+
         }
 
-        Assertions.assertEquals(idempotentDataService.getData().get(7).size(), 2);
-        Assertions.assertEquals(idempotentDataService.getData().get(8).size(), 2);
+        Assertions.assertEquals(idempotentDataService.getData().get(7).size(), 3);
+        Assertions.assertEquals(idempotentDataService.getData().get(8).size(), 3);
 
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 

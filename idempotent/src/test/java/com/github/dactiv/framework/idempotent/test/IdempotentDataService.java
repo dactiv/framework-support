@@ -19,28 +19,29 @@ public class IdempotentDataService {
 
     private final Map<Integer, List<Entity>> data = new LinkedHashMap<>();
 
-    @Idempotent(key = "idempotent:spring-el:increment-args:[#userId]", value = "[#entity.hashCode()]")
+    @Idempotent(key = "idempotent:save-entity:[#userId]", value = "[T(java.util.Objects).hash(#entity.name, #entity.type)]")
     public Integer saveEntity(Entity entity, Integer userId) {
+
         LOGGER.info("保存用户 ID 为 [" + userId + "] 的 entity 数据");
         return save(entity, userId);
     }
 
-    @Idempotent(key = "idempotent:spring-el:increment-args:[#userId]", value = "[#entity.hashCode()]", exception = "不要重复提交")
+    @Idempotent(key = "idempotent:save-entity:[#userId]", value = "[T(java.util.Objects).hash(#entity.name, #entity.type)]", exception = "不要重复提交")
     public Integer saveEntityExceptionMessage(Entity entity, Integer userId) {
         LOGGER.info("保存用户 ID 为 [" + userId + "] 的 entity 数据");
         return save(entity, userId);
     }
 
-    @Idempotent(key = "idempotent:spring-el:increment-args:[#userId]", value = "[#entity.hashCode()]",expirationTime = @Time(2000))
+    @Idempotent(key = "idempotent:save-entity:[#userId]", value = "[T(java.util.Objects).hash(#entity.name, #entity.type)]",expirationTime = @Time(2000))
     public Integer saveEntityExpirationTime(Entity entity, Integer userId) {
         LOGGER.info("保存用户 ID 为 [" + userId + "] 的 entity 数据");
         return save(entity, userId);
     }
 
-    @Idempotent(key = "idempotent:spring-el:increment-args:[#userId]")
-    public Integer saveEntityUnsetValue(Entity entity, Integer userId) {
+    @Idempotent(key = "idempotent:save-entity:[#userId]", ignore = "userId")
+    public Integer saveEntityUnsetValue(String name, int type, Integer userId) {
         LOGGER.info("保存用户 ID 为 [" + userId + "] 的 entity 数据");
-        return save(entity, userId);
+        return save(new Entity(name, type, null), userId);
     }
 
     public void nonIdempotentSaveEntity(Entity entity, Integer userId) {

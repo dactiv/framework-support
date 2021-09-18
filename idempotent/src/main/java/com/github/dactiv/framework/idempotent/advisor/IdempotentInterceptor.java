@@ -108,10 +108,17 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
         RBucket<List<Object>> bucket = redissonClient.getBucket(keyValue.toString());
 
-        List<Object> existValues = redissonClient.getList(keyValue.toString()).get();
+        List<Object> existValues = bucket.get();
 
-        if (CollectionUtils.isNotEmpty(existValues) && values.stream().anyMatch(existValues::contains)) {
-            return true;
+        if (CollectionUtils.isNotEmpty(existValues)) {
+
+            boolean match = values.stream().anyMatch(existValues::contains);
+
+            if (!match) {
+                bucket.expire(idempotent.expirationTime().value(), idempotent.expirationTime().unit());
+            }
+
+            return match;
         }
 
         boolean result = bucket.trySet(

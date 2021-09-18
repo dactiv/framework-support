@@ -67,8 +67,8 @@ public class TestIdempotentDataService {
             Thread.sleep(1000);
 
             try {
-                idempotentDataService.saveEntityUnsetValue(new Entity("123", 1, null), 7);
-                idempotentDataService.saveEntityUnsetValue(new Entity("321", 1, null), 8);
+                idempotentDataService.saveEntityUnsetValue("123", 1, 7);
+                idempotentDataService.saveEntityUnsetValue("321", 1, 8);
             } catch (IdempotentException e) {
                 LOGGER.warn("出现 IdempotentException 异常，信息为:" + e.getMessage());
                 Assertions.assertEquals(e.getMessage(), "请不要重复操作");

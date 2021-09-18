@@ -2,6 +2,7 @@ package com.github.dactiv.framework.commons;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * rest 结果集实体类，用于统一返回指定格式数据使用
@@ -277,6 +278,19 @@ public class RestResult<T> implements Serializable {
      */
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RestResult<?> that = (RestResult<?>) o;
+        return status == that.status && message.equals(that.message) && executeCode.equals(that.executeCode) && Objects.equals(data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message, status, executeCode, data);
     }
 
     /**

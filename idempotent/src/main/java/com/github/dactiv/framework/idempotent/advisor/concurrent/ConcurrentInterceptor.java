@@ -2,7 +2,7 @@ package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.idempotent.advisor.LockType;
+import com.github.dactiv.framework.idempotent.LockType;
 import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;

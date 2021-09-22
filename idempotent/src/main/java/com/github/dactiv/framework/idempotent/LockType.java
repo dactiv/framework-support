@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.idempotent.advisor;
+package com.github.dactiv.framework.idempotent;
 
 /**
  * 锁类型

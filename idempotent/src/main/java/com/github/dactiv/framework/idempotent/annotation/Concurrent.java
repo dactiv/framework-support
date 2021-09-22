@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.idempotent.annotation;
 
 import com.github.dactiv.framework.commons.annotation.Time;
-import com.github.dactiv.framework.idempotent.advisor.LockType;
+import com.github.dactiv.framework.idempotent.LockType;
 
 import java.lang.annotation.*;
 

@@ -2,6 +2,7 @@ package com.github.dactiv.framework.idempotent.advisor;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.idempotent.annotation.Idempotent;
+import com.github.dactiv.framework.idempotent.config.IdempotentProperties;
 import com.github.dactiv.framework.idempotent.exception.IdempotentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -38,13 +39,20 @@ public class IdempotentInterceptor implements MethodInterceptor {
      */
     private final ValueGenerator valueGenerator;
     /**
-     * 参数名称发现者，用于获取 Concurrent 注解下的方法参数细信息
+     * 幂等配置
+     */
+    private final IdempotentProperties properties;
+    /**
+     * 参数名称发现者，用于获取 Idempotent 注解下的方法参数细信息
      */
     private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-    public IdempotentInterceptor(RedissonClient redissonClient, ValueGenerator valueGenerator) {
+    public IdempotentInterceptor(RedissonClient redissonClient,
+                                 ValueGenerator valueGenerator,
+                                 IdempotentProperties properties) {
         this.redissonClient = redissonClient;
         this.valueGenerator = valueGenerator;
+        this.properties = properties;
     }
 
     @Override
@@ -94,7 +102,14 @@ public class IdempotentInterceptor implements MethodInterceptor {
                 if (ArrayUtils.contains(idempotent.ignore(),parameterNames[i])) {
                     continue;
                 }
-                value.add(arguments[i]);
+
+                Object v = arguments[i];
+
+                if (properties.getIgnoreClasses().stream().anyMatch(c -> c.isAssignableFrom(v.getClass()))) {
+                    continue;
+                }
+
+                value.add(v);
             }
 
             values.add(Arrays.hashCode(value.toArray()));

@@ -68,7 +68,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         boolean tryLock;
 
-        long waitTime = concurrent.waitTime();
+        long waitTime = concurrent.waitTime().unit().toMillis(concurrent.waitTime().value());
 
         if (waitTime <= 0) {
             tryLock = lock.tryLock();

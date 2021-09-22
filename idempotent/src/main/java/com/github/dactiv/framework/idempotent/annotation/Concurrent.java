@@ -37,7 +37,7 @@ public @interface Concurrent {
      *
      * @return 锁等待时间
      */
-    long waitTime() default 1000;
+    Time waitTime() default @Time(1000);
 
     /**
      * 锁生存/释放时间

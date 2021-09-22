@@ -333,14 +333,4 @@ public class SecurityUserDetails implements UserDetails {
     public void setType(String type) {
         this.type = type;
     }
-
-    /**
-     * 获取用户类型名称
-     *
-     * @return 用户类型名称
-     */
-    public String getTypeName() {
-        String name = NameEnumUtils.getName(getType(), ResourceSource.class, true);
-        return StringUtils.defaultString(name, this.type);
-    }
 }

@@ -34,6 +34,15 @@ public class ResourceAuthority implements GrantedAuthority {
      * spring security 资源授权现实
      *
      * @param authority spring security authority 的 name 值
+     */
+    public ResourceAuthority(String authority) {
+        this.authority = authority;
+    }
+
+    /**
+     * spring security 资源授权现实
+     *
+     * @param authority spring security authority 的 name 值
      * @param name      名称
      * @param value     uri 拦截值
      */

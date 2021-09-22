@@ -87,10 +87,12 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                     result.setMessage(error.getMessage());
                 }
             }
+            LOGGER.error("服务器异常", error);
+        } else {
+            LOGGER.error(result.getMessage());
         }
 
         webRequest.setAttribute(DEFAULT_ERROR_EXECUTE_ATTR_NAME, true, RequestAttributes.SCOPE_REQUEST);
-        LOGGER.error("服务器异常", error);
 
         return Casts.convertValue(result, Map.class);
     }

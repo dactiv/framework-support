@@ -46,6 +46,11 @@ public class DeviceIdProperties {
     private CacheProperties cache = DEFAULT_CACHE;
 
     /**
+     * 访问用户 id 头名称
+     */
+    private String accessUserIdHeaderName = DEFAULT_USER_ID_HEADER_NAME;
+
+    /**
      * 是否允许 session 创建
      *
      * @return true 是，否则 false
@@ -96,5 +101,23 @@ public class DeviceIdProperties {
      */
     public void setCache(CacheProperties cache) {
         this.cache = cache;
+    }
+
+    /**
+     * 获取访问用户 id 头名称
+     *
+     * @return 访问用户 id 头名称
+     */
+    public String getAccessUserIdHeaderName() {
+        return accessUserIdHeaderName;
+    }
+
+    /**
+     * 设置访问用户 id 头名称
+     *
+     * @param accessUserIdHeaderName 访问用户 id 头名称
+     */
+    public void setAccessUserIdHeaderName(String accessUserIdHeaderName) {
+        this.accessUserIdHeaderName = accessUserIdHeaderName;
     }
 }

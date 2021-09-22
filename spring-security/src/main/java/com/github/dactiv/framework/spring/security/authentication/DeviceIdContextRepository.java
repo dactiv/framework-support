@@ -49,7 +49,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         if (StringUtils.isNotEmpty(token)) {
 
-            String userId = request.getHeader(DeviceIdProperties.DEFAULT_SPRING_SECURITY_CONTEXT_KEY);
+            String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
             if (StringUtils.isNotEmpty(userId)) {
 
@@ -96,26 +96,17 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
         if (StringUtils.isEmpty(token)) {
-            return ;
-        }
-
-        SaveContextOnUpdateOrErrorResponseWrapper responseWrapper = WebUtils.getNativeResponse(
-                response,
-                SaveContextOnUpdateOrErrorResponseWrapper.class
-        );
-
-        if (Objects.isNull(responseWrapper) || !responseWrapper.isContextSaved()) {
-            return ;
+            return;
         }
 
         if (Objects.isNull(context.getAuthentication()) || !context.getAuthentication().isAuthenticated()) {
-            return ;
+            return;
         }
 
         Object details = context.getAuthentication().getDetails();
 
         if (Objects.isNull(details) || !SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
-            return ;
+            return;
         }
 
         RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
@@ -123,7 +114,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         if (Objects.nonNull(cacheSecurityContext)) {
 
-            String userId = request.getHeader(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME);
+            String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
             if (StringUtils.isEmpty(userId) && StringUtils.equals(request.getRequestURI(), properties.getLoginProcessingUrl())) {
                 setSecurityContext(context, bucket);
@@ -151,7 +142,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      * 设置安全上下文
      *
      * @param context 安全上下文
-     * @param bucket 安全上下文的桶对象
+     * @param bucket  安全上下文的桶对象
      */
     private void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
         bucket.set(
@@ -175,7 +166,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
             SecurityContext securityContext = bucket.get();
 
-            String userId = request.getHeader(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME);
+            String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
             result = isCurrentUserSecurityContext(userId, securityContext, id) || securityContext != null;
         }
@@ -201,30 +192,79 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
     /**
      * 创建设备识别认证的头信息
      *
+     * @param properties       认证配置信息
+     * @param type             认证类型
      * @param deviceIdentified 设备唯一识别
-     * @param userId 用户 id
+     * @param userId           用户 id
      *
      * @return 头信息
      */
-    public static HttpHeaders ofHttpHeaders(String deviceIdentified, Object userId) {
+    public static HttpHeaders ofHttpHeaders(AuthenticationProperties properties,
+                                            String type,
+                                            String deviceIdentified,
+                                            Object userId) {
+
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
-        httpHeaders.add(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME, userId.toString());
+        if (StringUtils.isNotEmpty(deviceIdentified)) {
+            httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
+        }
+
+        if (Objects.nonNull(properties)) {
+            httpHeaders.add(properties.getDeviceId().getAccessUserIdHeaderName(), userId.toString());
+        } else {
+            httpHeaders.add(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME, userId.toString());
+        }
+
+        if (StringUtils.isNotEmpty(type)) {
+            if (Objects.nonNull(properties)) {
+                httpHeaders.add(properties.getTypeHeaderName(), type);
+            } else {
+                httpHeaders.add(AuthenticationProperties.SECURITY_FORM_TYPE_HEADER_NAME, type);
+            }
+        }
 
         return httpHeaders;
+    }
+
+    /**
+     * 创建设备识别认证的头信息
+     *
+     * @param type             认证类型
+     * @param deviceIdentified 设备唯一识别
+     * @param userId           用户 id
+     *
+     * @return 头信息
+     */
+    public static HttpHeaders ofHttpHeaders(String type, String deviceIdentified, Object userId) {
+
+
+        return ofHttpHeaders(null, type, deviceIdentified, userId);
     }
 
     /**
      * 创建带设备识别认证的头信息的 http 实体
      *
      * @param deviceIdentified 设备唯一识别
-     * @param userId 用户 id
+     * @param userId           用户 id
      *
      * @return 头信息
      */
     public static <T> HttpEntity<T> ofHttpEntity(T body, String deviceIdentified, Object userId) {
-        return new HttpEntity<>(body, ofHttpHeaders(deviceIdentified, userId));
+        return ofHttpEntity(body, null, deviceIdentified, userId);
+    }
+
+    /**
+     * 创建带设备识别认证的头信息的 http 实体
+     *
+     * @param type             认证类型
+     * @param deviceIdentified 设备唯一识别
+     * @param userId           用户 id
+     *
+     * @return 头信息
+     */
+    public static <T> HttpEntity<T> ofHttpEntity(T body, String type, String deviceIdentified, Object userId) {
+        return new HttpEntity<>(body, ofHttpHeaders(type, deviceIdentified, userId));
     }
 
 }

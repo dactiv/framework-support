@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.spring.web.mobile;
+package com.github.dactiv.framework.spring.web.device;
 
 import com.github.dactiv.framework.commons.Casts;
 import nl.basjes.parse.useragent.UserAgent;

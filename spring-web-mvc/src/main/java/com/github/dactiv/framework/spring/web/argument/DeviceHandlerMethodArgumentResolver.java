@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.web.argument;
 
-import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
+import com.github.dactiv.framework.spring.web.device.DeviceUtils;
 import nl.basjes.parse.useragent.UserAgent;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

@@ -19,6 +19,10 @@ public class AuthenticationProperties {
      */
     public static final String SECURITY_FORM_TYPE_HEADER_NAME = "X-AUTHENTICATION-TYPE";
     /**
+     * 默认的认证 token header 名称
+     */
+    public static final String SECURITY_FORM_TOKEN_HEADER_NAME = "X-AUTHENTICATION-TOKEN";
+    /**
      * 默认的认证类型参数名称
      */
     public static final String SECURITY_FORM_TYPE_PARAM_NAME = "authenticationType";
@@ -55,6 +59,11 @@ public class AuthenticationProperties {
      * 认证类型 header 名称
      */
     private String typeHeaderName = SECURITY_FORM_TYPE_HEADER_NAME;
+
+    /**
+     * 认证 token 名称
+     */
+    private String tokenHeaderName = SECURITY_FORM_TOKEN_HEADER_NAME;
 
     /**
      * 认证类型参数名称
@@ -172,6 +181,24 @@ public class AuthenticationProperties {
     }
 
     /**
+     * 获取认证 token 的头名称
+     *
+     * @return token 的头名称
+     */
+    public String getTokenHeaderName() {
+        return tokenHeaderName;
+    }
+
+    /**
+     * 设置 token 的头名称
+     *
+     * @param tokenHeaderName token 的头名称
+     */
+    public void setTokenHeaderName(String tokenHeaderName) {
+        this.tokenHeaderName = tokenHeaderName;
+    }
+
+    /**
      * 获取登陆账户参数名
      *
      * @return 登陆账户参数名
@@ -243,10 +270,20 @@ public class AuthenticationProperties {
         this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 
+    /**
+     * 获取记住我配置
+     *
+     * @return 记住我配置
+     */
     public RememberMeProperties getRememberMe() {
         return rememberMe;
     }
 
+    /**
+     * 设置记住我配置
+     *
+     * @param rememberMe 记住我配置
+     */
     public void setRememberMe(RememberMeProperties rememberMe) {
         this.rememberMe = rememberMe;
     }

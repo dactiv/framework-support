@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.spring.web.mobile;
+package com.github.dactiv.framework.spring.web.device;
 
 import nl.basjes.parse.useragent.UserAgent;
 import org.springframework.core.Ordered;

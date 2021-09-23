@@ -1,7 +1,9 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -12,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.MultiValueMap;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -20,6 +23,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 认证 filter 实现, 用于结合 {@link UserDetailsService} 多用户类型认证的统一入口
@@ -29,6 +34,8 @@ import java.io.IOException;
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationProperties properties;
+
+    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -49,7 +56,8 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         super.doFilter(req, res, chain);
     }
 
-    public RequestAuthenticationFilter(AuthenticationProperties properties) {
+    public RequestAuthenticationFilter(AuthenticationProperties properties,
+                                       List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver) {
         this.properties = properties;
 
         setRequiresAuthenticationRequestMatcher(
@@ -58,6 +66,8 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         setUsernameParameter(properties.getUsernameParamName());
         setPasswordParameter(properties.getPasswordParamName());
+
+        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
     }
 
     @Override
@@ -118,15 +128,32 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        if (username == null) {
-            username = "";
+        if (StringUtils.isEmpty(username) && StringUtils.isEmpty(password)) {
+            String token = request.getHeader(properties.getTokenHeaderName());
+
+            if (StringUtils.isNotEmpty(token)) {
+                List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
+                        .stream()
+                        .filter(a -> a.isSupport(type))
+                        .collect(Collectors.toList());
+
+                if (CollectionUtils.isEmpty(resolvers)) {
+                    throw new SystemException("找不到类型 [" + type + "] token 解析器实现");
+                }
+
+                if (resolvers.size() > 1) {
+                    throw new SystemException("针对 [" + type + "] 类型找到一个以上的 token 解析器实现");
+                }
+
+                MultiValueMap<String, String> body = resolvers.iterator().next().decode(token);
+
+                username = body.getFirst(properties.getUsernameParamName());
+                password = body.getFirst(properties.getPasswordParamName());
+            }
         }
 
-        if (password == null) {
-            password = "";
-        }
-
-        username = username.trim();
+        username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
+        password = StringUtils.defaultString(password, StringUtils.EMPTY);
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 

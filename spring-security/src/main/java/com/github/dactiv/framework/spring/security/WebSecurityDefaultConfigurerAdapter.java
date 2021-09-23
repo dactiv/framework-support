@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security;
 
+import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
@@ -62,6 +63,9 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired(required = false)
+    private List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     @Autowired(required = false)
     private List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters = new LinkedList<>();
@@ -131,7 +135,10 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
             }
         } else {
 
-            RequestAuthenticationFilter filter = new RequestAuthenticationFilter(properties);
+            RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
+                    properties,
+                    authenticationTypeTokenResolvers
+            );
 
             filter.setAuthenticationManager(authenticationManager);
             filter.setApplicationEventPublisher(eventPublisher);

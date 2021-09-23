@@ -66,9 +66,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
     @Override
     public void afterPropertiesSet()  {
-
         properties.getUsers().forEach(this::syncSecurityUserDetails);
-
     }
 
     private SecurityUserDetails getUser(String username) {

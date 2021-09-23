@@ -7,7 +7,7 @@ import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethod
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
-import com.github.dactiv.framework.spring.web.mobile.DeviceResolverRequestFilter;
+import com.github.dactiv.framework.spring.web.device.DeviceResolverRequestFilter;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -30,7 +30,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.web.test.device;
 
-import com.github.dactiv.framework.spring.web.mobile.DeviceUtils;
+import com.github.dactiv.framework.spring.web.device.DeviceUtils;
 import nl.basjes.parse.useragent.UserAgent;
 import org.junit.jupiter.api.Test;
 

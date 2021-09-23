@@ -12,6 +12,7 @@ import com.github.dactiv.framework.spring.security.authentication.provider.Reque
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
+import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
@@ -125,6 +126,11 @@ public class SpringSecuritySupportAutoConfiguration {
     @Bean
     public FeignExceptionResultResolver feignExceptionResultResolver() {
         return new FeignExceptionResultResolver();
+    }
+
+    @Bean
+    public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver() {
+        return new FeignAuthenticationTypeTokenResolver();
     }
 
     @Bean

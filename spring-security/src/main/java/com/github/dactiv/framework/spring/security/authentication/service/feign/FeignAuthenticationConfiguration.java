@@ -24,9 +24,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Configuration
 @EnableConfigurationProperties(AuthenticationProperties.class)
-public class AuthenticationConfiguration implements AuthenticationTypeTokenResolver {
-
-    public static final String DEFAULT_USERNAME = "feign";
+public class FeignAuthenticationConfiguration {
 
     /**
      * feign 调用认真拦截器
@@ -43,9 +41,9 @@ public class AuthenticationConfiguration implements AuthenticationTypeTokenResol
                     .getUsers()
                     .stream()
                     .flatMap(u -> u.getData().stream())
-                    .filter(u -> u.getName().equals(DEFAULT_USERNAME))
+                    .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
                     .findFirst()
-                    .orElseThrow(() -> new SystemException("找不到类型为:" + DEFAULT_USERNAME + "的默认用户"));
+                    .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
 
             requestTemplate.header(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
 
@@ -75,18 +73,6 @@ public class AuthenticationConfiguration implements AuthenticationTypeTokenResol
     }
 
     /**
-     * 解码用户配置
-     *
-     * @param token token 值
-     *
-     * @return 参数信息
-     */
-    public static MultiValueMap<String, String> decodeUserProperties(String token) {
-        String param = new String(Base64.decodeBase64(token), StandardCharsets.UTF_8);
-        return Casts.castRequestBodyMap(param);
-    }
-
-    /**
      * 构造 feign 认证的 http headers
      *
      * @param properties 认证配置信息
@@ -102,9 +88,9 @@ public class AuthenticationConfiguration implements AuthenticationTypeTokenResol
                 .getUsers()
                 .stream()
                 .flatMap(u -> u.getData().stream())
-                .filter(u -> u.getName().equals(DEFAULT_USERNAME))
+                .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
                 .findFirst()
-                .orElseThrow(() -> new SystemException("找不到类型为:" + DEFAULT_USERNAME + "的默认用户"));
+                .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
 
         String base64 = encodeUserProperties(properties, user);
 
@@ -114,13 +100,4 @@ public class AuthenticationConfiguration implements AuthenticationTypeTokenResol
         return httpHeaders;
     }
 
-    @Override
-    public boolean isSupport(String type) {
-        return DEFAULT_USERNAME.equals(type);
-    }
-
-    @Override
-    public MultiValueMap<String, String> decode(String token) {
-        return decodeUserProperties(token);
-    }
 }

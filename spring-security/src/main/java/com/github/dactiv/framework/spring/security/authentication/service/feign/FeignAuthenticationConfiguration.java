@@ -40,7 +40,6 @@ public class FeignAuthenticationConfiguration {
             SecurityProperties.User user = properties
                     .getUsers()
                     .stream()
-                    .flatMap(u -> u.getData().stream())
                     .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
                     .findFirst()
                     .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
@@ -50,6 +49,7 @@ public class FeignAuthenticationConfiguration {
             String base64 = encodeUserProperties(properties, user);
 
             requestTemplate.header(properties.getTokenHeaderName(), base64);
+            requestTemplate.header(properties.getTokenResolverHeaderName(), FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE);
         };
     }
 
@@ -82,12 +82,9 @@ public class FeignAuthenticationConfiguration {
     public static HttpHeaders of(AuthenticationProperties properties) {
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        httpHeaders.add(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
-
         SecurityProperties.User user = properties
                 .getUsers()
                 .stream()
-                .flatMap(u -> u.getData().stream())
                 .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
                 .findFirst()
                 .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
@@ -96,6 +93,7 @@ public class FeignAuthenticationConfiguration {
 
         httpHeaders.add(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
         httpHeaders.add(properties.getTokenHeaderName(), base64);
+        httpHeaders.add(properties.getTokenResolverHeaderName(), FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE);
 
         return httpHeaders;
     }

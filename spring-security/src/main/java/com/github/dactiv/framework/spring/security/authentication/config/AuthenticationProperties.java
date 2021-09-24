@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication.config;
 
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
@@ -23,6 +24,10 @@ public class AuthenticationProperties {
      */
     public static final String SECURITY_FORM_TOKEN_HEADER_NAME = "X-AUTHENTICATION-TOKEN";
     /**
+     * 默认的认证 token 解析 header 名称
+     */
+    public static final String SECURITY_FORM_TOKEN_RESOLVER_HEADER_NAME = "X-AUTHENTICATION-TOKEN-RESOLVER";
+    /**
      * 默认的认证类型参数名称
      */
     public static final String SECURITY_FORM_TYPE_PARAM_NAME = "authenticationType";
@@ -43,7 +48,7 @@ public class AuthenticationProperties {
     /**
      * 默认用户配置
      */
-    private List<DefaultUserProperties> users = new LinkedList<>();
+    private List<SecurityProperties.User> users = new LinkedList<>();
 
     /**
      * 登陆 url
@@ -64,6 +69,11 @@ public class AuthenticationProperties {
      * 认证 token 名称
      */
     private String tokenHeaderName = SECURITY_FORM_TOKEN_HEADER_NAME;
+
+    /**
+     * 认证 token 解析名称
+     */
+    private String tokenResolverHeaderName = SECURITY_FORM_TOKEN_RESOLVER_HEADER_NAME;
 
     /**
      * 认证类型参数名称
@@ -95,7 +105,7 @@ public class AuthenticationProperties {
      *
      * @return 默认用户信息集合
      */
-    public List<DefaultUserProperties> getUsers() {
+    public List<SecurityProperties.User> getUsers() {
         return users;
     }
 
@@ -104,7 +114,7 @@ public class AuthenticationProperties {
      *
      * @param users 默认用户信息集合
      */
-    public void setUsers(List<DefaultUserProperties> users) {
+    public void setUsers(List<SecurityProperties.User> users) {
         this.users = users;
     }
 
@@ -196,6 +206,24 @@ public class AuthenticationProperties {
      */
     public void setTokenHeaderName(String tokenHeaderName) {
         this.tokenHeaderName = tokenHeaderName;
+    }
+
+    /**
+     * 获取认证 token 解析名称
+     *
+     * @return 认证 token 解析名称
+     */
+    public String getTokenResolverHeaderName() {
+        return tokenResolverHeaderName;
+    }
+
+    /**
+     * 设置认证 token 解析名称
+     *
+     * @param tokenResolverHeaderName 认证 token 解析名称
+     */
+    public void setTokenResolverHeaderName(String tokenResolverHeaderName) {
+        this.tokenResolverHeaderName = tokenResolverHeaderName;
     }
 
     /**

@@ -76,10 +76,9 @@ public class SpringSecuritySupportAutoConfiguration {
 
     @Bean
     DefaultUserDetailsService defaultUserDetailsService(PasswordEncoder passwordEncoder,
-                                                        AuthenticationProperties properties,
-                                                        RedissonClient redissonClient) {
+                                                        AuthenticationProperties properties) {
 
-        return new DefaultUserDetailsService(properties, passwordEncoder, redissonClient);
+        return new DefaultUserDetailsService(properties, passwordEncoder);
     }
 
     @Bean

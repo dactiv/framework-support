@@ -132,17 +132,19 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             String token = request.getHeader(properties.getTokenHeaderName());
 
             if (StringUtils.isNotEmpty(token)) {
+                String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
+
                 List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
                         .stream()
-                        .filter(a -> a.isSupport(type))
+                        .filter(a -> a.isSupport(resolverType))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(resolvers)) {
-                    throw new SystemException("找不到类型 [" + type + "] token 解析器实现");
+                    throw new SystemException("找不到类型 [" + resolverType + "] token 解析器实现");
                 }
 
                 if (resolvers.size() > 1) {
-                    throw new SystemException("针对 [" + type + "] 类型找到一个以上的 token 解析器实现");
+                    throw new SystemException("针对 [" + resolverType + "] 类型找到一个以上的 token 解析器实现");
                 }
 
                 MultiValueMap<String, String> body = resolvers.iterator().next().decode(token);

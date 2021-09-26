@@ -8,3 +8,5 @@ java 框架扩展，对日常的开发做一些基础的工具类的封装。
 4. idempotent 对幂等并发控制的一些基础封装
 5. spring-security 对 spring security 的一些基础配置进行一个基础的常用封装，包含对用户的登陆审计管理等。
 6. spring-web-mvc 对 spring mvc 的一些 rest 接口进行统一规范和一些基础封装。
+
+项目例子的使用在 [basic-service](https://github.com/dactiv/basic-service) 进行引入。

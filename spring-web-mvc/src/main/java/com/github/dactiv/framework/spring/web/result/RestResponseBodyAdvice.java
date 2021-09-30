@@ -115,7 +115,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             id = httpRequest.getServletRequest().getParameter(properties.getFilterResultIdParamName());
         }
 
-        if (StringUtils.isNotEmpty(id)) {
+        if (StringUtils.isNotEmpty(id) && StringUtils.isNotEmpty(FilterResultHolder.get())) {
 
             FilterResultHolder.set(id);
 

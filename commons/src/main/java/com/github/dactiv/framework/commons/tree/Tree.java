@@ -18,6 +18,11 @@ public interface Tree<P, C> {
     String ROOT_VALUE = "root";
 
     /**
+     * 父类 id 名称
+     */
+    String PARENT_ID_NAME = "parentId";
+
+    /**
      * 获取孩子节点集合
      *
      * @return 孩子节点集合

@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class HashServiceTest {
 
-    private HashService hashService = new HashService();
+    private final HashService hashService = new HashService();
 
     @Test
     public void testComputeHash() {

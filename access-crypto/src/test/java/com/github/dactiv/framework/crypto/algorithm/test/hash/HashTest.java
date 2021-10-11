@@ -9,8 +9,6 @@ import com.github.dactiv.framework.crypto.algorithm.hash.HashAlgorithmMode;
 import com.github.dactiv.framework.crypto.algorithm.test.TestData;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 
 /**
  * hash 单元测试
@@ -18,8 +16,6 @@ import org.springframework.core.io.ResourceLoader;
  * @author maurice
  */
 public class HashTest {
-
-    private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @Test
     public void testError() {

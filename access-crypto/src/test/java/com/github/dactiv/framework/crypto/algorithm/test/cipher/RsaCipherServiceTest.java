@@ -11,9 +11,8 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 /**
  * 非对称加密单元测试
@@ -22,10 +21,10 @@ import java.util.Arrays;
  */
 public class RsaCipherServiceTest {
 
-    private ResourceLoader resourceLoader = new DefaultResourceLoader();
+    private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @Test
-    public void test() throws NoSuchAlgorithmException, IOException {
+    public void test() throws IOException {
         RsaCipherService cipherService = new RsaCipherService();
         cipherService.setKeySize(2048);
 
@@ -38,7 +37,7 @@ public class RsaCipherServiceTest {
 
         ByteSource target = cipherService.decrypt(source.obtainBytes(), keyPair.getPrivate().getEncoded());
 
-        Assert.assertTrue(Arrays.equals(target.obtainBytes(), TestData.TEXT.getBytes()));
+        Assert.assertArrayEquals(target.obtainBytes(), TestData.TEXT.getBytes());
 
         RsaCipherService miniCipherService = new RsaCipherService();
         miniCipherService.setKeySize(1024);
@@ -57,14 +56,14 @@ public class RsaCipherServiceTest {
         miniCipherService.decrypt(byteArrayInputStream, decryptOut, keyPair.getPrivate().getEncoded());
         encryptIn = resourceLoader.getResource("classpath:/data.test").getInputStream();
         String text = read(encryptIn);
-        Assert.assertTrue(Arrays.equals(decryptOut.toByteArray(), text.getBytes()));
+        Assert.assertArrayEquals(decryptOut.toByteArray(), text.getBytes());
     }
 
     private String read(InputStream is) throws IOException {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
         final StringBuilder out = new StringBuilder();
-        Reader in = new InputStreamReader(is, "UTF-8");
+        Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
         for (; ; ) {
             int rsz = in.read(buffer, 0, buffer.length);
             if (rsz < 0)

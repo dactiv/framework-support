@@ -2,7 +2,10 @@ package com.github.dactiv.framework.spring.security.authentication.config;
 
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
+import org.springframework.security.core.context.SecurityContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +52,14 @@ public class DeviceIdProperties {
      * 访问用户 id 头名称
      */
     private String accessUserIdHeaderName = DEFAULT_USER_ID_HEADER_NAME;
+
+    /**
+     * 如果 {@link org.springframework.security.core.context.SecurityContext} 在 session
+     * 找不到但通过设备唯一能找到时，是否将该值通过
+     * {@link org.springframework.security.web.context.HttpSessionSecurityContextRepository#saveContext(SecurityContext, HttpServletRequest, HttpServletResponse)}
+     * 保存到 session 中
+     */
+    private boolean overwriteSession = true;
 
     /**
      * 是否允许 session 创建
@@ -119,5 +130,36 @@ public class DeviceIdProperties {
      */
     public void setAccessUserIdHeaderName(String accessUserIdHeaderName) {
         this.accessUserIdHeaderName = accessUserIdHeaderName;
+    }
+
+    /**
+     * 是否覆盖 session
+     * <p>
+     * 说明: 如果 {@link org.springframework.security.core.context.SecurityContext} 在 session
+     * 找不到但通过设备唯一能找到时，是否将该值通过
+     * {@link org.springframework.security.web.context.HttpSessionSecurityContextRepository#saveContext(SecurityContext, HttpServletRequest, HttpServletResponse)}
+     * 保存到 session 中
+     * </p>
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isOverwriteSession() {
+        return overwriteSession;
+    }
+
+    /**
+     * 设置是否覆盖 session
+     *
+     * <p>
+     * 说明: 如果 {@link org.springframework.security.core.context.SecurityContext} 在 session
+     * 找不到但通过设备唯一能找到时，是否将该值通过
+     * {@link org.springframework.security.web.context.HttpSessionSecurityContextRepository#saveContext(SecurityContext, HttpServletRequest, HttpServletResponse)}
+     * 保存到 session 中
+     * </p>
+     *
+     * @param overwriteSession true 是，否则 false
+     */
+    public void setOverwriteSession(boolean overwriteSession) {
+        this.overwriteSession = overwriteSession;
     }
 }

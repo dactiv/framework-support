@@ -11,6 +11,7 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
@@ -41,20 +42,20 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         SecurityContext superSecurityContext = super.loadContext(requestResponseHolder);
 
-        HttpServletRequest request = requestResponseHolder.getRequest();
+        Authentication authentication = superSecurityContext.getAuthentication();
+        if (Objects.nonNull(authentication) && isSecurityUserDetails(authentication.getDetails())) {
+            return superSecurityContext;
+        }
 
+        HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
         if (StringUtils.isNotEmpty(token)) {
-
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
             if (StringUtils.isNotEmpty(userId)) {
-
                 RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
-
                 SecurityContext cacheSecurityContext = bucket.get();
-
                 if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
                     return cacheSecurityContext;
                 }
@@ -64,19 +65,20 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         return superSecurityContext;
     }
 
+    private boolean isSecurityUserDetails(Object details) {
+        return SecurityUserDetails.class.isAssignableFrom(details.getClass());
+    }
+
     private boolean isCurrentUserSecurityContext(String userId, SecurityContext securityContext, String token) {
 
-        if (securityContext != null && securityContext.getAuthentication() != null) {
+        if (Objects.nonNull(securityContext) && Objects.nonNull(securityContext.getAuthentication())) {
             Object details = securityContext.getAuthentication().getDetails();
 
-            if (SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
-
+            if (isSecurityUserDetails(details)) {
                 SecurityUserDetails userDetails = Casts.cast(details);
-
                 Object id = userDetails.getId();
 
                 return (Objects.nonNull(id) && id.toString().equals(userId)) || token.equals(userId);
-
             } else {
                 return token.equals(userId);
             }
@@ -89,7 +91,9 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
 
-        super.saveContext(context, request, response);
+        if (properties.getDeviceId().isOverwriteSession() && isSaveContextToSession(context, request, response)) {
+            super.saveContext(context, request, response);
+        }
 
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
@@ -102,8 +106,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         }
 
         Object details = context.getAuthentication().getDetails();
-
-        if (Objects.isNull(details) || !SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
+        if (Objects.isNull(details) || !isSecurityUserDetails(details)) {
             return;
         }
 
@@ -119,9 +122,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
             } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
 
                 if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
-
                     MobileUserDetails mobileUserDetails = Casts.cast(details);
-
                     if (StringUtils.isNotEmpty(mobileUserDetails.getDeviceIdentified())) {
                         bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
                     }
@@ -134,6 +135,19 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
             setSecurityContext(context, bucket);
         }
 
+    }
+
+    /**
+     * 是否将 context 保存到 session 中
+     *
+     * @param context 安全上下文
+     * @param request http request
+     * @param response http response
+     *
+     * @return true 是，否则 false
+     */
+    protected boolean isSaveContextToSession(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
+        return true;
     }
 
     /**
@@ -161,12 +175,10 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         if (StringUtils.isNotEmpty(id)) {
 
             RBucket<SecurityContext> bucket = getSecurityContextBucket(id);
-
             SecurityContext securityContext = bucket.get();
 
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
-
-            result = isCurrentUserSecurityContext(userId, securityContext, id) || securityContext != null;
+            result = isCurrentUserSecurityContext(userId, securityContext, id);
         }
 
         if (!result) {
@@ -235,8 +247,6 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      * @return 头信息
      */
     public static HttpHeaders ofHttpHeaders(String type, String deviceIdentified, Object userId) {
-
-
         return ofHttpHeaders(null, type, deviceIdentified, userId);
     }
 

@@ -156,7 +156,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      * @param context 安全上下文
      * @param bucket  安全上下文的桶对象
      */
-    private void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
+    protected void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
         bucket.set(
                 context,
                 properties.getDeviceId().getCache().getExpiresTime().getValue(),

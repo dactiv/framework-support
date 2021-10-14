@@ -1,4 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    com.github.dactiv.framework.spring.security.SpringSecuritySupportAutoConfiguration,\
+    com.github.dactiv.framework.spring.security.SpringSecurityAutoConfiguration,\
     com.github.dactiv.framework.spring.security.audit.AuditConfiguration,\
     com.github.dactiv.framework.spring.security.WebSecurityDefaultConfigurerAdapter

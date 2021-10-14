@@ -3,7 +3,7 @@ package com.github.dactiv.framework.spring.web.result;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
-import com.github.dactiv.framework.spring.web.SpringWebSupportProperties;
+import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import org.apache.commons.collections.CollectionUtils;
@@ -63,9 +63,9 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      */
     public static final List<String> DEFAULT_SUPPORT_CLIENT = Collections.singletonList("SPRING_GATEWAY");
 
-    private final SpringWebSupportProperties properties;
+    private final SpringWebMvcProperties properties;
 
-    public RestResponseBodyAdvice(SpringWebSupportProperties properties) {
+    public RestResponseBodyAdvice(SpringWebMvcProperties properties) {
         this.properties = properties;
     }
 

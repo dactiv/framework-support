@@ -13,8 +13,8 @@ import java.util.List;
  * @author maurice.chen
  *
  */
-@ConfigurationProperties("spring.web.support")
-public class SpringWebSupportProperties {
+@ConfigurationProperties("dactiv.spring.web.mvc")
+public class SpringWebMvcProperties {
 
     /**
      * 需要扫描的包路径，用于指定哪个包下面的类引入了 filter 注解，通过该配置自动添加 jackson filter
@@ -36,7 +36,7 @@ public class SpringWebSupportProperties {
      */
     private List<String> supportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
 
-    public SpringWebSupportProperties() {
+    public SpringWebMvcProperties() {
     }
 
     /**

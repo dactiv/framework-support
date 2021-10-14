@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    com.github.dactiv.framework.spring.web.SpringWebMvcSupportAutoConfiguration
+    com.github.dactiv.framework.spring.web.SpringWebMvcAutoConfiguration

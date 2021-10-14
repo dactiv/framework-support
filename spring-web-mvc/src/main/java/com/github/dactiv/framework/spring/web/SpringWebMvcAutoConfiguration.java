@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.web;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
@@ -42,15 +43,15 @@ import java.util.List;
  */
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableConfigurationProperties(SpringWebSupportProperties.class)
-@ConditionalOnProperty(prefix = "dactiv.spring-mvc.enabled", value = "enabled", matchIfMissing = true)
-public class SpringWebMvcSupportAutoConfiguration {
+@EnableConfigurationProperties(SpringWebMvcProperties.class)
+@ConditionalOnProperty(prefix = "dactiv.spring.web.mvc", value = "enabled", matchIfMissing = true)
+public class SpringWebMvcAutoConfiguration {
 
     @Autowired(required = false)
     private List<InfoContributor> infoContributors;
 
     @Configuration
-    @EnableConfigurationProperties(SpringWebSupportProperties.class)
+    @EnableConfigurationProperties(SpringWebMvcProperties.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
 
@@ -100,13 +101,13 @@ public class SpringWebMvcSupportAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebSupportProperties properties) {
+    public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebMvcProperties properties) {
         return new RestResponseBodyAdvice(properties);
     }
 
     @Bean
     public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
-                                                 SpringWebSupportProperties properties) {
+                                                 SpringWebMvcProperties properties) {
 
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
 
@@ -116,6 +117,8 @@ public class SpringWebMvcSupportAutoConfiguration {
 
         objectMapper.setFilterProvider(annotationBuilder.getFilterProvider(objectMapper.getSerializationConfig()));
         objectMapper.setAnnotationIntrospector(annotationBuilder);
+
+        Casts.setObjectMapper(objectMapper);
 
         return objectMapper;
     }

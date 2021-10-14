@@ -52,7 +52,7 @@ import java.util.List;
 @AutoConfigureAfter(RedissonAutoConfiguration.class)
 @EnableConfigurationProperties(AuthenticationProperties.class)
 @ConditionalOnProperty(prefix = "dactiv.authentication.spring.security", value = "enabled", matchIfMissing = true)
-public class SpringSecuritySupportAutoConfiguration {
+public class SpringSecurityAutoConfiguration {
 
     @Autowired(required = false)
     private List<InfoContributor> infoContributors;

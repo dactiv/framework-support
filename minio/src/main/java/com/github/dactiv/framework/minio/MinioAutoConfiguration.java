@@ -2,9 +2,6 @@ package com.github.dactiv.framework.minio;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.minio.config.MinioProperties;
-import com.github.dactiv.framework.minio.endpoint.DownloadEndpoint;
-import com.github.dactiv.framework.minio.endpoint.GetEndpoint;
-import com.github.dactiv.framework.minio.endpoint.UploadEndpoint;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -57,19 +54,27 @@ public class MinioAutoConfiguration {
         return new MinioTemplate(minioClient, Objects.isNull(objectMapper) ? new ObjectMapper() : objectMapper);
     }
 
-    @Bean
-    public UploadEndpoint uploadEndpoint(MinioTemplate minioTemplate, MinioProperties minioProperties) {
-        return new UploadEndpoint(minioProperties.getUploadResponseIgnoreFields(), minioTemplate);
-    }
+    /**
+     * minio 操作终端
+     *
+     * @param minioTemplate minio 模版配置
+     *
+     * @return 文件终端
+     */
+    /*@Bean
+    public MinioEndpoint minioEndpoint(MinioTemplate minioTemplate) {
+        return new MinioEndpoint(minioTemplate);
+    }*/
 
-    @Bean
-    public GetEndpoint getEndpoint(MinioTemplate minioTemplate) {
-        return new GetEndpoint(minioTemplate);
-    }
-
-    @Bean
+    /**
+     * 下载文件终端
+     *
+     * @param minioTemplate minio 模版配置
+     *
+     * @return 文件终端
+     */
+    /*@Bean
     public DownloadEndpoint downloadEndpoint(MinioTemplate minioTemplate) {
         return new DownloadEndpoint(minioTemplate);
-    }
-
+    }*/
 }

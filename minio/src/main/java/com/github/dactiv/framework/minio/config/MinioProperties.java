@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.minio.config;
 
-import com.github.dactiv.framework.minio.endpoint.UploadEndpoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Arrays;
@@ -28,11 +27,6 @@ public class MinioProperties {
      * 安全密钥
      */
     private String secretKey;
-
-    /**
-     * 上传响应信息要忽略的字段值
-     */
-    private List<String> uploadResponseIgnoreFields = Arrays.asList(UploadEndpoint.DEFAULT_IGNORE_FIELDS);
 
     /**
      * minio 配置信息
@@ -92,23 +86,5 @@ public class MinioProperties {
      */
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
-    }
-
-    /**
-     * 获取上传响应信息要忽略的字段值
-     *
-     * @return 上传响应信息要忽略的字段值
-     */
-    public List<String> getUploadResponseIgnoreFields() {
-        return uploadResponseIgnoreFields;
-    }
-
-    /**
-     * 设置上传响应信息要忽略的字段值
-     *
-     * @param uploadResponseIgnoreFields 上传响应信息要忽略的字段值
-     */
-    public void setUploadResponseIgnoreFields(List<String> uploadResponseIgnoreFields) {
-        this.uploadResponseIgnoreFields = uploadResponseIgnoreFields;
     }
 }

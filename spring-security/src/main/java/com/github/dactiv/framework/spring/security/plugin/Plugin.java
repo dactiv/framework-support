@@ -60,13 +60,13 @@ public @interface Plugin {
     boolean audit() default false;
 
     /**
-     * 来源 ，默认为 PluginSource.ADMIN
+     * 来源
      *
      * @return 来源
      *
      * @see ResourceSource
      */
-    String[] sources() default {};
+    String[] sources() default {"System"};
 
     /**
      * 顺序值，默认为 0

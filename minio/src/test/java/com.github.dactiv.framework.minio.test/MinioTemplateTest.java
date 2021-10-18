@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.minio.MinioTemplate;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
+import io.minio.GetObjectResponse;
 import io.minio.ListObjectsArgs;
 import io.minio.ObjectWriteResponse;
 import io.minio.Result;

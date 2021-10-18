@@ -1,0 +1,11 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+dactiv:
+  minio:
+    endpoint: http://127.0.0.1:9000
+    access-key: E0DBXNY9RFGMJQKT1YMK
+    secret-key: FM7jvyAsBV0Dwgs+llMIkMObKeJ4k4qczNd+WPIn

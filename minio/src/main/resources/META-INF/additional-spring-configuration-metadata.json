@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "com.github.dactiv"
+    }
+  ],
+  "properties": [
+    {
+      "name": "dactiv.minio.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启 minio 支持 .",
+      "defaultValue": true
+    }
+  ]
+}

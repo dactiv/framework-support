@@ -28,14 +28,28 @@ public class CacheProperties implements Serializable {
      */
     private TimeProperties expiresTime;
 
+    /**
+     * 缓存配置
+     */
     public CacheProperties() {
 
     }
 
+    /**
+     * 缓存配置
+     *
+     * @param name 缓存名称
+     */
     public CacheProperties(String name) {
         this(name, null);
     }
 
+    /**
+     * 缓存配置
+     *
+     * @param name 缓存名称
+     * @param expiresTime 超时时间配置
+     */
     public CacheProperties(String name, TimeProperties expiresTime) {
         this.name = name;
         this.expiresTime = expiresTime;
@@ -86,5 +100,28 @@ public class CacheProperties implements Serializable {
      */
     public String getName(Object suffix) {
         return StringUtils.appendIfMissing(getName(),DEFAULT_SEPARATOR) + suffix.toString();
+    }
+
+    /**
+     * 创建缓存配置
+     *
+     * @param name 缓存名称
+     *
+     * @return 缓存配置
+     */
+    public static CacheProperties of(String name) {
+        return new CacheProperties(name);
+    }
+
+    /**
+     * 创建缓存配置
+     *
+     * @param name 缓存配置
+     * @param expiresTime 超时时间配置
+     *
+     * @return 缓存配置
+     */
+    public static CacheProperties of(String name, TimeProperties expiresTime) {
+        return new CacheProperties(name, expiresTime);
     }
 }

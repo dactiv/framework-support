@@ -130,6 +130,7 @@
         <module>spring-security</module>
         <module>alibaba-nacos</module>
         <module>idempotent</module>
+        <module>minio</module>
     </modules>
 
 </project>

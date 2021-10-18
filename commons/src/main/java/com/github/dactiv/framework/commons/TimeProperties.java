@@ -137,4 +137,92 @@ public class TimeProperties implements Serializable {
         return unit.toNanos(value);
     }
 
+    /**
+     * 创建时间配置
+     *
+     * @param value 值
+     * @param unit 时间单位
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties of(Integer value, TimeUnit unit) {
+        return new TimeProperties(value, unit);
+    }
+
+    /**
+     * 创建按天的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofDay(Integer value) {
+        return new TimeProperties(value, TimeUnit.DAYS);
+    }
+
+    /**
+     * 创建按小时的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofHours(Integer value) {
+        return new TimeProperties(value, TimeUnit.HOURS);
+    }
+
+    /**
+     * 创建按分钟的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofMinutes(Integer value) {
+        return new TimeProperties(value, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 创建按秒的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofSeconds(Integer value) {
+        return new TimeProperties(value, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 创建按毫秒的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofMilliseconds(Integer value) {
+        return new TimeProperties(value, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 创建按微秒的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofMicroseconds(Integer value) {
+        return new TimeProperties(value, TimeUnit.MICROSECONDS);
+    }
+
+    /**
+     * 创建按纳秒的时间配置
+     *
+     * @param value 值
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties ofNanoseconds(Integer value) {
+        return new TimeProperties(value, TimeUnit.NANOSECONDS);
+    }
 }

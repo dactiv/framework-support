@@ -214,43 +214,45 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             CronScheduledInfo cronScheduledInfo = createCronScheduledInfo(k, v, bean);
 
             // 如果该类型为 NacosCronScheduledInfo 时，加入到 CACHE 中
-            if (NacosCronScheduledInfo.class.isAssignableFrom(cronScheduledInfo.getClass())) {
-                // 定义 key 内容
-                List<MatchEvaluation> matchEvaluations = new LinkedList<>();
-
-                NacosCronScheduledInfo info = (NacosCronScheduledInfo) cronScheduledInfo;
-
-                // 定义表达式匹配定值类
-                MatchEvaluation cronEvaluation = new MatchEvaluation(
-                        info.getCronPropertyName(),
-                        CronScheduledInfo.DEFAULT_EXPRESSION_FIELD_NAME,
-                        info.getExpression()
-                );
-
-                matchEvaluations.add(cronEvaluation);
-
-                // 如果存在时区，定义时区匹配定值类
-                if (StringUtils.isNotEmpty(info.getTimeZonePropertyName())) {
-
-                    MatchEvaluation zoneEvaluation = new MatchEvaluation(
-                            info.getTimeZonePropertyName(),
-                            CronScheduledInfo.DEFAULT_TIME_ZONE_FIELD_NAME,
-                            info.getTimeZone(),
-                            (value, target) -> getTimeZone(v.toString())
-                    );
-
-                    matchEvaluations.add(zoneEvaluation);
-                }
-
-                LOGGER.info(
-                        "构造 [{}] 的 cron 调度, 当前 cron 表达式为: {}, 时区为: {}",
-                        cronScheduledInfo.getName(),
-                        cronScheduledInfo.getExpression(),
-                        cronScheduledInfo.getTimeZone()
-                );
-                // 添加到 CACHE 中
-                CACHE.put(matchEvaluations, info);
+            if (!NacosCronScheduledInfo.class.isAssignableFrom(cronScheduledInfo.getClass())) {
+                return ;
             }
+
+            // 定义 key 内容
+            List<MatchEvaluation> matchEvaluations = new LinkedList<>();
+
+            NacosCronScheduledInfo info = (NacosCronScheduledInfo) cronScheduledInfo;
+
+            // 定义表达式匹配定值类
+            MatchEvaluation cronEvaluation = new MatchEvaluation(
+                    info.getCronPropertyName(),
+                    CronScheduledInfo.DEFAULT_EXPRESSION_FIELD_NAME,
+                    info.getExpression()
+            );
+
+            matchEvaluations.add(cronEvaluation);
+
+            // 如果存在时区，定义时区匹配定值类
+            if (StringUtils.isNotEmpty(info.getTimeZonePropertyName())) {
+
+                MatchEvaluation zoneEvaluation = new MatchEvaluation(
+                        info.getTimeZonePropertyName(),
+                        CronScheduledInfo.DEFAULT_TIME_ZONE_FIELD_NAME,
+                        info.getTimeZone(),
+                        (value, target) -> getTimeZone(v.toString())
+                );
+
+                matchEvaluations.add(zoneEvaluation);
+            }
+
+            LOGGER.info(
+                    "构造 [{}] 的 cron 调度, 当前 cron 表达式为: {}, 时区为: {}",
+                    cronScheduledInfo.getName(),
+                    cronScheduledInfo.getExpression(),
+                    cronScheduledInfo.getTimeZone()
+            );
+            // 添加到 CACHE 中
+            CACHE.put(matchEvaluations, info);
 
         });
 

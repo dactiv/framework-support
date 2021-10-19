@@ -25,11 +25,10 @@ public interface NumberIdEntity<T extends Number> extends Serializable {
     T getId();
 
     /**
-     * 设置创建时间
+     * 获取创建时间
      *
      * @return 创建时间
      */
-    @JsonIgnore
     Date getCreationTime();
 
 }

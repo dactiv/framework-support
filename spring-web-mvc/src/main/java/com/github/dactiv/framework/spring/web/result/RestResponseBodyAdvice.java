@@ -132,7 +132,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             }
 
             // 如果没设置执行代码。根据状态值来设置执行代码
-            if (Objects.isNull(result.getExecuteCode())){
+            if (Objects.isNull(result.getExecuteCode())) {
 
                 if (HttpStatus.OK == status) {
                     result.setExecuteCode(RestResult.SUCCESS_EXECUTE_CODE);

@@ -35,7 +35,8 @@ public class MinioTemplate {
 
     /**
      * minio 模版
-     * @param minioClient minio 客户端
+     *
+     * @param minioClient  minio 客户端
      * @param objectMapper json 对象映射
      */
     public MinioTemplate(MinioClient minioClient, ObjectMapper objectMapper) {
@@ -131,7 +132,7 @@ public class MinioTemplate {
     /**
      * 删除文件
      *
-     * @param fileObject 文件对象描述
+     * @param fileObject          文件对象描述
      * @param deleteBucketIfEmpty true: 如果桶的文件目录为空，删除桶，否则 false
      *
      * @throws Exception 删除错误时抛出
@@ -218,7 +219,7 @@ public class MinioTemplate {
                 .builder()
                 .bucket(toObject.getBucketName().toLowerCase())
                 .region(toObject.getRegion())
-                .object(StringUtils.defaultString(toObject.getObjectName(),fromObject.getObjectName()))
+                .object(StringUtils.defaultString(toObject.getObjectName(), fromObject.getObjectName()))
                 .source(copySource.build());
 
         return minioClient.copyObject(args.build());

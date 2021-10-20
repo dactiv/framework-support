@@ -5,7 +5,7 @@ package com.github.dactiv.framework.commons.exception;
  *
  * @author maurice.chen
  */
-public class StatusErrorCodeException extends ErrorCodeException{
+public class StatusErrorCodeException extends ErrorCodeException {
 
     private static final long serialVersionUID = -8343474924487172853L;
 

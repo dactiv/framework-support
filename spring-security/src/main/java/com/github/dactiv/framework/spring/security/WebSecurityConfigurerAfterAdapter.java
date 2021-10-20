@@ -23,7 +23,7 @@ public interface WebSecurityConfigurerAfterAdapter {
     /**
      * 配置 http 访问安全
      *
-     * @param httpSecurity  http 访问安全
+     * @param httpSecurity http 访问安全
      */
     default void configure(HttpSecurity httpSecurity) throws Exception {
 

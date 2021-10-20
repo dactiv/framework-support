@@ -6,7 +6,6 @@ import com.github.dactiv.framework.crypto.algorithm.hash.Hash;
 import org.junit.Assert;
 
 /**
- *
  * 测试数据内容
  *
  * @author maurice

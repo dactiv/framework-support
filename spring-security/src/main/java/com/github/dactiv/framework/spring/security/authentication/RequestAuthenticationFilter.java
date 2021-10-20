@@ -49,7 +49,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
             if (rememberMeAuth != null) {
                 successfulAuthentication(request, response, chain, rememberMeAuth);
-                return ;
+                return;
             }
         }
 
@@ -172,7 +172,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      */
     protected String obtainType(HttpServletRequest request) {
 
-        String type =  request.getHeader(properties.getTypeHeaderName());
+        String type = request.getHeader(properties.getTypeHeaderName());
 
         if (StringUtils.isEmpty(type)) {
             type = request.getParameter(properties.getTypeParamName());

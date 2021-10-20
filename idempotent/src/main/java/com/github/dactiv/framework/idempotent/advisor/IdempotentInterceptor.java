@@ -76,8 +76,8 @@ public class IdempotentInterceptor implements MethodInterceptor {
      * 判断是否幂等
      *
      * @param idempotent 幂等注解
-     * @param method 当前方法
-     * @param arguments 参数信息
+     * @param method     当前方法
+     * @param arguments  参数信息
      *
      * @return true 为幂等， 否则 false
      */
@@ -85,7 +85,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
         String key = idempotent.key();
 
         if (StringUtils.isEmpty(key)) {
-            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL +  method.getName();
+            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL + method.getName();
         }
 
         Object keyValue = valueGenerator.generate(key, method, arguments);
@@ -99,7 +99,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
             List<Object> value = new LinkedList<>();
 
             for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
-                if (ArrayUtils.contains(idempotent.ignore(),parameterNames[i])) {
+                if (ArrayUtils.contains(idempotent.ignore(), parameterNames[i])) {
                     continue;
                 }
 

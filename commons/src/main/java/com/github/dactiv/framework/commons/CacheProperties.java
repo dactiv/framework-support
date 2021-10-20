@@ -47,7 +47,7 @@ public class CacheProperties implements Serializable {
     /**
      * 缓存配置
      *
-     * @param name 缓存名称
+     * @param name        缓存名称
      * @param expiresTime 超时时间配置
      */
     public CacheProperties(String name, TimeProperties expiresTime) {
@@ -99,7 +99,7 @@ public class CacheProperties implements Serializable {
      * @return 缓存名称 + 后缀值，如果缓存名称没有 ":" 符号，会自动加上。
      */
     public String getName(Object suffix) {
-        return StringUtils.appendIfMissing(getName(),DEFAULT_SEPARATOR) + suffix.toString();
+        return StringUtils.appendIfMissing(getName(), DEFAULT_SEPARATOR) + suffix.toString();
     }
 
     /**
@@ -116,7 +116,7 @@ public class CacheProperties implements Serializable {
     /**
      * 创建缓存配置
      *
-     * @param name 缓存配置
+     * @param name        缓存配置
      * @param expiresTime 超时时间配置
      *
      * @return 缓存配置

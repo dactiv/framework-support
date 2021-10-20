@@ -47,10 +47,10 @@ public class VersionFileObject extends FileObject {
 
     /**
      * 版本文件对象描述
-     * 
-     * @param bucket 桶描述
+     *
+     * @param bucket     桶描述
      * @param objectName 文件对象名称
-     * @param versionId 版本 id
+     * @param versionId  版本 id
      */
     public VersionFileObject(Bucket bucket, String objectName, String versionId) {
         super(bucket, objectName);
@@ -59,8 +59,9 @@ public class VersionFileObject extends FileObject {
 
     /**
      * 版本文件对象描述
+     *
      * @param fileObject 文件对象描述
-     * @param versionId 版本 id
+     * @param versionId  版本 id
      */
     public VersionFileObject(FileObject fileObject, String versionId) {
         super(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName());
@@ -126,7 +127,7 @@ public class VersionFileObject extends FileObject {
      * 创建一个版本文件对象描述
      *
      * @param fileObject 文件对象描述
-     * @param versionId 版本号
+     * @param versionId  版本号
      *
      * @return 版本文件对象描述
      */

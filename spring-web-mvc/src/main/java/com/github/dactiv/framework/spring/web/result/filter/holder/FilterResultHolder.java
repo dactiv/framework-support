@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *值持有者
+ * 值持有者
  *
  * @author maurice.chen
  */
@@ -85,7 +85,6 @@ public class FilterResultHolder {
 
     /**
      * 清除当前值
-     *
      */
     public static void clear() {
         strategy.clear();
@@ -107,12 +106,12 @@ public class FilterResultHolder {
      */
     public static void add(String value) {
         if (StringUtils.isEmpty(value)) {
-            return ;
+            return;
         }
 
         List<String> strings = get();
         if (strings.contains(value)) {
-            return ;
+            return;
         }
 
         strings.add(value);

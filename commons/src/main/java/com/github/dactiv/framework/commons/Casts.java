@@ -145,8 +145,8 @@ public class Casts {
      * 将 bytes 内容转换为指定类型的对象
      *
      * @param bytes bytes 内容
-     * @param type 指定类型的对象 class
-     * @param <T> 对象范型实体值
+     * @param type  指定类型的对象 class
+     * @param <T>   对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -162,8 +162,8 @@ public class Casts {
      * 将 bytes 内容转换为指定类型的对象
      *
      * @param bytes bytes 内容
-     * @param type 用于包含信息和作为反序列化器键的类型标记类的基类
-     * @param <T> 对象范型实体值
+     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>   对象范型实体值
      *
      * @return 指定类型的对象实例
      */
@@ -394,7 +394,7 @@ public class Casts {
     /**
      * 设置 url 路径变量值
      *
-     * @param url url 路径
+     * @param url           url 路径
      * @param variableValue url 路径的变量对应值 map
      *
      * @return 新的 url 路径

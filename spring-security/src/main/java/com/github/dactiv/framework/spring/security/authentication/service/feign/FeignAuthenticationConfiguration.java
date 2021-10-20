@@ -56,7 +56,7 @@ public class FeignAuthenticationConfiguration {
      * 对认证用户进行编码
      *
      * @param properties 认证配置
-     * @param user 当前用户
+     * @param user       当前用户
      *
      * @return 编码后的字符串
      */

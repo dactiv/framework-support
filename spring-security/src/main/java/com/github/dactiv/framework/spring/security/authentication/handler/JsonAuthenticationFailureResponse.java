@@ -15,7 +15,7 @@ public interface JsonAuthenticationFailureResponse {
     /**
      * 设置响应信息
      *
-     * @param result 响应内容
+     * @param result  响应内容
      * @param request http 请求
      */
     void setting(RestResult<Map<String, Object>> result, HttpServletRequest request);

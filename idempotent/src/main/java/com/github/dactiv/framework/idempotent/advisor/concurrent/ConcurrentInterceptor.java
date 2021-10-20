@@ -51,7 +51,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         if (StringUtils.isEmpty(key)) {
             Method method = invocation.getMethod();
-            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL +  method.getName();
+            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL + method.getName();
         }
 
         Object concurrentKey = valueGenerator.generate(key, invocation.getMethod(), invocation.getArguments());

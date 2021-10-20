@@ -142,7 +142,7 @@ public class MinioTemplateTest {
         Iterable<Result<Item>> iterable = minioTemplate.getMinioClient().listObjects(copy);
         Assertions.assertEquals(iterable.iterator().next().get().objectName(), "copy");
 
-        ObjectWriteResponse response = minioTemplate.copyObject(copyFile, FileObject.of(bucket,"newCopy"));
+        ObjectWriteResponse response = minioTemplate.copyObject(copyFile, FileObject.of(bucket, "newCopy"));
 
         ListObjectsArgs newCopy = ListObjectsArgs
                 .builder()

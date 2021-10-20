@@ -8,7 +8,6 @@ import java.lang.annotation.*;
  * 过滤字段或方法注解，用于 http 响应数据时过滤响应的 json 结构
  *
  * @author maurice.chen
- *
  */
 @Documented
 @JacksonAnnotation

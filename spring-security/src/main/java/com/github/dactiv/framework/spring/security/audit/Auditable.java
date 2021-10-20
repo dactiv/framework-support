@@ -19,9 +19,7 @@ public @interface Auditable {
      *
      * <p>
      * 如：
-     * <p>
      * request 提交的参数或头信息存在 token=test&id=1，要获取 token 做 principal 的话，principal 就等于 token
-     * <p>
      * 如果当前存在 spring security 登录用户的话。该值为{@link Authentication#getName()}
      * </p>
      *

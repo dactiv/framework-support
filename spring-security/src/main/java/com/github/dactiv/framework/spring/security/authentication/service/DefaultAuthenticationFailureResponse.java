@@ -25,7 +25,7 @@ public class DefaultAuthenticationFailureResponse implements JsonAuthenticationF
     public void setting(RestResult<Map<String, Object>> result, HttpServletRequest request) {
 
         if (!request.getHeader(properties.getTypeHeaderName()).equals(DefaultUserDetailsService.DEFAULT_TYPES)) {
-            return ;
+            return;
         }
 
         result.setStatus(HttpStatus.UNAUTHORIZED.value());

@@ -23,6 +23,7 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
      * @param principal   当前人
      * @param after       在什么时间之后的
      * @param type        类型
+     *
      * @return 分页信息
      */
     Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type);

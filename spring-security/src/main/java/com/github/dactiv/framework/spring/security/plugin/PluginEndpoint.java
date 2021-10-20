@@ -423,9 +423,10 @@ public class PluginEndpoint {
     /**
      * 获取多个请求 uri 信息，并用 ，（逗号）分割
      *
-     * @param target 目标对象
+     * @param target      目标对象
      * @param targetValue 目标 url 值
      * @param parent      父类 plugin
+     *
      * @return 多个请求 uri 信息，并用 ，（逗号）分割
      */
     private String getRequestValueString(Object target, String targetValue, PluginInfo parent) {
@@ -467,6 +468,7 @@ public class PluginEndpoint {
      * @param target 构建目标
      * @param method 方法
      * @param parent 父类节点
+     *
      * @return 请求值集合
      */
     private List<String> getRequestValues(Object target, Method method, PluginInfo parent) {

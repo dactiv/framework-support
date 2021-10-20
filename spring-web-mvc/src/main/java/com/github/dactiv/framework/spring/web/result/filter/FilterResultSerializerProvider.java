@@ -13,21 +13,23 @@ import java.io.IOException;
  * 过滤结果集序列话供应者实现，由于默认的序列话供应者对于 JsonSerializer 缓存机制，无法执行新的序列化过程，所以必须要重写
  *
  * @author maurice.chen
- *
  */
 public class FilterResultSerializerProvider extends DefaultSerializerProvider {
 
-    public FilterResultSerializerProvider() { super(); }
+    public FilterResultSerializerProvider() {
+        super();
+    }
 
-    public FilterResultSerializerProvider(FilterResultSerializerProvider src) { super(src); }
+    public FilterResultSerializerProvider(FilterResultSerializerProvider src) {
+        super(src);
+    }
 
     protected FilterResultSerializerProvider(SerializerProvider src, SerializationConfig config, SerializerFactory f) {
         super(src, config, f);
     }
 
     @Override
-    public DefaultSerializerProvider copy()
-    {
+    public DefaultSerializerProvider copy() {
         if (getClass() != FilterResultSerializerProvider.class) {
             return super.copy();
         }

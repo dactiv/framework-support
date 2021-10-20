@@ -16,7 +16,7 @@ public class EqnWildcardParser implements WildcardParser {
 
     @Override
     public void structure(Property property, QueryWrapper<?> queryWrapper) {
-        if(BooleanUtils.toBoolean(property.getValue().toString())) {
+        if (BooleanUtils.toBoolean(property.getValue().toString())) {
             queryWrapper.isNull(property.getPropertyName());
         }
     }

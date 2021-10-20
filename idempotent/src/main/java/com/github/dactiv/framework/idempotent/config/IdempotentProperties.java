@@ -23,6 +23,7 @@ public class IdempotentProperties {
 
     /**
      * 获取全局忽略的参数类型
+     *
      * @return 全局忽略的参数类型
      */
     public List<Class<?>> getIgnoreClasses() {

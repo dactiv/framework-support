@@ -3,7 +3,7 @@ package com.github.dactiv.framework.spring.web.result.filter.holder;
 import java.util.List;
 
 /**
- *值持有者策略
+ * 值持有者策略
  *
  * @author maurice.chen
  */
@@ -15,7 +15,6 @@ public interface FilterResultHolderStrategy {
     void clear();
 
     /**
-     *
      * 获取值
      *
      * @return 值集合

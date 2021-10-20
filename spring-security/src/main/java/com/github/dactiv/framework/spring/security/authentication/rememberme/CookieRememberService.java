@@ -125,11 +125,11 @@ public class CookieRememberService implements RememberMeServices {
     public void loginSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
         if (!isRememberMeRequested(request)) {
-            return ;
+            return;
         }
 
         if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
-            return ;
+            return;
         }
 
         SecurityUserDetails details = Casts.cast(authentication.getDetails());
@@ -138,7 +138,7 @@ public class CookieRememberService implements RememberMeServices {
         RememberMeToken rememberMeToken = new RememberMeToken(details);
         bucket.setAsync(rememberMeToken);
 
-        int maxAge = (int)properties.getRememberMe().getCache().getExpiresTime().toSeconds();
+        int maxAge = (int) properties.getRememberMe().getCache().getExpiresTime().toSeconds();
 
         removeCookie(request, response);
         setCookie(rememberMeToken, maxAge, request, response);
@@ -218,9 +218,9 @@ public class CookieRememberService implements RememberMeServices {
     /**
      * 设置 cookie 内容
      *
-     * @param token token 信息
-     * @param maxAge 过期时间
-     * @param request http 请求信息
+     * @param token    token 信息
+     * @param maxAge   过期时间
+     * @param request  http 请求信息
      * @param response http 请求信息
      */
     protected void setCookie(RememberMeToken token, int maxAge, HttpServletRequest request, HttpServletResponse response) {
@@ -299,7 +299,7 @@ public class CookieRememberService implements RememberMeServices {
     /**
      * 删除 cookie
      *
-     * @param request http 请求信息
+     * @param request  http 请求信息
      * @param response http 响应信息
      */
     protected void removeCookie(HttpServletRequest request, HttpServletResponse response) {

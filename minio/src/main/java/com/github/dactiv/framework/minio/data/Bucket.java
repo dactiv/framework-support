@@ -39,8 +39,9 @@ public class Bucket implements Serializable {
 
     /**
      * 桶描述
+     *
      * @param bucketName 桶名称
-     * @param region 区域
+     * @param region     区域
      */
     public Bucket(String bucketName, String region) {
         this.bucketName = bucketName;
@@ -98,7 +99,7 @@ public class Bucket implements Serializable {
      * 创建一个桶描述
      *
      * @param bucketName 桶名称
-     * @param region 所属区域
+     * @param region     所属区域
      *
      * @return 桶描述
      */

@@ -141,7 +141,7 @@ public class TimeProperties implements Serializable {
      * 创建时间配置
      *
      * @param value 值
-     * @param unit 时间单位
+     * @param unit  时间单位
      *
      * @return 时间配置
      */

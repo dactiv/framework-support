@@ -137,7 +137,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                     }
 
                 }
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.warn("加载資源出错，包路径为:" + locationPattern, e);
             }
 
@@ -161,7 +161,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * 添加供应者 filter
      *
      * @param simpleFilterProvider 供应者 filter
-     * @param annotated 注解信息
+     * @param annotated            注解信息
      */
     private void addProviderFilter(SimpleFilterProvider simpleFilterProvider, Annotated annotated) {
 

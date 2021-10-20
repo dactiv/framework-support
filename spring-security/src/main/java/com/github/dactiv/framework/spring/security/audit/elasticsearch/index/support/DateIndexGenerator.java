@@ -65,7 +65,7 @@ public class DateIndexGenerator extends PropertyIndexGenerator {
         } else if (Date.class.isAssignableFrom(date.getClass())) {
             Date d = Casts.cast(date);
             result.add(new SimpleDateFormat(pattern).format(d));
-        } else if (Instant.class.isAssignableFrom(date.getClass())){
+        } else if (Instant.class.isAssignableFrom(date.getClass())) {
             Instant i = Casts.cast(date);
             LocalDateTime localDateTime = LocalDateTime.ofInstant(i, ZoneId.systemDefault());
             result.add(localDateTime.format(DateTimeFormatter.ofPattern(pattern)));

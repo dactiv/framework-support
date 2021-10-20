@@ -32,7 +32,7 @@ public class IdempotentDataService {
         return save(entity, userId);
     }
 
-    @Idempotent(key = "idempotent:save-entity:[#userId]", value = "[T(java.util.Objects).hash(#entity.name, #entity.type)]",expirationTime = @Time(2000))
+    @Idempotent(key = "idempotent:save-entity:[#userId]", value = "[T(java.util.Objects).hash(#entity.name, #entity.type)]", expirationTime = @Time(2000))
     public Integer saveEntityExpirationTime(Entity entity, Integer userId) {
         LOGGER.info("保存用户 ID 为 [" + userId + "] 的 entity 数据");
         return save(entity, userId);

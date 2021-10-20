@@ -21,6 +21,7 @@ public @interface Concurrent {
      * <p>如:</p>
      * <p>@Concurrent(value="[#vo.fieldName]")</p>
      * <p>public void save(Vo vo);</p>
+     *
      * @return key 名称
      */
     String value() default "";

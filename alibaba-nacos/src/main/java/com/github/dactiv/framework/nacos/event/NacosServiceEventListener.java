@@ -52,7 +52,7 @@ public class NacosServiceEventListener implements EventListener {
     @Override
     public void onEvent(Event event) {
         if (!NamingEvent.class.isAssignableFrom(event.getClass())) {
-            return ;
+            return;
         }
 
         NamingEvent namingEvent = Casts.cast(event);

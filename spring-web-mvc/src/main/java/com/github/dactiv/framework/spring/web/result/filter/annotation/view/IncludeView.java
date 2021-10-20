@@ -9,7 +9,6 @@ import java.lang.annotation.*;
  * 用于 jackson json 序列化 json 时，通过该注解来指定使用哪个方式进行序列化。
  *
  * @author maurice.chen
- *
  */
 @Documented
 @JacksonAnnotation

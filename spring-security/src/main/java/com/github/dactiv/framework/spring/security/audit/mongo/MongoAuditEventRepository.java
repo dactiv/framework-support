@@ -106,6 +106,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
      * 创建插件审计事件
      *
      * @param map map 数据源
+     *
      * @return 插件审计事件
      */
     public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
@@ -123,6 +124,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
      * @param principal 操作人
      * @param after     在什么时间之后的
      * @param type      类型
+     *
      * @return 查询条件
      */
     private Criteria createCriteria(String principal, Instant after, String type) {

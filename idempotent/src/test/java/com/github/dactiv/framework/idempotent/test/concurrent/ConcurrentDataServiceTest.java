@@ -52,7 +52,7 @@ public class ConcurrentDataServiceTest {
         concurrentDataService.incrementSpringEl();
         concurrentDataService.setCount(1);
 
-        concurrentDataService.incrementArgs(new Entity("123",0, "333".toCharArray()));
+        concurrentDataService.incrementArgs(new Entity("123", 0, "333".toCharArray()));
         concurrentDataService.setCount(2);
     }
 

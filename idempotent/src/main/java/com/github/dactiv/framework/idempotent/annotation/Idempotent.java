@@ -32,6 +32,7 @@ public @interface Idempotent {
      * <p>如:</p>
      * <p>@Idempoten(value="[#vo.fieldName]")</p>
      * <p>public void save(Vo vo);</p>
+     *
      * @return 锁识别
      */
     String[] value() default {};
@@ -45,6 +46,7 @@ public @interface Idempotent {
 
     /**
      * 如果不使用 {@link #value()} 时，要忽略哪个参数不做 hashCode
+     *
      * @return 要忽略的参数
      */
     String[] ignore() default {};

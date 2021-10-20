@@ -11,7 +11,6 @@ import java.util.List;
  * spring web 扩展支持的配置类
  *
  * @author maurice.chen
- *
  */
 @ConfigurationProperties("dactiv.spring.web.mvc")
 public class SpringWebMvcProperties {

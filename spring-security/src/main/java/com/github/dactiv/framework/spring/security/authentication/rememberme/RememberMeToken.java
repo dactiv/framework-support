@@ -92,6 +92,7 @@ public class RememberMeToken extends IntegerIdEntity {
 
     /**
      * 获取 token 值
+     *
      * @return token 值
      */
     public String getToken() {

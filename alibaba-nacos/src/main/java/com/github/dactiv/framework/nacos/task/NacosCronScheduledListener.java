@@ -85,7 +85,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     /**
      * 当 nacos 配置发生变化时，进入此方法
      *
-     * @param dataId 数据 id
+     * @param dataId     数据 id
      * @param configInfo 更新的配置内容
      */
     protected void configReceive(String dataId, String configInfo) throws IOException {
@@ -215,7 +215,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
             // 如果该类型为 NacosCronScheduledInfo 时，加入到 CACHE 中
             if (!NacosCronScheduledInfo.class.isAssignableFrom(cronScheduledInfo.getClass())) {
-                return ;
+                return;
             }
 
             // 定义 key 内容
@@ -387,7 +387,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     public void afterPropertiesSet() throws Exception {
 
         if (Objects.isNull(this.scheduledTaskRegistrar)) {
-            return ;
+            return;
         }
 
         // 需要侦听的配置集合

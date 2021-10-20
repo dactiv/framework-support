@@ -90,6 +90,7 @@ public class DeviceIdProperties {
 
     /**
      * 设置是否禁用 url 重写，默认为 false
+     *
      * @param disableUrlRewriting true 是，否则 false
      */
     public void setDisableUrlRewriting(boolean disableUrlRewriting) {

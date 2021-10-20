@@ -148,6 +148,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      * 创建插件审计事件
      *
      * @param map map 数据源
+     *
      * @return 插件审计事件
      */
     public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
@@ -165,6 +166,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      * @param after     在什么时间之后的
      * @param type      类型
      * @param principal 操作人
+     *
      * @return 查询条件
      */
     private Criteria createCriteria(Instant after, String type, String principal) {
@@ -192,6 +194,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      * @param after     在什么时间之后
      * @param type      类型
      * @param principal 操作人
+     *
      * @return index 信息
      */
     private String getIndex(Instant after, String type, String principal) {

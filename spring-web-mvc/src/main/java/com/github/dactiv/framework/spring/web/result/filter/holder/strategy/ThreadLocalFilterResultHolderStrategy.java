@@ -26,7 +26,7 @@ public class ThreadLocalFilterResultHolderStrategy implements FilterResultHolder
 
     @Override
     public void set(List<String> id) {
-        Objects.requireNonNull(id,"filter result id 不能为空");
+        Objects.requireNonNull(id, "filter result id 不能为空");
         THREAD_LOCAL.set(id);
     }
 

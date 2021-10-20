@@ -150,7 +150,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     public static <S> Page<S> convertResultPage(IPage<S> page) {
 
         return new Page<>(
-                new PageRequest((int)page.getCurrent(), (int)page.getSize()),
+                new PageRequest((int) page.getCurrent(), (int) page.getSize()),
                 page.getRecords()
         );
     }
@@ -159,7 +159,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * 创建查询分页
      *
      * @param pageRequest 分页请求
-     * @param <S>      分页范型类型
+     * @param <S>         分页范型类型
      *
      * @return Mybatis 分页查询对象
      */

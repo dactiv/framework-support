@@ -52,6 +52,7 @@ public class RememberMeProperties {
 
     /**
      * 获取记住我参数名
+     *
      * @return 记住我参数名
      */
     public String getParamName() {
@@ -96,6 +97,7 @@ public class RememberMeProperties {
 
     /**
      * 设置 cookie 值是否使用 base46 编码后在进行存储
+     *
      * @param base64Value true 是，否则 false
      */
     public void setBase64Value(boolean base64Value) {

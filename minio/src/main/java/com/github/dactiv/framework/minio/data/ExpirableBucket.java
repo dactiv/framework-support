@@ -7,7 +7,7 @@ import com.github.dactiv.framework.commons.TimeProperties;
  *
  * @author maurice.chen
  */
-public class ExpirableBucket extends Bucket{
+public class ExpirableBucket extends Bucket {
 
     private static final long serialVersionUID = -2648131524041207239L;
 

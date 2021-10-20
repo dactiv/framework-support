@@ -14,7 +14,7 @@ public interface JsonAuthenticationSuccessResponse {
     /**
      * 设置响应信息
      *
-     * @param result 响应内容
+     * @param result  响应内容
      * @param request http 请求
      */
     void setting(RestResult<Object> result, HttpServletRequest request);

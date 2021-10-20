@@ -56,7 +56,6 @@ public class RestResult<T> implements Serializable {
 
     /**
      * 创建一个抽象的 rest 结果集实体类
-     *
      */
     public RestResult() {
     }
@@ -126,7 +125,7 @@ public class RestResult<T> implements Serializable {
      * 创建一个成功的抽象 rest 结果集实体类
      *
      * @param message 响应信息
-     * @param data 响应内容
+     * @param data    响应内容
      *
      * @return rest 结果集
      */
@@ -137,7 +136,7 @@ public class RestResult<T> implements Serializable {
     /**
      * 创建一个成功的抽象 rest 结果集实体类
      *
-     * @param message 响应信息
+     * @param message     响应信息
      * @param executeCode 执行代码
      *
      * @return rest 结果集
@@ -162,7 +161,7 @@ public class RestResult<T> implements Serializable {
      * 创建一个异常的抽象 rest 结果集实体类
      *
      * @param executeCode 执行代码
-     * @param throwable 异常信息
+     * @param throwable   异常信息
      *
      * @return rest 结果集
      */
@@ -174,8 +173,8 @@ public class RestResult<T> implements Serializable {
      * 创建一个异常的抽象 rest 结果集实体类
      *
      * @param executeCode 执行代码
-     * @param throwable 异常信息
-     * @param data 数据内容
+     * @param throwable   异常信息
+     * @param data        数据内容
      *
      * @return rest 结果集
      */
@@ -190,7 +189,6 @@ public class RestResult<T> implements Serializable {
      * @param status      执行状态
      * @param executeCode 执行代码
      * @param data        响应数据
-     *
      */
     public RestResult(String message, int status, String executeCode, T data) {
         this.message = message;

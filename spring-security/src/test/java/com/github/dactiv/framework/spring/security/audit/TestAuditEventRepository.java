@@ -34,7 +34,7 @@ public class TestAuditEventRepository {
 
         Assertions.assertEquals(before + 1, auditEvents.size());
 
-        if(PluginAuditEventRepository.class.isAssignableFrom(auditEventRepository.getClass())) {
+        if (PluginAuditEventRepository.class.isAssignableFrom(auditEventRepository.getClass())) {
 
             PluginAuditEvent target = Casts.cast(auditEvents.iterator().next());
 

@@ -18,7 +18,7 @@ public class ReflectionUtils {
     /**
      * 查找对象中的字段
      *
-     * @param o 对象
+     * @param o    对象
      * @param name 字段名称
      *
      * @return 字段信息
@@ -30,7 +30,7 @@ public class ReflectionUtils {
     /**
      * 获取字段值
      *
-     * @param o 对象
+     * @param o     对象
      * @param field 字段
      *
      * @return 字段值

@@ -59,7 +59,9 @@ public class DeviceUtils {
 
     /**
      * 获取设备信息
+     *
      * @param userAgent user agent
+     *
      * @return 设备信息
      */
     public static UserAgent getDevice(String userAgent) {

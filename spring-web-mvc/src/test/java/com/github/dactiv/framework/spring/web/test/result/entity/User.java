@@ -6,7 +6,7 @@ import com.github.dactiv.framework.spring.web.result.filter.annotation.view.Excl
 import java.util.LinkedList;
 import java.util.List;
 
-@ExcludeView(value = "unity", properties = {"creationTime","sex", "age"})
+@ExcludeView(value = "unity", properties = {"creationTime", "sex", "age"})
 public class User {
 
     private Integer id = 1;

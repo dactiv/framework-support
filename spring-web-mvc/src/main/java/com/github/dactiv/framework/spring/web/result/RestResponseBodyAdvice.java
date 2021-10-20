@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -109,22 +110,6 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
         boolean support = clients != null && clients.stream().anyMatch(properties::isSupportClient);
 
-        String id = httpRequest.getServletRequest().getHeader(properties.getFilterResultIdHeaderName());
-
-        if (StringUtils.isEmpty(id)) {
-            id = httpRequest.getServletRequest().getParameter(properties.getFilterResultIdParamName());
-        }
-
-        if (StringUtils.isNotEmpty(id) && StringUtils.isNotEmpty(FilterResultHolder.get())) {
-
-            FilterResultHolder.set(id);
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("本次请求需要使用排除值 ID 为 [{}] 的响应排除", id);
-            }
-
-        }
-
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 
             HttpStatus status = HttpStatus.valueOf(httpResponse.getServletResponse().getStatus());
@@ -162,6 +147,21 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return body;
         }
 
+    }
+
+    /**
+     * 设置过滤返回对象结果集的值
+     *
+     * @param request http 请求对象
+     */
+    public String getFilterResultId(HttpServletRequest request) {
+        String id = request.getHeader(properties.getFilterResultIdHeaderName());
+
+        if (StringUtils.isEmpty(id)) {
+            id = request.getParameter(properties.getFilterResultIdParamName());
+        }
+
+        return id;
     }
 
 

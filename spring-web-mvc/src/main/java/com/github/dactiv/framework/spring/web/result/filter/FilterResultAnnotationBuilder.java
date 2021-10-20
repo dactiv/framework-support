@@ -16,6 +16,7 @@ import com.github.dactiv.framework.spring.web.result.filter.annotation.view.Incl
 import com.github.dactiv.framework.spring.web.result.filter.annotation.view.IncludeViews;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import io.micrometer.core.instrument.util.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -208,16 +209,16 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
     public Object findFilterId(Annotated a) {
         Object returnValue = null;
 
-        String id = FilterResultHolder.get();
+        List<String> ids = FilterResultHolder.get();
 
-        if (StringUtils.isNotEmpty(id)) {
+        if (CollectionUtils.isNotEmpty(ids)) {
 
             ExcludeViews ExcludeViewsAnn = a.getAnnotation(ExcludeViews.class);
 
             if (Objects.nonNull(ExcludeViewsAnn)) {
 
                 for (ExcludeView view : ExcludeViewsAnn.value()) {
-                    returnValue = getExcludeViewId(view, id, a);
+                    returnValue = getExcludeViewId(view, ids, a);
 
                     if (Objects.nonNull(returnValue)) {
                         break;
@@ -226,7 +227,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
             }
 
             if (Objects.isNull(returnValue)) {
-                returnValue = getExcludeViewId(a.getAnnotation(ExcludeView.class), id, a);
+                returnValue = getExcludeViewId(a.getAnnotation(ExcludeView.class), ids, a);
             }
 
             if (Objects.isNull(returnValue)) {
@@ -236,7 +237,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                 if (Objects.nonNull(includeViewsAnn)) {
 
                     for (IncludeView view : includeViewsAnn.value()) {
-                        returnValue = getIncludeViewId(view, id, a);
+                        returnValue = getIncludeViewId(view, ids, a);
 
                         if (Objects.nonNull(returnValue)) {
                             break;
@@ -245,7 +246,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                 }
 
                 if (Objects.nonNull(returnValue)) {
-                    returnValue = getIncludeViewId(a.getAnnotation(IncludeView.class), id, a);
+                    returnValue = getIncludeViewId(a.getAnnotation(IncludeView.class), ids, a);
                 }
 
             }
@@ -262,18 +263,18 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * 获取排除视图 id
      *
      * @param view 排除视图注解
-     * @param id   当前应用的 id 值
+     * @param ids  当前应用的 id 值集合
      * @param a    当前注解位置
      *
      * @return 如果匹配返回排除视图  id 值，否则返回 null
      */
-    public Object getExcludeViewId(ExcludeView view, String id, Annotated a) {
+    public Object getExcludeViewId(ExcludeView view, List<String> ids, Annotated a) {
 
         if (view == null) {
             return null;
         }
 
-        if (view.value().equals(id)) {
+        if (CollectionUtils.isNotEmpty(ids) && ids.contains(view.value())) {
             return getExcludeViewId(view, a);
         }
 
@@ -284,18 +285,18 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * 获取排除视图 id
      *
      * @param view 引入视图注解
-     * @param id   当前应用的 id 值
+     * @param ids  当前应用的 id 值集合
      * @param a    当前注解位置
      *
      * @return 如果匹配返回排除视图  id 值，否则返回 null
      */
-    public Object getIncludeViewId(IncludeView view, String id, Annotated a) {
+    public Object getIncludeViewId(IncludeView view, List<String> ids, Annotated a) {
 
         if (view == null) {
             return null;
         }
 
-        if (view.value().equals(id)) {
+        if (CollectionUtils.isNotEmpty(ids) && ids.contains(view.value())) {
             return getIncludeViewId(view, a);
         }
 
@@ -331,16 +332,16 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
         boolean returnValue = false;
 
-        String id = FilterResultHolder.get();
+        List<String> ids = FilterResultHolder.get();
 
-        if (StringUtils.isNotEmpty(id)) {
+        if (CollectionUtils.isNotEmpty(ids)) {
 
             Excludes excludes = _findAnnotation(a, Excludes.class);
 
             if (excludes != null) {
 
                 for (Exclude e : excludes.value()) {
-                    returnValue = isExclude(e, id);
+                    returnValue = isExclude(e, ids);
 
                     if (returnValue) {
                         break;
@@ -350,7 +351,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
             }
 
             if (!returnValue) {
-                returnValue = isExclude(_findAnnotation(a, Exclude.class), id);
+                returnValue = isExclude(_findAnnotation(a, Exclude.class), ids);
             }
 
         }
@@ -367,16 +368,16 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
      * 是否匹配排除
      *
      * @param exclude 配置注解
-     * @param id      当前视图 id
+     * @param ids     当前视图 id 集合
      *
      * @return true 是，否则 false
      */
-    private boolean isExclude(Exclude exclude, String id) {
+    private boolean isExclude(Exclude exclude, List<String> ids) {
 
         if (exclude == null) {
             return false;
         }
 
-        return exclude.value().equals(id);
+        return CollectionUtils.isNotEmpty(ids) && ids.contains(exclude.value());
     }
 }

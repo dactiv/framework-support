@@ -1,10 +1,13 @@
 package com.github.dactiv.framework.spring.web.result.filter.holder;
 
 import com.github.dactiv.framework.spring.web.result.filter.holder.strategy.ThreadLocalFilterResultHolderStrategy;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *值持有者
@@ -69,8 +72,15 @@ public class FilterResultHolder {
      *
      * @return 当前值
      */
-    public static String get() {
-        return strategy.get();
+    public static List<String> get() {
+        List<String> strings = strategy.get();
+
+        if (CollectionUtils.isEmpty(strings)) {
+            strings = new ArrayList<>();
+            strategy.set(strings);
+        }
+
+        return strings;
     }
 
     /**
@@ -86,8 +96,26 @@ public class FilterResultHolder {
      *
      * @param value 值
      */
-    public static void set(String value) {
+    public static void set(List<String> value) {
         strategy.set(value);
+    }
+
+    /**
+     * 添加值
+     *
+     * @param value 值
+     */
+    public static void add(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return ;
+        }
+
+        List<String> strings = get();
+        if (strings.contains(value)) {
+            return ;
+        }
+
+        strings.add(value);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.web.result.filter.holder.strategy;
 
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolderStrategy;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Objects;
  */
 public class ThreadLocalFilterResultHolderStrategy implements FilterResultHolderStrategy {
 
-    private static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<List<String>> THREAD_LOCAL = new ThreadLocal<>();
 
     @Override
     public void clear() {
@@ -19,13 +20,18 @@ public class ThreadLocalFilterResultHolderStrategy implements FilterResultHolder
     }
 
     @Override
-    public String get() {
+    public List<String> get() {
         return THREAD_LOCAL.get();
     }
 
     @Override
-    public void set(String id) {
+    public void set(List<String> id) {
         Objects.requireNonNull(id,"filter result id 不能为空");
         THREAD_LOCAL.set(id);
+    }
+
+    @Override
+    public void add(String value) {
+        get().add(value);
     }
 }

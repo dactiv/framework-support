@@ -38,7 +38,7 @@ public class TestJacksonExcludePropertyExecutor {
 
         Casts.setObjectMapper(objectMapper);
 
-        FilterResultHolder.set("unity");
+        FilterResultHolder.add("unity");
 
         Map<String, Object> userMap = Casts.convertValue(user, Map.class);
 

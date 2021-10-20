@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.spring.web.result.filter.holder;
 
+import java.util.List;
+
 /**
  *值持有者策略
  *
@@ -16,14 +18,21 @@ public interface FilterResultHolderStrategy {
      *
      * 获取值
      *
-     * @return 值
+     * @return 值集合
      */
-    String get();
+    List<String> get();
 
     /**
      * 设置值
      *
+     * @param values 值
+     */
+    void set(List<String> values);
+
+    /**
+     * 添加值
+     *
      * @param value 值
      */
-    void set(String value);
+    void add(String value);
 }

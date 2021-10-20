@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.web.test.result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;

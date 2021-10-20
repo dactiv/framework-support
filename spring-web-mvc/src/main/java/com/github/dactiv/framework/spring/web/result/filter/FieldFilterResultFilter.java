@@ -4,7 +4,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;

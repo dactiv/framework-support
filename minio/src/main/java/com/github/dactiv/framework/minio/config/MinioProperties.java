@@ -2,9 +2,6 @@ package com.github.dactiv.framework.minio.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * minio 配置信息
  *

@@ -15,7 +15,6 @@ import com.github.dactiv.framework.spring.web.result.filter.annotation.view.Excl
 import com.github.dactiv.framework.spring.web.result.filter.annotation.view.IncludeView;
 import com.github.dactiv.framework.spring.web.result.filter.annotation.view.IncludeViews;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
-import io.micrometer.core.instrument.util.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

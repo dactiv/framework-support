@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.security.authentication.service.feign
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import feign.RequestInterceptor;

@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.idempotent.exception;
 
-import com.github.dactiv.framework.commons.exception.SystemException;
-
 /**
  * 并发异常
  *

@@ -4,7 +4,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.ServiceException;
-import com.github.dactiv.framework.commons.exception.StatusErrorCodeException;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import org.slf4j.Logger;
@@ -12,17 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * rest 格式的全局错误实现

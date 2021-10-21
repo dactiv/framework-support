@@ -48,6 +48,10 @@ public class MinioAutoDeleteConfiguration implements SchedulingConfigurer {
         // FIXME 怎么做成可动态的配置
         taskRegistrar.addCronTask(() -> {
 
+            if (Objects.isNull(autoDeleteProperties.getExpiration())) {
+                return;
+            }
+
             for (ExpirableBucket bucket : autoDeleteProperties.getExpiration()) {
 
                 TimeProperties time = bucket.getExpirationTime();

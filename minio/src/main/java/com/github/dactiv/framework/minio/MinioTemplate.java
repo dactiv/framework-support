@@ -2,8 +2,10 @@ package com.github.dactiv.framework.minio;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
 import com.github.dactiv.framework.minio.data.VersionFileObject;
@@ -238,6 +240,9 @@ public class MinioTemplate {
             InputStream inputStream = getObject(fileObject);
             return objectMapper.readValue(inputStream, targetClass);
         } catch (Exception e) {
+            if (JsonMappingException.class.isAssignableFrom(e.getClass())) {
+                throw new SystemException(e);
+            }
             return null;
         }
     }
@@ -255,6 +260,9 @@ public class MinioTemplate {
             InputStream inputStream = getObject(fileObject);
             return objectMapper.readValue(inputStream, javaType);
         } catch (Exception e) {
+            if (JsonMappingException.class.isAssignableFrom(e.getClass())) {
+                throw new SystemException(e);
+            }
             return null;
         }
     }
@@ -272,6 +280,9 @@ public class MinioTemplate {
             InputStream inputStream = getObject(fileObject);
             return objectMapper.readValue(inputStream, typeReference);
         } catch (Exception e) {
+            if (JsonMappingException.class.isAssignableFrom(e.getClass())) {
+                throw new SystemException(e);
+            }
             return null;
         }
     }

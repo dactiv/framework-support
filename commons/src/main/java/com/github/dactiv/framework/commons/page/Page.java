@@ -9,17 +9,13 @@ import java.util.List;
  *
  * @author maurice.chen
  **/
-public class Page<T> implements Serializable {
+public class Page<T> extends ScrollPage<T> {
 
     private static final long serialVersionUID = -8548642105903724207L;
     /**
      * 分页请求
      */
     private PageRequest pageRequest;
-    /**
-     * 数据元素
-     */
-    private List<T> elements;
 
     /**
      * 分页对象
@@ -34,8 +30,8 @@ public class Page<T> implements Serializable {
      * @param elements    数据元素
      */
     public Page(PageRequest pageRequest, List<T> elements) {
+        super(pageRequest, elements);
         this.pageRequest = pageRequest;
-        this.elements = elements;
     }
 
     /**
@@ -48,24 +44,6 @@ public class Page<T> implements Serializable {
     }
 
     /**
-     * 获取每页的内容大小
-     *
-     * @return 内容数量
-     */
-    public int getSize() {
-        return pageRequest == null ? 0 : pageRequest.getSize();
-    }
-
-    /**
-     * 获取数据元素数量
-     *
-     * @return 数据元素数量
-     */
-    public int getNumberOfElements() {
-        return elements.size();
-    }
-
-    /**
      * 判断是否存在上一页
      *
      * @return true 表示存在，否则 false
@@ -75,39 +53,12 @@ public class Page<T> implements Serializable {
     }
 
     /**
-     * 判断是否存在下一页
-     *
-     * @return true 表示存在，否则 false
-     */
-    public boolean hasNext() {
-        return getNumberOfElements() == getSize();
-    }
-
-    /**
      * 判断是否为首页
      *
      * @return ture 表示首页，否则 false
      */
     public boolean isFirst() {
         return !hasPrevious();
-    }
-
-    /**
-     * 判断是否为尾页
-     *
-     * @return true 表示尾页，否则 false
-     */
-    public boolean isLast() {
-        return !hasNext();
-    }
-
-    /**
-     * 获取数据元素
-     *
-     * @return 当前也的分页数据集合
-     */
-    public List<T> getContent() {
-        return Collections.unmodifiableList(elements);
     }
 
 }

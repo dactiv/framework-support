@@ -200,6 +200,24 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
     }
 
     /**
+     * 获取认证配置信息
+     *
+     * @return 认证配置信息
+     */
+    public AuthenticationProperties getProperties() {
+        return properties;
+    }
+
+    /**
+     * 获取 redis 客户端
+     *
+     * @return redis 客户端
+     */
+    public RedissonClient getRedissonClient() {
+        return redissonClient;
+    }
+
+    /**
      * 创建设备识别认证的头信息
      *
      * @param properties       认证配置信息

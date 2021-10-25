@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
+import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -109,6 +110,8 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
         boolean support = clients != null && clients.stream().anyMatch(properties::isSupportClient);
 
+        setFilterResultId(httpRequest.getServletRequest());
+
         if (support && execute && MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
 
             HttpStatus status = HttpStatus.valueOf(httpResponse.getServletResponse().getStatus());
@@ -153,13 +156,27 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      *
      * @param request http 请求对象
      */
+    public void setFilterResultId(HttpServletRequest request) {
+        String id = getFilterResultId(request);
+        if (StringUtils.isNotEmpty(id) && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("当前收到要过滤的响应数据 id 为 [{}]", id);
+        }
+        FilterResultHolder.get().add(id);
+    }
+
+    /**
+     * 获取过滤返回对象结果集的值
+     *
+     * @param request http 请求
+     *
+     * @return 过滤返回对象结果集的值
+     */
     public String getFilterResultId(HttpServletRequest request) {
         String id = request.getHeader(properties.getFilterResultIdHeaderName());
 
         if (StringUtils.isEmpty(id)) {
             id = request.getParameter(properties.getFilterResultIdParamName());
         }
-
         return id;
     }
 

@@ -14,7 +14,6 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import com.github.dactiv.framework.spring.web.result.error.support.BindingResultErrorResultResolver;
 import com.github.dactiv.framework.spring.web.result.error.support.ErrorCodeResultResolver;
-import com.github.dactiv.framework.spring.web.result.filter.FieldFilterResultFilter;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,9 +129,5 @@ public class SpringWebMvcAutoConfiguration {
         return new EnumerateEndpoint(infoContributors);
     }
 
-    @Bean
-    public FieldFilterResultFilter fieldFilterResultFilter(SpringWebMvcProperties springWebMvcProperties) {
-        return new FieldFilterResultFilter(springWebMvcProperties);
-    }
 
 }

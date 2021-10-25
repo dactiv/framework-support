@@ -71,11 +71,29 @@ public class ScrollPage<T> implements Serializable {
     }
 
     /**
-     * 获取数据元素
+     * 设置分页请求
+     *
+     * @param pageRequest 分页请求
+     */
+    public void setPageRequest(ScrollPageRequest pageRequest) {
+        this.pageRequest = pageRequest;
+    }
+
+    /**
+     * 获取数据元素集合
      *
      * @return 当前也的分页数据集合
      */
-    public List<T> getContent() {
+    public List<T> getElements() {
         return Collections.unmodifiableList(elements);
     }
+
+    /**
+     * 设置数据元素集合
+     * @param elements 数据元素集合
+     */
+    public void setElements(List<T> elements) {
+        this.elements = elements;
+    }
+
 }

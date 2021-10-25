@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.commons.page;
 
-import java.io.Serializable;
-
 /**
  * 分页请求对象
  *
@@ -31,12 +29,12 @@ public class PageRequest extends ScrollPageRequest {
     /**
      * 分页请求对象，用于在分页查询时，通过该对象得知要查询的页数。
      *
-     * @param page 页号
+     * @param number 页号
      * @param size 内容大小
      */
-    public PageRequest(int page, int size) {
+    public PageRequest(int number, int size) {
         super(size);
-        this.number = page;
+        this.number = number;
     }
 
     /**

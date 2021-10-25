@@ -14,6 +14,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.RememberMeServices;
@@ -33,6 +35,8 @@ import java.util.Optional;
  * @author maurice.chen
  */
 public class CookieRememberService implements RememberMeServices {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(CookieRememberService.class);
 
     private final AuthenticationProperties properties;
 
@@ -101,12 +105,14 @@ public class CookieRememberService implements RememberMeServices {
                     redisObject.getType()
             );
 
-            userDetails = userDetailsService.getAuthenticationUserDetails(requestToken);
-        }
-
-        if (Objects.isNull(userDetails)) {
-            removeCookie(request, response);
-            return null;
+            try {
+                userDetails = userDetailsService.getAuthenticationUserDetails(requestToken);
+                userDetails.setType(requestToken.getType());
+            } catch (Exception e) {
+                LOGGER.error("记住我服务授权出现错误", e);
+                removeCookie(request, response);
+                return null;
+            }
         }
 
         TypeRememberMeAuthenticationToken result = new TypeRememberMeAuthenticationToken(userDetails);

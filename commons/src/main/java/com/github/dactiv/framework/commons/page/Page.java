@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.commons.page;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 /**

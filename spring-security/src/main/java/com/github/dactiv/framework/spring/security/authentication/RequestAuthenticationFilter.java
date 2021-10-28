@@ -72,7 +72,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        return super.requiresAuthentication(request, response) || StringUtils.isNotEmpty(obtainType(request));
+        return super.requiresAuthentication(request, response) || StringUtils.isNotBlank(obtainType(request));
     }
 
     @Override
@@ -121,17 +121,17 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         String type = obtainType(request);
 
-        if (StringUtils.isEmpty(type)) {
+        if (StringUtils.isBlank(type)) {
             throw new AuthenticationServiceException("授权类型不正确");
         }
 
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        if (StringUtils.isEmpty(username) && StringUtils.isEmpty(password)) {
+        if (StringUtils.isBlank(username) && StringUtils.isBlank(password)) {
             String token = request.getHeader(properties.getTokenHeaderName());
 
-            if (StringUtils.isNotEmpty(token)) {
+            if (StringUtils.isNotBlank(token)) {
                 String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
 
                 List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
@@ -174,7 +174,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         String type = request.getHeader(properties.getTypeHeaderName());
 
-        if (StringUtils.isEmpty(type)) {
+        if (StringUtils.isBlank(type)) {
             type = request.getParameter(properties.getTypeParamName());
         }
 

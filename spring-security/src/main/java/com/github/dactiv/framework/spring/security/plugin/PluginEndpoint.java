@@ -179,7 +179,7 @@ public class PluginEndpoint {
                 PluginInfo parent = createPluginInfo(plugin, classTarget);
 
                 // 如果该 plugin 配置没有 id 值，就直接用类名做 id 值
-                if (parent != null && StringUtils.isEmpty(parent.getId())) {
+                if (parent != null && StringUtils.isBlank(parent.getId())) {
                     parent.setId(classTarget.getName());
                 }
 
@@ -208,7 +208,7 @@ public class PluginEndpoint {
 
                 PluginInfo temp = null;
 
-                if (StringUtils.isNotEmpty(plugin.parent())) {
+                if (StringUtils.isNotBlank(plugin.parent())) {
 
                     temp = parent
                             .values()
@@ -236,11 +236,11 @@ public class PluginEndpoint {
         parent.values().forEach(p -> {
             p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
 
-            if (StringUtils.isEmpty(p.getSource())) {
+            if (StringUtils.isBlank(p.getSource())) {
                 p.setSource(ResourceSource.Console.toString());
             }
 
-            if (StringUtils.isEmpty(p.getType())) {
+            if (StringUtils.isBlank(p.getType())) {
                 p.setType(ResourceType.Menu.toString());
             }
 
@@ -315,11 +315,11 @@ public class PluginEndpoint {
             PluginInfo target = new PluginInfo(plugin);
 
             // 如果方法级别的 plugin 信息没有 id，就用方法名称做 id
-            if (StringUtils.isEmpty(target.getId())) {
+            if (StringUtils.isBlank(target.getId())) {
                 target.setId(method.getName());
             }
 
-            if (StringUtils.isEmpty(target.getParent()) && parent != null) {
+            if (StringUtils.isBlank(target.getParent()) && parent != null) {
                 target.setParent(parent.getId());
             }
 
@@ -433,7 +433,7 @@ public class PluginEndpoint {
 
         List<String> uri = new ArrayList<>();
 
-        if (StringUtils.isEmpty(parent.getValue())) {
+        if (StringUtils.isBlank(parent.getValue())) {
             return StringUtils.appendIfMissing(targetValue, "/**");
         } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
 

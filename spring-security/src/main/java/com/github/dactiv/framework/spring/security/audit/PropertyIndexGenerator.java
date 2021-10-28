@@ -49,7 +49,7 @@ public class PropertyIndexGenerator implements IndexGenerator {
 
         List<String> result = new LinkedList<>();
 
-        if (StringUtils.isNotEmpty(prefix)) {
+        if (StringUtils.isNotBlank(prefix)) {
             result.add(prefix);
         }
 

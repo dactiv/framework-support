@@ -50,10 +50,10 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
-        if (StringUtils.isNotEmpty(token)) {
+        if (StringUtils.isNotBlank(token)) {
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
-            if (StringUtils.isNotEmpty(userId)) {
+            if (StringUtils.isNotBlank(userId)) {
                 RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
                 SecurityContext cacheSecurityContext = bucket.get();
                 if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
@@ -97,7 +97,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
-        if (StringUtils.isEmpty(token)) {
+        if (StringUtils.isBlank(token)) {
             return;
         }
 
@@ -117,13 +117,13 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
-            if (StringUtils.isEmpty(userId) && StringUtils.equals(request.getRequestURI(), properties.getLoginProcessingUrl())) {
+            if (StringUtils.isBlank(userId) && StringUtils.equals(request.getRequestURI(), properties.getLoginProcessingUrl())) {
                 setSecurityContext(context, bucket);
             } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
 
                 if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
                     MobileUserDetails mobileUserDetails = Casts.cast(details);
-                    if (StringUtils.isNotEmpty(mobileUserDetails.getDeviceIdentified())) {
+                    if (StringUtils.isNotBlank(mobileUserDetails.getDeviceIdentified())) {
                         bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
                     }
                 }
@@ -172,7 +172,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         String id = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
-        if (StringUtils.isNotEmpty(id)) {
+        if (StringUtils.isNotBlank(id)) {
 
             RBucket<SecurityContext> bucket = getSecurityContextBucket(id);
             SecurityContext securityContext = bucket.get();
@@ -234,7 +234,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        if (StringUtils.isNotEmpty(deviceIdentified)) {
+        if (StringUtils.isNotBlank(deviceIdentified)) {
             httpHeaders.add(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME, deviceIdentified);
         }
 
@@ -244,7 +244,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
             httpHeaders.add(DeviceIdProperties.DEFAULT_USER_ID_HEADER_NAME, userId.toString());
         }
 
-        if (StringUtils.isNotEmpty(type)) {
+        if (StringUtils.isNotBlank(type)) {
             if (Objects.nonNull(properties)) {
                 httpHeaders.add(properties.getTypeHeaderName(), type);
             } else {

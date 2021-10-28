@@ -184,7 +184,7 @@ public class SpringMvcUtils {
     public static String getDeviceIdentified(HttpServletRequest request) {
         String deviceIdentified = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
 
-        if (StringUtils.isEmpty(deviceIdentified)) {
+        if (StringUtils.isBlank(deviceIdentified)) {
             deviceIdentified = request.getSession().getId();
         }
 
@@ -244,24 +244,24 @@ public class SpringMvcUtils {
     public static String getIpAddress(HttpServletRequest request) {
 
         String ip = request.getHeader("x-forwarded-for");
-        if (StringUtils.isEmpty(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if (StringUtils.isEmpty(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (StringUtils.isEmpty(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
         }
-        if (StringUtils.isEmpty(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (StringUtils.isEmpty(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
 
         //使用代理，则获取第一个IP地址
-        if (StringUtils.isNotEmpty(ip) && ip.length() > IP_MIN_LENGTH) {
+        if (StringUtils.isNotBlank(ip) && ip.length() > IP_MIN_LENGTH) {
             if (ip.indexOf(COMMA_STRING) > 0) {
                 ip = ip.substring(0, ip.indexOf(COMMA_STRING));
             }

@@ -49,7 +49,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         String key = concurrent.value();
 
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             Method method = invocation.getMethod();
             key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL + method.getName();
         }

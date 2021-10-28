@@ -1,10 +1,11 @@
 package com.github.dactiv.framework.commons.tree;
 
 import com.github.dactiv.framework.commons.Casts;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 树工具类，用户合并或拆解等
@@ -124,7 +125,7 @@ public class TreeUtils {
      * @return true 是，否则 false
      */
     public static <P, T> boolean isParent(Tree<P, T> tree) {
-        return StringUtils.isEmpty(tree.getParent()) || Tree.ROOT_VALUE.equals(tree.getParent().toString());
+        return Objects.isNull(tree.getParent()) || StringUtils.isEmpty(tree.getParent().toString()) || Tree.ROOT_VALUE.equals(tree.getParent().toString());
     }
 
 }

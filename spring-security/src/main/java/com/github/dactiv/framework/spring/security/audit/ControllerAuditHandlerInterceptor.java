@@ -161,15 +161,15 @@ public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter
 
         if (securityContext.getAuthentication() == null || !securityContext.getAuthentication().isAuthenticated()) {
 
-            if (StringUtils.isNotEmpty(key)) {
+            if (StringUtils.isNotBlank(key)) {
                 principal = request.getParameter(key);
 
-                if (StringUtils.isEmpty(principal)) {
+                if (StringUtils.isBlank(principal)) {
                     principal = request.getHeader(key);
                 }
             }
 
-            if (StringUtils.isEmpty(principal)) {
+            if (StringUtils.isBlank(principal)) {
                 principal = request.getRemoteAddr();
             }
 

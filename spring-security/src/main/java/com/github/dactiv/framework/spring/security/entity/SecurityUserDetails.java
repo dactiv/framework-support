@@ -83,7 +83,7 @@ public class SecurityUserDetails implements UserDetails {
                                boolean accountNonExpired, boolean credentialsNonExpired,
                                boolean accountNonLocked) {
 
-        if (StringUtils.isEmpty(username) || password == null) {
+        if (StringUtils.isBlank(username) || password == null) {
             throw new IllegalArgumentException("Cannot pass null or empty values to constructor");
         }
 
@@ -104,7 +104,7 @@ public class SecurityUserDetails implements UserDetails {
 
         result.addAll(
                 resourceAuthorities.stream()
-                        .filter(x -> StringUtils.isNotEmpty(x.getAuthority()))
+                        .filter(x -> StringUtils.isNotBlank(x.getAuthority()))
                         .filter(x -> !DEFAULT_IS_AUTHENTICATED_METHOD_NAME.equals(x.getAuthority()))
                         .flatMap(x -> Arrays.stream(StringUtils.split(x.getAuthority(), SpringMvcUtils.COMMA_STRING)))
                         .map(StringUtils::trimToEmpty)

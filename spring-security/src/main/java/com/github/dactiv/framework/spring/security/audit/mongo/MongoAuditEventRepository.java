@@ -131,11 +131,11 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         Criteria criteria = new Criteria();
 
-        if (StringUtils.isNotEmpty(principal)) {
+        if (StringUtils.isNotBlank(principal)) {
             criteria = criteria.and("principal").is(principal);
         }
 
-        if (StringUtils.isNotEmpty(type)) {
+        if (StringUtils.isNotBlank(type)) {
             criteria = criteria.and("type").is(type);
         }
 

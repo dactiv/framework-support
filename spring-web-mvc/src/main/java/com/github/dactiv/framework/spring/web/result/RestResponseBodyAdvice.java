@@ -158,7 +158,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      */
     public void setFilterResultId(HttpServletRequest request) {
         String id = getFilterResultId(request);
-        if (StringUtils.isNotEmpty(id) && LOGGER.isDebugEnabled()) {
+        if (StringUtils.isNotBlank(id) && LOGGER.isDebugEnabled()) {
             LOGGER.debug("当前收到要过滤的响应数据 id 为 [{}]", id);
         }
         FilterResultHolder.get().add(id);
@@ -174,7 +174,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     public String getFilterResultId(HttpServletRequest request) {
         String id = request.getHeader(properties.getFilterResultIdHeaderName());
 
-        if (StringUtils.isEmpty(id)) {
+        if (StringUtils.isBlank(id)) {
             id = request.getParameter(properties.getFilterResultIdParamName());
         }
         return id;

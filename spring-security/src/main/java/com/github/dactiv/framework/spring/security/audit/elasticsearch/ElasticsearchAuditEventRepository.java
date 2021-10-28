@@ -173,7 +173,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         Criteria criteria = new Criteria();
 
-        if (StringUtils.isNotEmpty(type)) {
+        if (StringUtils.isNotBlank(type)) {
             criteria = criteria.and("type").is(type);
         }
 
@@ -181,7 +181,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
             criteria = criteria.and("timestamp").greaterThanEqual(after.getEpochSecond());
         }
 
-        if (StringUtils.isNotEmpty(principal)) {
+        if (StringUtils.isNotBlank(principal)) {
             criteria = criteria.and("principal").contains(principal);
         }
 

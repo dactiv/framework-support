@@ -57,9 +57,9 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
 
         Objects.requireNonNull(genericsList, parameter + "找不到 GenericsList 注解");
 
-        String name = StringUtils.isEmpty(genericsList.name()) ? parameter.getParameterName() : genericsList.name();
+        String name = StringUtils.isBlank(genericsList.name()) ? parameter.getParameterName() : genericsList.name();
 
-        if (StringUtils.isEmpty(name)) {
+        if (StringUtils.isBlank(name)) {
             throw new SystemException("无法解除参数名称");
         }
 

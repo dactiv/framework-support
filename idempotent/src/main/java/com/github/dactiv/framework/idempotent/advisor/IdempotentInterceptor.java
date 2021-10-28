@@ -84,7 +84,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
     public boolean isIdempotent(Idempotent idempotent, Method method, Object[] arguments) {
         String key = idempotent.key();
 
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL + method.getName();
         }
 

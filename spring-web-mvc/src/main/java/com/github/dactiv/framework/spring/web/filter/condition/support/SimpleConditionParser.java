@@ -101,7 +101,7 @@ public class SimpleConditionParser implements ConditionParser {
                 propertyValue = value.iterator().next();
             }
 
-            if (Objects.isNull(propertyValue) || StringUtils.isEmpty(propertyValue.toString())) {
+            if (Objects.isNull(propertyValue) || StringUtils.isBlank(propertyValue.toString())) {
                 continue;
             }
 

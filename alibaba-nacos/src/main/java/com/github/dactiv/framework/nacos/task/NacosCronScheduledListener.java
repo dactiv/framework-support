@@ -233,7 +233,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             matchEvaluations.add(cronEvaluation);
 
             // 如果存在时区，定义时区匹配定值类
-            if (StringUtils.isNotEmpty(info.getTimeZonePropertyName())) {
+            if (StringUtils.isNotBlank(info.getTimeZonePropertyName())) {
 
                 MatchEvaluation zoneEvaluation = new MatchEvaluation(
                         info.getTimeZonePropertyName(),
@@ -274,7 +274,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
         String name = scheduled.name();
 
         // 如果名称为空，使用类名加方法名代替
-        if (StringUtils.isEmpty(name)) {
+        if (StringUtils.isBlank(name)) {
             name = bean.getClass().getName() + "." + method.getName();
         }
 
@@ -335,7 +335,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
      */
     private TimeZone getTimeZone(String zone) {
 
-        return StringUtils.isNotEmpty(zone) ? TimeZone.getTimeZone(zone) : TimeZone.getDefault();
+        return StringUtils.isNotBlank(zone) ? TimeZone.getTimeZone(zone) : TimeZone.getDefault();
 
     }
 
@@ -403,11 +403,11 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             String name = nacosConfigProperties.getName();
 
             // 如果名称为空，通过 spring.application.name 来构造默认侦听信息
-            if (StringUtils.isEmpty(name)) {
+            if (StringUtils.isBlank(name)) {
                 // 获取 spring.application.name 信息
                 name = applicationContext.getEnvironment().getProperty("spring.application.name");
                 // 如果为空，表示不对服务应用名做 nacos 配置管理，直接略过
-                if (StringUtils.isNotEmpty(name)) {
+                if (StringUtils.isNotBlank(name)) {
 
                     // 如果 name 没有 .后缀名，通过配置信息获取
                     String defaultName = StringUtils.appendIfMissing(name, "." + nacosConfigProperties.getFileExtension());

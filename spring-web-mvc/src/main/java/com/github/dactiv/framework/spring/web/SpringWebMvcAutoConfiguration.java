@@ -16,6 +16,7 @@ import com.github.dactiv.framework.spring.web.result.error.support.BindingResult
 import com.github.dactiv.framework.spring.web.result.error.support.ErrorCodeResultResolver;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
+import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -129,5 +130,8 @@ public class SpringWebMvcAutoConfiguration {
         return new EnumerateEndpoint(infoContributors);
     }
 
-
+    @Bean
+    public ClearFilterResultHolderFilter clearFilterResultHolderFilter() {
+        return new ClearFilterResultHolderFilter();
+    }
 }

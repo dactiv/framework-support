@@ -2,8 +2,8 @@ package com.github.dactiv.framework.spring.web.result.filter.holder;
 
 import com.github.dactiv.framework.spring.web.result.filter.holder.strategy.ThreadLocalFilterResultHolderStrategy;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class FilterResultHolder {
     private static void initialize() {
 
         // 如果没有配置策略名称，设置默认使用本地线程資源
-        if (!StringUtils.hasText(strategyName)) {
+        if (StringUtils.isBlank(strategyName)) {
             strategyName = MODE_THREAD_LOCAL;
         }
 
@@ -105,7 +105,7 @@ public class FilterResultHolder {
      * @param value 值
      */
     public static void add(String value) {
-        if (StringUtils.isEmpty(value)) {
+        if (StringUtils.isBlank(value)) {
             return;
         }
 

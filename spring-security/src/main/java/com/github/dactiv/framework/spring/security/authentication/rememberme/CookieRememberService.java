@@ -54,7 +54,7 @@ public class CookieRememberService implements RememberMeServices {
     public Authentication autoLogin(HttpServletRequest request, HttpServletResponse response) {
         String rememberMeCookie = getRememberMeCookieValue(request);
 
-        if (StringUtils.isEmpty(rememberMeCookie)) {
+        if (StringUtils.isBlank(rememberMeCookie)) {
             return null;
         }
 
@@ -214,7 +214,7 @@ public class CookieRememberService implements RememberMeServices {
 
         String paramValue = request.getParameter(properties.getRememberMe().getParamName());
 
-        if (StringUtils.isEmpty(paramValue)) {
+        if (StringUtils.isBlank(paramValue)) {
             return false;
         }
 

@@ -14,6 +14,7 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import com.github.dactiv.framework.spring.web.result.error.support.BindingResultErrorResultResolver;
 import com.github.dactiv.framework.spring.web.result.error.support.ErrorCodeResultResolver;
+import com.github.dactiv.framework.spring.web.result.error.support.MissingServletRequestParameterResolver;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
@@ -78,6 +79,11 @@ public class SpringWebMvcAutoConfiguration {
     @Bean
     public BindingResultErrorResultResolver bindingResultErrorResultResolver() {
         return new BindingResultErrorResultResolver();
+    }
+
+    @Bean
+    public MissingServletRequestParameterResolver missingServletRequestParameterResolver() {
+        return new MissingServletRequestParameterResolver(MissingServletRequestParameterResolver.DEFAULT_OBJECT_NAME);
     }
 
     @Bean

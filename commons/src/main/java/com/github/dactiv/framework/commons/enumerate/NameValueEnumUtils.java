@@ -80,7 +80,7 @@ public class NameValueEnumUtils {
      *
      * @return 对应的名称值
      */
-    public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum>> enumClass) {
+    public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum<?>>> enumClass) {
         return getName(value, enumClass, false);
     }
 
@@ -93,11 +93,11 @@ public class NameValueEnumUtils {
      *
      * @return 对应的名称值
      */
-    public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum>> enumClass, boolean ignoreNotFound) {
-        Enum<? extends NameValueEnum>[] values = enumClass.getEnumConstants();
+    public static String getName(Object value, Class<? extends Enum<? extends NameValueEnum<?>>> enumClass, boolean ignoreNotFound) {
+        Enum<? extends NameValueEnum<?>>[] values = enumClass.getEnumConstants();
 
-        for (Enum<? extends NameValueEnum> o : values) {
-            NameValueEnum ve = (NameValueEnum) o;
+        for (Enum<? extends NameValueEnum<?>> o : values) {
+            NameValueEnum<?> ve = (NameValueEnum<?>) o;
             if (Objects.equals(ve.getValue(), value)) {
                 return ve.getName();
             }
@@ -108,7 +108,7 @@ public class NameValueEnumUtils {
         return null;
     }
 
-    private static void throwNotFoundExceptionIfNecessary(Object value, Class<? extends Enum<? extends NameValueEnum>> enumClass, boolean ignoreNotFound) {
+    private static void throwNotFoundExceptionIfNecessary(Object value, Class<? extends Enum<? extends NameValueEnum<?>>> enumClass, boolean ignoreNotFound) {
         if (!ignoreNotFound) {
             String msg = enumClass.getName() + " 中找不到值为: " + value + " 的对应名称，" + enumClass.getName() +
                     "信息为:" + castMap((Class<? extends Enum<? extends NameValueEnum<Object>>>) enumClass);
@@ -125,7 +125,7 @@ public class NameValueEnumUtils {
      *
      * @return key value 枚举实现类
      */
-    public static <E extends Enum<? extends NameValueEnum>> E parse(Object value, Class<E> enumClass) {
+    public static <E extends Enum<? extends NameValueEnum<?>>> E parse(Object value, Class<E> enumClass) {
         return parse(value, enumClass, false);
     }
 
@@ -139,11 +139,11 @@ public class NameValueEnumUtils {
      *
      * @return key value 枚举实现类
      */
-    public static <E extends Enum<? extends NameValueEnum>> E parse(Object value, Class<E> enumClass, boolean ignoreNotFound) {
-        Enum<? extends NameValueEnum>[] values = enumClass.getEnumConstants();
+    public static <E extends Enum<? extends NameValueEnum<?>>> E parse(Object value, Class<E> enumClass, boolean ignoreNotFound) {
+        Enum<? extends NameValueEnum<?>>[] values = enumClass.getEnumConstants();
 
-        for (Enum<? extends NameValueEnum> o : values) {
-            NameValueEnum ve = (NameValueEnum) o;
+        for (Enum<? extends NameValueEnum<?>> o : values) {
+            NameValueEnum<?> ve = (NameValueEnum<?>) o;
             if (Objects.equals(ve.getValue(), value)) {
                 return (E) ve;
             }

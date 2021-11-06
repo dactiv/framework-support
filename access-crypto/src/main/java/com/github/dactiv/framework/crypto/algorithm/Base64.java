@@ -157,8 +157,8 @@ public class Base64 {
             // return false;
             return true;
         }
-        for (int i = 0; i < length; i++) {
-            if (!isBase64(arrayOctect[i])) {
+        for (byte b : arrayOctect) {
+            if (!isBase64(b)) {
                 return false;
             }
         }
@@ -173,7 +173,7 @@ public class Base64 {
      * @return The data, less whitespace (see RFC 2045).
      */
     static byte[] discardWhitespace(byte[] data) {
-        byte groomedData[] = new byte[data.length];
+        byte[] groomedData = new byte[data.length];
         int bytesCopied = 0;
 
         for (byte aByte : data) {
@@ -188,7 +188,7 @@ public class Base64 {
             }
         }
 
-        byte packedData[] = new byte[bytesCopied];
+        byte[] packedData = new byte[bytesCopied];
 
         System.arraycopy(groomedData, 0, packedData, 0, bytesCopied);
 
@@ -263,7 +263,7 @@ public class Base64 {
 
             chunckCount = (CHUNK_SEPARATOR.length == 0 ? 0 : (int) Math
                     .ceil((float) encodedDataLengthLong / CHUNK_SIZE));
-            encodedDataLengthLong += chunckCount * CHUNK_SEPARATOR.length;
+            encodedDataLengthLong += (long) chunckCount * CHUNK_SEPARATOR.length;
         }
 
         if (encodedDataLengthLong > Integer.MAX_VALUE) {
@@ -271,7 +271,7 @@ public class Base64 {
                     "Input array too big, output array would be bigger than Integer.MAX_VALUE=" + Integer.MAX_VALUE);
         }
         int encodedDataLength = (int) encodedDataLengthLong;
-        byte encodedData[] = new byte[encodedDataLength];
+        byte[] encodedData = new byte[encodedDataLength];
 
         byte k, l, b1, b2, b3;
 

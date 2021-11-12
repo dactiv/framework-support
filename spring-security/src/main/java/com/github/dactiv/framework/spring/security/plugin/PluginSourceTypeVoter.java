@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.security.plugin;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
-import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -21,6 +20,16 @@ import java.util.stream.Collectors;
  * @author maurice
  */
 public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocation> {
+
+    /**
+     * 默认同意的来源类型值
+     */
+    public static final List<String> DEFAULT_GRANTED_SOURCES = Arrays.asList("System","All");
+
+    /**
+     * 默认同意的来源类型
+     */
+    private List<String> grantedSources = DEFAULT_GRANTED_SOURCES;
 
     public boolean supports(ConfigAttribute attribute) {
         return true;
@@ -49,7 +58,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
 
         List<String> resourceTypes = Arrays
                 .stream(plugin.sources())
-                .filter(s -> !ResourceSource.DEFAULT_GRANTED_SOURCES.contains(s))
+                .filter(s -> !grantedSources.contains(s))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(resourceTypes)) {
@@ -70,4 +79,21 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
         return AccessDecisionVoter.ACCESS_ABSTAIN;
     }
 
+    /**
+     * 获取默认同意的来源类型
+     *
+     * @return 默认同意的来源类型
+     */
+    public List<String> getGrantedSources() {
+        return grantedSources;
+    }
+
+    /**
+     * 设置默认同意的来源类型
+     *
+     * @param grantedSources 默认同意的来源类型
+     */
+    public void setGrantedSources(List<String> grantedSources) {
+        this.grantedSources = grantedSources;
+    }
 }

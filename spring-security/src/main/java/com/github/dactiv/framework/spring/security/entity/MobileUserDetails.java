@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
 import nl.basjes.parse.useragent.UserAgent;
 
@@ -15,6 +14,8 @@ import nl.basjes.parse.useragent.UserAgent;
 public class MobileUserDetails extends SecurityUserDetails {
 
     private static final long serialVersionUID = -848955060608795664L;
+
+    public static final String DEFAULT_TYPE = "mobile";
 
     /**
      * 设备唯一识别
@@ -32,7 +33,7 @@ public class MobileUserDetails extends SecurityUserDetails {
      * 移动端用户明细实现
      */
     public MobileUserDetails() {
-        setType(ResourceSource.Mobile.toString());
+        setType(DEFAULT_TYPE);
     }
 
     /**
@@ -48,7 +49,7 @@ public class MobileUserDetails extends SecurityUserDetails {
         super(id, username, password, UserStatus.Enabled);
         this.deviceIdentified = deviceIdentified;
         this.device = device;
-        setType(ResourceSource.Mobile.toString());
+        setType(DEFAULT_TYPE);
     }
 
     /**

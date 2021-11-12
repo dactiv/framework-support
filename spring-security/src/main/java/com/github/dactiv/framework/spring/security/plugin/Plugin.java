@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security.plugin;
 
-import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceType;
 
 import java.lang.annotation.*;
@@ -64,9 +63,8 @@ public @interface Plugin {
      *
      * @return 来源
      *
-     * @see ResourceSource
      */
-    String[] sources() default {"System"};
+    String[] sources() default {};
 
     /**
      * 顺序值，默认为 0

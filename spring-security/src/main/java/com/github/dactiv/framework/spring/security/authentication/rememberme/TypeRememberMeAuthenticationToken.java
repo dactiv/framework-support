@@ -14,9 +14,9 @@ public class TypeRememberMeAuthenticationToken extends RememberMeAuthenticationT
     private static final long serialVersionUID = -8113122218981886840L;
 
     /**
-     * 类型
+     * 类型, 用于区别每个 remember me token 的分类，该值取决于 {@link SecurityUserDetails#getType}
      *
-     * @see com.github.dactiv.framework.spring.security.enumerate.ResourceSource
+     * @see SecurityUserDetails
      */
     private final String type;
 

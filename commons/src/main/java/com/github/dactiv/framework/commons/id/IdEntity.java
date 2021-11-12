@@ -7,7 +7,7 @@ import java.io.Serializable;
  *
  * @param <T> 主键类型
  */
-public class IdEntity<T> implements Serializable {
+public class IdEntity<T> implements BasicIdentification<T> {
 
     private static final long serialVersionUID = -1430010950223063423L;
 

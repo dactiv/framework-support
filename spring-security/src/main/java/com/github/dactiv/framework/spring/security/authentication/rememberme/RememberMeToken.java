@@ -29,9 +29,9 @@ public class RememberMeToken extends IntegerIdEntity {
     private String token;
 
     /**
-     * 类型
+     * 类型, 用于区别每个 remember me token 的分类，该值取决于 {@link SecurityUserDetails#getType}
      *
-     * @see com.github.dactiv.framework.spring.security.enumerate.ResourceSource
+     * @see SecurityUserDetails
      */
     private String type;
 

@@ -22,7 +22,7 @@ public @interface IncludeView {
      *
      * @return 值
      */
-    String value();
+    String value() default "";
 
     /**
      * 要过滤的属性名称

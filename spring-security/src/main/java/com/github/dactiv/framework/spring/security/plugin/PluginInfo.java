@@ -3,11 +3,11 @@ package com.github.dactiv.framework.spring.security.plugin;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.tree.Tree;
 import com.github.dactiv.framework.spring.security.entity.ResourceAuthority;
-import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,9 +70,9 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
     private String type;
 
     /**
-     * 来源: 参考 {@link ResourceSource};
+     * 来源: 参考 {@link Plugin#sources()};
      */
-    private String source;
+    private List<String> sources;
 
     /**
      * 父类
@@ -121,7 +121,7 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
         this.icon = plugin.icon();
         this.sort = plugin.sort();
         this.setType(plugin.type().toString());
-        this.setSource(StringUtils.join(plugin.sources(), ","));
+        this.setSources(Arrays.asList(plugin.sources()));
         this.remark = plugin.remark();
     }
 
@@ -226,21 +226,21 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
     }
 
     /**
-     * 获取来源
+     * 获取来源集合
      *
-     * @return FRONT.前端, ADMIN.管理后台, USER_CENTER.用户中心
+     * @return 来源集合
      */
-    public String getSource() {
-        return source;
+    public List<String> getSources() {
+        return sources;
     }
 
     /**
-     * 设置来源
+     * 设置来源集合
      *
-     * @param source FRONT.前端, ADMIN.管理后台, USER_CENTER.用户中心
+     * @param sources 来源集合
      */
-    public void setSource(String source) {
-        this.source = source;
+    public void setSources(List<String> sources) {
+        this.sources = sources;
     }
 
     /**

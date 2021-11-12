@@ -48,7 +48,9 @@ public interface UserDetailsService {
      *
      * @return 用户授权集合
      */
-    Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityUserDetails userDetails);
+    default Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityUserDetails userDetails) {
+        return userDetails.getAuthorities();
+    }
 
     /**
      * 获取支持的用户类型

@@ -107,4 +107,15 @@ public class ResourceAuthority implements GrantedAuthority {
     public String getAuthority() {
         return authority;
     }
+
+    /**
+     * 获取许可值
+     *
+     * @param value 值
+     *
+     * @return 许可值
+     */
+    public static String getPermissionValue(String value) {
+        return DEFAULT_RESOURCE_PREFIX + value + DEFAULT_RESOURCE_SUFFIX;
+    }
 }

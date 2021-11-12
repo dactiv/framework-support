@@ -7,7 +7,6 @@ import com.github.dactiv.framework.commons.tree.Tree;
 import com.github.dactiv.framework.commons.tree.TreeUtils;
 import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
-import com.github.dactiv.framework.spring.security.enumerate.ResourceSource;
 import com.github.dactiv.framework.spring.security.enumerate.ResourceType;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,6 +71,16 @@ public class PluginEndpoint {
      * 需要扫描的包路径
      */
     private List<String> basePackages = new ArrayList<>(16);
+
+    /**
+     * 生成插件的来源类型集合，用于通过该值去配合 {@link Plugin#sources()} 来判断构造 info 中的 plugin 时，否添加到 plugin 中
+     */
+    private List<String> generateSources = new LinkedList<>();
+
+    /**
+     * 如果 {@link Plugin#sources()} 没有配置值时候，默认使用什么值
+     */
+    private String defaultSource = "Console";
 
     /**
      * spring 资源解析器
@@ -236,8 +245,8 @@ public class PluginEndpoint {
         parent.values().forEach(p -> {
             p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
 
-            if (StringUtils.isBlank(p.getSource())) {
-                p.setSource(ResourceSource.Console.toString());
+            if (CollectionUtils.isEmpty(p.getSources()) && StringUtils.isNotBlank(defaultSource)) {
+                p.setSources(Collections.singletonList(defaultSource));
             }
 
             if (StringUtils.isBlank(p.getType())) {
@@ -261,7 +270,7 @@ public class PluginEndpoint {
 
         List<String> sources = Arrays.asList(plugin.sources());
 
-        if (sources.contains(ResourceSource.Console.toString()) || sources.contains(ResourceSource.All.toString())) {
+        if (generateSources.stream().anyMatch(sources::contains)) {
 
             // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
             RequestMapping mapping = AnnotationUtils.findAnnotation(target, RequestMapping.class);
@@ -625,5 +634,41 @@ public class PluginEndpoint {
      */
     public List<String> getBasePackages() {
         return basePackages;
+    }
+
+    /**
+     * 获取插件的来源类型集合
+     *
+     * @return 插件的来源类型集合
+     */
+    public List<String> getGenerateSources() {
+        return generateSources;
+    }
+
+    /**
+     * 设置插件的来源类型集合
+     *
+     * @param generateSources 插件的来源类型集合
+     */
+    public void setGenerateSources(List<String> generateSources) {
+        this.generateSources = generateSources;
+    }
+
+    /**
+     * 获取默认来源值
+     *
+     * @return 默认来源值
+     */
+    public String getDefaultSource() {
+        return defaultSource;
+    }
+
+    /**
+     * 设置默认来源值
+     *
+     * @param defaultSource 默认来源值
+     */
+    public void setDefaultSource(String defaultSource) {
+        this.defaultSource = defaultSource;
     }
 }

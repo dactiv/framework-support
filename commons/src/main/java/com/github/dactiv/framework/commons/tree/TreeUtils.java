@@ -29,9 +29,44 @@ public class TreeUtils {
 
         List<R> result = new ArrayList<>();
 
-        for (Tree<P, T> tree : treeList) {
-            result.add(Casts.cast(tree));
-        }
+        treeList.forEach(tree -> result.add(Casts.cast(tree)));
+
+        return result;
+    }
+
+    /**
+     * 绑定泛型树
+     *
+     * @param list 树形集合
+     * @param <P>  树形父类类型
+     * @param <T>  属性孩子类型
+     * @param <R>  返回类型
+     *
+     * @return 绑定后的树形结合
+     */
+    public static <P, T, R extends Tree<P, T>> List<R> unBuildGenericTree(List<? extends Tree<P, T>> list) {
+        List<Tree<P, T>> treeList = TreeUtils.unBuildTree(list);
+
+        List<R> result = new ArrayList<>();
+
+        treeList.forEach(tree -> result.add(Casts.cast(tree)));
+
+        return result;
+    }
+
+    /**
+     * 接触绑定树
+     *
+     * @param list 树形集合
+     * @param <P>  树形父类类型
+     * @param <T>  属性孩子类型
+     *
+     * @return 解除绑定后的树形结合
+     */
+    public static <P, T> List<Tree<P, T>> unBuildTree(List<? extends Tree<P, T>> list) {
+        List<Tree<P, T>> result = new ArrayList<>();
+
+        list.stream().flatMap(r -> unBuildTree(r.getChildren()).stream()).forEach(result::add);
 
         return result;
     }
@@ -48,41 +83,18 @@ public class TreeUtils {
     public static <P, T> List<Tree<P, T>> buildTree(List<? extends Tree<P, T>> list) {
         List<Tree<P, T>> result = new ArrayList<>();
 
-        for (Tree<P, T> root : list) {
-
-            //顶级节点的根节点为NULL
-            if (isParent(root)) {
-
-                findChildren(root, list);
-
-                result.add(root);
-
-            }
-        }
+        list.stream().filter(TreeUtils::isParent).peek(root -> findChildren(root, list)).forEach(result::add);
 
         if (result.isEmpty()) {
 
             List<Tree<P, T>> children = new ArrayList<>();
-
             List<Tree<P, T>> clone = new ArrayList<>(list);
 
-            for (Tree<P, T> root : list) {
-
-                for (Tree<P, T> child : list) {
-
-                    if (child.isChildren(root)) {
-                        children.add(child);
-                    }
-
-                }
-            }
+            list.stream().filter(root -> list.stream().anyMatch(child -> child.isChildren(root))).forEach(children::add);
 
             clone.removeAll(children);
 
-            for (Tree<P, T> root : clone) {
-                findChildren(root, list);
-                result.add(root);
-            }
+            clone.stream().peek(root -> findChildren(root, list)).forEach(result::add);
 
         }
 
@@ -100,21 +112,12 @@ public class TreeUtils {
      */
     private static <P, T> void findChildren(Tree<P, T> parent, List<? extends Tree<P, T>> list) {
 
-        for (Tree<P, T> entity : list) {
-
-            if (isParent(entity)) {
-                continue;
-            }
-
-            if (entity.isChildren(parent)) {
-
-                findChildren(entity, list);
-
-                parent.getChildren().add(entity);
-
-            }
-
-        }
+        list
+                .stream()
+                .filter(entity -> !isParent(entity))
+                .filter(entity -> entity.isChildren(parent))
+                .peek(entity -> findChildren(entity, list))
+                .forEach(entity -> parent.getChildren().add(entity));
     }
 
     /**

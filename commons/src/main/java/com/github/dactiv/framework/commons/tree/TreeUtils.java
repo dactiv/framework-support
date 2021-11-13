@@ -66,7 +66,12 @@ public class TreeUtils {
     public static <P, T> List<Tree<P, T>> unBuildTree(List<? extends Tree<P, T>> list) {
         List<Tree<P, T>> result = new ArrayList<>();
 
-        list.stream().flatMap(r -> unBuildTree(r.getChildren()).stream()).forEach(result::add);
+        for(Tree<P, T> t : list) {
+            result.add(t);
+            List<Tree<P,T>> children = unBuildTree(t.getChildren());
+            result.addAll(children);
+            t.getChildren().clear();
+        }
 
         return result;
     }
@@ -85,18 +90,17 @@ public class TreeUtils {
 
         list.stream().filter(TreeUtils::isParent).peek(root -> findChildren(root, list)).forEach(result::add);
 
-        if (result.isEmpty()) {
-
-            List<Tree<P, T>> children = new ArrayList<>();
-            List<Tree<P, T>> clone = new ArrayList<>(list);
-
-            list.stream().filter(root -> list.stream().anyMatch(child -> child.isChildren(root))).forEach(children::add);
-
-            clone.removeAll(children);
-
-            clone.stream().peek(root -> findChildren(root, list)).forEach(result::add);
-
+        if (!result.isEmpty()) {
+            return result;
         }
+
+        List<Tree<P, T>> children = new ArrayList<>();
+        List<Tree<P, T>> clone = new ArrayList<>(list);
+
+        list.forEach(root -> list.stream().filter(child -> child.isChildren(root)).forEach(children::add));
+
+        clone.removeAll(children);
+        clone.stream().peek(root -> findChildren(root, list)).forEach(result::add);
 
         return result;
     }
@@ -111,13 +115,12 @@ public class TreeUtils {
      * @param <T>    属性孩子类型
      */
     private static <P, T> void findChildren(Tree<P, T> parent, List<? extends Tree<P, T>> list) {
-
         list
                 .stream()
-                .filter(entity -> !isParent(entity))
-                .filter(entity -> entity.isChildren(parent))
-                .peek(entity -> findChildren(entity, list))
-                .forEach(entity -> parent.getChildren().add(entity));
+                .filter(e -> !isParent(e))
+                .filter(e -> e.isChildren(parent))
+                .peek(e -> findChildren(e, list))
+                .forEach(e ->parent.getChildren().add(e));
     }
 
     /**
@@ -128,7 +131,9 @@ public class TreeUtils {
      * @return true 是，否则 false
      */
     public static <P, T> boolean isParent(Tree<P, T> tree) {
-        return Objects.isNull(tree.getParent()) || StringUtils.isEmpty(tree.getParent().toString()) || Tree.ROOT_VALUE.equals(tree.getParent().toString());
+        return Objects.isNull(tree.getParent()) ||
+                StringUtils.isEmpty(tree.getParent().toString()) ||
+                Tree.ROOT_VALUE.equals(tree.getParent().toString());
     }
 
 }

@@ -1,6 +1,10 @@
 package com.github.dactiv.framework.commons.tree;
 
+import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.id.BasicIdentification;
+
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 树形接口
@@ -43,7 +47,16 @@ public interface Tree<P, C> {
      *
      * @return true 为是，否则 false
      */
-    boolean isChildren(Tree<P, C> parent);
+    default boolean isChildren(Tree<P, C> parent) {
+        C c = Casts.cast(parent);
+
+        if (!BasicIdentification.class.isAssignableFrom(c.getClass())) {
+            return false;
+        }
+
+        BasicIdentification<?> identification = Casts.cast(c);
+        return Objects.equals(identification.getId(), this.getParent());
+    }
 
 
 }

@@ -78,11 +78,6 @@ public class PluginEndpoint {
     private List<String> generateSources = new LinkedList<>();
 
     /**
-     * 如果 {@link Plugin#sources()} 没有配置值时候，默认使用什么值
-     */
-    private String defaultSource = "Console";
-
-    /**
      * spring 资源解析器
      */
     private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -182,43 +177,40 @@ public class PluginEndpoint {
             if (Class.class.isAssignableFrom(target.getClass())) {
 
                 Class<?> classTarget = (Class<?>) target;
-
                 Plugin plugin = AnnotationUtils.findAnnotation(classTarget, Plugin.class);
+                if (Objects.isNull(plugin)) {
+                    continue;
+                }
+
+                List<String> sources = Arrays.asList(plugin.sources());
+                if (generateSources.stream().noneMatch(sources::contains)) {
+                    continue;
+                }
 
                 PluginInfo parent = createPluginInfo(plugin, classTarget);
-
                 // 如果该 plugin 配置没有 id 值，就直接用类名做 id 值
-                if (parent != null && StringUtils.isBlank(parent.getId())) {
+                if (StringUtils.isBlank(parent.getId())) {
                     parent.setId(classTarget.getName());
                 }
 
                 pluginInfoList.add(parent);
-
                 Method[] methods = classTarget.isInterface() ? classTarget.getMethods() : classTarget.getDeclaredMethods();
-
                 List<Method> methodList = Arrays.asList(methods);
-
                 TargetObject targetObject = new TargetObject(target, methodList);
-
                 // 遍历方法级别的 plugin 注解。并添加到 parent 中
                 List<PluginInfo> pluginInfos = buildPluginInfo(targetObject, parent);
-
                 pluginInfoList.addAll(pluginInfos);
 
             } else if (Method.class.isAssignableFrom(target.getClass())) {
 
                 Method method = (Method) target;
-
                 Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
-
                 if (Objects.isNull(plugin)) {
                     continue;
                 }
 
                 PluginInfo temp = null;
-
                 if (StringUtils.isNotBlank(plugin.parent())) {
-
                     temp = parent
                             .values()
                             .stream()
@@ -231,10 +223,9 @@ public class PluginEndpoint {
                         continue;
                     }
                 }
+
                 TargetObject targetObject = new TargetObject(method, Collections.singletonList(method));
-
                 List<PluginInfo> pluginInfos = buildPluginInfo(targetObject, temp);
-
                 pluginInfoList.addAll(pluginInfos);
             } else {
                 throw new SystemException("Plugin 注解只支持 Class 或 Method 类型, ");
@@ -242,18 +233,16 @@ public class PluginEndpoint {
 
         }
 
-        parent.values().forEach(p -> {
-            p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
-
-            if (CollectionUtils.isEmpty(p.getSources()) && StringUtils.isNotBlank(defaultSource)) {
-                p.setSources(Collections.singletonList(defaultSource));
-            }
-
-            if (StringUtils.isBlank(p.getType())) {
-                p.setType(ResourceType.Menu.toString());
-            }
-
-        });
+        parent
+                .values()
+                .stream()
+                .filter(p -> generateSources.stream().anyMatch(s -> p.getSources().contains(s)))
+                .forEach(p -> {
+                    p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
+                    if (StringUtils.isBlank(p.getType())) {
+                        p.setType(ResourceType.Menu.toString());
+                    }
+                });
 
         pluginInfoList.addAll(parent.values());
 
@@ -268,28 +257,18 @@ public class PluginEndpoint {
 
         PluginInfo parent = new PluginInfo(plugin);
 
-        List<String> sources = Arrays.asList(plugin.sources());
-
-        if (generateSources.stream().anyMatch(sources::contains)) {
-
-            // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
-            RequestMapping mapping = AnnotationUtils.findAnnotation(target, RequestMapping.class);
-
-            if (mapping != null) {
-
-                List<String> uri = new ArrayList<>();
-
-                for (String value : mapping.value()) {
-                    // 添加 /** 通配符，作用是为了可能某些需要带参数过来
-                    String url = StringUtils.appendIfMissing(value, "/**");
-                    // 删除.（逗号）后缀的所有内容，作用是可能有些配置是
-                    // 有.html 和 .json的类似配置，但其实一个就够了
-                    uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
-                }
-
-                parent.setValue(StringUtils.join(uri, SpringMvcUtils.COMMA_STRING));
-
+        // 如果类头存在 RequestMapping 注解，需要将该注解的 value 合并起来
+        RequestMapping mapping = AnnotationUtils.findAnnotation(target, RequestMapping.class);
+        if (mapping != null) {
+            List<String> uri = new ArrayList<>();
+            for (String value : mapping.value()) {
+                // 添加 /** 通配符，作用是为了可能某些需要带参数过来
+                String url = StringUtils.appendIfMissing(value, "/**");
+                // 删除.（逗号）后缀的所有内容，作用是可能有些配置是
+                // 有.html 和 .json的类似配置，但其实一个就够了
+                uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
             }
+            parent.setValue(StringUtils.join(uri, SpringMvcUtils.COMMA_STRING));
 
         }
 
@@ -306,34 +285,34 @@ public class PluginEndpoint {
 
         List<PluginInfo> result = new ArrayList<>();
 
+        if (generateSources.stream().noneMatch(s -> parent.getSources().contains(s))) {
+            return result;
+        }
+
         for (Method method : targetObject.getMethodList()) {
             // 如果找不到 PluginInfo 注解，什么都不做
             Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
-
             if (plugin == null) {
                 continue;
             }
 
             // 获取请求 url 值
             List<String> values = getRequestValues(targetObject.getTarget(), method, parent);
-
             if (values.isEmpty()) {
                 continue;
             }
 
             PluginInfo target = new PluginInfo(plugin);
-
             // 如果方法级别的 plugin 信息没有 id，就用方法名称做 id
             if (StringUtils.isBlank(target.getId())) {
                 target.setId(method.getName());
             }
 
-            if (StringUtils.isBlank(target.getParent()) && parent != null) {
+            if (StringUtils.isBlank(target.getParent())) {
                 target.setParent(parent.getId());
             }
 
             target.setValue(StringUtils.join(values, SpringMvcUtils.COMMA_STRING));
-
             List<String> authorize = getSecurityAuthorize(method);
 
             if (!authorize.isEmpty()) {
@@ -343,11 +322,8 @@ public class PluginEndpoint {
             result.add(target);
 
             if (missingParentMap.containsKey(target.getId())) {
-
                 List<Method> subMethods = missingParentMap.get(target.getId());
-
                 TargetObject subObject = new TargetObject(targetObject, subMethods);
-
                 result.addAll(buildPluginInfo(subObject, target));
             }
 
@@ -362,22 +338,16 @@ public class PluginEndpoint {
         List<String> values = new ArrayList<>();
 
         PreAuthorize preAuthorize = AnnotationUtils.findAnnotation(method, PreAuthorize.class);
-
         if (preAuthorize != null) {
             String v = preAuthorize.value();
-
             List<String> methodValues = getAuthorityMethodValue(v);
-
             values.addAll(methodValues);
         }
 
         PostAuthorize postAuthorize = AnnotationUtils.findAnnotation(method, PostAuthorize.class);
-
         if (postAuthorize != null) {
             String v = postAuthorize.value();
-
             List<String> methodValues = getAuthorityMethodValue(v);
-
             values.addAll(methodValues);
         }
 
@@ -400,7 +370,6 @@ public class PluginEndpoint {
         if (MethodReference.class.isAssignableFrom(spelNode.getClass())) {
 
             MethodReference mr = (MethodReference) spelNode;
-
             if (SecurityUserDetails.DEFAULT_SUPPORT_SECURITY_METHOD_NAME.contains(mr.getName())) {
 
                 if (mr.getName().equals(SecurityUserDetails.DEFAULT_IS_AUTHENTICATED_METHOD_NAME)) {
@@ -447,7 +416,6 @@ public class PluginEndpoint {
         } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
 
             TargetObject targetObject = Casts.cast(target);
-
             if (Method.class.isAssignableFrom(targetObject.getTarget().getClass())) {
                 return StringUtils.appendIfMissing(targetValue, "/**");
             }
@@ -455,17 +423,11 @@ public class PluginEndpoint {
         }
 
         for (String parentValue : StringUtils.split(parent.getValue())) {
-
             for (String value : StringUtils.split(targetValue)) {
-
                 parentValue = StringUtils.remove(parentValue, "**");
-
                 String url = StringUtils.appendIfMissing(parentValue, value + "/**");
-
                 uri.add(RegExUtils.removeAll(url, "\\{.*\\}"));
-
             }
-
         }
 
         return StringUtils.join(uri, SpringMvcUtils.COMMA_STRING);
@@ -484,61 +446,46 @@ public class PluginEndpoint {
 
         // 获取 RequestMapping 的 value 信息
         List<String> values = new ArrayList<>();
-
         // 如果找不到 RequestMapping 注解，什么都不做
         RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-
         if (requestMapping != null) {
             values = Arrays.asList(requestMapping.value());
         }
 
-
         // 如果为空值，表示可能是 GetMapping 注解
         if (values.isEmpty()) {
-
             // 如果找不到 GetMapping 注解，什么都不做
             GetMapping annotation = AnnotationUtils.findAnnotation(method, GetMapping.class);
-
             if (annotation != null) {
                 values = Arrays.asList(annotation.value());
             }
-
         }
 
         // 如果为空值，表示可能是 PostMapping 注解
         if (values.isEmpty()) {
-
             // 如果找不到 PostMapping 注解，什么都不做
             PostMapping annotation = AnnotationUtils.findAnnotation(method, PostMapping.class);
-
             if (annotation != null) {
                 values = Arrays.asList(annotation.value());
             }
-
         }
 
         // 如果为空值，表示可能是 PutMapping 注解
         if (values.isEmpty()) {
-
             // 如果找不到 PutMapping 注解，什么都不做
             PutMapping annotation = AnnotationUtils.findAnnotation(method, PutMapping.class);
-
             if (annotation != null) {
                 values = Arrays.asList(annotation.value());
             }
-
         }
 
         // 如果为空值，表示可能是 DeleteMapping 注解
         if (values.isEmpty()) {
-
             // 如果找不到 PutMapping 注解，什么都不做
             DeleteMapping annotation = AnnotationUtils.findAnnotation(method, DeleteMapping.class);
-
             if (annotation != null) {
                 values = Arrays.asList(annotation.value());
             }
-
         }
 
         // 如果为空值，表示注解没命名，直接用方法名
@@ -561,12 +508,10 @@ public class PluginEndpoint {
 
         for (String basePackage : basePackages) {
             String classPath = ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage)) + "/**/*.class";
-
             TypeFilter filter = new AnnotationTypeFilter(Plugin.class);
 
             try {
                 Resource[] resources = this.resourcePatternResolver.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + classPath);
-
                 for (Resource resource : resources) {
 
                     if (!resource.isReadable()) {
@@ -579,19 +524,13 @@ public class PluginEndpoint {
                     if (filter.match(metadataReader, metadataReaderFactory)) {
                         target.add(targetClass);
                     } else {
-
                         Method[] methods = targetClass.getDeclaredMethods();
-
                         for (Method method : methods) {
-
                             Plugin plugin = AnnotationUtils.findAnnotation(method, Plugin.class);
-
                             if (Objects.nonNull(plugin)) {
                                 target.add(method);
                             }
-
                         }
-
                     }
                 }
 
@@ -654,21 +593,4 @@ public class PluginEndpoint {
         this.generateSources = generateSources;
     }
 
-    /**
-     * 获取默认来源值
-     *
-     * @return 默认来源值
-     */
-    public String getDefaultSource() {
-        return defaultSource;
-    }
-
-    /**
-     * 设置默认来源值
-     *
-     * @param defaultSource 默认来源值
-     */
-    public void setDefaultSource(String defaultSource) {
-        this.defaultSource = defaultSource;
-    }
 }

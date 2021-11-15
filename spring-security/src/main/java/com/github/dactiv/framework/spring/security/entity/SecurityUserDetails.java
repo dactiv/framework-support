@@ -57,7 +57,6 @@ public class SecurityUserDetails implements UserDetails {
     private String username;
     @JsonIgnore
     private List<ResourceAuthority> resourceAuthorities = new ArrayList<>();
-    @JsonIgnore
     private List<RoleAuthority> roleAuthorities = new ArrayList<>();
     @JsonIgnore
     private boolean accountNonExpired = true;
@@ -264,18 +263,8 @@ public class SecurityUserDetails implements UserDetails {
      *
      * @return 角色类型的授权信息
      */
-    @JsonIgnore
     public List<RoleAuthority> getRoleAuthorities() {
         return roleAuthorities;
-    }
-
-    /**
-     * 获取字符串集合的角色类型授权信息
-     *
-     * @return 字符串集合的角色类型授权信息
-     */
-    public List<String> getRoleAuthorityStrings() {
-        return roleAuthorities.stream().map(RoleAuthority::getAuthority).collect(Collectors.toList());
     }
 
     /**

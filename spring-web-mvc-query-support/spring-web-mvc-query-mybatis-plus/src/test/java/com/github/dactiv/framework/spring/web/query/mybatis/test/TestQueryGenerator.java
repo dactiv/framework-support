@@ -46,6 +46,9 @@ public class TestQueryGenerator {
 
         map.put("filter_[creation_time_between]", Arrays.asList(new Date(), new Date()));
 
+        map.add("filter_[city_jin]", "nanning");
+        map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
+
         QueryWrapper<AuthenticationInfo> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);
 
         String targetSql = queryWrapper.getTargetSql();
@@ -68,6 +71,9 @@ public class TestQueryGenerator {
         Assertions.assertEquals(StringUtils.countMatches(targetSql,"remark LIKE ?"), 3);
 
         Assertions.assertTrue(targetSql.contains("creation_time BETWEEN ? AND ?"));
+
+        Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city, ?)"));
+        Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) OR JSON_CONTAINS(area, ?))"));
 
     }
 }

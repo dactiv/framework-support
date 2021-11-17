@@ -20,7 +20,6 @@ public class JsonContainsWildcardParser implements WildcardParser {
 
     @Override
     public void structure(Property property, QueryWrapper<?> queryWrapper) {
-
         ApplyObject applyObject = structure(property);
         if (Iterable.class.isAssignableFrom(property.getValue().getClass())) {
             queryWrapper.and(c -> c.apply(applyObject.getSql(), applyObject.getArgs().toArray()));
@@ -45,9 +44,10 @@ public class JsonContainsWildcardParser implements WildcardParser {
             List<Object> values = new ArrayList<>();
             List<String> sql = new ArrayList<>();
 
-            for(Object o : iterable) {
-                values.add(o);
-                sql.add("JSON_CONTAINS("+ property.getPropertyName() + ", {" + i + "})");
+            for (Object o : iterable) {
+                String value = getMatchValue(o);
+                values.add(value);
+                sql.add("JSON_CONTAINS(" + property.getPropertyName() + ", {" + i + "})");
                 i++;
             }
 
@@ -55,10 +55,25 @@ public class JsonContainsWildcardParser implements WildcardParser {
             return new ApplyObject(applySql, values);
         } else {
             return new ApplyObject(
-                    "JSON_CONTAINS("+ property.getPropertyName() + ", {0})",
-                    Collections.singletonList(property.getValue())
+                    "JSON_CONTAINS(" + property.getPropertyName() + ", {0})",
+                    Collections.singletonList(getMatchValue(property.getValue()))
             );
         }
+    }
+
+    /**
+     * 获取匹配值
+     *
+     * @param value 值
+     *
+     * @return 可以匹配的 json 值
+     */
+    public static String getMatchValue(Object value) {
+        String result = value.toString();
+        if (String.class.isAssignableFrom(value.getClass())) {
+            result = "\"" + value + "\"";
+        }
+        return result;
     }
 
     /**
@@ -78,7 +93,8 @@ public class JsonContainsWildcardParser implements WildcardParser {
 
         /**
          * 创建一个新的追加对象
-         * @param sql 要生成的执行的 sql
+         *
+         * @param sql  要生成的执行的 sql
          * @param args 要追加的 sql 参数
          */
         public ApplyObject(String sql, List<Object> args) {

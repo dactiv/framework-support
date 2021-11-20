@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.crypto.access;
 
-import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
+import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 
@@ -127,7 +127,7 @@ public class AccessCrypto implements Serializable {
      * @return 是否启用名称
      */
     public String getEnabledName() {
-        return NameValueEnumUtils.getName(this.enabled, DisabledOrEnabled.class);
+        return ValueEnumUtils.getName(this.enabled, DisabledOrEnabled.class);
     }
 
     /**
@@ -154,7 +154,7 @@ public class AccessCrypto implements Serializable {
      * @return 是否响应加解密名称
      */
     public String getResponseEncryptName() {
-        return NameValueEnumUtils.getName(this.responseEncrypt, YesOrNo.class);
+        return ValueEnumUtils.getName(this.responseEncrypt, YesOrNo.class);
     }
 
     /**
@@ -181,7 +181,7 @@ public class AccessCrypto implements Serializable {
      * @return 是否响应加解密名称
      */
     public String getRequestDecryptName() {
-        return NameValueEnumUtils.getName(this.requestDecrypt, YesOrNo.class);
+        return ValueEnumUtils.getName(this.requestDecrypt, YesOrNo.class);
     }
 
     /**

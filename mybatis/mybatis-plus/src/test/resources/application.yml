@@ -1,0 +1,17 @@
+mybatis-plus:
+  type-aliases-package: com.github.dactiv.framework.mybatis.plus.test.entity
+  configuration:
+    call-setters-on-nulls: on
+  global-config:
+    db-config:
+      id-type: auto
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:mybatis;MODE=MYSQL
+    driverClassName: org.h2.Driver
+    username: root
+    password:
+    type: com.zaxxer.hikari.HikariDataSource
+    schema: classpath:sql/schema.sql
+    #data: classpath:sql/data.sql

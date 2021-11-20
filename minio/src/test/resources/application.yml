@@ -7,5 +7,5 @@ management:
 dactiv:
   minio:
     endpoint: http://127.0.0.1:9000
-    access-key: E0DBXNY9RFGMJQKT1YMK
-    secret-key: FM7jvyAsBV0Dwgs+llMIkMObKeJ4k4qczNd+WPIn
+    access-key: OGZ7U7D86H5OOKY8RBQK
+    secret-key: GcsYfojIIaPrSVgOXcszJp67pXR49ZgWgz+fB+BY

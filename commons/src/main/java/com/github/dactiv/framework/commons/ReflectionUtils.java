@@ -170,8 +170,20 @@ public class ReflectionUtils {
      * @return 范型类型
      */
     public static <T> Class<T> getGenericClass(Object target, int index) {
+        return getGenericClass(target, index);
+    }
 
-        Type genType = target.getClass().getGenericSuperclass();
+    /**
+     * 获取范型对象类型
+     *
+     * @param target 目标对象
+     * @param index  范型索引位置
+     *
+     * @return 范型类型
+     */
+    public static <T> Class<T> getGenericClass(Class<?> target, int index) {
+
+        Type genType = target.getGenericSuperclass();
 
         if (!(genType instanceof ParameterizedType)) {
             return Casts.cast(Object.class);

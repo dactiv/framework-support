@@ -131,7 +131,7 @@
         <module>alibaba-nacos</module>
         <module>idempotent</module>
         <module>minio</module>
-        <module>spring-web-mvc-query-support</module>
+        <module>mybatis</module>
     </modules>
 
 </project>

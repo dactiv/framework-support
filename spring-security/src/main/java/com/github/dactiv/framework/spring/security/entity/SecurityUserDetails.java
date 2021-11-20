@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
+import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
@@ -187,7 +187,7 @@ public class SecurityUserDetails implements UserDetails {
      * @return 状态名称
      */
     public String getStatusName() {
-        return NameValueEnumUtils.getName(this.status, UserStatus.class);
+        return ValueEnumUtils.getName(this.status, UserStatus.class);
     }
 
     /**

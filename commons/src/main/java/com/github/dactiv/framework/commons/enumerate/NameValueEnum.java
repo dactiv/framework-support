@@ -8,12 +8,6 @@ package com.github.dactiv.framework.commons.enumerate;
  *
  * @author maurice
  */
-public interface NameValueEnum<V> extends NameEnum {
+public interface NameValueEnum<V> extends NameEnum, ValueEnum<V> {
 
-    /**
-     * 获取值
-     *
-     * @return 值
-     */
-    V getValue();
 }

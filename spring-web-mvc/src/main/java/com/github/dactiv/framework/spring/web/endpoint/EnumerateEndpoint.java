@@ -4,7 +4,7 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
-import com.github.dactiv.framework.commons.enumerate.NameValueEnumUtils;
+import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import com.github.dactiv.framework.commons.exception.ServiceException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -141,7 +141,7 @@ public class EnumerateEndpoint {
             Map<String, Object> map;
 
             if (NameValueEnum.class.isAssignableFrom(c)) {
-                map = NameValueEnumUtils.castMap(Casts.cast(c));
+                map = ValueEnumUtils.castMap(Casts.cast(c));
             } else {
                 map = NameEnumUtils.castMap(c);
             }

@@ -2,16 +2,17 @@ mybatis-plus:
   type-aliases-package: com.github.dactiv.framework.mybatis.plus.test.entity
   configuration:
     call-setters-on-nulls: on
+    default-enum-type-handler: com.github.dactiv.framework.mybatis.handler.NameValueEnumTypeHandler
   global-config:
     db-config:
       id-type: auto
 
 spring:
   datasource:
-    url: jdbc:h2:mem:mybatis;MODE=MYSQL
+    url: jdbc:h2:mem:mybatis;INIT=create domain if not exists jsonb as other;MODE=MYSQL;DB_CLOSE_DELAY=-1
     driverClassName: org.h2.Driver
     username: root
-    password:
+    password: qwerty123
     type: com.zaxxer.hikari.HikariDataSource
     schema: classpath:sql/schema.sql
-    #data: classpath:sql/data.sql
+    data: classpath:sql/data.sql

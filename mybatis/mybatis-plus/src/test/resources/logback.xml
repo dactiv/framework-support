@@ -7,6 +7,8 @@
         </encoder>
     </appender>
 
+    <logger name="com.github.dactiv.framework.mybatis.plus" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE-APPENDER"/>
     </root>

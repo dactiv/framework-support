@@ -170,7 +170,7 @@ public class ReflectionUtils {
      * @return 范型类型
      */
     public static <T> Class<T> getGenericClass(Object target, int index) {
-        return getGenericClass(target, index);
+        return getGenericClass(target.getClass(), index);
     }
 
     /**

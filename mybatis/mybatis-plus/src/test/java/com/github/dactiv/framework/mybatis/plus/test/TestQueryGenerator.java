@@ -2,7 +2,7 @@ package com.github.dactiv.framework.mybatis.plus.test;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.dactiv.framework.mybatis.plus.MybatisPlusQueryGenerator;
-import com.github.dactiv.framework.mybatis.plus.test.entity.AuthenticationInfo;
+import com.github.dactiv.framework.mybatis.plus.test.entity.AllTypeEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import java.util.Date;
 public class TestQueryGenerator {
 
     @Autowired
-    private MybatisPlusQueryGenerator<AuthenticationInfo> queryGenerator;
+    private MybatisPlusQueryGenerator<AllTypeEntity> queryGenerator;
 
     @Test
     public void testAll() {
@@ -49,7 +49,7 @@ public class TestQueryGenerator {
         map.add("filter_[city_jin]", "nanning");
         map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
 
-        QueryWrapper<AuthenticationInfo> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);
+        QueryWrapper<AllTypeEntity> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);
 
         String targetSql = queryWrapper.getTargetSql();
 

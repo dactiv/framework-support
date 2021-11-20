@@ -25,7 +25,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
 
     private final Class<E> type;
 
-    public NameValueEnumTypeHandler(Class<E> type) {
+    public NameValueEnumTypeHandler(Class<E> type){
         super(type);
         this.type = type;
     }
@@ -56,7 +56,6 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
     @Override
     public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
         Object s = rs.getObject(columnName);
-
         E value = getValue(s);
 
         if (Objects.isNull(value)) {

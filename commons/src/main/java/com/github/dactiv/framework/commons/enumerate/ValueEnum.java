@@ -7,6 +7,8 @@ package com.github.dactiv.framework.commons.enumerate;
  */
 public interface ValueEnum<V> {
 
+    String METHOD_NAME = "getValue";
+
     /**
      * 获取值
      *

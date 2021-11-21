@@ -47,7 +47,6 @@ public class ValueEnumUtils {
         List<V> ignoreList = new ArrayList<>(16);
 
         if (ArrayUtils.isNotEmpty(ignore)) {
-
             ignoreList = Arrays.asList(ignore);
         }
 
@@ -56,13 +55,11 @@ public class ValueEnumUtils {
         for (Enum<? extends ValueEnum<V>> o : values) {
 
             ValueEnum<V> ve = (ValueEnum<V>) o;
-
             if (jsonIgnoreList.contains(o.toString())) {
                 continue;
             }
 
             V value = ve.getValue();
-
             if (ignoreList.contains(value)) {
                 continue;
             }
@@ -98,7 +95,7 @@ public class ValueEnumUtils {
         Enum<? extends ValueEnum<?>>[] values = enumClass.getEnumConstants();
 
         for (Enum<? extends ValueEnum<?>> o : values) {
-            ValueEnum<?> ve = (ValueEnum<?>) o;
+            ValueEnum<?> ve = Casts.cast(o);
             if (Objects.equals(ve.getValue(), value)) {
                 return getName(ve);
             }
@@ -153,9 +150,9 @@ public class ValueEnumUtils {
         Enum<? extends ValueEnum<?>>[] values = enumClass.getEnumConstants();
 
         for (Enum<? extends ValueEnum<?>> o : values) {
-            ValueEnum<?> ve = (ValueEnum<?>) o;
+            ValueEnum<?> ve = Casts.cast(o);
             if (Objects.equals(ve.getValue(), value)) {
-                return (E) ve;
+                return Casts.cast(ve);
             }
         }
 

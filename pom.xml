@@ -131,7 +131,7 @@
         <module>alibaba-nacos</module>
         <module>idempotent</module>
         <module>minio</module>
-        <module>mybatis</module>
+        <module>mybatis-plus</module>
     </modules>
 
 </project>

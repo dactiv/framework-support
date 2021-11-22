@@ -33,7 +33,7 @@ public class AllTypeEntity implements BasicIdentification<Integer> {
     private DisabledOrEnabled status = DisabledOrEnabled.Disabled;
 
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
-    @JsonCollectionGenericType(StringIdEntity.class)
+    @JsonCollectionGenericType(ExecuteStatus.class)
     private List<ExecuteStatus> executes = List.of(ExecuteStatus.Processing);
 
     public AllTypeEntity() {

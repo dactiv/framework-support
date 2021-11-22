@@ -79,6 +79,19 @@ public class Casts {
      * 将值转换成指定类型的对象
      *
      * @param value 值
+     * @param toValueType 指定类型
+     * @param <T>   对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T convertValue(Object value, JavaType toValueType) {
+        return objectMapper.convertValue(value, toValueType);
+    }
+
+    /**
+     * 将值转换成指定类型的对象
+     *
+     * @param value 值
      * @param type  引用类型
      * @param <T>   对象范型实体值
      *

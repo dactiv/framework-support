@@ -24,7 +24,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 重试中
      */
-    Retrying("重试中", 3),
+    Retrying("重试中", 2),
 
     /**
      * 执行失败

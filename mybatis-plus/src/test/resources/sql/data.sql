@@ -1,1 +1,1 @@
-INSERT INTO tb_all_type_entity (id, device, entities, status, executes) VALUES (1, JSON '{"os":"windows", "version": 11}', JSON '[{"id":"1", "creationTime": 100000000},{"id":"2", "creationTime": 100000000}]', 1, JSON '[1,2,3]');
+INSERT INTO tb_all_type_entity (id, device, entities, status, executes) VALUES (1, JSON '{"os":"windows", "version": 11}', JSON '[{"id":"1", "creationTime": 100000000},{"id":"2", "creationTime": 100000000}]', 1, JSON '[0,1,2]');

@@ -7,6 +7,7 @@ import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import org.apache.ibatis.type.EnumTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
@@ -57,7 +58,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
     @Override
     public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
         Object s = rs.getObject(columnName);
-        E value = getValue(s);
+        E value = Casts.cast(getValue(s, this.type));
 
         if (Objects.isNull(value)) {
             value = super.getNullableResult(rs, columnName);
@@ -71,7 +72,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
     public E getNullableResult(ResultSet rs, int i) throws SQLException {
         Object s = rs.getObject(i);
 
-        E value = getValue(s);
+        E value = Casts.cast(getValue(s, this.type));
 
         if (Objects.isNull(value)) {
             value = super.getNullableResult(rs, i);
@@ -84,7 +85,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
     public E getNullableResult(CallableStatement cs, int i) throws SQLException {
         Object s = cs.getObject(i);
 
-        E value = getValue(s);
+        E value = Casts.cast(getValue(s, this.type));
 
         if (Objects.isNull(value)) {
             value = super.getNullableResult(cs, i);
@@ -93,7 +94,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
         return value;
     }
 
-    private E getValue(Object s){
+    public static Object getValue(Object s, Class<?> type){
 
         if (Objects.isNull(s)) {
             return null;
@@ -101,7 +102,10 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
 
         if (ValueEnum.class.isAssignableFrom(type)) {
 
-            Method method = Objects.requireNonNull(getValueEnumMethod(), "在接口 ValueEnum 中，找不到 " + ValueEnum.METHOD_NAME + " 方法.");
+            Method method = Objects.requireNonNull(
+                    getValueEnumMethod(type),
+                    "在接口 ValueEnum 中，找不到 " + ValueEnum.METHOD_NAME + " 方法."
+            );
             Class<?> returnType = method.getReturnType();
 
             Object castValue = Casts.cast(s, returnType);
@@ -117,11 +121,12 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
         return null;
     }
 
-    private Method getValueEnumMethod() {
+    private static Method getValueEnumMethod(Class<?> type) {
         try {
-            return this.type.getMethod(ValueEnum.METHOD_NAME);
+            return type.getMethod(ValueEnum.METHOD_NAME);
         } catch (NoSuchMethodException e) {
             return null;
         }
     }
+
 }

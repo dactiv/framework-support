@@ -7,7 +7,6 @@ import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import org.apache.ibatis.type.EnumTypeHandler;
 import org.apache.ibatis.type.JdbcType;
-import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
@@ -101,14 +100,15 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
         }
 
         if (ValueEnum.class.isAssignableFrom(type)) {
-            Method method = getTypeMethod();
-            if (Objects.nonNull(method)) {
-                Class<?> returnType = method.getReturnType();
-                Object castValue = Casts.cast(s, returnType);
-                if (Objects.nonNull(castValue)) {
-                    s = castValue;
-                }
+
+            Method method = Objects.requireNonNull(getValueEnumMethod(), "在接口 ValueEnum 中，找不到 " + ValueEnum.METHOD_NAME + " 方法.");
+            Class<?> returnType = method.getReturnType();
+
+            Object castValue = Casts.cast(s, returnType);
+            if (Objects.nonNull(castValue)) {
+                s = castValue;
             }
+
             return Casts.cast(ValueEnumUtils.parse(s, Casts.cast(type), true));
         } else if (NameEnum.class.isAssignableFrom(type)) {
             return Casts.cast(NameEnumUtils.parse(s.toString(), Casts.cast(type), true));
@@ -117,7 +117,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
         return null;
     }
 
-    private Method getTypeMethod() {
+    private Method getValueEnumMethod() {
         try {
             return this.type.getMethod(ValueEnum.METHOD_NAME);
         } catch (NoSuchMethodException e) {

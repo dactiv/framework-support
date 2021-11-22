@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "com.github.dactiv"
+    }
+  ],
+  "properties": [
+    {
+      "name": "dactiv.spring.web.mvc.enabled",
+      "type": "java.lang.Boolean",
+      "description": "enabled spring web mvc support .",
+      "defaultValue": true
+    }
+  ]
+}

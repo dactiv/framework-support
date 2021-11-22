@@ -6,8 +6,9 @@ import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.ExecuteStatus;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
-import com.github.dactiv.framework.mybatis.plus.handler.JacksonJsonTypeHandler;
-import com.github.dactiv.framework.mybatis.plus.handler.NameValueEnumTypeHandler;
+import com.github.dactiv.framework.mybatis.annotation.JsonCollectionGenericType;
+import com.github.dactiv.framework.mybatis.handler.JacksonJsonTypeHandler;
+import com.github.dactiv.framework.mybatis.handler.NameValueEnumTypeHandler;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
@@ -25,12 +26,14 @@ public class AllTypeEntity implements BasicIdentification<Integer> {
     private Map<String, String> device;
 
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
+    @JsonCollectionGenericType(StringIdEntity.class)
     private List<StringIdEntity> entities;
 
     @TableField(typeHandler = NameValueEnumTypeHandler.class)
     private DisabledOrEnabled status = DisabledOrEnabled.Disabled;
 
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
+    @JsonCollectionGenericType(StringIdEntity.class)
     private List<ExecuteStatus> executes = List.of(ExecuteStatus.Processing);
 
     public AllTypeEntity() {

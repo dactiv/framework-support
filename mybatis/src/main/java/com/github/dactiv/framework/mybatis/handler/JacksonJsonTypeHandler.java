@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.mybatis.plus.handler;
+package com.github.dactiv.framework.mybatis.handler;
 
 import com.github.dactiv.framework.commons.Casts;
 import org.apache.commons.lang3.StringUtils;

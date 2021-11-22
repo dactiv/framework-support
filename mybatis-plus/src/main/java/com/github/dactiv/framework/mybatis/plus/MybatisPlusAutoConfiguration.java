@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * spring mvc mybatis-plus query 自动配置实现
+ * mybatis-plus 自动配置实现
  *
  * @author maurice.chen
  */

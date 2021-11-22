@@ -132,6 +132,7 @@
         <module>idempotent</module>
         <module>minio</module>
         <module>mybatis-plus</module>
+        <module>mybatis</module>
     </modules>
 
 </project>

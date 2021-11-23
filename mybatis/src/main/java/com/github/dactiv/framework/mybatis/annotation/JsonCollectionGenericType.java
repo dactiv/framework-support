@@ -3,6 +3,11 @@ package com.github.dactiv.framework.mybatis.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * json 集合泛型类型声明注解
+ *
+ * @author maurice.chen
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})

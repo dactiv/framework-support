@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.commons.id.number;
 
-import java.io.Serializable;
+import com.github.dactiv.framework.commons.id.BasicIdentification;
+
 import java.util.Date;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Date;
  *
  * @author maurice.chen
  */
-public interface NumberIdEntity<T extends Number> extends Serializable {
+public interface NumberIdEntity<T extends Number> extends BasicIdentification<T> {
 
     /**
      * 创建时间字段名称

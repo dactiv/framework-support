@@ -23,7 +23,7 @@ public class AllTypeEntity implements BasicIdentification<Integer> {
 
     @NotEmpty
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
-    private Map<String, String> device;
+    private Map<String, Object> device;
 
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
     @JsonCollectionGenericType(StringIdEntity.class)
@@ -48,11 +48,11 @@ public class AllTypeEntity implements BasicIdentification<Integer> {
         this.id = id;
     }
 
-    public Map<String, String> getDevice() {
+    public Map<String, Object> getDevice() {
         return device;
     }
 
-    public void setDevice(Map<String, String> device) {
+    public void setDevice(Map<String, Object> device) {
         this.device = device;
     }
 

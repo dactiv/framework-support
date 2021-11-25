@@ -61,11 +61,18 @@ public class JacksonJsonCollectionPostInterceptor extends AbstractJsonCollection
             }
 
             Object value = ReflectionUtils.getFieldValue(result, pd.getName());
+            if(Objects.isNull(value)) {
+                continue;
+            }
+
             JsonCollectionGenericType ann = getJsonCollectionGenericType(pd, type);
             Class<?> targetClass = ann.value();
 
-            Object newValue;
-
+            CollectionType collectionType = TypeFactory
+                    .defaultInstance()
+                    .constructCollectionType(Casts.cast(collectionClass), targetClass);
+            Object newValue = Casts.convertValue(value, collectionType);
+            /*Object newValue;
             if (ValueEnum.class.isAssignableFrom(targetClass) || NameEnum.class.isAssignableFrom(targetClass)) {
                 Collection<?> collection = Casts.cast(value);
                 Stream<Object> stream = collection
@@ -84,7 +91,7 @@ public class JacksonJsonCollectionPostInterceptor extends AbstractJsonCollection
                         .defaultInstance()
                         .constructCollectionType(Casts.cast(collectionClass), targetClass);
                 newValue = Casts.convertValue(value, collectionType);
-            }
+            }*/
 
             if (Objects.nonNull(pd.getWriteMethod())) {
                 ReflectionUtils.invokeMethod(result, pd.getWriteMethod(), List.of(newValue));

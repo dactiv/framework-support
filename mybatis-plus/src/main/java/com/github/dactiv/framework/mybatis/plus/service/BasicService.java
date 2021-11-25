@@ -218,7 +218,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     public int update(Iterable<T> entities, Wrapper<T> wrapper, boolean errorThrow) {
         int result = 0;
-
         for (T e : entities) {
             if (!update(e, wrapper) && errorThrow) {
                 String msg = "更新 [" + getEntityClass() + "] 数据不成功，内容为 [" + e + "]";

@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.commons.enumerate;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 带有值得枚举接口
  *
@@ -14,5 +16,6 @@ public interface ValueEnum<V> {
      *
      * @return 值
      */
+    @JsonValue
     V getValue();
 }

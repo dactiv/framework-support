@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 基础 id 接口，用于对数据对象操作的统一继承接口。
@@ -22,6 +23,16 @@ import java.util.stream.Collectors;
  * @param <T> id 类型
  */
 public interface BasicIdentification<T> extends Serializable {
+
+    /**
+     * 获取 id 方法名称
+     */
+    String READ_METHOD_NAME = "getId";
+
+    /**
+     * 设置 id 方法名称
+     */
+    String WRITE_METHOD_NAME = "setId";
 
     /**
      * 获取主键 id
@@ -37,7 +48,8 @@ public interface BasicIdentification<T> extends Serializable {
     void setId(T id);
 
     /**
-     * 创建一个新的带 id 值的对象
+     * 创建一个新的带 id 值的对象，注意：如果字段存在默认值得情况下，创建的实体会附带字段默认值，
+     * 如果需要只创建带 id 值其他任何字段值为 null 的情况下，使用{@link #ofIdData()} 创建
      *
      * @param <N> 返回类型
      *
@@ -52,17 +64,32 @@ public interface BasicIdentification<T> extends Serializable {
             throw new SystemException("对类型为 [" + this.getClass() + "] 的对象创建新实例时出错",e);
         }
 
+        result.setId(getId());
+
+        return result;
+    }
+
+    /**
+     * 创建一个新的带 id 值的对象
+     *
+     * @param <N> 返回类型
+     *
+     * @return 新的对象
+     */
+    default <N extends BasicIdentification<T>> N ofIdData(){
+        N result = ofNew();
+
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(this.getClass());
 
         Arrays
                 .stream(propertyDescriptors)
                 .filter(p -> Objects.nonNull(p.getReadMethod()))
                 .filter(p -> Objects.nonNull(p.getWriteMethod()))
+                .filter(p -> !p.getReadMethod().getName().equals(READ_METHOD_NAME))
+                .filter(p -> !p.getWriteMethod().getName().equals(WRITE_METHOD_NAME))
                 .filter(p -> ClassUtils.isAssignable(p.getWriteMethod().getParameterTypes()[0], p.getReadMethod().getReturnType()))
                 .map(PropertyDescriptor::getWriteMethod)
                 .forEach(method -> ReflectionUtils.invokeMethod(method, result, new Object[]{null}));
-
-        result.setId(getId());
 
         return result;
     }

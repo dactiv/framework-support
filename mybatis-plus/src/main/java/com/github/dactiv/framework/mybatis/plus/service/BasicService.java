@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * 简单封装的基础实体业务逻辑基类，该类用于不实现 service 接口的情况直接继承使用，封装一些常用的方法
@@ -28,6 +29,9 @@ import java.util.Objects;
  */
 public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
 
+    /**
+     * mapper 实例
+     */
     @Autowired
     protected M baseMapper;
 
@@ -73,16 +77,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int save(Iterable<T> entities, boolean errorThrow) {
-        int result = 0;
-        for (T e : entities) {
-            if (!save(e) && errorThrow) {
-                String msg = "保存 [" + getEntityClass() + "] 数据不成功，内容为 [" + e + "]";
-                throw new SystemException(msg);
-            } else {
-                result++;
-            }
-        }
-        return result;
+        return executeIterable(entities, errorThrow, this::save, "save");
     }
 
     /**
@@ -128,16 +123,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int insert(Iterable<T> entities, boolean errorThrow) {
-        int result = 0;
-        for (T e : entities) {
-            if (!insert(e) && errorThrow) {
-                String msg = "新增 [" + getEntityClass() + "] 数据不成功，内容为 [" + e + "]";
-                throw new SystemException(msg);
-            } else {
-                result++;
-            }
-        }
-        return result;
+        return executeIterable(entities, errorThrow, this::insert, "insert");
     }
 
     /**
@@ -172,10 +158,24 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int updateById(Iterable<T> entities, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, this::updateById, "updateById");
+    }
+
+    /**
+     * 执行可迭代的数据内容
+     *
+     * @param iterable 可迭代的数据
+     * @param errorThrow true 如果执行过程中存在的影响行数小于 1 时抛出异常，否则 false
+     * @param predicate 执行内容断言
+     * @param name 执行名称
+     *
+     * @return 影响行数
+     */
+    public int executeIterable(Iterable<T> iterable, boolean errorThrow, Predicate<T> predicate, String name) {
         int result = 0;
-        for (T e : entities) {
-            if (!updateById(e) && errorThrow) {
-                String msg = "更新 [" + getEntityClass() + "] 数据不成功，内容为 [" + e + "]";
+        for (T e : iterable) {
+            if (!predicate.test(e) && errorThrow) {
+                String msg = "执行 [" + getEntityClass() + "] 的 [" + name + " ] 影响行数小于等于 0, 内容为 [" + e + "]";
                 throw new SystemException(msg);
             } else {
                 result++;
@@ -217,16 +217,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int update(Iterable<T> entities, Wrapper<T> wrapper, boolean errorThrow) {
-        int result = 0;
-        for (T e : entities) {
-            if (!update(e, wrapper) && errorThrow) {
-                String msg = "更新 [" + getEntityClass() + "] 数据不成功，内容为 [" + e + "]";
-                throw new SystemException(msg);
-            } else {
-                result++;
-            }
-        }
-        return result;
+        return executeIterable(entities, errorThrow, (e) -> this.update(e, wrapper), "update");
     }
 
     /**
@@ -381,16 +372,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int deleteByEntity(Iterable<T> entities, boolean errorThrow) {
-        int result = 0;
-        for (T e : entities) {
-            if (!deleteByEntity(e) && errorThrow) {
-                String msg = "删除 [" + getEntityClass() + "] 数据不成功, 内容为[" + e + "]";
-                throw new SystemException(msg);
-            } else {
-                result++;
-            }
-        }
-        return result;
+        return executeIterable(entities, errorThrow, this::deleteByEntity, "deleteByEntity");
     }
 
     /**

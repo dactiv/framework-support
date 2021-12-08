@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.security.authentication.token;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -23,6 +24,16 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
      * 用户类型
      */
     private final String type;
+
+    /**
+     * 当前用户认证 token
+     *
+     * @param username 登陆账户
+     * @param type  用户类型
+     */
+    public PrincipalAuthenticationToken(String username, String type) {
+        this(new UsernamePasswordAuthenticationToken(username, null), type);
+    }
 
     /**
      * 当前用户认证 token

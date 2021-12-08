@@ -2,3 +2,5 @@ dactiv:
   authentication:
     audit:
       type: memory
+
+spring.elasti

@@ -3,6 +3,12 @@ package com.github.dactiv.framework.mybatis.plus.service;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.ExceptionUtils;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.UpdateChainWrapper;
+import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.commons.exception.SystemException;
@@ -15,11 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 简单封装的基础实体业务逻辑基类，该类用于不实现 service 接口的情况直接继承使用，封装一些常用的方法
@@ -273,6 +277,26 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
     }
 
     /**
+     * 查找数据
+     *
+     * @param wrapper where 条件
+     *
+     * @return 数据集合
+     */
+    public <R> List<R> findObjects(Wrapper<T> wrapper, Class<R> returnType) {
+        List<Object> result = baseMapper.selectObjs(wrapper);
+
+        if (CollectionUtils.isNotEmpty(result)) {
+            return result
+                    .stream()
+                    .map(o -> Casts.cast(o, returnType))
+                    .collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
+    }
+
+    /**
      * 查找单个数据
      *
      * @param wrapper where 条件
@@ -281,6 +305,28 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     public T findOne(Wrapper<T> wrapper) {
         return baseMapper.selectOne(wrapper);
+    }
+
+    /**
+     * 查找单个数据
+     *
+     * @param wrapper where 条件
+     * @param returnType 数据返回类型 class
+     * @param <R> 数据返回类型
+     *
+     * @return 数据内容
+     */
+    public <R> R findOneObject(Wrapper<T> wrapper, Class<R> returnType) {
+        List<Object> result = baseMapper.selectObjs(wrapper);
+
+        if (CollectionUtils.isNotEmpty(result)) {
+            if (result.size() != 1) {
+                throw ExceptionUtils.mpe("One record is expected, but the query result is multiple records");
+            }
+            return Casts.cast(result.iterator().next(), returnType);
+        }
+
+        return null;
     }
 
     /**
@@ -406,6 +452,40 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     public List<T> get(List<? extends Serializable> ids) {
         return baseMapper.selectBatchIds(ids);
+    }
+
+    /**
+     * 链式更改
+     * @return UpdateWrapper 的包装类
+     */
+    public UpdateChainWrapper<T> update() {
+        return ChainWrappers.updateChain(getBaseMapper());
+    }
+
+    /**
+     * 链式更改 lambda 式
+     *
+     * @return LambdaUpdateWrapper 的包装类
+     */
+    public LambdaUpdateChainWrapper<T> lambdaUpdate() {
+        return ChainWrappers.lambdaUpdateChain(getBaseMapper());
+    }
+
+    /**
+     * 链式更改
+     * @return UpdateWrapper 的包装类
+     */
+    public QueryChainWrapper<T> query() {
+        return ChainWrappers.queryChain(getBaseMapper());
+    }
+
+    /**
+     * 链式更改 lambda 式
+     *
+     * @return LambdaUpdateWrapper 的包装类
+     */
+    public LambdaQueryChainWrapper<T> lambdaQuery() {
+        return ChainWrappers.lambdaQueryChain(getBaseMapper());
     }
 
     /**

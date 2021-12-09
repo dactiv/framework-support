@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.crypto.access;
 
-import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 
@@ -39,17 +38,17 @@ public class AccessCrypto implements Serializable {
     /**
      * 是否启用，1.是，0.否
      */
-    private Integer enabled = YesOrNo.Yes.getValue();
+    private DisabledOrEnabled enabled = DisabledOrEnabled.Enabled;
 
     /**
      * 是否请求加密，0.否，1.是
      */
-    private Integer requestDecrypt = YesOrNo.Yes.getValue();
+    private YesOrNo requestDecrypt = YesOrNo.Yes;
 
     /**
      * 是否响应加密，0.否，1.是
      */
-    private Integer responseEncrypt = YesOrNo.No.getValue();
+    private YesOrNo responseEncrypt = YesOrNo.No;
 
     /**
      * 加解密条件
@@ -108,7 +107,7 @@ public class AccessCrypto implements Serializable {
      *
      * @return 1.是，0.否
      */
-    public Integer getEnabled() {
+    public DisabledOrEnabled getEnabled() {
         return enabled;
     }
 
@@ -117,25 +116,17 @@ public class AccessCrypto implements Serializable {
      *
      * @param enabled 1.是，0.否
      */
-    public void setEnabled(Integer enabled) {
+    public void setEnabled(DisabledOrEnabled enabled) {
         this.enabled = enabled;
     }
 
-    /**
-     * 获取是否启用名称
-     *
-     * @return 是否启用名称
-     */
-    public String getEnabledName() {
-        return ValueEnumUtils.getName(this.enabled, DisabledOrEnabled.class);
-    }
 
     /**
      * 获取是否响应加密
      *
      * @return 0.否，1.是
      */
-    public Integer getResponseEncrypt() {
+    public YesOrNo getResponseEncrypt() {
         return responseEncrypt;
     }
 
@@ -144,25 +135,17 @@ public class AccessCrypto implements Serializable {
      *
      * @param responseEncrypt 0.否，1.是
      */
-    public void setResponseEncrypt(Integer responseEncrypt) {
+    public void setResponseEncrypt(YesOrNo responseEncrypt) {
         this.responseEncrypt = responseEncrypt;
     }
 
-    /**
-     * 获取是否响应加解密名称
-     *
-     * @return 是否响应加解密名称
-     */
-    public String getResponseEncryptName() {
-        return ValueEnumUtils.getName(this.responseEncrypt, YesOrNo.class);
-    }
 
     /**
      * 获取是否请求加密
      *
      * @return 0.否，1.是
      */
-    public Integer getRequestDecrypt() {
+    public YesOrNo getRequestDecrypt() {
         return requestDecrypt;
     }
 
@@ -171,17 +154,8 @@ public class AccessCrypto implements Serializable {
      *
      * @param requestDecrypt 0.否，1.是
      */
-    public void setRequestDecrypt(Integer requestDecrypt) {
+    public void setRequestDecrypt(YesOrNo requestDecrypt) {
         this.requestDecrypt = requestDecrypt;
-    }
-
-    /**
-     * 获取是否响应加解密名称
-     *
-     * @return 是否响应加解密名称
-     */
-    public String getRequestDecryptName() {
-        return ValueEnumUtils.getName(this.requestDecrypt, YesOrNo.class);
     }
 
     /**

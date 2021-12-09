@@ -64,7 +64,7 @@ public class SecurityUserDetails implements UserDetails {
     private boolean accountNonLocked = true;
     @JsonIgnore
     private boolean credentialsNonExpired = true;
-    private Integer status;
+    private UserStatus status;
     private String type;
 
     public SecurityUserDetails() {
@@ -89,7 +89,7 @@ public class SecurityUserDetails implements UserDetails {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.status = status.getValue();
+        this.status = status;
         this.accountNonExpired = accountNonExpired;
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
@@ -168,7 +168,7 @@ public class SecurityUserDetails implements UserDetails {
      *
      * @param status 状态:0.禁用,1启用
      */
-    public void setStatus(Integer status) {
+    public void setStatus(UserStatus status) {
         this.status = status;
     }
 
@@ -177,17 +177,8 @@ public class SecurityUserDetails implements UserDetails {
      *
      * @return 状态:0.禁用,1启用
      */
-    public Integer getStatus() {
+    public UserStatus getStatus() {
         return this.status;
-    }
-
-    /**
-     * 获取状态名称
-     *
-     * @return 状态名称
-     */
-    public String getStatusName() {
-        return ValueEnumUtils.getName(this.status, UserStatus.class);
     }
 
     /**
@@ -227,7 +218,7 @@ public class SecurityUserDetails implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return DisabledOrEnabled.Enabled.getValue().equals(status);
+        return UserStatus.Enabled.equals(status);
     }
 
     /**

@@ -58,17 +58,12 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * 保存数据，如果实体实现 {@link BasicIdentification} 接口，并通过 {@link BasicIdentification#getId()}
      * 得到的值为 null 时会新增数据，会通过 {@link BasicIdentification#getId()} 去更新当前数据。
      *
-     * <p>
-     * 注意：
-     * 如果执行过程中存在的影响行数小于 1 时抛出异常。
-     * </p>
-     *
      * @param entities 可迭代的实体信息
      *
      * @return 影响行数
      */
-    public int save(Iterable<T> entities) {
-        return save(entities, true);
+    public int save(Collection<T> entities) {
+        return save(entities, false);
     }
 
     /**
@@ -80,8 +75,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int save(Iterable<T> entities, boolean errorThrow) {
-        return executeIterable(entities, errorThrow, this::save, "save");
+    public int save(Collection<T> entities, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, (e) -> save(e) > 0, "save");
     }
 
     /**
@@ -92,7 +87,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      */
-    public boolean save(T entity) {
+    public int save(T entity) {
 
         if (!BasicIdentification.class.isAssignableFrom(entity.getClass())) {
             return insert(entity);
@@ -114,8 +109,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int insert(Iterable<T> entities) {
-        return insert(entities, true);
+    public int insert(Collection<T> entities) {
+        return insert(entities, false);
     }
 
     /**
@@ -126,8 +121,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int insert(Iterable<T> entities, boolean errorThrow) {
-        return executeIterable(entities, errorThrow, this::insert, "insert");
+    public int insert(Collection<T> entities, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, (e) -> insert(e) > 0, "insert");
     }
 
     /**
@@ -138,8 +133,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      *
      */
-    public boolean insert(T entity) {
-        return baseMapper.insert(entity) > 0;
+    public int insert(T entity) {
+        return baseMapper.insert(entity);
     }
 
     /**
@@ -149,8 +144,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int updateById(Iterable<T> entities) {
-        return updateById(entities, true);
+    public int updateById(Collection<T> entities) {
+        return updateById(entities, false);
     }
 
     /**
@@ -161,8 +156,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int updateById(Iterable<T> entities, boolean errorThrow) {
-        return executeIterable(entities, errorThrow, this::updateById, "updateById");
+    public int updateById(Collection<T> entities, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, (e) -> updateById(e) > 0, "updateById");
     }
 
     /**
@@ -175,7 +170,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int executeIterable(Iterable<T> iterable, boolean errorThrow, Predicate<T> predicate, String name) {
+    public int executeIterable(Collection<T> iterable, boolean errorThrow, Predicate<T> predicate, String name) {
         int result = 0;
         for (T e : iterable) {
             if (!predicate.test(e) && errorThrow) {
@@ -195,45 +190,45 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      */
-    public boolean updateById(T entity) {
-        return baseMapper.updateById(entity) > 0;
+    public int updateById(T entity) {
+        return baseMapper.updateById(entity);
     }
 
     /**
-     * 根据 根据 whereEntity 条件 参数更新数据，如果执行过程中存在的影响行数小于 1 时抛出异常
+     * 根据 where 条件 参数更新数据，如果执行过程中存在的影响行数小于 1 时抛出异常
      *
      * @param entities 可迭代的实体信息
-     * @param wrapper whereEntity 条件
+     * @param wrapper where 条件
      *
      * @return 影响行数
      */
-    public int update(Iterable<T> entities, Wrapper<T> wrapper) {
-        return update(entities, wrapper, true);
+    public int update(Collection<T> entities, Wrapper<T> wrapper) {
+        return update(entities, wrapper, false);
     }
 
     /**
-     * 根据 根据 whereEntity 条件 参数更新数据
+     * 根据 where 条件 参数更新数据
      *
      * @param entities 可迭代的实体信息
-     * @param wrapper whereEntity 条件
+     * @param wrapper where 条件
      * @param errorThrow 如果执行过程中存在的影响行数小于 1 时，抛出异常
      *
      * @return 影响行数
      */
-    public int update(Iterable<T> entities, Wrapper<T> wrapper, boolean errorThrow) {
-        return executeIterable(entities, errorThrow, (e) -> this.update(e, wrapper), "update");
+    public int update(Collection<T> entities, Wrapper<T> wrapper, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, (e) -> update(e, wrapper) > 0, "update");
     }
 
     /**
-     * 根据 根据 whereEntity 条件 参数更新数据
+     * 根据 where 条件 参数更新数据
      *
      * @param entity 实体内容
-     * @param wrapper whereEntity 条件
+     * @param wrapper where 条件
      *
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      */
-    public boolean update(T entity, Wrapper<T> wrapper) {
-        return baseMapper.update(entity, wrapper) > 0;
+    public int update(T entity, Wrapper<T> wrapper) {
+        return baseMapper.update(entity, wrapper);
     }
 
     /**
@@ -364,8 +359,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int deleteById(Iterable<? extends Serializable> ids) {
-        return deleteById(ids, true);
+    public int deleteById(Collection<? extends Serializable> ids) {
+        return deleteById(ids, false);
     }
 
     /**
@@ -376,7 +371,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int deleteById(Iterable<? extends Serializable> ids, boolean errorThrow) {
+    public int deleteById(Collection<? extends Serializable> ids, boolean errorThrow) {
         Collection<Serializable> collection = new LinkedList<>();
         CollectionUtils.addAll(collection, ids);
         int result = baseMapper.deleteBatchIds(collection);
@@ -394,8 +389,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      */
-    public boolean deleteById(Serializable id) {
-        return baseMapper.deleteById(id) > 0;
+    public int deleteById(Serializable id) {
+        return baseMapper.deleteById(id);
     }
 
     /**
@@ -405,7 +400,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int deleteByEntity(Iterable<T> entities) {
+    public int deleteByEntity(Collection<T> entities) {
         return deleteByEntity(entities, true);
     }
 
@@ -417,8 +412,8 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
-    public int deleteByEntity(Iterable<T> entities, boolean errorThrow) {
-        return executeIterable(entities, errorThrow, this::deleteByEntity, "deleteByEntity");
+    public int deleteByEntity(Collection<T> entities, boolean errorThrow) {
+        return executeIterable(entities, errorThrow, (e) -> deleteByEntity(e) > 0, "deleteByEntity");
     }
 
     /**
@@ -428,8 +423,19 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
      */
-    public boolean deleteByEntity(T entity) {
-        return baseMapper.deleteById(entity) > 0;
+    public int deleteByEntity(T entity) {
+        return baseMapper.deleteById(entity);
+    }
+
+    /**
+     * 根据 where 条件删除数据
+     *
+     * @param wrapper where 条件
+     *
+     * @return 影响行数
+     */
+    public int delete(Wrapper<T> wrapper) {
+        return baseMapper.delete(wrapper);
     }
 
     /**
@@ -450,7 +456,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 实体集合
      */
-    public List<T> get(List<? extends Serializable> ids) {
+    public List<T> get(Collection<? extends Serializable> ids) {
         return baseMapper.selectBatchIds(ids);
     }
 

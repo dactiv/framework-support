@@ -23,10 +23,6 @@ public class AccessCryptoPredicate implements Serializable {
      * 备注
      */
     private String remark;
-    /**
-     * 访问加解密 id
-     */
-    private Integer accessCryptoId;
 
     /**
      * 访问加解密条件
@@ -86,23 +82,5 @@ public class AccessCryptoPredicate implements Serializable {
      */
     public void setRemark(String remark) {
         this.remark = remark;
-    }
-
-    /**
-     * 设置访问加解密 id
-     *
-     * @param accessCryptoId 访问加解密 id
-     */
-    public void setAccessCryptoId(Integer accessCryptoId) {
-        this.accessCryptoId = accessCryptoId;
-    }
-
-    /**
-     * 获取访问加解密 id
-     *
-     * @return 访问加解密 id
-     */
-    public Integer getAccessCryptoId() {
-        return accessCryptoId;
     }
 }

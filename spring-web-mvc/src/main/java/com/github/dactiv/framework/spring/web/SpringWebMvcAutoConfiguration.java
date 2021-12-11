@@ -46,6 +46,7 @@ import java.util.List;
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @EnableConfigurationProperties(SpringWebMvcProperties.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "dactiv.spring.web.mvc", value = "enabled", matchIfMissing = true)
 public class SpringWebMvcAutoConfiguration {
 

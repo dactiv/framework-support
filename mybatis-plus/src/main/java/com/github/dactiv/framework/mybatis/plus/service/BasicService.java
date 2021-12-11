@@ -85,7 +85,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @param entity 实体内容
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      */
     public int save(T entity) {
 
@@ -130,7 +130,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @param entity 实体信息
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      *
      */
     public int insert(T entity) {
@@ -188,7 +188,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @param entity 实体信息
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      */
     public int updateById(T entity) {
         return baseMapper.updateById(entity);
@@ -225,7 +225,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @param entity 实体内容
      * @param wrapper where 条件
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      */
     public int update(T entity, Wrapper<T> wrapper) {
         return baseMapper.update(entity, wrapper);
@@ -387,7 +387,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @param id 主键 id
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      */
     public int deleteById(Serializable id) {
         return baseMapper.deleteById(id);
@@ -421,7 +421,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @param entity 实体
      *
-     * @return 如果执行过程中存在的影响行数小于 1 时返回 false，否则返回 true
+     * @return 影响行数
      */
     public int deleteByEntity(T entity) {
         return baseMapper.deleteById(entity);

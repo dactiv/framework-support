@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.commons.id;
 
-import java.io.Serializable;
-
 /**
  * 主键实体
  *
@@ -20,6 +18,13 @@ public class IdEntity<T> implements BasicIdentification<T> {
      * 主键 id
      */
     private T id;
+
+    public IdEntity() {
+    }
+
+    public IdEntity(T id) {
+        this.id = id;
+    }
 
     /**
      * 获取主键 id

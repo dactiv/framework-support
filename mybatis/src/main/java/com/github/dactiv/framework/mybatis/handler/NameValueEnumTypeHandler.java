@@ -7,7 +7,6 @@ import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 import org.apache.ibatis.type.EnumTypeHandler;
 import org.apache.ibatis.type.JdbcType;
-import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;

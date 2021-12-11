@@ -18,7 +18,7 @@ import com.github.dactiv.framework.spring.web.result.error.support.MissingServle
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * spring mvc 自动配置实现
@@ -49,9 +50,6 @@ import java.util.List;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "dactiv.spring.web.mvc", value = "enabled", matchIfMissing = true)
 public class SpringWebMvcAutoConfiguration {
-
-    @Autowired(required = false)
-    private List<InfoContributor> infoContributors;
 
     @Configuration
     @EnableConfigurationProperties(SpringWebMvcProperties.class)
@@ -133,8 +131,8 @@ public class SpringWebMvcAutoConfiguration {
 
     @Bean
     @ConfigurationProperties("dactiv.enumerate")
-    public EnumerateEndpoint enumerateEndpoint() {
-        return new EnumerateEndpoint(infoContributors);
+    public EnumerateEndpoint enumerateEndpoint(ObjectProvider<InfoContributor> infoContributor) {
+        return new EnumerateEndpoint(infoContributor.stream().collect(Collectors.toList()));
     }
 
     @Bean

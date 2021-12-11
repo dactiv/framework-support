@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
-import com.github.dactiv.framework.commons.enumerate.NameEnum;
-import com.github.dactiv.framework.commons.enumerate.ValueEnum;
-import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.mybatis.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.mybatis.handler.NameValueEnumTypeHandler;
 import com.github.dactiv.framework.mybatis.interceptor.json.AbstractJsonCollectionPostInterceptor;
@@ -20,12 +17,8 @@ import org.apache.ibatis.session.RowBounds;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * jackson json 实现的 json 集合后续映射拦截器

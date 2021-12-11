@@ -9,8 +9,9 @@ import com.github.dactiv.framework.spring.security.authentication.handler.JsonAu
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
@@ -31,8 +32,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * spring security 配置实现
@@ -40,35 +41,47 @@ import java.util.List;
  * @author maurice.chen
  */
 @Configuration
+@EnableConfigurationProperties(AuthenticationProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private DeviceIdContextRepository deviceIdContextRepository;
+    private final DeviceIdContextRepository deviceIdContextRepository;
 
-    @Autowired
-    private RequestAuthenticationProvider requestAuthenticationProvider;
+    private final RequestAuthenticationProvider requestAuthenticationProvider;
 
-    @Autowired
-    private AuthenticationProperties properties;
+    private final AuthenticationProperties properties;
 
-    @Autowired
-    private JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
+    private final JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
 
-    @Autowired
-    private JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler;
+    private final JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler;
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired(required = false)
-    private List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
+    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
-    @Autowired(required = false)
-    private List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters = new LinkedList<>();
+    private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
+
+    public WebSecurityDefaultConfigurerAdapter(DeviceIdContextRepository deviceIdContextRepository,
+                                               RequestAuthenticationProvider requestAuthenticationProvider,
+                                               AuthenticationProperties properties,
+                                               JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
+                                               JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
+                                               ApplicationEventPublisher eventPublisher,
+                                               AuthenticationManager authenticationManager,
+                                               ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
+                                               ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
+        this.deviceIdContextRepository = deviceIdContextRepository;
+        this.requestAuthenticationProvider = requestAuthenticationProvider;
+        this.properties = properties;
+        this.jsonAuthenticationFailureHandler = jsonAuthenticationFailureHandler;
+        this.jsonAuthenticationSuccessHandler = jsonAuthenticationSuccessHandler;
+        this.eventPublisher = eventPublisher;
+        this.authenticationManager = authenticationManager;
+        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().collect(Collectors.toList());
+        this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder managerBuilder) throws Exception {

@@ -4,19 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
-
+import com.github.dactiv.framework.mybatis.plus.wildcard.*;
 import com.github.dactiv.framework.spring.web.query.QueryGenerator;
 import com.github.dactiv.framework.spring.web.query.condition.Condition;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import com.github.dactiv.framework.spring.web.query.condition.support.SimpleConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
-
-import com.github.dactiv.framework.mybatis.plus.wildcard.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;

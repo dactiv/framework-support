@@ -18,6 +18,7 @@ import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -42,6 +43,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * spring security 重写支持自动配置类
@@ -54,13 +56,10 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "dactiv.authentication.spring.security", value = "enabled", matchIfMissing = true)
 public class SpringSecurityAutoConfiguration {
 
-    @Autowired(required = false)
-    private List<InfoContributor> infoContributors;
-
     @Bean
     @ConfigurationProperties("dactiv.authentication.plugin")
-    PluginEndpoint pluginEndpoint() {
-        return new PluginEndpoint(infoContributors);
+    PluginEndpoint pluginEndpoint(ObjectProvider<InfoContributor> infoContributor) {
+        return new PluginEndpoint(infoContributor.stream().collect(Collectors.toList()));
     }
 
     @Bean

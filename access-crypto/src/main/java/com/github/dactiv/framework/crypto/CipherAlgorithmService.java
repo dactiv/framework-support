@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.crypto;
 
-import com.github.dactiv.framework.crypto.access.CryptoAlgorithm;
 import com.github.dactiv.framework.crypto.algorithm.cipher.*;
 import com.github.dactiv.framework.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.framework.crypto.algorithm.exception.UnknownAlgorithmException;
@@ -86,9 +85,9 @@ public class CipherAlgorithmService {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T extends CipherService> T getCipherService(CryptoAlgorithm ca) {
+    public <T extends CipherService> T getCipherService(AlgorithmProperties ca) {
 
-        AbstractBlockCipherService cipherService = getCipherService(ca.getAlgorithm());
+        AbstractBlockCipherService cipherService = getCipherService(ca.getName());
 
         cipherService.setMode(OperationMode.valueOf(ca.getMode()));
         cipherService.setPaddingScheme(PaddingScheme.getPaddingScheme(ca.getPaddingScheme()));

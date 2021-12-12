@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.commons.jackson;
+package com.github.dactiv.framework.commons.jackson.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -12,7 +12,7 @@ import java.io.IOException;
  *
  * @author maurice
  */
-public class JacksonDesensitize extends JsonSerializer<String> {
+public class JacksonDesensitizeSerializer extends JsonSerializer<String> {
 
     /**
      * 默认倍数值

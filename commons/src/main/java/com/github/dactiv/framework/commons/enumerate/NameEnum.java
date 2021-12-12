@@ -7,6 +7,8 @@ package com.github.dactiv.framework.commons.enumerate;
  */
 public interface NameEnum {
 
+    String FIELD_NAME = "name";
+
     /**
      * 获取名称
      *

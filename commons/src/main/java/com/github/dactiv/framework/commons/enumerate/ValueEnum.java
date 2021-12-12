@@ -11,6 +11,8 @@ public interface ValueEnum<V> {
 
     String METHOD_NAME = "getValue";
 
+    String FIELD_NAME = "value";
+
     /**
      * 获取值
      *

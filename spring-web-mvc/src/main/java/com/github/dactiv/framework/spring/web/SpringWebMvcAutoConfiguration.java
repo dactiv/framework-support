@@ -2,7 +2,14 @@ package com.github.dactiv.framework.spring.web;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.enumerate.NameEnum;
+import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
+import com.github.dactiv.framework.commons.enumerate.ValueEnum;
+import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
+import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
+import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
 import com.github.dactiv.framework.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.framework.spring.web.device.DeviceResolverRequestFilter;
@@ -65,9 +72,14 @@ public class SpringWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(RestResultErrorAttributes.class)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public RestResultErrorAttributes servletRestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
         return new RestResultErrorAttributes(resultResolvers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
+    public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebMvcProperties properties) {
+        return new RestResponseBodyAdvice(properties);
     }
 
     @Bean
@@ -105,13 +117,6 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RestResponseBodyAdvice.class)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestResponseBodyAdvice restResponseBodyAdvice(SpringWebMvcProperties properties) {
-        return new RestResponseBodyAdvice(properties);
-    }
-
-    @Bean
     public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
                                                  SpringWebMvcProperties properties) {
 
@@ -123,6 +128,14 @@ public class SpringWebMvcAutoConfiguration {
 
         objectMapper.setFilterProvider(annotationBuilder.getFilterProvider(objectMapper.getSerializationConfig()));
         objectMapper.setAnnotationIntrospector(annotationBuilder);
+
+        SimpleModule module = new SimpleModule();
+
+        module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer<Object>());
+        module.addSerializer(ValueEnum.class, new ValueEnumSerializer<Object>());
+        module.addSerializer(NameEnum.class, new NameEnumSerializer());
+
+        objectMapper.registerModule(module);
 
         Casts.setObjectMapper(objectMapper);
 

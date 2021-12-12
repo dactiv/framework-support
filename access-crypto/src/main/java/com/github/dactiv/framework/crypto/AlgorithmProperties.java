@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.crypto.access;
+package com.github.dactiv.framework.crypto;
 
 import java.io.Serializable;
 
@@ -7,13 +7,13 @@ import java.io.Serializable;
  *
  * @author maurice
  */
-public class CryptoAlgorithm implements Serializable {
+public class AlgorithmProperties implements Serializable {
 
     private static final long serialVersionUID = 3207978889614838003L;
     /**
      * 算法
      */
-    private String algorithm;
+    private String name;
 
     /**
      * 密码分组模式
@@ -58,7 +58,7 @@ public class CryptoAlgorithm implements Serializable {
     /**
      * 加解密算法
      */
-    public CryptoAlgorithm() {
+    public AlgorithmProperties() {
     }
 
     /**
@@ -66,17 +66,17 @@ public class CryptoAlgorithm implements Serializable {
      *
      * @return 算法
      */
-    public String getAlgorithm() {
-        return algorithm;
+    public String getName() {
+        return name;
     }
 
     /**
      * 设置算法
      *
-     * @param algorithm 算法
+     * @param name 算法
      */
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

@@ -11,10 +11,11 @@ import java.io.InputStream;
  */
 public class SimpleByteSource extends AbstractByteSource {
 
+    private static final long serialVersionUID = 3094636554790450900L;
     /**
      * 字节数组
      */
-    private byte[] bytes;
+    private final byte[] bytes;
 
     /**
      * 简单的字节原实现

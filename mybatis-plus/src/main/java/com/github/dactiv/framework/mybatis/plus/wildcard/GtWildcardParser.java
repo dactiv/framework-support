@@ -9,7 +9,7 @@ import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
  *
  * @author maurice.chen
  */
-public class GtWildcardParser implements WildcardParser {
+public class GtWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "gt";
 

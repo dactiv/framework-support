@@ -10,7 +10,7 @@ import org.apache.commons.lang3.BooleanUtils;
  *
  * @author maurice.chen
  */
-public class EqnWildcardParser implements WildcardParser {
+public class EqnWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "eqn";
 

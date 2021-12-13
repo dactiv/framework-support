@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class BetweenWildcardParser implements WildcardParser {
+public class BetweenWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "between";
 

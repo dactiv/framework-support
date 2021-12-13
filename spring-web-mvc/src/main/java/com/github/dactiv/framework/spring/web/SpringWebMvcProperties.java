@@ -21,19 +21,24 @@ public class SpringWebMvcProperties {
     private List<String> basePackages = new ArrayList<>();
 
     /**
-     * 过滤属性的 id 头名称
+     * 过滤属性的 id 头名称, "X-FILTER-RESULT-ID"
      */
     private String filterResultIdHeaderName = RestResponseBodyAdvice.DEFAULT_FILTER_RESULT_ID_HEADER_NAME;
 
     /**
-     * 过滤属性的 id 参数名称
+     * 过滤属性的 id 参数名称, 默认为 "filterResultId"
      */
     private String filterResultIdParamName = RestResponseBodyAdvice.DEFAULT_FILTER_RESULT_ID_PARAM_NAME;
 
     /**
-     * 支持格式化的客户端集合
+     * 支持格式化的客户端集合，默认为 "SPRING_GATEWAY"
      */
     private List<String> supportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
+
+    /**
+     * 是否使用 filter result 的 ObjectMapper设置到 Casts工具类中, 默认为 true
+     */
+    private boolean useFilterResultObjectMapperToCastsClass = true;
 
     public SpringWebMvcProperties() {
     }
@@ -119,5 +124,23 @@ public class SpringWebMvcProperties {
      */
     public boolean isSupportClient(String client) {
         return supportClients.contains(client);
+    }
+
+    /**
+     * 是否使用 filter result 的 ObjectMapper设置到 Casts工具类中
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isUseFilterResultObjectMapperToCastsClass() {
+        return useFilterResultObjectMapperToCastsClass;
+    }
+
+    /**
+     * 设置是否使用 filter result 的 ObjectMapper设置到 Casts工具类中
+     *
+     * @param useFilterResultObjectMapperToCastsClass true 是，否则 false
+     */
+    public void setUseFilterResultObjectMapperToCastsClass(boolean useFilterResultObjectMapperToCastsClass) {
+        this.useFilterResultObjectMapperToCastsClass = useFilterResultObjectMapperToCastsClass;
     }
 }

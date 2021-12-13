@@ -7,6 +7,9 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
+import com.github.dactiv.framework.commons.jackson.deserializer.NameEnumDeserializer;
+import com.github.dactiv.framework.commons.jackson.deserializer.NameValueEnumDeserializer;
+import com.github.dactiv.framework.commons.jackson.deserializer.ValueEnumDeserializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -117,6 +120,7 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
                                                  SpringWebMvcProperties properties) {
 
@@ -131,13 +135,15 @@ public class SpringWebMvcAutoConfiguration {
 
         SimpleModule module = new SimpleModule();
 
-        module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer<Object>());
-        module.addSerializer(ValueEnum.class, new ValueEnumSerializer<Object>());
+        module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer());
+        module.addSerializer(ValueEnum.class, new ValueEnumSerializer());
         module.addSerializer(NameEnum.class, new NameEnumSerializer());
 
         objectMapper.registerModule(module);
 
-        Casts.setObjectMapper(objectMapper);
+        if (properties.isUseFilterResultObjectMapperToCastsClass()) {
+            Casts.setObjectMapper(objectMapper);
+        }
 
         return objectMapper;
     }

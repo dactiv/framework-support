@@ -10,7 +10,7 @@ import org.apache.commons.lang3.BooleanUtils;
  *
  * @author maurice.chen
  */
-public class NenWildcardParser implements WildcardParser {
+public class NenWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "nen";
 

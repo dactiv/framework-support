@@ -15,7 +15,7 @@ public class UserDetail {
 
     private String ip = "127.0.0.1";
 
-    private Integer status = DisabledOrEnabled.Enabled.getValue();
+    private DisabledOrEnabled status = DisabledOrEnabled.Enabled;
 
     public UserDetail() {
     }
@@ -44,11 +44,11 @@ public class UserDetail {
         this.ip = ip;
     }
 
-    public Integer getStatus() {
+    public DisabledOrEnabled getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(DisabledOrEnabled status) {
         this.status = status;
     }
 

@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class JsonContainsWildcardParser implements WildcardParser {
+public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "jin";
 

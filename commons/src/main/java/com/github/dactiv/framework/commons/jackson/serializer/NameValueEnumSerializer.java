@@ -12,13 +12,14 @@ import java.io.IOException;
 /**
  * 名称和值的枚举序列化实现
  *
- * @param <V> 范型类型
+ * @author maurice.chen
  */
-public class NameValueEnumSerializer<V> extends JsonSerializer<NameValueEnum<V>> {
+@SuppressWarnings("rawtypes")
+public class NameValueEnumSerializer extends JsonSerializer<NameValueEnum> {
 
     @Override
-    public void serialize(NameValueEnum<V> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        V enumValue = value.getValue();
+    public void serialize(NameValueEnum value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        Object enumValue = value.getValue();
 
         gen.writeStartObject();
 

@@ -9,8 +9,9 @@ import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import java.io.IOException;
 
 /**
- * 名称和值的枚举序列化实现
+ * 名称枚举序列化实现
  *
+ * @author maurice.chen
  */
 public class NameEnumSerializer extends JsonSerializer<NameEnum> {
 

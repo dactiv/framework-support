@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class NotInWildcardParser implements WildcardParser {
+public class NotInWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "nin";
 

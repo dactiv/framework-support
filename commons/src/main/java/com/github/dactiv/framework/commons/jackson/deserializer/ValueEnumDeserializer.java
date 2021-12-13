@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * 值枚举的反序列化实现
  *
- * @param <T> 继承自 {@link NameEnum} 的泛型类型
+ * @param <T> 继承自 {@link ValueEnum} 的泛型类型
  *
  * @author maurice.chen
  */

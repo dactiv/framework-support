@@ -40,6 +40,11 @@ public class SpringWebMvcProperties {
      */
     private boolean useFilterResultObjectMapperToCastsClass = true;
 
+    /**
+     * Undertow 的 webSocketDeploymentBuffers 默认值
+     */
+    private int webSocketDeploymentBuffers = 1024;
+
     public SpringWebMvcProperties() {
     }
 
@@ -142,5 +147,23 @@ public class SpringWebMvcProperties {
      */
     public void setUseFilterResultObjectMapperToCastsClass(boolean useFilterResultObjectMapperToCastsClass) {
         this.useFilterResultObjectMapperToCastsClass = useFilterResultObjectMapperToCastsClass;
+    }
+
+    /**
+     * 获取 Undertow 的 webSocketDeploymentBuffers 默认值
+     *
+     * @return Undertow 的 webSocketDeploymentBuffers 默认值
+     */
+    public int getWebSocketDeploymentBuffers() {
+        return webSocketDeploymentBuffers;
+    }
+
+    /**
+     * 设置 Undertow 的 webSocketDeploymentBuffers 默认值
+     *
+     * @param webSocketDeploymentBuffers Undertow 的 webSocketDeploymentBuffers 默认值
+     */
+    public void setWebSocketDeploymentBuffers(int webSocketDeploymentBuffers) {
+        this.webSocketDeploymentBuffers = webSocketDeploymentBuffers;
     }
 }

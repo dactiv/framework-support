@@ -33,7 +33,7 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
     public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = p.getCodec().readTree(p);
 
-        String nodeValue = jsonNode.textValue();
+        String nodeValue = jsonNode.isValueNode() ? jsonNode.toString() : jsonNode.textValue();
 
         String currentName = p.getCurrentName();
         Object value = p.getCurrentValue();

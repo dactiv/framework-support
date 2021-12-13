@@ -21,4 +21,5 @@ public interface ValueEnum<V> {
      * @return 值
      */
     V getValue();
+
 }

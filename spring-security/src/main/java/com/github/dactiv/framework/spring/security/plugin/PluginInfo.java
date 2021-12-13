@@ -42,7 +42,7 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
     /**
      * 默认的来源字段名
      */
-    public static final String DEFAULT_SOURCE_NAME = "source";
+    public static final String DEFAULT_SOURCES_NAME = "sources";
 
     /**
      * 顶级父类表示

@@ -33,14 +33,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, E type, JdbcType jdbcType) throws SQLException {
-        Object value = null;
-        if (ValueEnum.class.isAssignableFrom(type.getClass())) {
-            ValueEnum<?> valueEnum = Casts.cast(type);
-            value = valueEnum.getValue();
-        } else if (NameEnum.class.isAssignableFrom(type.getClass())) {
-            NameEnum nameEnum = Casts.cast(type);
-            value = nameEnum.getName();
-        }
+        Object value = getEnumValue(type);
 
         if (Objects.isNull(value)) {
             super.setNonNullParameter(ps, i, type, jdbcType);
@@ -52,6 +45,30 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
         } else {
             ps.setObject(i, value, jdbcType.TYPE_CODE);
         }
+    }
+
+    /**
+     * 获取枚举实际值
+     *
+     * @param value 当前值
+     *
+     * @return 枚举值
+     */
+    public static Object getEnumValue(Object value) {
+
+        if (Objects.isNull(value)) {
+            return null;
+        }
+
+        if (ValueEnum.class.isAssignableFrom(value.getClass())) {
+            ValueEnum<?> valueEnum = Casts.cast(value);
+            return valueEnum.getValue();
+        } else if (NameEnum.class.isAssignableFrom(value.getClass())) {
+            NameEnum nameEnum = Casts.cast(value);
+            return nameEnum.toString();
+        }
+
+        return null;
     }
 
     @Override

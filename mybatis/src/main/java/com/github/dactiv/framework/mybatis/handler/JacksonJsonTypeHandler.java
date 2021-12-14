@@ -1,6 +1,8 @@
 package com.github.dactiv.framework.mybatis.handler;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.enumerate.NameEnum;
+import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -9,6 +11,10 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * jackson json type handler 实现
@@ -27,8 +33,30 @@ public class JacksonJsonTypeHandler<T> extends BaseTypeHandler<T> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, Casts.writeValueAsString(parameter));
+        if (Collection.class.isAssignableFrom(parameter.getClass())) {
+            Collection<?> collection = Casts.cast(parameter);
+            List<Object> nameValueEnums = collection
+                    .stream()
+                    .map(NameValueEnumTypeHandler::getEnumValue)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (!nameValueEnums.isEmpty()) {
+                ps.setString(i, Casts.writeValueAsString(nameValueEnums));
+            } else {
+                ps.setString(i, Casts.writeValueAsString(parameter));
+            }
+        } else {
+            Object nameValueEnum = NameValueEnumTypeHandler.getEnumValue(parameter);
+            if (Objects.nonNull(nameValueEnum)) {
+                ps.setObject(i, nameValueEnum);
+            } else {
+                ps.setString(i, Casts.writeValueAsString(parameter));
+            }
+        }
     }
+
+
 
     @Override
     public T getNullableResult(ResultSet rs, String columnName) throws SQLException {

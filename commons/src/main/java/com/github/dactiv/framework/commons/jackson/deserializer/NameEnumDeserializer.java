@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class NameEnumDeserializer<T extends NameEnum> extends JsonDeserializer<T> {
 
     @Override
-    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = p.getCodec().readTree(p);
 
         String nodeValue = jsonNode.textValue();

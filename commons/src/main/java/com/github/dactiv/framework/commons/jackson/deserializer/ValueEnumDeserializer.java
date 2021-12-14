@@ -32,7 +32,7 @@ public class ValueEnumDeserializer<T extends ValueEnum> extends JsonDeserializer
     public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = p.getCodec().readTree(p);
 
-        String nodeValue = jsonNode.textValue();
+        String nodeValue = NameValueEnumDeserializer.getNodeValue(jsonNode);
 
         String currentName = p.getCurrentName();
         Object value = p.getCurrentValue();
@@ -46,13 +46,13 @@ public class ValueEnumDeserializer<T extends ValueEnum> extends JsonDeserializer
 
         Optional<ValueEnum> optional = valueEnums
                 .stream()
-                .filter(v -> v.getValue().toString().equals(jsonNode.textValue()))
+                .filter(v -> v.getValue().toString().equals(nodeValue))
                 .findFirst();
 
         if (optional.isEmpty()) {
             optional = valueEnums
                     .stream()
-                    .filter(v -> v.toString().equals(jsonNode.textValue()))
+                    .filter(v -> v.toString().equals(nodeValue))
                     .findFirst();
         }
 
@@ -61,5 +61,6 @@ public class ValueEnumDeserializer<T extends ValueEnum> extends JsonDeserializer
 
         return Casts.cast(result);
     }
+
 
 }

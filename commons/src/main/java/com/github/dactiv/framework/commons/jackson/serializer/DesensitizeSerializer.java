@@ -12,7 +12,7 @@ import java.io.IOException;
  *
  * @author maurice
  */
-public class JacksonDesensitizeSerializer extends JsonSerializer<String> {
+public class DesensitizeSerializer extends JsonSerializer<String> {
 
     /**
      * 默认倍数值

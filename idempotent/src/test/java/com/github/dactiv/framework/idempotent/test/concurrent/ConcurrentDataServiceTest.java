@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.idempotent.test.concurrent;
 
+import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class ConcurrentDataServiceTest {
                 try {
                     concurrentDataService.increment();
                 } catch (ConcurrentException e) {
-                    Assertions.assertEquals(e.getMessage(), "请不要重复操作");
+                    Assertions.assertEquals(e.getMessage(), ConcurrentInterceptor.DEFAULT_EXCEPTION);
                 }
             });
         }

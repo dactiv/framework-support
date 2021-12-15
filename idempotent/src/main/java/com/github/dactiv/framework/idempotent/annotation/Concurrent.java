@@ -2,6 +2,7 @@ package com.github.dactiv.framework.idempotent.annotation;
 
 import com.github.dactiv.framework.commons.annotation.Time;
 import com.github.dactiv.framework.idempotent.LockType;
+import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
 
 import java.lang.annotation.*;
 
@@ -31,19 +32,19 @@ public @interface Concurrent {
      *
      * @return 信息
      */
-    String exception() default "请不要重复操作";
+    String exception() default ConcurrentInterceptor.DEFAULT_EXCEPTION;
 
     /**
-     * 锁等待时间
+     * 等待锁时间（获取锁时如果在该时间内获取不到，抛出异常）
      *
      * @return 锁等待时间
      */
     Time waitTime() default @Time(1000);
 
     /**
-     * 锁生存/释放时间
+     * 释放锁时间 (当获取到锁时候，在该时间不管执行过程供应者执行完成或不完成，都将当前锁释放)
      *
-     * @return 锁生存/释放时间
+     * @return 释放锁时间
      */
     Time leaseTime() default @Time(5000);
 

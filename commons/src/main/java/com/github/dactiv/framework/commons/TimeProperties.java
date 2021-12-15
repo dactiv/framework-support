@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.commons;
 
+import com.github.dactiv.framework.commons.annotation.Time;
+
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +38,16 @@ public class TimeProperties implements Serializable {
     public TimeProperties(long value, TimeUnit unit) {
         this.value = value;
         this.unit = unit;
+    }
+
+    /**
+     * 创建一个时间配置
+     *
+     * @param time 时间注解
+     */
+    public TimeProperties(Time time) {
+        this.value = time.value();
+        this.unit = time.unit();
     }
 
     /**
@@ -147,6 +159,17 @@ public class TimeProperties implements Serializable {
      */
     public static TimeProperties of(Integer value, TimeUnit unit) {
         return new TimeProperties(value, unit);
+    }
+
+    /**
+     * 创建时间配置
+     *
+     * @param time 时间注解
+     *
+     * @return 时间配置
+     */
+    public static TimeProperties of(Time time) {
+        return new TimeProperties(time);
     }
 
     /**

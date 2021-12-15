@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.idempotent.config;
+package com.github.dactiv.framework.idempotent;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

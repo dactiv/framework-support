@@ -4,7 +4,6 @@ import com.github.dactiv.framework.idempotent.advisor.IdempotentInterceptor;
 import com.github.dactiv.framework.idempotent.advisor.IdempotentPointcutAdvisor;
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentPointcutAdvisor;
-import com.github.dactiv.framework.idempotent.config.IdempotentProperties;
 import com.github.dactiv.framework.idempotent.exception.IdempotentErrorResultResolver;
 import com.github.dactiv.framework.idempotent.generator.SpelExpressionValueGenerator;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;

@@ -9,6 +9,7 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Invocation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -97,7 +98,7 @@ public abstract class AbstractJsonCollectionPostInterceptor implements Intercept
         }
 
         if (result == null) {
-            Field field = FieldUtils.getDeclaredField(targetClass, propertyDescriptor.getName(), true);
+            Field field = ReflectionUtils.findField(targetClass, propertyDescriptor.getName());
             if (Objects.nonNull(field)) {
                 result = AnnotatedElementUtils.findMergedAnnotation(field, JsonCollectionGenericType.class);
             }

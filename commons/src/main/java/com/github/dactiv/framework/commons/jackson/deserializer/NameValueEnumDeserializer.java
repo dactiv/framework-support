@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
 
         Optional<NameValueEnum> optional = valueEnums
                 .stream()
-                .filter(v -> v.getValue().toString().equals(nodeValue))
+                .filter(v -> v.toString().equals(nodeValue))
                 .findFirst();
 
         if (optional.isEmpty()) {
@@ -58,9 +59,10 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
         }
 
         if (optional.isEmpty()) {
+
             optional = valueEnums
                     .stream()
-                    .filter(v -> v.toString().equals(nodeValue))
+                    .filter(v -> v.getValue().toString().equals(nodeValue))
                     .findFirst();
         }
 
@@ -70,13 +72,18 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
         return Casts.cast(result);
     }
 
+    /**
+     * 获取 json node 值
+     *
+     * @param jsonNode json node
+     *
+     * @return 实际值
+     */
     public static String getNodeValue(JsonNode jsonNode) {
-        if (jsonNode.isValueNode()) {
-            return jsonNode.toString();
-        } else if (jsonNode.isObject()) {
+        if (jsonNode.isObject()) {
             return jsonNode.get(ValueEnum.FIELD_NAME).asText();
         }
 
-        return jsonNode.asText();
+        return Objects.isNull(jsonNode.textValue()) ? jsonNode.toString() : jsonNode.textValue();
     }
 }

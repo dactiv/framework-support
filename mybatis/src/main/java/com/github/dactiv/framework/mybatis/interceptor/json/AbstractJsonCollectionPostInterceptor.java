@@ -1,8 +1,7 @@
 package com.github.dactiv.framework.mybatis.interceptor.json;
 
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.mybatis.annotation.JsonCollectionGenericType;
-import org.apache.commons.lang3.reflect.FieldUtils;
+import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.plugin.Interceptor;

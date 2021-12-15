@@ -29,11 +29,7 @@ public class NameEnumDeserializer<T extends NameEnum> extends JsonDeserializer<T
         JsonNode jsonNode = p.getCodec().readTree(p);
 
         String nodeValue = NameValueEnumDeserializer.getNodeValue(jsonNode);
-
-        String currentName = p.getCurrentName();
-        Object value = p.getCurrentValue();
-
-        Class<?> type = BeanUtils.findPropertyType(currentName, value.getClass());
+        Class<?> type = NameValueEnumDeserializer.getType(p);
 
         List<NameEnum> valueEnums = Arrays
                 .stream(type.getEnumConstants())

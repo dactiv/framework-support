@@ -6,7 +6,7 @@ import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.ExecuteStatus;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
-import com.github.dactiv.framework.mybatis.annotation.JsonCollectionGenericType;
+import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.mybatis.handler.JacksonJsonTypeHandler;
 import com.github.dactiv.framework.mybatis.handler.NameValueEnumTypeHandler;
 

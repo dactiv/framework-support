@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.mybatis.annotation;
+package com.github.dactiv.framework.commons.annotation;
 
 
 import java.lang.annotation.*;

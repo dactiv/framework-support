@@ -5,16 +5,18 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,11 +34,7 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
         JsonNode jsonNode = p.getCodec().readTree(p);
 
         String nodeValue = getNodeValue(jsonNode);
-
-        String currentName = p.getCurrentName();
-        Object value = p.getCurrentValue();
-
-        Class<?> type = BeanUtils.findPropertyType(currentName, value.getClass());
+        Class<?> type = getType(p);
 
         List<NameValueEnum> valueEnums = Arrays
                 .stream(type.getEnumConstants())
@@ -82,5 +80,46 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
         }
 
         return Objects.isNull(jsonNode.textValue()) ? jsonNode.toString() : jsonNode.textValue();
+    }
+
+    public static String getCurrentName(JsonParser p) throws IOException {
+        String result = p.getCurrentName();
+
+        if (StringUtils.isEmpty(result)) {
+            result = p.getParsingContext().getParent().getCurrentName();
+        }
+
+        return result;
+    }
+
+    public static Object getCurrentValue(JsonParser p) {
+        Object result = p.getCurrentValue();
+
+        if (Collection.class.isAssignableFrom(result.getClass())) {
+            result = p.getParsingContext().getParent().getCurrentValue();
+        }
+
+        return result;
+    }
+
+    public static Class<?> getType(JsonParser p) throws IOException {
+        String currentName = getCurrentName(p);
+        Object value = getCurrentValue(p);
+
+        Class<?> type = BeanUtils.findPropertyType(currentName, value.getClass());
+
+        if (Collection.class.isAssignableFrom(type)) {
+            Field field = Objects.requireNonNull(
+                    ReflectionUtils.findField(value.getClass(), currentName),
+                    "在类 [" + value.getClass() + "] 中找不到 [" + currentName + "] 字段"
+            );
+
+            JsonCollectionGenericType genericType = field.getAnnotation(JsonCollectionGenericType.class);
+            if (Objects.nonNull(genericType)) {
+                return genericType.value();
+            }
+        }
+
+        return type;
     }
 }

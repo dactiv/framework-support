@@ -7,7 +7,7 @@ import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.mybatis.annotation.JsonCollectionGenericType;
+import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.mybatis.handler.NameValueEnumTypeHandler;
 import com.github.dactiv.framework.mybatis.interceptor.json.AbstractJsonCollectionPostInterceptor;
 import org.apache.ibatis.executor.Executor;

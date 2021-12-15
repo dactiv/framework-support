@@ -1,8 +1,6 @@
 package com.github.dactiv.framework.mybatis.handler;
 
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.enumerate.NameEnum;
-import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

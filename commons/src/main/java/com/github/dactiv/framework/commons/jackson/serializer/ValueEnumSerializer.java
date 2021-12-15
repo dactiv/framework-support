@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
-import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
-import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 
 import java.io.IOException;
 

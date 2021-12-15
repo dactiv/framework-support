@@ -7,9 +7,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
-import com.github.dactiv.framework.commons.jackson.deserializer.NameEnumDeserializer;
-import com.github.dactiv.framework.commons.jackson.deserializer.NameValueEnumDeserializer;
-import com.github.dactiv.framework.commons.jackson.deserializer.ValueEnumDeserializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -37,10 +34,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.websocket.servlet.UndertowWebSocketServletWebServerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -68,14 +65,32 @@ public class SpringWebMvcAutoConfiguration {
     @Configuration
     @EnableConfigurationProperties(SpringWebMvcProperties.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
+    public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {
+
+        private final SpringWebMvcProperties properties;
+
+        public DefaultWebMvcConfigurer(SpringWebMvcProperties properties) {
+            this.properties = properties;
+        }
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
             argumentResolvers.add(new GenericsListHandlerMethodArgumentResolver(getValidator()));
             argumentResolvers.add(new DeviceHandlerMethodArgumentResolver());
         }
+
+        @Override
+        public void customize(UndertowServletWebServerFactory factory) {
+            super.customize(factory);
+            factory.addDeploymentInfoCustomizers(deploymentInfo -> {
+                WebSocketDeploymentInfo webSocketDeploymentInfo = new WebSocketDeploymentInfo();
+                webSocketDeploymentInfo.setBuffers(new DefaultByteBufferPool(false, properties.getWebSocketDeploymentBuffers()));
+                deploymentInfo.addServletContextAttribute("io.undertow.websockets.jsr.WebSocketDeploymentInfo", webSocketDeploymentInfo);
+            });
+        }
     }
+
+
 
     @Bean
     @ConditionalOnMissingBean(RestResultErrorAttributes.class)
@@ -163,15 +178,4 @@ public class SpringWebMvcAutoConfiguration {
         return new ClearFilterResultHolderFilter();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UndertowServletWebServerFactory.class)
-    public WebServerFactoryCustomizer<UndertowServletWebServerFactory>  undertowCustomizerBean(SpringWebMvcProperties properties) {
-        return factory -> {
-            factory.addDeploymentInfoCustomizers(deploymentInfo -> {
-                WebSocketDeploymentInfo webSocketDeploymentInfo = new WebSocketDeploymentInfo();
-                webSocketDeploymentInfo.setBuffers(new DefaultByteBufferPool(false, properties.getWebSocketDeploymentBuffers()));
-                deploymentInfo.addServletContextAttribute("io.undertow.websockets.jsr.WebSocketDeploymentInfo", webSocketDeploymentInfo);
-            });
-        };
-    }
 }

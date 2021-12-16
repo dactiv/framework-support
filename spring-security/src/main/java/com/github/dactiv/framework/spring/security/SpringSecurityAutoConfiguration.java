@@ -100,21 +100,28 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(RememberMeServices.class)
     public CookieRememberService cookieRememberService(AuthenticationProperties properties,
                                                        RedissonClient redissonClient,
-                                                       List<UserDetailsService> userDetailsServices) {
-        return new CookieRememberService(properties, redissonClient, userDetailsServices);
+                                                       ObjectProvider<UserDetailsService> userDetailsService) {
+        return new CookieRememberService(
+                properties,
+                redissonClient,
+                userDetailsService.orderedStream().collect(Collectors.toList())
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
-    public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses) {
-        return new JsonAuthenticationFailureHandler(failureResponses);
+    public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureResponse) {
+        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().collect(Collectors.toList()));
     }
 
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
-    public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(List<JsonAuthenticationSuccessResponse> successResponses,
+    public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(ObjectProvider<JsonAuthenticationSuccessResponse> successResponse,
                                                                              AuthenticationProperties properties) {
-        return new JsonAuthenticationSuccessHandler(successResponses, properties);
+        return new JsonAuthenticationSuccessHandler(
+                successResponse.orderedStream().collect(Collectors.toList()),
+                properties
+        );
     }
 
     @Bean
@@ -151,16 +158,22 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     public RequestAuthenticationProvider requestAuthenticationProvider(RedissonClient redissonClient,
-                                                                       List<UserDetailsService> userDetailsServices) {
-        return new RequestAuthenticationProvider(redissonClient, userDetailsServices);
+                                                                       ObjectProvider<UserDetailsService> userDetailsService) {
+        return new RequestAuthenticationProvider(
+                redissonClient,
+                userDetailsService.orderedStream().collect(Collectors.toList())
+        );
     }
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
 
-        @Autowired
-        private ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor;
+        private final ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor;
+
+        public DefaultWebMvcConfigurer(ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor) {
+            this.controllerAuditHandlerInterceptor = controllerAuditHandlerInterceptor;
+        }
 
         @Override
         public void addInterceptors(InterceptorRegistry registry) {

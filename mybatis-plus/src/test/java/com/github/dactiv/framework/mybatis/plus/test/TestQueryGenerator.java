@@ -49,6 +49,8 @@ public class TestQueryGenerator {
         map.add("filter_[city.id_jin]", "nanning");
         map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
 
+        map.add("filter_[city.name_jeq]", "nanning");
+
         QueryWrapper<AllTypeEntity> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);
 
         String targetSql = queryWrapper.getTargetSql();
@@ -72,7 +74,8 @@ public class TestQueryGenerator {
 
         Assertions.assertTrue(targetSql.contains("creation_time BETWEEN ? AND ?"));
 
-        Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city, ?)"));
+        Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', ?，'$')"));
+        Assertions.assertTrue(targetSql.contains("city->'$.name' = ?"));
         Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) OR JSON_CONTAINS(area, ?))"));
 
     }

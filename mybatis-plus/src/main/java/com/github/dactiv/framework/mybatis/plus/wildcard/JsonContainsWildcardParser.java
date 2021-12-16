@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * json格式的包含查询通配符实现
+ * json 格式的包含查询通配符实现
  *
  * @author maurice.chen
  */
@@ -62,40 +62,24 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
         }
     }
 
+    /**
+     * 获取表达式
+     *
+     * @param propertyName 属性名称
+     * @param index 值索引
+     *
+     * @return JSON_CONTAINS 表达式
+     */
     public static String getExpression(String propertyName, int index) {
-
-        String result;
 
         if (StringUtils.contains(propertyName, Casts.DEFAULT_DOT_SYMBOL)) {
             String path = StringUtils.substringAfter(propertyName, Casts.DEFAULT_DOT_SYMBOL);
             String field = StringUtils.substringBefore(propertyName, Casts.DEFAULT_DOT_SYMBOL);
-            result = "JSON_CONTAINS(" + field + "," + "JSON_OBJECT(\'" + path + "\', {" + index + "}))";
-        } else {
-            result = "JSON_CONTAINS(" + propertyName + ", {" + index + "})";
+            return "JSON_CONTAINS(" + field + "->'$[*]." + path  + "', {" + index + "}，'$')";
         }
 
-        return result;
+        return "JSON_CONTAINS(" + propertyName + ", {" + index + "})";
     }
-
-   /* private static String getJsonObject(String path) {
-        String temp = path;
-        StringBuilder result = new StringBuilder();
-        boolean hasDot = StringUtils.contains(temp, Casts.DEFAULT_DOT_SYMBOL);
-
-        while (StringUtils.contains(temp, Casts.DEFAULT_DOT_SYMBOL)) {
-            String item = StringUtils.substringBefore(temp, Casts.DEFAULT_DOT_SYMBOL);
-            temp = StringUtils.substringAfter(temp, Casts.DEFAULT_DOT_SYMBOL);
-            result.append("JSON_OBJECT(\'").append(item).append("\',");
-        }
-
-        result.append("JSON_OBJECT(\'").append(temp).append("\', ?)");
-
-        if (hasDot) {
-            result.append(")");
-        }
-
-        return result.toString();
-    }*/
 
     /**
      * 获取匹配值
@@ -107,7 +91,7 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
     public static String getMatchValue(Object value) {
         String result = value.toString();
         if (String.class.isAssignableFrom(value.getClass())) {
-            result = "\"" + value + "\"";
+            result = "\'" + value + "\'";
         }
         return result;
     }

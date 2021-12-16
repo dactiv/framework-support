@@ -46,7 +46,7 @@ public class TestQueryGenerator {
 
         map.put("filter_[creation_time_between]", Arrays.asList(new Date(), new Date()));
 
-        map.add("filter_[city_jin]", "nanning");
+        map.add("filter_[city.id_jin]", "nanning");
         map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
 
         QueryWrapper<AllTypeEntity> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);

@@ -103,15 +103,10 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                     }
 
                     MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-
                     String className = metadataReader.getClassMetadata().getClassName();
-
                     Class<?> targetClass = Class.forName(className);
-
                     BeanDescription beanDescription = config.introspectClassAnnotations(targetClass);
-
                     AnnotatedClass annotatedClass = beanDescription.getClassInfo();
-
                     addProviderFilter(simpleFilterProvider, annotatedClass);
 
                     for (AnnotatedField field : annotatedClass.fields()) {

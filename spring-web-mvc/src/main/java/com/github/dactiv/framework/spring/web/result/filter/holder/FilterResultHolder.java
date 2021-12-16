@@ -18,7 +18,7 @@ public class FilterResultHolder {
 
     public static final String MODE_THREAD_LOCAL = "MODE_THREAD_LOCAL";
 
-    public static final String SYSTEM_PROPERTY = "sg.exclude.holder.strategy";
+    public static final String SYSTEM_PROPERTY = "jackson.exclude.holder.strategy";
 
     private static String strategyName = System.getProperty(SYSTEM_PROPERTY);
 

@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.mybatis.plus.wildcard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,7 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
         if (Iterable.class.isAssignableFrom(property.getValue().getClass())) {
             queryWrapper.and(c -> c.apply(applyObject.getSql(), applyObject.getArgs().toArray()));
         } else {
-            queryWrapper.apply(applyObject.getSql(), applyObject.getArgs().toArray());
+            queryWrapper.apply(applyObject.getSql(), applyObject.getArgs().iterator().next());
         }
     }
 
@@ -46,8 +47,8 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
 
             for (Object o : iterable) {
                 String value = getMatchValue(o);
+                sql.add(getExpression(property.getPropertyName(), i));
                 values.add(value);
-                sql.add("JSON_CONTAINS(" + property.getPropertyName() + ", {" + i + "})");
                 i++;
             }
 
@@ -55,11 +56,46 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
             return new ApplyObject(applySql, values);
         } else {
             return new ApplyObject(
-                    "JSON_CONTAINS(" + property.getPropertyName() + ", {0})",
+                    getExpression(property.getPropertyName(), 0),
                     Collections.singletonList(getMatchValue(property.getValue()))
             );
         }
     }
+
+    public static String getExpression(String propertyName, int index) {
+
+        String result;
+
+        if (StringUtils.contains(propertyName, Casts.DEFAULT_DOT_SYMBOL)) {
+            String path = StringUtils.substringAfter(propertyName, Casts.DEFAULT_DOT_SYMBOL);
+            String field = StringUtils.substringBefore(propertyName, Casts.DEFAULT_DOT_SYMBOL);
+            result = "JSON_CONTAINS(" + field + "," + "JSON_OBJECT(\'" + path + "\', {" + index + "}))";
+        } else {
+            result = "JSON_CONTAINS(" + propertyName + ", {" + index + "})";
+        }
+
+        return result;
+    }
+
+   /* private static String getJsonObject(String path) {
+        String temp = path;
+        StringBuilder result = new StringBuilder();
+        boolean hasDot = StringUtils.contains(temp, Casts.DEFAULT_DOT_SYMBOL);
+
+        while (StringUtils.contains(temp, Casts.DEFAULT_DOT_SYMBOL)) {
+            String item = StringUtils.substringBefore(temp, Casts.DEFAULT_DOT_SYMBOL);
+            temp = StringUtils.substringAfter(temp, Casts.DEFAULT_DOT_SYMBOL);
+            result.append("JSON_OBJECT(\'").append(item).append("\',");
+        }
+
+        result.append("JSON_OBJECT(\'").append(temp).append("\', ?)");
+
+        if (hasDot) {
+            result.append(")");
+        }
+
+        return result.toString();
+    }*/
 
     /**
      * 获取匹配值

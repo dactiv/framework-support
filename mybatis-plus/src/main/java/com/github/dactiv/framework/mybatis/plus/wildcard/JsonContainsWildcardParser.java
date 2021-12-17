@@ -46,7 +46,6 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
             List<String> sql = new ArrayList<>();
 
             for (Object o : iterable) {
-                //String value = getMatchValue(o);
                 sql.add(getExpression(property.getPropertyName(), i));
                 values.add(o);
                 i++;
@@ -79,21 +78,6 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
         }
 
         return "JSON_CONTAINS(" + propertyName + ", {" + index + "})";
-    }
-
-    /**
-     * 获取匹配值
-     *
-     * @param value 值
-     *
-     * @return 可以匹配的 json 值
-     */
-    public static String getMatchValue(Object value) {
-        String result = value.toString();
-        if (String.class.isAssignableFrom(value.getClass())) {
-            result = "\"" + value + "\"";
-        }
-        return result;
     }
 
     /**

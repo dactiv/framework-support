@@ -353,11 +353,6 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
         return returnValue || super._isIgnorable(a);
     }
 
-    @Override
-    public PropertyName findNameForSerialization(Annotated a) {
-        return super.findNameForSerialization(a);
-    }
-
     /**
      * 是否匹配排除
      *

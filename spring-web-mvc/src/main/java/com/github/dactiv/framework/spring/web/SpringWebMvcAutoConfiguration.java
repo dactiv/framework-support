@@ -147,7 +147,7 @@ public class SpringWebMvcAutoConfiguration {
 
         objectMapper.setSerializerProvider(new FilterResultSerializerProvider());
 
-        FilterResultAnnotationBuilder annotationBuilder = new FilterResultAnnotationBuilder(properties.getBasePackages());
+        FilterResultAnnotationBuilder annotationBuilder = new FilterResultAnnotationBuilder(properties.getFilterViewBasePackages());
 
         objectMapper.setFilterProvider(annotationBuilder.getFilterProvider(objectMapper.getSerializationConfig()));
         objectMapper.setAnnotationIntrospector(annotationBuilder);

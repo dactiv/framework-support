@@ -46,9 +46,9 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
             List<String> sql = new ArrayList<>();
 
             for (Object o : iterable) {
-                String value = getMatchValue(o);
+                //String value = getMatchValue(o);
                 sql.add(getExpression(property.getPropertyName(), i));
-                values.add(value);
+                values.add(o);
                 i++;
             }
 
@@ -57,7 +57,7 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
         } else {
             return new ApplyObject(
                     getExpression(property.getPropertyName(), 0),
-                    Collections.singletonList(getMatchValue(property.getValue()))
+                    Collections.singletonList(property.getValue())
             );
         }
     }
@@ -75,7 +75,7 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
         if (StringUtils.contains(propertyName, Casts.DEFAULT_DOT_SYMBOL)) {
             String path = StringUtils.substringAfter(propertyName, Casts.DEFAULT_DOT_SYMBOL);
             String field = StringUtils.substringBefore(propertyName, Casts.DEFAULT_DOT_SYMBOL);
-            return "JSON_CONTAINS(" + field + "->'$[*]." + path  + "', {" + index + "}，'$')";
+            return "JSON_CONTAINS(" + field + "->'$[*]." + path  + "', {" + index + "}, '$')";
         }
 
         return "JSON_CONTAINS(" + propertyName + ", {" + index + "})";
@@ -91,7 +91,7 @@ public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?
     public static String getMatchValue(Object value) {
         String result = value.toString();
         if (String.class.isAssignableFrom(value.getClass())) {
-            result = "\'" + value + "\'";
+            result = "\"" + value + "\"";
         }
         return result;
     }

@@ -19,7 +19,7 @@ public class JsonEqWildcardParser implements WildcardParser<QueryWrapper<?>> {
     public void structure(Property property, QueryWrapper<?> query) {
         String propertyName = StringUtils.substringBefore(property.getPropertyName(), Casts.DEFAULT_DOT_SYMBOL);
         String path = StringUtils.substringAfter(property.getPropertyName(), Casts.DEFAULT_DOT_SYMBOL);
-        query.apply(propertyName + "->'$." + path + "' = {0}", "\'" + property.getValue() + "\'");
+        query.apply(propertyName + "->'$." + path + "' = {0}", property.getValue());
     }
 
     @Override

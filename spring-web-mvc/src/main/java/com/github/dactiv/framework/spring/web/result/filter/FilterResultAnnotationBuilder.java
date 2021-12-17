@@ -239,7 +239,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                     }
                 }
 
-                if (Objects.nonNull(returnValue)) {
+                if (Objects.isNull(returnValue)) {
                     returnValue = getIncludeViewId(a.getAnnotation(IncludeView.class), ids, a);
                 }
 

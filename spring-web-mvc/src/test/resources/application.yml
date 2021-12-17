@@ -2,4 +2,4 @@ dactiv:
   spring:
     web:
       mvc:
-        base-packages: com.github.dactiv.framework.spring.web.test.result.entity
+        filter-view-base-packages: com.github.dactiv.framework.spring.web.test.result.entity

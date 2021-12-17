@@ -18,7 +18,7 @@ public class SpringWebMvcProperties {
     /**
      * 需要扫描的包路径，用于指定哪个包下面的类引入了 filter 注解，通过该配置自动添加 jackson filter
      */
-    private List<String> basePackages = new ArrayList<>();
+    private List<String> filterViewBasePackages = new ArrayList<>();
 
     /**
      * 过滤属性的 id 头名称, "X-FILTER-RESULT-ID"
@@ -53,17 +53,17 @@ public class SpringWebMvcProperties {
      *
      * @return 需要扫描的包路径
      */
-    public List<String> getBasePackages() {
-        return basePackages;
+    public List<String> getFilterViewBasePackages() {
+        return filterViewBasePackages;
     }
 
     /**
      * 设置需要扫描的包路径
      *
-     * @param basePackages 需要扫描的包路径
+     * @param filterViewBasePackages 需要扫描的包路径
      */
-    public void setBasePackages(List<String> basePackages) {
-        this.basePackages = basePackages;
+    public void setFilterViewBasePackages(List<String> filterViewBasePackages) {
+        this.filterViewBasePackages = filterViewBasePackages;
     }
 
     /**

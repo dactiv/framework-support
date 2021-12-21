@@ -70,6 +70,19 @@ public class ErrorCodeException extends SystemException {
     }
 
     /**
+     * 断言是否为 true， 如果不为 true 抛出指定代码异常
+     *
+     * @param value 断言值
+     * @param message 错误消息
+     * @param code 代码
+     */
+    public static void isTrue(boolean value, String message, String code) {
+        if (!value) {
+            throw new  ErrorCodeException(message, code);
+        }
+    }
+
+    /**
      * 抛出带有错误代码的异常
      *
      * @param cause   异常类

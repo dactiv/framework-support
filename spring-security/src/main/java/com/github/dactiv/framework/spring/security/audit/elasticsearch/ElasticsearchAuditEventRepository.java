@@ -11,6 +11,12 @@ import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.Ind
 import com.github.dactiv.framework.spring.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -19,10 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.*;
 
 import java.time.Instant;
 import java.util.*;
@@ -85,12 +88,14 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         String index = getIndex(after, principal, type);
 
-        Criteria criteria = createCriteria(after, type, principal);
+        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
 
-        Query query = new CriteriaQuery(criteria).addSort(Sort.by(Sort.Order.desc("timestamp")));
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
+                .withQuery(queryBuilder)
+                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
 
         return elasticsearchRestTemplate
-                .search(query, Map.class, IndexCoordinates.of(index))
+                .search(builder.build(), Map.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
                 .map(this::createPluginAuditEvent)
@@ -102,17 +107,15 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         String index = getIndex(after, principal, type);
 
-        Criteria criteria = createCriteria(after, type, principal);
+        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
 
-        Query query = new CriteriaQuery(
-                criteria,
-                org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize())
-        );
-
-        query.addSort(Sort.by(Sort.Order.desc("timestamp")));
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
+                .withQuery(queryBuilder)
+                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
+                .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         List<PluginAuditEvent> content = elasticsearchRestTemplate
-                .search(query, Map.class, IndexCoordinates.of(index))
+                .search(builder.build(), Map.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
                 .map(this::createPluginAuditEvent)
@@ -169,23 +172,22 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      *
      * @return 查询条件
      */
-    private Criteria createCriteria(Instant after, String type, String principal) {
-
-        Criteria criteria = new Criteria();
+    private QueryBuilder createQueryBuilder(Instant after, String type, String principal) {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
         if (StringUtils.isNotBlank(type)) {
-            criteria = criteria.and("type").is(type);
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("type", type));
         }
 
         if (Objects.nonNull(after)) {
-            criteria = criteria.and("timestamp").greaterThanEqual(after.getEpochSecond());
+            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("timestamp").gte(after.getEpochSecond()));
         }
 
         if (StringUtils.isNotBlank(principal)) {
-            criteria = criteria.and("principal").contains(principal);
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("principal", principal));
         }
 
-        return criteria;
+        return queryBuilder;
     }
 
     /**

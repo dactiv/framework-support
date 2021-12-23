@@ -5,17 +5,17 @@ import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
 
 /**
- * 小于等于查询通配符实现
+ * 大于等于查询通配符实现
  *
  * @author maurice.chen
  */
-public class LeWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class GteWildcardParser implements WildcardParser<QueryWrapper<?>> {
 
-    private final static String DEFAULT_WILDCARD_NAME = "le";
+    private final static String DEFAULT_WILDCARD_NAME = "gte";
 
     @Override
     public void structure(Property property, QueryWrapper<?> queryWrapper) {
-        queryWrapper.le(property.getPropertyName(), property.getValue());
+        queryWrapper.ge(property.getPropertyName(), property.getValue());
     }
 
     @Override

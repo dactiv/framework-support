@@ -10,12 +10,12 @@ import org.apache.commons.lang3.BooleanUtils;
  *
  * @author maurice.chen
  */
-public class EqnWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class EqnWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "eqn";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
         if (BooleanUtils.toBoolean(property.getValue().toString())) {
             queryWrapper.isNull(property.getPropertyName());
         }

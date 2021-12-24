@@ -31,7 +31,7 @@ public interface QueryGenerator<T> {
      *
      * @return 通配符解析器集合
      */
-    List<WildcardParser> getWildcardParserList();
+    List<WildcardParser<T>> getWildcardParserList();
 
     /**
      * 获取条件解析器集合

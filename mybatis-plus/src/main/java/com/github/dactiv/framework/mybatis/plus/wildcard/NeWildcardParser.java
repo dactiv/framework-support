@@ -9,12 +9,12 @@ import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
  *
  * @author maurice.chen
  */
-public class NeWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class NeWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "ne";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
         queryWrapper.ne(property.getPropertyName(), property.getValue());
     }
 

@@ -1,8 +1,10 @@
 package com.github.dactiv.framework.mybatis.plus.wildcard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
+import org.apache.ibatis.javassist.expr.Cast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +14,15 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class NotInWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class NotInWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "nin";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
         if (Iterable.class.isAssignableFrom(property.getValue().getClass())) {
 
-            Iterable<?> iterable = (Iterable<?>) property.getValue();
+            Iterable<?> iterable = Casts.cast(property.getValue());
             List<Object> values = new ArrayList<>();
 
             iterable.forEach(values::add);

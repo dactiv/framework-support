@@ -31,7 +31,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     /**
      * 通配符解析器集合
      */
-    private final List<WildcardParser> wildcardParsers;
+    private final List<WildcardParser<QueryWrapper<T>>> wildcardParsers;
 
     /**
      * 条件解析器集合
@@ -52,7 +52,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      * @param wildcardParsers  通配符解析器集合
      * @param conditionParsers 条件解析器集合
      */
-    public MybatisPlusQueryGenerator(List<WildcardParser> wildcardParsers, List<ConditionParser> conditionParsers) {
+    public MybatisPlusQueryGenerator(List<WildcardParser<QueryWrapper<T>>> wildcardParsers, List<ConditionParser> conditionParsers) {
         this.wildcardParsers = wildcardParsers;
         this.conditionParsers = conditionParsers;
     }
@@ -70,12 +70,12 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
                 temp = queryWrapper.or();
             }
 
-            List<WildcardParser> result = getWildcardParserList()
+            List<WildcardParser<QueryWrapper<T>>> result = getWildcardParserList()
                     .stream()
                     .filter(w -> w.isSupport(c.getName()))
                     .collect(Collectors.toList());
 
-            for (WildcardParser wildcardParser : result) {
+            for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
                 wildcardParser.structure(c.getProperty(), temp);
             }
 
@@ -85,7 +85,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     }
 
     @Override
-    public List<WildcardParser> getWildcardParserList() {
+    public List<WildcardParser<QueryWrapper<T>>> getWildcardParserList() {
         return wildcardParsers;
     }
 
@@ -99,24 +99,24 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
      *
      * @return 通配符解析器集合
      */
-    public List<WildcardParser> getDefaultWildcardParserList() {
+    public List<WildcardParser<QueryWrapper<T>>> getDefaultWildcardParserList() {
         return Arrays.asList(
-                new BetweenWildcardParser(),
-                new EqWildcardParser(),
-                new NeWildcardParser(),
-                new LikeWildcardParser(),
-                new LikeRightWildcardParser(),
-                new LikeLeftWildcardParser(),
-                new GteWildcardParser(),
-                new GtWildcardParser(),
-                new LteWildcardParser(),
-                new LtWildcardParser(),
-                new InWildcardParser(),
-                new NotInWildcardParser(),
-                new EqnWildcardParser(),
-                new NenWildcardParser(),
-                new JsonContainsWildcardParser(),
-                new JsonEqWildcardParser()
+                new BetweenWildcardParser<>(),
+                new EqWildcardParser<>(),
+                new NeWildcardParser<>(),
+                new LikeWildcardParser<>(),
+                new LikeRightWildcardParser<>(),
+                new LikeLeftWildcardParser<>(),
+                new GteWildcardParser<>(),
+                new GtWildcardParser<>(),
+                new LteWildcardParser<>(),
+                new LtWildcardParser<>(),
+                new InWildcardParser<>(),
+                new NotInWildcardParser<>(),
+                new EqnWildcardParser<>(),
+                new NenWildcardParser<>(),
+                new JsonContainsWildcardParser<>(),
+                new JsonEqWildcardParser<>()
         );
     }
 

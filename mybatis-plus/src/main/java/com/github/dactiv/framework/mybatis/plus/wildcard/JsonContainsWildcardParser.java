@@ -15,12 +15,12 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class JsonContainsWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class JsonContainsWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "jin";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
         ApplyObject applyObject = structure(property);
         if (Iterable.class.isAssignableFrom(property.getValue().getClass())) {
             queryWrapper.and(c -> c.apply(applyObject.getSql(), applyObject.getArgs().toArray()));

@@ -24,10 +24,9 @@ import org.springframework.context.annotation.Configuration;
 public class MybatisPlusAutoConfiguration {
 
     @Bean
-    @SuppressWarnings("rawtypes")
     @ConditionalOnMissingBean(QueryGenerator.class)
     public MybatisPlusQueryGenerator<?> mybatisPlusQueryGenerator() {
-        return new MybatisPlusQueryGenerator();
+        return new MybatisPlusQueryGenerator<>();
     }
 
     @Bean

@@ -11,12 +11,12 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author maurice.chen
  */
-public class JsonEqWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class JsonEqWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "jeq";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> query) {
+    public void structure(Property property, QueryWrapper<T> query) {
         String propertyName = StringUtils.substringBefore(property.getPropertyName(), Casts.DEFAULT_DOT_SYMBOL);
         String path = StringUtils.substringAfter(property.getPropertyName(), Casts.DEFAULT_DOT_SYMBOL);
         query.apply(propertyName + "->'$." + path + "' = {0}", property.getValue());

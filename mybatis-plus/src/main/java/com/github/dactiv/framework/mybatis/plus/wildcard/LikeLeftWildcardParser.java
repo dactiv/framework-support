@@ -9,12 +9,12 @@ import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
  *
  * @author maurice.chen
  */
-public class LikeLeftWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class LikeLeftWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "llike";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
         queryWrapper.likeRight(property.getPropertyName(), property.getValue());
     }
 

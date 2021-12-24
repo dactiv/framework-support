@@ -13,12 +13,12 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class BetweenWildcardParser implements WildcardParser<QueryWrapper<?>> {
+public class BetweenWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
 
     private final static String DEFAULT_WILDCARD_NAME = "between";
 
     @Override
-    public void structure(Property property, QueryWrapper<?> queryWrapper) {
+    public void structure(Property property, QueryWrapper<T> queryWrapper) {
 
         if (!Iterable.class.isAssignableFrom(property.getValue().getClass())) {
             throw new SystemException("Between 查询的参数值的数组必须大于 1 位");

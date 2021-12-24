@@ -28,8 +28,8 @@ public class TestQueryGenerator {
         map.add("filter_[id_eqn]", true);
         map.add("filter_[id_eq]", BigDecimal.ONE.intValue());
 
-        map.add("filter_[user_id_ge]", BigDecimal.ZERO.intValue());
-        map.add("filter_[user_id_le]", Integer.MIN_VALUE);
+        map.add("filter_[user_id_gte]", BigDecimal.ZERO.intValue());
+        map.add("filter_[user_id_lte]", Integer.MIN_VALUE);
 
         map.add("filter_[retry_count_gt]", BigDecimal.ZERO.intValue());
         map.add("filter_[retry_count_lt]", Integer.MIN_VALUE);

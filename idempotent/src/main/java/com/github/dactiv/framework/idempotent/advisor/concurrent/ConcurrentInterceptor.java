@@ -201,7 +201,9 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         try {
             return supplier.get();
         } finally {
-            lock.unlock();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
 
     }

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
-import org.apache.ibatis.javassist.expr.Cast;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -26,7 +26,7 @@ public class LoggingClientHttpRequestInterceptor implements CustomClientHttpRequ
         return response;
     }
 
-    private void traceRequest(HttpRequest request, byte[] body) throws IOException {
+    private void traceRequest(HttpRequest request, byte[] body)  {
         LOGGER.debug("===========================request begin================================================");
         LOGGER.debug("URI         : {}", request.getURI());
         LOGGER.debug("Method      : {}", request.getMethod());

@@ -155,7 +155,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
         RandomNumberGenerator rng = getRandomNumberGenerator();
         try {
             if (rng != null && SecureRandomNumberGenerator.class.isAssignableFrom(rng.getClass())) {
-                SecureRandom secureRandom = (SecureRandom) rng.getRandom();
+                SecureRandom secureRandom = rng.getRandom();
                 signature.initSign(getPrivateKey(key), secureRandom);
             } else {
                 signature.initSign(getPrivateKey(key));

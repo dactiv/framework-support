@@ -119,7 +119,7 @@ public abstract class AbstractBlockCipherService extends AbstractJcaCipherServic
      * @return true 为是，否则 false
      */
     private boolean isModeInitializationVectorSupport(OperationMode mode) {
-        return mode != null && !mode.equals(OperationMode.ECB) && !mode.equals(OperationMode.NONE);
+        return mode == null || mode.equals(OperationMode.ECB) || mode.equals(OperationMode.NONE);
     }
 
     /**
@@ -147,13 +147,13 @@ public abstract class AbstractBlockCipherService extends AbstractJcaCipherServic
     protected byte[] generateInitializationVector(boolean streaming) {
         if (streaming) {
             OperationMode streamingMode = getStreamingMode();
-            if (!isModeInitializationVectorSupport(streamingMode)) {
+            if (isModeInitializationVectorSupport(streamingMode)) {
                 String msg = "[流]-[" + streamingMode.name() + "]密码分组模式不支持初始化向量";
                 throw new IllegalStateException(msg);
             }
         } else {
             OperationMode mode = getMode();
-            if (!isModeInitializationVectorSupport(mode)) {
+            if (isModeInitializationVectorSupport(mode)) {
                 String msg = "[" + streamingMode.name() + "]密码分组模式不支持初始化向量";
                 throw new IllegalStateException(msg);
             }

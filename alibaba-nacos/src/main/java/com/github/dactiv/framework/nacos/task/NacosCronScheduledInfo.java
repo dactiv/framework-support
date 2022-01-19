@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.nacos.task;
 
-import org.springframework.scheduling.config.CronTask;
-
 /**
  * nacos cron 调度信息
  *
@@ -68,9 +66,4 @@ public class NacosCronScheduledInfo extends CronScheduledInfo {
         this.timeZonePropertyName = timeZonePropertyName;
     }
 
-    @Override
-    public CronTask createCronTask() {
-
-        return super.createCronTask();
-    }
 }

@@ -132,6 +132,7 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
         putParameterValue(temp, name, webRequest.getParameterMap());
 
         HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+        Objects.requireNonNull(servletRequest, "current request is not http servlet request ");
         MultipartHttpServletRequest multipartRequest = WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
         if (multipartRequest != null) {

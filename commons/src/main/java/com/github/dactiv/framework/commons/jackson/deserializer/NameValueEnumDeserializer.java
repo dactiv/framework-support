@@ -11,7 +11,6 @@ import com.github.dactiv.framework.commons.enumerate.ValueEnum;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;

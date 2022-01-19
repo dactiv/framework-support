@@ -14,18 +14,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.*;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
 import java.time.Instant;
 import java.util.*;
@@ -92,7 +91,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
+                .withSorts(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
 
         return elasticsearchRestTemplate
                 .search(builder.build(), Map.class, IndexCoordinates.of(index))
@@ -111,7 +110,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
+                .withSorts(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         List<PluginAuditEvent> content = elasticsearchRestTemplate

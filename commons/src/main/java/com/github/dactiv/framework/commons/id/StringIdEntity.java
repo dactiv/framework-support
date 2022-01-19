@@ -1,7 +1,5 @@
 package com.github.dactiv.framework.commons.id;
 
-import com.github.dactiv.framework.commons.id.number.IntegerIdEntity;
-
 import java.util.Date;
 
 /**

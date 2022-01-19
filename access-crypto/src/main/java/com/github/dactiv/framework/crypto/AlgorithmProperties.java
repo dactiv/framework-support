@@ -3,7 +3,7 @@ package com.github.dactiv.framework.crypto;
 import java.io.Serializable;
 
 /**
- * 加解密算法模型
+ * 加解密算法模型配置
  *
  * @author maurice
  */

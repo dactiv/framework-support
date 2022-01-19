@@ -70,7 +70,7 @@ public class CipherAlgorithmService {
             throw new UnknownAlgorithmException(msg);
         }
         try {
-            return (T) algorithmServiceMap.get(algorithmName).newInstance();
+            return (T) algorithmServiceMap.get(algorithmName).getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new CryptoException(e);
         }
@@ -79,10 +79,10 @@ public class CipherAlgorithmService {
     /**
      * 获取秘密法服务
      *
-     * @param ca
-     * @param <T>
+     * @param ca 加解密算法模型配置
+     * @param <T> 加解密服务实现类型
      *
-     * @return
+     * @return 加解密服务
      */
     @SuppressWarnings("unchecked")
     public <T extends CipherService> T getCipherService(AlgorithmProperties ca) {

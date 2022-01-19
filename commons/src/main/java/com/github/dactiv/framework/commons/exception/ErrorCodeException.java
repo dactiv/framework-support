@@ -10,12 +10,12 @@ public class ErrorCodeException extends SystemException {
     /**
      * 默认错误的异常信息
      */
-    public static String DEFAULT_ERROR_MESSAGE = "服务器异常，请稍后再试。";
+    public static final String DEFAULT_ERROR_MESSAGE = "服务器异常，请稍后再试。";
 
     /**
      * 默认异常代码
      */
-    public static String DEFAULT_EXCEPTION_CODE = "500";
+    public static final String DEFAULT_EXCEPTION_CODE = "500";
 
     /**
      * 错误代码

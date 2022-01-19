@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +28,7 @@ import java.util.Objects;
  *
  * @author maurice
  */
-public class ControllerAuditHandlerInterceptor extends HandlerInterceptorAdapter implements ApplicationEventPublisherAware {
+public class ControllerAuditHandlerInterceptor implements ApplicationEventPublisherAware, AsyncHandlerInterceptor {
 
     private static final String DEFAULT_SUCCESS_SUFFIX_NAME = "SUCCESS";
 

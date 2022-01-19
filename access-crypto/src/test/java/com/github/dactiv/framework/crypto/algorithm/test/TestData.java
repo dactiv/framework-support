@@ -12,7 +12,7 @@ import org.junit.Assert;
  */
 public class TestData {
 
-    public static final String TEXT = "1234567890abcdefghijklnmopqrsduvwxyz一串中文后面跟着标点符号~!@#$%^&*()_+-=[]{}\';,./?><:";
+    public static final String TEXT = "1234567890abcdefghijklnmopqrsduvwxyz一串中文后面跟着标点符号~!@#$%^&*()_+-=[]{}\\';,./?><:";
 
     public static final String SALT = "maurice";
 

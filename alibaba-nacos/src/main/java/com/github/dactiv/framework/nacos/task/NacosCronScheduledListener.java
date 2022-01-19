@@ -4,8 +4,8 @@ import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
-import org.apache.commons.configuration.tree.DefaultExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +91,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     protected void configReceive(String dataId, String configInfo) throws IOException {
 
         // 获取后缀名
-        String fileExtension = StringUtils.substringAfterLast(dataId, DefaultExpressionEngine.DEFAULT_PROPERTY_DELIMITER);
+        String fileExtension = StringUtils.substringAfterLast(dataId, Casts.DEFAULT_DOT_SYMBOL);
 
         // 通过 configInfo 创建配置信息
         List<PropertySource<?>> properties = NacosDataParserHandler.getInstance().parseNacosData(dataId, configInfo, fileExtension);

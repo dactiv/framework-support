@@ -40,7 +40,7 @@ public enum HashAlgorithmMode {
     /**
      * 算法名称
      */
-    private String name;
+    private final String name;
 
     /**
      * 获取算法名称

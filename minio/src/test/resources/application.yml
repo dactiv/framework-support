@@ -7,9 +7,5 @@ management:
 dactiv:
   minio:
     endpoint: http://127.0.0.1:9000
-    # window key 配置
-    #access-key: V18BN9PMFTDAOTBVR6CS
-    #secret-key: d3xBTdyN0eMjJZATRvpdDBZwE3qOGefHJQPLj8Cq
-    # mac key 配置
-    access-key: CRIZ9VKL3PUEDN414SR0
-    secret-key: YJ9andk0rOgxYPQI7Fb0+dBXkRJOmwkrFwoeHI1S
+    access-key: V18BN9PMFTDAOTBVR6CS
+    secret-key: d3xBTdyN0eMjJZATRvpdDBZwE3qOGefHJQPLj8Cq

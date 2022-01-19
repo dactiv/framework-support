@@ -36,18 +36,17 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
     /**
      * mapper 实例
      */
-    @Autowired
     protected M baseMapper;
 
     /**
      * 实体类型
      */
-    protected Class<T> entityClass;
+    protected final Class<T> entityClass;
 
     /**
      * mapper 类型
      */
-    protected Class<M> mapperClass;
+    protected  final Class<M> mapperClass;
 
     public BasicService() {
         mapperClass = ReflectionUtils.getGenericClass(this, BigDecimal.ZERO.intValue());
@@ -492,6 +491,15 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     public LambdaQueryChainWrapper<T> lambdaQuery() {
         return ChainWrappers.lambdaQueryChain(getBaseMapper());
+    }
+
+    /**
+     * 设置 mapper 实现
+     * @param baseMapper mapper 实现
+     */
+    @Autowired
+    public void setBaseMapper(M baseMapper) {
+        this.baseMapper = baseMapper;
     }
 
     /**

@@ -16,7 +16,7 @@ public class HashService {
     /**
      * 随机数值生成器
      */
-    private RandomNumberGenerator randomNumberGenerator = new SecureRandomNumberGenerator();
+    private RandomNumberGenerator randomNumberGenerator;
 
     /**
      * hash 算法模型

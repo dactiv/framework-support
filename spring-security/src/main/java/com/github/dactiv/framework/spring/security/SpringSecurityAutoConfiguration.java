@@ -19,7 +19,6 @@ import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -141,7 +140,7 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     public AccessDecisionManager accessDecisionManager() {
-        List<AccessDecisionVoter<? extends Object>> decisionVoters
+        List<AccessDecisionVoter<?>> decisionVoters
                 = Arrays.asList(
                 new WebExpressionVoter(),
                 new RoleVoter(),

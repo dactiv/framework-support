@@ -91,7 +91,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSorts(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
+                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
 
         return elasticsearchRestTemplate
                 .search(builder.build(), Map.class, IndexCoordinates.of(index))
@@ -110,7 +110,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSorts(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
+                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         List<PluginAuditEvent> content = elasticsearchRestTemplate

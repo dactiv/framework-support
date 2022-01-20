@@ -24,7 +24,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
     /**
      * 默认同意的来源类型值
      */
-    public static final List<String> DEFAULT_GRANTED_SOURCES = Arrays.asList("System","All");
+    public static final List<String> DEFAULT_GRANTED_SOURCES = Arrays.asList("SYSTEM","ALL");
 
     /**
      * 默认同意的来源类型

@@ -56,6 +56,6 @@ public @interface Idempotent {
      *
      * @return 时间
      */
-    Time expirationTime() default @Time(5000);
+    Time expirationTime() default @Time(3000);
 
 }

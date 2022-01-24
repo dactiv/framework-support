@@ -15,6 +15,21 @@ import java.util.Map;
 public class CipherAlgorithmService {
 
     /**
+     * AES 算法名称
+     */
+    public static final String AES_ALGORITHM = "AES";
+
+    /**
+     * DES 算法名称
+     */
+    public static final String DES_ALGORITHM = "DES";
+
+    /**
+     * RSA 算法名称
+     */
+    public static final String RSA_ALGORITHM = "RSA";
+
+    /**
      * 默认密文名称
      */
     public static String DEFAULT_CIPHER_TEXT_NAME = "cipherText";
@@ -39,11 +54,11 @@ public class CipherAlgorithmService {
      */
     public CipherAlgorithmService() {
         // 添加 AES 算法服务
-        algorithmServiceMap.put("AES", AesCipherService.class);
+        algorithmServiceMap.put(AES_ALGORITHM, AesCipherService.class);
         // 添加 DES 算法服务
-        algorithmServiceMap.put("DES", DesCipherService.class);
+        algorithmServiceMap.put(DES_ALGORITHM, DesCipherService.class);
         // 添加 RSA 算法服务
-        algorithmServiceMap.put("RSA", RsaCipherService.class);
+        algorithmServiceMap.put(RSA_ALGORITHM, RsaCipherService.class);
     }
 
     /**

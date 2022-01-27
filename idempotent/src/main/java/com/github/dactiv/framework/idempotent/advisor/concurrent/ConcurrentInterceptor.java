@@ -17,6 +17,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -91,11 +92,34 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      * @return 返回值
      *
      */
-    private <R> R invoke(String key, Concurrent concurrent, Supplier<R> supplier) {
+    private <R> R invoke(String key,
+                         Concurrent concurrent,
+                         Supplier<R> supplier) {
         TimeProperties waitTime = TimeProperties.of(concurrent.waitTime());
         TimeProperties leaseTime = TimeProperties.of(concurrent.leaseTime());
 
         return invoke(key, concurrent.type(), waitTime, leaseTime, concurrent.exception(), supplier);
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param properties 并发配置
+     * @param supplier 执行过程供应者
+     * @param <R> 返回值类型
+     * @return 返回值
+     */
+    public <R> R invoke(ConcurrentProperties properties,
+                        Supplier<R> supplier) {
+
+        return invoke(
+                properties.getKey(),
+                properties.getLockType(),
+                properties.getWaitTime(),
+                properties.getLeaseTime(),
+                properties.getException(),
+                supplier
+        );
     }
 
     /**
@@ -107,28 +131,9 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      * @return 返回值
      */
-    public <R> R invoke(String key, Supplier<R> supplier) {
+    public <R> R invoke(String key,
+                        Supplier<R> supplier) {
         return invoke(key, LockType.Lock, supplier);
-    }
-
-    /**
-     * 执行并发处理过程
-     *
-     * @param properties 并发配置
-     * @param supplier 执行过程供应者
-     * @param <R> 返回值类型
-     * @return 返回值
-     */
-    public <R> R invoke(ConcurrentProperties properties, Supplier<R> supplier) {
-
-        return invoke(
-                properties.getKey(),
-                properties.getLockType(),
-                properties.getWaitTime(),
-                properties.getLeaseTime(),
-                properties.getException(),
-                supplier
-        );
     }
 
     /***
@@ -141,7 +146,9 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      * @return 返回值
      */
-    public <R> R invoke(String key, LockType type, Supplier<R> supplier) {
+    public <R> R invoke(String key,
+                        LockType type,
+                        Supplier<R> supplier) {
         return invoke(key, type, null, supplier);
     }
 
@@ -157,7 +164,10 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      * @return 返回值
      *
      */
-    public <R> R invoke(String key, LockType type, TimeProperties waitTime, Supplier<R> supplier) {
+    public <R> R invoke(String key,
+                        LockType type,
+                        TimeProperties waitTime,
+                        Supplier<R> supplier) {
         return invoke(key, type, waitTime, null, supplier);
     }
 
@@ -173,7 +183,11 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      * @return 返回值
      */
-    public <R> R invoke(String key, LockType type, TimeProperties waitTime, TimeProperties leaseTime, Supplier<R> supplier) {
+    public <R> R invoke(String key,
+                        LockType type,
+                        TimeProperties waitTime,
+                        TimeProperties leaseTime,
+                        Supplier<R> supplier) {
         return invoke(key, type, waitTime, leaseTime, DEFAULT_EXCEPTION, supplier);
     }
 
@@ -189,7 +203,13 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      * @return 执行过程供应者返回值
      */
-    public <R> R invoke(String key, LockType type, TimeProperties waitTime, TimeProperties leaseTime, String exception, Supplier<R> supplier) {
+    public <R> R invoke(String key,
+                        LockType type,
+                        TimeProperties waitTime,
+                        TimeProperties leaseTime,
+                        String exception,
+                        Supplier<R> supplier) {
+
         RLock lock = getLock(key, type);
 
         boolean tryLock = tryLock(lock, waitTime, leaseTime);
@@ -200,6 +220,137 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         try {
             return supplier.get();
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param concurrent 并发注解
+     * @param supplier 执行过程供应者
+     *
+     */
+    private void invoke(String key,
+                         Concurrent concurrent,
+                         Runnable supplier) {
+        TimeProperties waitTime = TimeProperties.of(concurrent.waitTime());
+        TimeProperties leaseTime = TimeProperties.of(concurrent.leaseTime());
+
+        invoke(key, concurrent.type(), waitTime, leaseTime, concurrent.exception(), supplier);
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param properties 并发配置
+     * @param runnable 执行过程供应者
+     */
+    public void invoke(ConcurrentProperties properties,
+                       Runnable runnable) {
+
+        invoke(
+                properties.getKey(),
+                properties.getLockType(),
+                properties.getWaitTime(),
+                properties.getLeaseTime(),
+                properties.getException(),
+                runnable
+        );
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param runnable 执行过程供应者
+     *
+     */
+    public void invoke(String key,
+                       Runnable runnable) {
+        invoke(key, LockType.Lock, runnable);
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param type 锁类型
+     * @param runnable 执行过程供应者
+     *
+     */
+    public void invoke(String key,
+                       LockType type,
+                       Runnable runnable) {
+        invoke(key, type, null, runnable);
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param type 锁类型
+     * @param waitTime 等待锁时间（获取锁时如果在该时间内获取不到，抛出异常）
+     * @param runnable 执行过程供应者
+     *
+     */
+    public void invoke(String key,
+                       LockType type,
+                       TimeProperties waitTime,
+                       Runnable runnable) {
+        invoke(key, type, waitTime, null, runnable);
+    }
+
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param type 锁类型
+     * @param waitTime 等待锁时间（获取锁时如果在该时间内获取不到，抛出异常）
+     * @param leaseTime 释放锁时间 (当获取到锁时候，在该时间不管执行过程供应者执行完成或不完成，都将当前锁释放)
+     * @param runnable 执行过程供应者
+     *
+     */
+    public void invoke(String key,
+                       LockType type,
+                       TimeProperties waitTime,
+                       TimeProperties leaseTime,
+                       Runnable runnable) {
+        invoke(key, type, waitTime, leaseTime, DEFAULT_EXCEPTION, runnable);
+    }
+    /**
+     * 执行并发处理过程
+     *
+     * @param key 键值
+     * @param type 锁类型
+     * @param waitTime 等待锁时间（获取锁时如果在该时间内获取不到，抛出异常）
+     * @param leaseTime 释放锁时间 (当获取到锁时候，在该时间不管执行过程供应者执行完成或不完成，都将当前锁释放)
+     * @param exception 异常信息
+     * @param runnable 执行过程供应者
+     *
+     */
+    public void invoke(String key,
+                       LockType type,
+                       TimeProperties waitTime,
+                       TimeProperties leaseTime,
+                       String exception,
+                       Runnable runnable) {
+
+        RLock lock = getLock(key, type);
+
+        boolean tryLock = tryLock(lock, waitTime, leaseTime);
+
+        if (!tryLock) {
+            throw new ConcurrentException(exception);
+        }
+
+        try {
+            runnable.run();
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();

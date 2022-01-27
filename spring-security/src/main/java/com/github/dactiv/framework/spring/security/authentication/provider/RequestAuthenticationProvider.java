@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -80,21 +81,52 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 获取实现类
         UserDetailsService userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+        // 开始授权，如果失败抛出异常
+        SecurityUserDetails userDetails = doAuthenticate(token, userDetailsService);
 
+        Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
+        // 获取认证缓存
+        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
+        // 如果启用授权缓存，从授权缓存获取用户授权信息
+        if (Objects.nonNull(authorizationCache) && CollectionUtils.isEmpty(grantedAuthorities)) {
+            RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
+            grantedAuthorities = list.range(0, list.size());
+        }
+
+        // 如果找不到授权信息，调用 UserDetailsService 的 getPrincipalAuthorities 方法获取当前用户授权信息
+        if (CollectionUtils.isEmpty(grantedAuthorities)) {
+
+            grantedAuthorities = userDetailsService.getPrincipalAuthorities(userDetails);
+            if (Objects.nonNull(authorizationCache)) {
+
+                RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
+                list.addAllAsync(grantedAuthorities);
+
+                if (Objects.nonNull(authorizationCache.getExpiresTime())) {
+                    list.expireAsync(authorizationCache.getExpiresTime().getValue(), authorizationCache.getExpiresTime().getUnit());
+                }
+            }
+
+        }
+
+        PrincipalAuthenticationToken result = createSuccessAuthentication(userDetails, token, grantedAuthorities);
+        userDetailsService.onSuccessAuthentication(result);
+
+        return result;
+    }
+
+    protected SecurityUserDetails doAuthenticate(RequestAuthenticationToken token, UserDetailsService userDetailsService) {
         SecurityUserDetails userDetails = null;
-
         CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(token);
 
         // 如果启用认证缓存，从认证缓存里获取用户
         if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
-
             userDetails = bucket.get();
         }
 
         //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
         if (Objects.isNull(userDetails)) {
-
             try {
                 userDetails = userDetailsService.getAuthenticationUserDetails(token);
             } catch (AuthenticationException e) {
@@ -111,7 +143,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         checkUserDetails(userDetails);
 
-        String presentedPassword = authentication.getCredentials().toString();
+        String presentedPassword = token.getCredentials().toString();
 
         // 如果用户账户密码不正确，抛出用户名或密码错误异常
         if (!userDetailsService.matchesPassword(presentedPassword, token, userDetails)) {
@@ -122,41 +154,9 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
 
         userDetails.setType(token.getType());
-
-        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
-
-        Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
-
-        // 如果启用授权缓存，从授权缓存获取用户授权信息
-        if (Objects.nonNull(authorizationCache) && CollectionUtils.isEmpty(grantedAuthorities)) {
-
-            RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
-
-            grantedAuthorities = list.range(0, list.size());
-        }
-
-        // 如果找不到授权信息，调用 UserDetailsService 的 getPrincipalAuthorities 方法获取当前用户授权信息
-        if (CollectionUtils.isEmpty(grantedAuthorities)) {
-
-            grantedAuthorities = userDetailsService.getPrincipalAuthorities(userDetails);
-
-            if (Objects.nonNull(authorizationCache)) {
-
-                RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
-
-                list.addAllAsync(grantedAuthorities);
-
-                if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                    list.expireAsync(authorizationCache.getExpiresTime().getValue(), authorizationCache.getExpiresTime().getUnit());
-                }
-            }
-
-        }
-
         // 如果启用认证缓存，存储用户信息到缓存里
         if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
-
             if (Objects.isNull(authenticationCache.getExpiresTime())) {
                 bucket.set(userDetails);
             } else {
@@ -168,11 +168,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             }
         }
 
-        PrincipalAuthenticationToken result = createSuccessAuthentication(userDetails, token, grantedAuthorities);
-
-        userDetailsService.onSuccessAuthentication(result);
-
-        return result;
+        return userDetails;
     }
 
     /**

@@ -3,9 +3,7 @@ package com.github.dactiv.framework.security.audit.elasticsearch.index.support;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.audit.PropertyIndexGenerator;
-import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -14,7 +12,6 @@ import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,10 +71,6 @@ public class DateIndexGenerator extends PropertyIndexGenerator {
         }
 
         return result;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new DateIndexGenerator(PluginAuditEvent.DEFAULT_INDEX_NAME, "-", "timestamp").generateIndex(new AuditEvent(Instant.now(), "", "", new HashMap<>())));
     }
 
     /**

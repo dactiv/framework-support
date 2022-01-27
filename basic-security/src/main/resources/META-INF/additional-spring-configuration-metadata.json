@@ -6,9 +6,9 @@
   ],
   "properties": [
     {
-      "name": "dactiv.authentication.spring-security.enabled",
+      "name": "dactiv.authentication.audit.enabled",
       "type": "java.lang.Boolean",
-      "description": "是否开启 spring security 支持 .",
+      "description": "是否开启审计支持 .",
       "defaultValue": true
     }
   ]

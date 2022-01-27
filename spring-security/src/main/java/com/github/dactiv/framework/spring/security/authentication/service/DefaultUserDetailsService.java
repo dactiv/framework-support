@@ -5,7 +5,7 @@ import com.github.dactiv.framework.spring.security.authentication.UserDetailsSer
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
-import com.github.dactiv.framework.spring.security.entity.RoleAuthority;
+import com.github.dactiv.framework.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.authentication.BadCredentialsException;

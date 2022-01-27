@@ -1,7 +1,9 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
+import com.github.dactiv.framework.security.entity.ResourceAuthority;
+import com.github.dactiv.framework.security.entity.RoleAuthority;
+import com.github.dactiv.framework.security.enumerate.UserStatus;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;

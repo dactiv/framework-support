@@ -125,6 +125,7 @@
     <modules>
         <module>parent</module>
         <module>commons</module>
+        <module>basic-security</module>
         <module>access-crypto</module>
         <module>spring-web-mvc</module>
         <module>spring-security</module>

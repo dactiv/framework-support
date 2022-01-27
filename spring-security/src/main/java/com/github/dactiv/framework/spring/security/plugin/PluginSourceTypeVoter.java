@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.plugin;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;

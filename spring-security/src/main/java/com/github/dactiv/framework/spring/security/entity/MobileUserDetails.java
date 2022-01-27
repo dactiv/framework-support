@@ -2,7 +2,7 @@ package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.github.dactiv.framework.spring.security.enumerate.UserStatus;
+import com.github.dactiv.framework.security.enumerate.UserStatus;
 import nl.basjes.parse.useragent.UserAgent;
 
 /**

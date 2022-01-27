@@ -1,8 +1,9 @@
 package com.github.dactiv.framework.spring.security.audit;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.security.audit.Auditable;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
-import com.github.dactiv.framework.spring.security.plugin.Plugin;
+import com.github.dactiv.framework.security.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;

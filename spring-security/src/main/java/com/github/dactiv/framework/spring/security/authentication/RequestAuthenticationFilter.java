@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +73,15 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        return super.requiresAuthentication(request, response) || StringUtils.isNotBlank(obtainType(request));
+
+        if (Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
+            return true;
+        } else if (StringUtils.isNotBlank(obtainType(request))) {
+            return true;
+        } else {
+            return super.requiresAuthentication(request, response);
+        }
+
     }
 
     @Override

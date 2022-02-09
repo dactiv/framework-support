@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.StatusErrorCodeException;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
+import org.springframework.http.HttpStatus;
 
 /**
  * 错误代码结果集解析器实现
@@ -27,6 +28,7 @@ public class ErrorCodeResultResolver implements ErrorResultResolver {
 
         result.setExecuteCode(exception.getErrorCode());
         result.setMessage(exception.getMessage());
+        result.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
         if (StatusErrorCodeException.class.isAssignableFrom(error.getClass())) {
             StatusErrorCodeException statusException = Casts.cast(error, StatusErrorCodeException.class);

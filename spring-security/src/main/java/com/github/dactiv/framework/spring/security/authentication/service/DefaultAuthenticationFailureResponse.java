@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.security.authentication.service;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,8 +24,8 @@ public class DefaultAuthenticationFailureResponse implements JsonAuthenticationF
 
     @Override
     public void setting(RestResult<Map<String, Object>> result, HttpServletRequest request) {
-
-        if (!request.getHeader(properties.getTypeHeaderName()).equals(DefaultUserDetailsService.DEFAULT_TYPES)) {
+        String authHeader = request.getHeader(properties.getTypeHeaderName());
+        if (!StringUtils.equals(authHeader,DefaultUserDetailsService.DEFAULT_TYPES)) {
             return;
         }
 

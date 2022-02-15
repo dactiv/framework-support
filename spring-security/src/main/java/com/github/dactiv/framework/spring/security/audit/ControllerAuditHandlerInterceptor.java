@@ -79,36 +79,24 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         HandlerMethod handlerMethod = Casts.cast(handler);
 
         String type;
-
         String principal;
 
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
-
         if (auditable != null) {
-
             principal = getPrincipal(auditable.principal(), request);
-
             type = auditable.type();
-
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
-            if (plugin != null && plugin.audit()) {
+            if (Objects.isNull(plugin) || !plugin.audit()) {
+                return ;
+            }
 
-                principal = getPrincipal(null, request);
-
-                type = plugin.name();
-
-                Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
-
-                if (root != null) {
-                    type = root.name() + ":" + type;
-                }
-
-                createAuditEvent(principal, type, request, response, handler, ex);
-
-            } else {
-                return;
+            principal = getPrincipal(null, request);
+            type = plugin.name();
+            Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
+            if (root != null) {
+                type = root.name() + ":" + type;
             }
         }
 

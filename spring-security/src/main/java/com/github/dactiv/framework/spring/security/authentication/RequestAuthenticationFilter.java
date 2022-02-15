@@ -74,9 +74,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
 
-        if (Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
-            return true;
-        } else if (StringUtils.isNotBlank(obtainType(request))) {
+        if (StringUtils.isNotBlank(obtainType(request))) {
             return true;
         } else {
             return super.requiresAuthentication(request, response);

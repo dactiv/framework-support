@@ -1,8 +1,6 @@
 package com.github.dactiv.framework.spring.web.jackson;
 
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.*;
@@ -36,6 +34,13 @@ public class MultipleDateFormat extends DateFormat {
         for (String pattern : patterns) {
             dateFormats.add(new SimpleDateFormat(StringUtils.trim(pattern)));
         }
+
+        Locale locale = Locale.getDefault(Locale.Category.FORMAT);
+
+        calendar = Calendar.getInstance(locale);
+
+        numberFormat = NumberFormat.getIntegerInstance(locale);
+        numberFormat.setGroupingUsed(false);
     }
 
     @Override
@@ -82,5 +87,10 @@ public class MultipleDateFormat extends DateFormat {
     @Override
     public void setLenient(boolean lenient) {
         dateFormats.forEach(f -> f.setLenient(lenient));
+    }
+
+    @Override
+    public Object clone() {
+        return super.clone();
     }
 }

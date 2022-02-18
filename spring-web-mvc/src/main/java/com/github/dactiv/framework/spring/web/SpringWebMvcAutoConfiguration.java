@@ -151,6 +151,23 @@ public class SpringWebMvcAutoConfiguration {
                                                  JacksonProperties jacksonProperties,
                                                  SpringWebMvcProperties properties) {
 
+        String dateFormat = jacksonProperties.getDateFormat();
+        if (Objects.nonNull(dateFormat)) {
+            try {
+                Class<?> dateFormatClass = ClassUtils.forName(dateFormat, null);
+                builder.dateFormat((DateFormat) BeanUtils.instantiateClass(dateFormatClass));
+            }
+            catch (ClassNotFoundException ex) {
+                MultipleDateFormat multipleDateFormat = new MultipleDateFormat(dateFormat);
+                TimeZone timeZone = jacksonProperties.getTimeZone();
+                if (Objects.isNull(timeZone)) {
+                    timeZone = new ObjectMapper().getSerializationConfig().getTimeZone();
+                }
+                multipleDateFormat.setTimeZone(timeZone);
+                builder.dateFormat(multipleDateFormat);
+            }
+        }
+
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
 
         objectMapper.setSerializerProvider(new FilterResultSerializerProvider());
@@ -170,22 +187,6 @@ public class SpringWebMvcAutoConfiguration {
 
         if (properties.isUseFilterResultObjectMapperToCastsClass()) {
             Casts.setObjectMapper(objectMapper);
-        }
-        String dateFormat = jacksonProperties.getDateFormat();
-        if (Objects.nonNull(dateFormat)) {
-            try {
-                Class<?> dateFormatClass = ClassUtils.forName(dateFormat, null);
-                builder.dateFormat((DateFormat) BeanUtils.instantiateClass(dateFormatClass));
-            }
-            catch (ClassNotFoundException ex) {
-                MultipleDateFormat multipleDateFormat = new MultipleDateFormat(dateFormat);
-                TimeZone timeZone = jacksonProperties.getTimeZone();
-                if (Objects.isNull(timeZone)) {
-                    timeZone = new ObjectMapper().getSerializationConfig().getTimeZone();
-                }
-                multipleDateFormat.setTimeZone(timeZone);
-                builder.dateFormat(multipleDateFormat);
-            }
         }
 
         return objectMapper;

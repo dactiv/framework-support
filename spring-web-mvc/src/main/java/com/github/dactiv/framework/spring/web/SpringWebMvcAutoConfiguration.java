@@ -16,6 +16,7 @@ import com.github.dactiv.framework.spring.web.device.DeviceResolverRequestFilter
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
+import com.github.dactiv.framework.spring.web.jackson.MultipleDateFormat;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -27,12 +28,14 @@ import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializ
 import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.websocket.servlet.UndertowWebSocketServletWebServerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -42,12 +45,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +65,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableConfigurationProperties(SpringWebMvcProperties.class)
+@EnableConfigurationProperties({SpringWebMvcProperties.class, JacksonProperties.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "dactiv.spring.web.mvc", value = "enabled", matchIfMissing = true)
 public class SpringWebMvcAutoConfiguration {
@@ -139,8 +147,8 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
+                                                 JacksonProperties jacksonProperties,
                                                  SpringWebMvcProperties properties) {
 
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
@@ -162,6 +170,22 @@ public class SpringWebMvcAutoConfiguration {
 
         if (properties.isUseFilterResultObjectMapperToCastsClass()) {
             Casts.setObjectMapper(objectMapper);
+        }
+        String dateFormat = jacksonProperties.getDateFormat();
+        if (Objects.nonNull(dateFormat)) {
+            try {
+                Class<?> dateFormatClass = ClassUtils.forName(dateFormat, null);
+                builder.dateFormat((DateFormat) BeanUtils.instantiateClass(dateFormatClass));
+            }
+            catch (ClassNotFoundException ex) {
+                MultipleDateFormat multipleDateFormat = new MultipleDateFormat(dateFormat);
+                TimeZone timeZone = jacksonProperties.getTimeZone();
+                if (Objects.isNull(timeZone)) {
+                    timeZone = new ObjectMapper().getSerializationConfig().getTimeZone();
+                }
+                multipleDateFormat.setTimeZone(timeZone);
+                builder.dateFormat(multipleDateFormat);
+            }
         }
 
         return objectMapper;

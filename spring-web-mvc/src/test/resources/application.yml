@@ -3,3 +3,8 @@ dactiv:
     web:
       mvc:
         filter-view-base-packages: com.github.dactiv.framework.spring.web.test.result.entity
+        
+        
+spring:
+  jackson:
+    date-format: yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-dd HH:mm:ss

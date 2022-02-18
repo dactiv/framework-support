@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.security.audit.elasticsearch;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
@@ -54,7 +55,11 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
         this.securityProperties = securityProperties;
 
-        this.indexGenerator = new DateIndexGenerator(PluginAuditEvent.DEFAULT_INDEX_NAME, "-", "timestamp");
+        this.indexGenerator = new DateIndexGenerator(
+                PluginAuditEvent.DEFAULT_INDEX_NAME,
+                "-",
+                RestResult.DEFAULT_TIMESTAMP_NAME
+        );
     }
 
     @Override

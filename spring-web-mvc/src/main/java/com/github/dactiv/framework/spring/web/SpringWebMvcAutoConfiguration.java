@@ -16,7 +16,6 @@ import com.github.dactiv.framework.spring.web.device.DeviceResolverRequestFilter
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
-import com.github.dactiv.framework.spring.web.jackson.MultipleDateFormat;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -147,26 +146,8 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
-                                                 JacksonProperties jacksonProperties,
-                                                 SpringWebMvcProperties properties) {
+    public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder, SpringWebMvcProperties properties) {
 
-        String dateFormat = jacksonProperties.getDateFormat();
-        if (Objects.nonNull(dateFormat)) {
-            try {
-                Class<?> dateFormatClass = ClassUtils.forName(dateFormat, null);
-                builder.dateFormat((DateFormat) BeanUtils.instantiateClass(dateFormatClass));
-            }
-            catch (ClassNotFoundException ex) {
-                MultipleDateFormat multipleDateFormat = new MultipleDateFormat(dateFormat);
-                TimeZone timeZone = jacksonProperties.getTimeZone();
-                if (Objects.isNull(timeZone)) {
-                    timeZone = new ObjectMapper().getSerializationConfig().getTimeZone();
-                }
-                multipleDateFormat.setTimeZone(timeZone);
-                builder.dateFormat(multipleDateFormat);
-            }
-        }
 
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
 

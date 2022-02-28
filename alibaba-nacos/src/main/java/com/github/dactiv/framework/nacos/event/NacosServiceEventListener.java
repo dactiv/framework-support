@@ -109,7 +109,7 @@ public class NacosServiceEventListener implements EventListener {
     }
 
     /**
-     * 设置给监听器为超时
+     * 设置监听器为超时
      */
     public void expired() {
         setLastAccessTime(new Date(System.currentTimeMillis() - expirationTime.toMillis()));

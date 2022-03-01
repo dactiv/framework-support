@@ -27,20 +27,35 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
     public static final String DEFAULT_ERROR_EXECUTE_ATTR_NAME = "REST_ERROR_ATTRIBUTES_EXECUTE";
 
-    private static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
+    public static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
+            SystemException.class,
             ServiceException.class,
-            SystemException.class
+            IllegalArgumentException.class
     );
 
-    private static final List<HttpStatus> DEFAULT_HTTP_STATUSES_MESSAGE = Arrays.asList(
+    public static final List<HttpStatus> DEFAULT_HTTP_STATUSES_MESSAGE = Arrays.asList(
             HttpStatus.FORBIDDEN,
             HttpStatus.UNAUTHORIZED
     );
 
     private final List<ErrorResultResolver> resultResolvers;
 
-    public RestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
+    /**
+     * 支持的异常抛出消息的类
+     */
+    private final List<Class<? extends Exception>> supportException;
+
+    /**
+     * 支持的 http 响应状态
+     */
+    private final List<HttpStatus> supportHttpStatus;
+
+    public RestResultErrorAttributes(List<ErrorResultResolver> resultResolvers,
+                                     List<Class<? extends Exception>> supportException,
+                                     List<HttpStatus> supportHttpStatus) {
         this.resultResolvers = resultResolvers;
+        this.supportException = supportException;
+        this.supportHttpStatus = supportHttpStatus;
     }
 
     @Override
@@ -60,7 +75,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
                 new LinkedHashMap<>()
         );
 
-        if (DEFAULT_HTTP_STATUSES_MESSAGE.contains(status)) {
+        if (supportHttpStatus.contains(status)) {
             result.setMessage(status.getReasonPhrase());
         }
 
@@ -75,7 +90,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
             if (optional.isPresent()) {
                 result = optional.get().resolve(error);
 
-                if (DEFAULT_MESSAGE_EXCEPTION.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
+                if (supportException.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
                     result.setMessage(error.getMessage());
                 }
             }

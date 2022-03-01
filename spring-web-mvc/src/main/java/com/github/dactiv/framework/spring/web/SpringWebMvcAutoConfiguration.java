@@ -97,12 +97,15 @@ public class SpringWebMvcAutoConfiguration {
         }
     }
 
-
-
     @Bean
     @ConditionalOnMissingBean(RestResultErrorAttributes.class)
-    public RestResultErrorAttributes servletRestResultErrorAttributes(List<ErrorResultResolver> resultResolvers) {
-        return new RestResultErrorAttributes(resultResolvers);
+    public RestResultErrorAttributes servletRestResultErrorAttributes(List<ErrorResultResolver> resultResolvers,
+                                                                      SpringWebMvcProperties properties) {
+        return new RestResultErrorAttributes(
+                resultResolvers,
+                properties.getSupportException(),
+                properties.getSupportHttpStatus()
+        );
     }
 
     @Bean

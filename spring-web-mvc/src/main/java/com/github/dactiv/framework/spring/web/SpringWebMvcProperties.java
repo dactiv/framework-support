@@ -2,7 +2,9 @@ package com.github.dactiv.framework.spring.web;
 
 
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
+import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,16 @@ public class SpringWebMvcProperties {
      * 是否使用 filter result 的 ObjectMapper设置到 Casts工具类中, 默认为 true
      */
     private boolean useFilterResultObjectMapperToCastsClass = true;
+
+    /**
+     * 支持的异常抛出消息的类
+     */
+    private List<Class<? extends Exception>> supportException = RestResultErrorAttributes.DEFAULT_MESSAGE_EXCEPTION;
+
+    /**
+     * 支持的 http 响应状态
+     */
+    private List<HttpStatus> supportHttpStatus = RestResultErrorAttributes.DEFAULT_HTTP_STATUSES_MESSAGE;
 
     /**
      * Undertow 的 webSocketDeploymentBuffers 默认值
@@ -165,5 +177,41 @@ public class SpringWebMvcProperties {
      */
     public void setWebSocketDeploymentBuffers(int webSocketDeploymentBuffers) {
         this.webSocketDeploymentBuffers = webSocketDeploymentBuffers;
+    }
+
+    /**
+     * 获取支持的异常抛出消息的类
+     *
+     * @return 支持的异常抛出消息的类
+     */
+    public List<Class<? extends Exception>> getSupportException() {
+        return supportException;
+    }
+
+    /**
+     * 设置支持的异常抛出消息的类
+     *
+     * @param supportException 支持的异常抛出消息的类
+     */
+    public void setSupportException(List<Class<? extends Exception>> supportException) {
+        this.supportException = supportException;
+    }
+
+    /**
+     * 获取支持的 http 响应状态
+     *
+     * @return 支持的 http 响应状态
+     */
+    public List<HttpStatus> getSupportHttpStatus() {
+        return supportHttpStatus;
+    }
+
+    /**
+     * 设置支持的 http 响应状态
+     *
+     * @param supportHttpStatus 支持的 http 响应状态
+     */
+    public void setSupportHttpStatus(List<HttpStatus> supportHttpStatus) {
+        this.supportHttpStatus = supportHttpStatus;
     }
 }

@@ -89,10 +89,8 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
             if (optional.isPresent()) {
                 result = optional.get().resolve(error);
-
-                if (supportException.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
-                    result.setMessage(error.getMessage());
-                }
+            } else if (supportException.stream().anyMatch(e -> e.isAssignableFrom(error.getClass()))) {
+                result.setMessage(error.getMessage());
             }
             LOGGER.error("服务器异常", error);
         } else {

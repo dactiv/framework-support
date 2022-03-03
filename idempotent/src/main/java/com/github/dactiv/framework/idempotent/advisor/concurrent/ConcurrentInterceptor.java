@@ -76,7 +76,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         try {
             return invocation.proceed();
         } catch (Throwable e) {
-            throw new SystemException("并发 aop 调用错误", e);
+            throw new SystemException(e.getMessage(), e);
         }
     }
 

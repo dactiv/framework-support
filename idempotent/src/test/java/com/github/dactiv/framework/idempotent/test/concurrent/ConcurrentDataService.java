@@ -35,6 +35,13 @@ public class ConcurrentDataService {
         return count;
     }
 
+    @Concurrent(value = "increment:spring-el:count:[#entity.name]", condition = "[#entity.name] != null")
+    public int incrementConditionArgs(Entity entity) {
+        count = count + 1;
+        LOGGER.info("当前自增值为:" + count);
+        return count;
+    }
+
     public int getCount() {
         return count;
     }

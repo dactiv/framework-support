@@ -38,6 +38,18 @@ public @interface Idempotent {
     String[] value() default {};
 
     /**
+     * 判断条件
+     *
+     * <p>spring el 规范: 启用 spring el 时，通过中括号([])识别启用</p>
+     * <p>如:</p>
+     * <p>@Concurrent(condition="[#vo.fieldName] != null")</p>
+     * <p>public void save(Vo vo);</p>
+     *
+     * @return 条件表达式
+     */
+    String condition() default "";
+
+    /**
      * 异常信息，如果通过锁识别查询出数据信息，提示的异常是信息是什么。
      *
      * @return 信息

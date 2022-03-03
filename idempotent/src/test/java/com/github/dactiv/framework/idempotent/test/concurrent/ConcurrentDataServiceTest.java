@@ -55,6 +55,8 @@ public class ConcurrentDataServiceTest {
 
         concurrentDataService.incrementArgs(new Entity("123", 0, "333".toCharArray()));
         concurrentDataService.setCount(2);
+
+        concurrentDataService.incrementConditionArgs(new Entity(null, 0, "333".toCharArray()));
     }
 
 }

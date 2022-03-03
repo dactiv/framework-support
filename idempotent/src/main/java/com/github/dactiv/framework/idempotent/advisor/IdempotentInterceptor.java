@@ -64,6 +64,12 @@ public class IdempotentInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
+        String condition = idempotent.condition();
+
+        if (StringUtils.isNotBlank(condition) && !valueGenerator.assertCondition(condition, invocation.getMethod(), invocation.getArguments())) {
+            return invocation.proceed();
+        }
+
         if (isIdempotent(idempotent, invocation.getMethod(), invocation.getArguments())) {
             throw new IdempotentException(idempotent.exception());
         }

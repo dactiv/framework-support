@@ -55,16 +55,12 @@ public class SpelExpressionValueGenerator implements ValueGenerator {
     @Override
     public Object generate(String expression, Method method, Object... args) {
 
-        String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
+        StandardEvaluationContext evaluationContext = createStandardEvaluationContext(method, args);
 
-        Map<String, Object> variables = new LinkedHashMap<>();
+        return generate(StringUtils.defaultString(getPrefix(), StringUtils.EMPTY), expression, evaluationContext);
+    }
 
-        if (ArrayUtils.isNotEmpty(args)) {
-            for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
-                variables.put(parameterNames[i], args[i]);
-            }
-        }
-
+    private Object generate(String prefix, String expression, StandardEvaluationContext evaluationContext) {
         List<String> tokens = new LinkedList<>();
 
         String[] array = StringUtils.substringsBetween(expression, openCharacter, closeCharacter);
@@ -72,9 +68,6 @@ public class SpelExpressionValueGenerator implements ValueGenerator {
         if (ArrayUtils.isNotEmpty(array)) {
             tokens = Arrays.asList(array);
         }
-
-        StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        evaluationContext.setVariables(variables);
 
         String result = expression;
 
@@ -90,12 +83,41 @@ public class SpelExpressionValueGenerator implements ValueGenerator {
 
             if (Objects.nonNull(value)) {
                 result = StringUtils.replace(result, getTokenValue(t), value.toString());
+            } else {
+                result = StringUtils.replace(result, getTokenValue(t), "null");
             }
 
             replaceToken.add(t);
         }
 
-        return StringUtils.defaultString(getPrefix(), StringUtils.EMPTY) + result;
+        return StringUtils.prependIfMissing(result, prefix);
+    }
+
+    private StandardEvaluationContext createStandardEvaluationContext(Method method, Object... args) {
+        String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
+
+        Map<String, Object> variables = new LinkedHashMap<>();
+
+        if (ArrayUtils.isNotEmpty(args)) {
+            for (int i = 0; i < (parameterNames != null ? parameterNames.length : 0); i++) {
+                variables.put(parameterNames[i], args[i]);
+            }
+        }
+
+        StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+        evaluationContext.setVariables(variables);
+
+        return evaluationContext;
+    }
+
+    @Override
+    public boolean assertCondition(String condition, Method method, Object... args) {
+
+        StandardEvaluationContext evaluationContext = createStandardEvaluationContext(method, args);
+
+        String expression = generate(StringUtils.EMPTY, condition, evaluationContext).toString();
+
+        return Boolean.TRUE.equals(parser.parseExpression(expression).getValue(evaluationContext, Boolean.class));
     }
 
     /**

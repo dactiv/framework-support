@@ -48,7 +48,14 @@ public class ConcurrentInterceptor implements MethodInterceptor {
 
         Concurrent concurrent = AnnotationUtils.findAnnotation(invocation.getMethod(), Concurrent.class);
 
+
         if (Objects.isNull(concurrent)) {
+            return invocation.proceed();
+        }
+
+        String condition = concurrent.condition();
+
+        if (StringUtils.isNotBlank(condition) && !valueGenerator.assertCondition(condition, invocation.getMethod(), invocation.getArguments())) {
             return invocation.proceed();
         }
 

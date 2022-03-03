@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.web.mvc;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
 import nl.basjes.parse.useragent.UserAgent;
@@ -20,6 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -28,8 +32,6 @@ import java.util.Optional;
  * @author maurice.chen
  **/
 public class SpringMvcUtils {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(SpringMvcUtils.class);
 
     private final static String IP_UNKNOWN_STRING = "unknown";
 
@@ -206,20 +208,33 @@ public class SpringMvcUtils {
     }
 
     /**
+     * 通过 rest 结果集构造下载类型的 ResponseEntity
+     *
+     * @param result rest 结果集
+     *
+     * @return 下载类型的 ResponseEntity
+     */
+    public static ResponseEntity<byte[]> createDownloadResponseEntity(RestResult<byte[]> result) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), StandardCharsets.UTF_8) + ".xls");
+        return new ResponseEntity<>(result.getData(), headers, HttpStatus.OK);
+    }
+
+    /**
      * 创建下载类型的 ResponseEntity
      *
-     * @param fileName 下载文件名称
+     * @param filename 下载文件名称
      * @param path     文件路径
      *
      * @return 下载类型的 ResponseEntity
      *
      * @throws IOException 获取路径文件失败抛出
      */
-    public static ResponseEntity<byte[]> createDownloadResponseEntity(String fileName, String path) throws IOException {
+    public static ResponseEntity<byte[]> createDownloadResponseEntity(String filename, String path) throws IOException {
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, fileName);
+        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(filename, StandardCharsets.UTF_8));
 
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(new File(path)), headers, HttpStatus.CREATED);
     }

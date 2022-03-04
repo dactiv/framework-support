@@ -216,7 +216,7 @@ public class SpringMvcUtils {
      */
     public static ResponseEntity<byte[]> createDownloadResponseEntity(RestResult<byte[]> result) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), StandardCharsets.UTF_8) + ".xls");
+        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), StandardCharsets.UTF_8));
         return new ResponseEntity<>(result.getData(), headers, HttpStatus.OK);
     }
 

@@ -3,14 +3,15 @@ package com.github.dactiv.framework.mybatis.plus.baisc;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
 
+import java.io.Serializable;
+
 /**
- * 字符串类类型的主键且带版本号的实体基类接口
+ * 带版本号更新的主键 id 实体
  *
  * @param <V> 版本号类型
- *
- * @author maurice.chen
+ * @param <T> 主键 id 类型
  */
-public interface StringVersionEntity<V> extends BasicIdentification<String> {
+public interface VersionEntity<V, T extends Serializable> extends BasicIdentification<T> {
 
     /**
      * 创建时间字段名称
@@ -32,15 +33,15 @@ public interface StringVersionEntity<V> extends BasicIdentification<String> {
     V getVersion();
 
     @Override
-    default <N extends BasicIdentification<String>> N ofNew() {
-        StringVersionEntity<V> result = BasicIdentification.super.ofNew();
+    default <N extends BasicIdentification<T>> N ofNew() {
+        VersionEntity<V, T> result = BasicIdentification.super.ofNew();
         result.setVersion(getVersion());
         return Casts.cast(result);
     }
 
     @Override
-    default <N extends BasicIdentification<String>> N ofIdData() {
-        StringVersionEntity<V> result = BasicIdentification.super.ofIdData();
+    default <N extends BasicIdentification<T>> N ofIdData() {
+        VersionEntity<V, T> result = BasicIdentification.super.ofIdData();
         result.setVersion(getVersion());
         return Casts.cast(result);
     }

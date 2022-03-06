@@ -2,7 +2,7 @@ package com.github.dactiv.framework.mybatis.plus.baisc.support;
 
 import com.baomidou.mybatisplus.annotation.Version;
 import com.github.dactiv.framework.commons.id.number.IntegerIdEntity;
-import com.github.dactiv.framework.mybatis.plus.baisc.NumberVersionEntity;
+import com.github.dactiv.framework.mybatis.plus.baisc.VersionEntity;
 
 
 /**
@@ -12,7 +12,7 @@ import com.github.dactiv.framework.mybatis.plus.baisc.NumberVersionEntity;
  *
  * @author maurice.chen
  */
-public class IntegerVersionEntity<V> extends IntegerIdEntity implements NumberVersionEntity<V, Integer> {
+public class IntegerVersionEntity<V> extends IntegerIdEntity implements VersionEntity<V, Integer> {
 
     @Version
     private V version;

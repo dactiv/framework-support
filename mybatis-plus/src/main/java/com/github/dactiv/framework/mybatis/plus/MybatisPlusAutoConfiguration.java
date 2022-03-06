@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.mybatis.plus;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.query.QueryGenerator;
@@ -36,7 +37,7 @@ public class MybatisPlusAutoConfiguration {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
-
+        interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         return interceptor;
     }
 

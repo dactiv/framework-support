@@ -16,6 +16,7 @@ import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.mybatis.plus.MybatisPlusQueryGenerator;
+import com.github.dactiv.framework.mybatis.plus.baisc.VersionEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -173,7 +174,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
         int result = 0;
         for (T e : iterable) {
             if (!predicate.test(e) && errorThrow) {
-                String msg = "执行 [" + getEntityClass() + "] 的 [" + name + " ] 影响行数小于等于 0, 内容为 [" + e + "]";
+                String msg = "执行 [" + getEntityClass() + "] 的 [" + name + " ] 操作为对数据发生任何变化, 数据内容为 [" + e + "]";
                 throw new SystemException(msg);
             } else {
                 result++;
@@ -190,6 +191,14 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int updateById(T entity) {
+
+        if (VersionEntity.class.isAssignableFrom(entity.getClass())) {
+            VersionEntity<?, T> versionEntity = Casts.cast(entity);
+            if (Objects.nonNull(versionEntity.getVersion())) {
+                return updateById(List.of(entity), true);
+            }
+        }
+
         return baseMapper.updateById(entity);
     }
 

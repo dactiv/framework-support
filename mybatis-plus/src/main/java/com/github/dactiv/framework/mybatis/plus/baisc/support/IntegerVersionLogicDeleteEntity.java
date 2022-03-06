@@ -6,8 +6,8 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.id.number.IntegerIdEntity;
-import com.github.dactiv.framework.mybatis.plus.baisc.NumberLogicDeleteEntity;
-import com.github.dactiv.framework.mybatis.plus.baisc.NumberVersionEntity;
+import com.github.dactiv.framework.mybatis.plus.baisc.LogicDeleteEntity;
+import com.github.dactiv.framework.mybatis.plus.baisc.VersionEntity;
 
 /**
  * 整形，且带版本号和逻辑删除标识的实体基类
@@ -16,7 +16,7 @@ import com.github.dactiv.framework.mybatis.plus.baisc.NumberVersionEntity;
  *
  * @author maurice.chen
  */
-public class IntegerVersionLogicDeleteEntity<V> extends IntegerIdEntity implements NumberVersionEntity<V, Integer>, NumberLogicDeleteEntity<Integer> {
+public class IntegerVersionLogicDeleteEntity<V> extends IntegerIdEntity implements VersionEntity<V, Integer>, LogicDeleteEntity<Integer> {
 
     @Version
     private V version;
@@ -46,15 +46,17 @@ public class IntegerVersionLogicDeleteEntity<V> extends IntegerIdEntity implemen
 
     @Override
     public <N extends BasicIdentification<Integer>> N ofNew() {
-        IntegerVersionLogicDeleteEntity<V> result = NumberVersionEntity.super.ofNew();
+        IntegerVersionLogicDeleteEntity<V> result = super.ofIdData();
+
         result.setVersion(getVersion());
         result.setDeleted(getDeleted());
+
         return Casts.cast(result);
     }
 
     @Override
     public <N extends BasicIdentification<Integer>> N ofIdData() {
-        IntegerVersionLogicDeleteEntity<V> result = NumberVersionEntity.super.ofIdData();
+        IntegerVersionLogicDeleteEntity<V> result = super.ofIdData();
 
         result.setVersion(getVersion());
         result.setDeleted(getDeleted());

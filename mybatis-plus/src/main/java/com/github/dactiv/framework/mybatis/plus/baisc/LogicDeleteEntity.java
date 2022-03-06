@@ -12,11 +12,11 @@ import com.github.dactiv.framework.commons.id.number.NumberIdEntity;
  *
  * @author maurice.chen
  */
-public interface NumberLogicDeleteEntity<T extends Number> extends NumberIdEntity<T> {
+public interface LogicDeleteEntity<T> extends BasicIdentification<T> {
     /**
      * 创建时间字段名称
      */
-    String DELETE_FIELD_NAME = "delete";
+    String DELETE_FIELD_NAME = "deleted";
 
     /**
      * 获取是否删除该记录
@@ -34,14 +34,14 @@ public interface NumberLogicDeleteEntity<T extends Number> extends NumberIdEntit
 
     @Override
     default <N extends BasicIdentification<T>> N ofNew() {
-        NumberLogicDeleteEntity<T> result = NumberIdEntity.super.ofNew();
+        LogicDeleteEntity<T> result = BasicIdentification.super.ofNew();
         result.setDeleted(getDeleted());
         return Casts.cast(result);
     }
 
     @Override
     default <N extends BasicIdentification<T>> N ofIdData() {
-        NumberLogicDeleteEntity<T> result = NumberIdEntity.super.ofIdData();
+        LogicDeleteEntity<T> result = BasicIdentification.super.ofIdData();
         result.setDeleted(getDeleted());
         return Casts.cast(result);
     }

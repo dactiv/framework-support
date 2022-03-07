@@ -10,10 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +63,8 @@ public class SecurityUserDetails implements UserDetails {
     private boolean credentialsNonExpired = true;
     private UserStatus status;
     private String type;
+
+    private Map<String, Object> meta;
 
     public SecurityUserDetails() {
     }
@@ -310,5 +309,22 @@ public class SecurityUserDetails implements UserDetails {
      */
     public void setType(String type) {
         this.type = type;
+    }
+
+    /**
+     * 获取元数据
+     * @return 元数据
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * 设置元数据
+     *
+     * @param meta 元数据
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 }

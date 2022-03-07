@@ -29,8 +29,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
 
     public static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
             SystemException.class,
-            ServiceException.class,
-            IllegalArgumentException.class
+            ServiceException.class
     );
 
     public static final List<HttpStatus> DEFAULT_HTTP_STATUSES_MESSAGE = Arrays.asList(

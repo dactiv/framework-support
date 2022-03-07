@@ -2,8 +2,11 @@ package com.github.dactiv.framework.mybatis.plus.baisc;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 带版本号更新的主键 id 实体
@@ -40,8 +43,13 @@ public interface VersionEntity<V, T extends Serializable> extends BasicIdentific
     }
 
     @Override
-    default <N extends BasicIdentification<T>> N ofIdData() {
-        VersionEntity<V, T> result = BasicIdentification.super.ofIdData();
+    default <N extends BasicIdentification<T>> N ofIdData(String ... ignoreProperties) {
+        List<String> ignorePropertyList = new LinkedList<>();
+
+        CollectionUtils.addAll(ignorePropertyList, ignoreProperties);
+        ignorePropertyList.add(VERSION_FIELD_NAME);
+
+        VersionEntity<V, T> result = BasicIdentification.super.ofIdData(ignorePropertyList.toArray(new String[0]));
         result.setVersion(getVersion());
         return Casts.cast(result);
     }

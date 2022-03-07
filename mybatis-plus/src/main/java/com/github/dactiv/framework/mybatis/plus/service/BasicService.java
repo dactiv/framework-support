@@ -191,14 +191,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      */
     public int updateById(T entity) {
-
-        if (VersionEntity.class.isAssignableFrom(entity.getClass())) {
-            VersionEntity<?, T> versionEntity = Casts.cast(entity);
-            if (Objects.nonNull(versionEntity.getVersion())) {
-                return updateById(List.of(entity), true);
-            }
-        }
-
         return baseMapper.updateById(entity);
     }
 

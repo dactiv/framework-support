@@ -4,6 +4,10 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.id.number.NumberIdEntity;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 数值型的逻辑删除实体基类接口
@@ -40,8 +44,13 @@ public interface LogicDeleteEntity<T> extends BasicIdentification<T> {
     }
 
     @Override
-    default <N extends BasicIdentification<T>> N ofIdData() {
-        LogicDeleteEntity<T> result = BasicIdentification.super.ofIdData();
+    default <N extends BasicIdentification<T>> N ofIdData(String ... ignoreProperties) {
+        List<String> ignorePropertyList = new LinkedList<>();
+
+        CollectionUtils.addAll(ignorePropertyList, ignoreProperties);
+        ignorePropertyList.add(DELETE_FIELD_NAME);
+
+        LogicDeleteEntity<T> result = BasicIdentification.super.ofIdData(ignorePropertyList.toArray(new String[0]));
         result.setDeleted(getDeleted());
         return Casts.cast(result);
     }

@@ -9,6 +9,7 @@ import org.springframework.util.ReflectionUtils;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,7 +44,7 @@ public interface BasicIdentification<T> extends Serializable {
 
     /**
      * 创建一个新的带 id 值的对象，注意：如果字段存在默认值得情况下，创建的实体会附带字段默认值，
-     * 如果需要只创建带 id 值其他任何字段值为 null 的情况下，使用{@link #ofIdData()} 创建
+     * 如果需要只创建带 id 值其他任何字段值为 null 的情况下，使用{@link #ofIdData(String...)} ()} 创建
      *
      * @param <N> 返回类型
      *
@@ -70,13 +71,14 @@ public interface BasicIdentification<T> extends Serializable {
      *
      * @return 新的对象
      */
-    default <N extends BasicIdentification<T>> N ofIdData(){
+    default <N extends BasicIdentification<T>> N ofIdData(String ...ignoreProperties){
         N result = ofNew();
 
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(this.getClass());
-
+        List<String> ignorePropertyList = Arrays.asList(ignoreProperties);
         Arrays
                 .stream(propertyDescriptors)
+                .filter(p -> !ignorePropertyList.contains(p.getName()))
                 .filter(p -> Objects.nonNull(p.getReadMethod()))
                 .filter(p -> Objects.nonNull(p.getWriteMethod()))
                 .filter(p -> !p.getReadMethod().getName().equals(READ_METHOD_NAME))

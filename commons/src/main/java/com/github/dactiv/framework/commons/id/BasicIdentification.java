@@ -8,9 +8,11 @@ import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 基础 id 接口，用于对数据对象操作的统一继承接口。
@@ -50,7 +52,7 @@ public interface BasicIdentification<T> extends Serializable {
      *
      * @return 新的对象
      */
-    default <N extends BasicIdentification<T>> N ofNew(){
+    default <N extends BasicIdentification<T>> N ofNew(String ...ignoreProperties){
         N result;
 
         try {
@@ -61,6 +63,27 @@ public interface BasicIdentification<T> extends Serializable {
 
         result.setId(getId());
 
+        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(this.getClass());
+        List<String> ignorePropertyList = Arrays.asList(ignoreProperties);
+
+        List<PropertyDescriptor> propertyDescriptorList = Arrays
+                .stream(propertyDescriptors)
+                .filter(p -> ignorePropertyList.contains(p.getName()))
+                .collect(Collectors.toList());
+
+        for (PropertyDescriptor propertyDescriptor : propertyDescriptorList) {
+            if (Objects.nonNull(propertyDescriptor.getWriteMethod()) && Objects.nonNull(propertyDescriptor.getReadMethod())) {
+                Object value = ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), this);
+                ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), result, value);
+            } else {
+                Field field = ReflectionUtils.findField(this.getClass(), propertyDescriptor.getName());
+                if (Objects.isNull(field)) {
+                    continue;
+                }
+                Object value = ReflectionUtils.getField(field, this);
+                ReflectionUtils.setField(field, result, value);
+            }
+        }
         return result;
     }
 
@@ -72,7 +95,7 @@ public interface BasicIdentification<T> extends Serializable {
      * @return 新的对象
      */
     default <N extends BasicIdentification<T>> N ofIdData(String ...ignoreProperties){
-        N result = ofNew();
+        N result = ofNew(ignoreProperties);
 
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(this.getClass());
         List<String> ignorePropertyList = Arrays.asList(ignoreProperties);

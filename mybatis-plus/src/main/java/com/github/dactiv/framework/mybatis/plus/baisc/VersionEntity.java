@@ -36,14 +36,14 @@ public interface VersionEntity<V, T extends Serializable> extends BasicIdentific
     V getVersion();
 
     @Override
-    default <N extends BasicIdentification<T>> N ofNew() {
-        VersionEntity<V, T> result = BasicIdentification.super.ofNew();
+    default <N extends BasicIdentification<T>> N ofNew(String ...ignoreProperties) {
+        VersionEntity<V, T> result = BasicIdentification.super.ofNew(ignoreProperties);
         result.setVersion(getVersion());
         return Casts.cast(result);
     }
 
     @Override
-    default <N extends BasicIdentification<T>> N ofIdData(String ... ignoreProperties) {
+    default <N extends BasicIdentification<T>> N ofIdData(String ...ignoreProperties) {
         List<String> ignorePropertyList = new LinkedList<>();
 
         CollectionUtils.addAll(ignorePropertyList, ignoreProperties);

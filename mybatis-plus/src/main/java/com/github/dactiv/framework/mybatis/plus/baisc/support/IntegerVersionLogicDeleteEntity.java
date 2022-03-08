@@ -49,8 +49,8 @@ public class IntegerVersionLogicDeleteEntity<V> extends IntegerIdEntity implemen
     }
 
     @Override
-    public <N extends BasicIdentification<Integer>> N ofNew() {
-        IntegerVersionLogicDeleteEntity<V> result = super.ofIdData();
+    public <N extends BasicIdentification<Integer>> N ofNew(String ... ignoreProperties) {
+        IntegerVersionLogicDeleteEntity<V> result = super.ofIdData(ignoreProperties);
 
         result.setVersion(getVersion());
         result.setDeleted(getDeleted());

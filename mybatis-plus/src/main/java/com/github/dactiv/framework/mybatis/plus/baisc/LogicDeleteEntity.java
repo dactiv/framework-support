@@ -37,8 +37,8 @@ public interface LogicDeleteEntity<T> extends BasicIdentification<T> {
     void setDeleted(YesOrNo deleted);
 
     @Override
-    default <N extends BasicIdentification<T>> N ofNew() {
-        LogicDeleteEntity<T> result = BasicIdentification.super.ofNew();
+    default <N extends BasicIdentification<T>> N ofNew(String ... ignoreProperties) {
+        LogicDeleteEntity<T> result = BasicIdentification.super.ofNew(ignoreProperties);
         result.setDeleted(getDeleted());
         return Casts.cast(result);
     }

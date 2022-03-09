@@ -139,11 +139,11 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
         try {
 
             // 获取所有服务
-            ListView<String> view = namingService.getServicesOfServer(1, Integer.MAX_VALUE);
+            ListView<String> view = namingService.getServicesOfServer(1, Integer.MAX_VALUE, discoveryProperties.getGroup());
 
             for (String s : view.getData()) {
                 // 通过服务名获取服务信息
-                Service service = namingMaintainService.queryService(s);
+                Service service = namingMaintainService.queryService(s, discoveryProperties.getGroup());
                 // 通过服务名获取所有服务实例
                 List<Instance> instanceList = namingService.getAllInstances(service.getName(), service.getGroupName());
                 // 创建一组监听缓存，如果存在取当前的数据，否则创建一个

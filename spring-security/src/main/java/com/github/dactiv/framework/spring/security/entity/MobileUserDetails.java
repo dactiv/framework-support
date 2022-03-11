@@ -1,7 +1,6 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
 import nl.basjes.parse.useragent.UserAgent;
 
@@ -10,7 +9,6 @@ import nl.basjes.parse.useragent.UserAgent;
  *
  * @author maurice
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MobileUserDetails extends SecurityUserDetails {
 
     private static final long serialVersionUID = -848955060608795664L;

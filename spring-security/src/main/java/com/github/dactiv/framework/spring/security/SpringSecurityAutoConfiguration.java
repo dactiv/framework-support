@@ -81,7 +81,7 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DeviceIdContextRepository.class)
-    DeviceIdContextRepository deviceIdentifiedSecurityContextRepository(AuthenticationProperties properties,
+    public DeviceIdContextRepository deviceIdentifiedSecurityContextRepository(AuthenticationProperties properties,
                                                                         RedissonClient redissonClient) {
 
         DeviceIdContextRepository repository = new DeviceIdContextRepository(

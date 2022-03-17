@@ -2,7 +2,9 @@ package com.github.dactiv.framework.spring.web;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
@@ -16,6 +18,8 @@ import com.github.dactiv.framework.spring.web.device.DeviceResolverRequestFilter
 import com.github.dactiv.framework.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
+import com.github.dactiv.framework.spring.web.jackson.LocalDateTimeTimestampSerializer;
+import com.github.dactiv.framework.spring.web.jackson.LocalDateTimestampSerializer;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -51,10 +55,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.TimeZone;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -149,11 +152,11 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder, SpringWebMvcProperties properties) {
-
+    public ObjectMapper filterResultObjectMapper(Jackson2ObjectMapperBuilder builder,
+                                                 JacksonProperties jacksonProperties,
+                                                 SpringWebMvcProperties properties) {
 
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
-
         objectMapper.setSerializerProvider(new FilterResultSerializerProvider());
 
         FilterResultAnnotationBuilder annotationBuilder = new FilterResultAnnotationBuilder(properties.getFilterViewBasePackages());
@@ -166,6 +169,13 @@ public class SpringWebMvcAutoConfiguration {
         module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer());
         module.addSerializer(ValueEnum.class, new ValueEnumSerializer());
         module.addSerializer(NameEnum.class, new NameEnumSerializer());
+
+        Map<SerializationFeature, Boolean> map = jacksonProperties.getSerialization();
+        Boolean isWriteDatesAsTimestamps = map.get(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        if (Objects.nonNull(isWriteDatesAsTimestamps) && isWriteDatesAsTimestamps) {
+            module.addSerializer(LocalDate.class, new LocalDateTimestampSerializer(jacksonProperties));
+            module.addSerializer(LocalDateTime.class, new LocalDateTimeTimestampSerializer(jacksonProperties));
+        }
 
         objectMapper.registerModule(module);
 

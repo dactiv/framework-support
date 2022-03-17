@@ -4,7 +4,6 @@ package com.github.dactiv.framework.spring.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
@@ -20,6 +19,7 @@ import com.github.dactiv.framework.spring.web.interceptor.CustomClientHttpReques
 import com.github.dactiv.framework.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
 import com.github.dactiv.framework.spring.web.jackson.LocalDateTimeTimestampSerializer;
 import com.github.dactiv.framework.spring.web.jackson.LocalDateTimestampSerializer;
+import com.github.dactiv.framework.spring.web.jackson.LocalTimeSecondOfDaySerializer;
 import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
@@ -31,7 +31,6 @@ import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializ
 import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -48,15 +47,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -175,6 +172,7 @@ public class SpringWebMvcAutoConfiguration {
         if (Objects.nonNull(isWriteDatesAsTimestamps) && isWriteDatesAsTimestamps) {
             module.addSerializer(LocalDate.class, new LocalDateTimestampSerializer(jacksonProperties));
             module.addSerializer(LocalDateTime.class, new LocalDateTimeTimestampSerializer(jacksonProperties));
+            module.addSerializer(LocalTime.class, new LocalTimeSecondOfDaySerializer());
         }
 
         objectMapper.registerModule(module);

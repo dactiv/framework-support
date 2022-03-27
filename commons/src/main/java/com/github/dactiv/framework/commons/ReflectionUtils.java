@@ -6,6 +6,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -14,6 +15,26 @@ import java.util.List;
  * @author maurice.chen
  */
 public class ReflectionUtils {
+
+    /**
+     * 获取所有字段信息
+     *
+     * @param targetClass 目标类
+     *
+     * @return 字段集合
+     */
+    public static List<Field> findFields(Class<?> targetClass) {
+
+        Field[] fields = targetClass.getDeclaredFields();
+
+        List<Field> result = new LinkedList<>(Arrays.asList(fields));
+
+        if (!targetClass.getName().equals(Object.class.getName())) {
+            result.addAll(findFields(targetClass.getSuperclass()));
+        }
+
+        return result;
+    }
 
     /**
      * 查找对象中的字段

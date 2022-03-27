@@ -8,15 +8,22 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
+import com.github.dactiv.framework.minio.data.ObjectItem;
 import com.github.dactiv.framework.minio.data.VersionFileObject;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.Item;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * minio 模版
@@ -129,6 +136,35 @@ public class MinioTemplate {
      */
     public void deleteObject(FileObject fileObject) throws Exception {
         deleteObject(fileObject, false);
+    }
+
+    /**
+     * 获取文件列表
+     *
+     * @param bucket 桶信息
+     *
+     * @return 文件项
+     *
+     * @throws Exception 获取错误时抛出
+     */
+    public List<ObjectItem> getFileObjects(Bucket bucket) throws Exception {
+
+        ListObjectsArgs args = ListObjectsArgs
+                .builder()
+                .bucket(bucket.getBucketName())
+                .includeUserMetadata(true)
+                .useApiVersion1(false)
+                .build();
+
+        List<ObjectItem> result = new LinkedList<>();
+        Iterable<Result<Item>> results = minioClient.listObjects(args);
+
+        for (Result<Item> itemResult : results) {
+            Item item = itemResult.get();
+            result.add(new ObjectItem(item));
+        }
+
+        return result;
     }
 
     /**

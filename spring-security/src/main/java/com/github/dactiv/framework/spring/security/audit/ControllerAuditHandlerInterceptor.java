@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.security.audit;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.security.audit.Auditable;
+import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +38,12 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
     private static final String DEFAULT_FAILURE_SUFFIX_NAME = "FAILURE";
 
     private static final String DEFAULT_EXCEPTION_KEY_NAME = "exception";
+
+    public static final String DEFAULT_HEADER_KEY = "header";
+
+    public static final String DEFAULT_PARAM_KEY = "parameter";
+
+    public static final String DEFAULT_BODY_KEY = "body";
 
     /**
      * spring 应用的事件推送器
@@ -79,7 +87,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         HandlerMethod handlerMethod = Casts.cast(handler);
 
         String type;
-        String principal;
+        Object principal;
 
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (auditable != null) {
@@ -107,7 +115,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
     }
 
-    private AuditEvent createAuditEvent(String principal,
+    private AuditEvent createAuditEvent(Object principal,
                                         String type,
                                         HttpServletRequest request,
                                         HttpServletResponse response,
@@ -125,30 +133,54 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
                 data.put(exceptionKeyName, ex.getMessage());
             }
         }
+        if (SecurityUserDetails.class.isAssignableFrom(principal.getClass())) {
+            SecurityUserDetails securityUserDetails = Casts.cast(principal, SecurityUserDetails.class);
 
-        return new AuditEvent(Instant.now(), principal, type, data);
+            PluginAuditEvent auditEvent = new PluginAuditEvent(Instant.now(), securityUserDetails.getUsername(), type, data);
+            auditEvent.setPrincipalId(securityUserDetails.getId().toString());
+            auditEvent.setMeta(securityUserDetails.getMeta());
+
+            return auditEvent;
+        } else {
+            return new AuditEvent(Instant.now(), principal.toString(), type, data);
+        }
     }
 
     private Map<String, Object> getData(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         Map<String, Object> data = new LinkedHashMap<>();
 
+        if (request.getHeaderNames().hasMoreElements()) {
+            Map<String, Object> header = new LinkedHashMap<>();
+            Iterator<String> iterator = request.getHeaderNames().asIterator();
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                header.put(key, request.getHeader(key));
+            }
+            data.put(DEFAULT_HEADER_KEY, header);
+        }
+
         Map<String, String[]> parameterMap = request.getParameterMap();
 
         if (!parameterMap.isEmpty()) {
-            data.putAll(parameterMap);
+            data.put(DEFAULT_PARAM_KEY, parameterMap);
         }
+
+        /*String value = CURRENT_BODY.get();
+
+        if (StringUtils.isNotEmpty(value)) {
+            data.put(DEFAULT_BODY_KEY, Casts.readValue(value, Map.class));
+        }*/
 
         return data;
     }
 
-    private String getPrincipal(String key, HttpServletRequest request) {
-
-        String principal = null;
+    private Object getPrincipal(String key, HttpServletRequest request) {
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
 
         if (securityContext.getAuthentication() == null || !securityContext.getAuthentication().isAuthenticated()) {
+            String principal = null;
 
             if (StringUtils.isNotBlank(key)) {
                 principal = request.getParameter(key);
@@ -162,20 +194,12 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
                 principal = request.getRemoteAddr();
             }
 
+            return principal;
+
         } else {
             Authentication authentication = securityContext.getAuthentication();
-
-            principal = authentication.getPrincipal().toString();
-
-            Object detail = authentication.getDetails();
-
-            if (SecurityUserDetails.class.isAssignableFrom(detail.getClass())) {
-                SecurityUserDetails securityUserDetails = Casts.cast(detail);
-                principal = securityUserDetails.getUsername();
-            }
+            return authentication.getDetails();
         }
-
-        return principal;
     }
 
     @Override

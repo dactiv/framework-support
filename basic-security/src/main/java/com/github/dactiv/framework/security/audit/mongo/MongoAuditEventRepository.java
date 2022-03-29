@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.security.audit.mongo;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
@@ -48,6 +49,14 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
     public void add(AuditEvent event) {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
+
+        if (pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
+            return;
+        }
+
+        if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
+            pluginAuditEvent = Casts.cast(event);
+        }
 
         try {
 

@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
+import com.github.dactiv.framework.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
@@ -16,6 +17,7 @@ import com.github.dactiv.framework.spring.security.authentication.service.feign.
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
+import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
@@ -24,6 +26,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.websocket.servlet.UndertowWebSocketServletWebServerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -166,7 +169,7 @@ public class SpringSecurityAutoConfiguration {
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public static class DefaultWebMvcConfigurer implements WebMvcConfigurer {
+    public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {
 
         private final ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor;
 
@@ -178,5 +181,11 @@ public class SpringSecurityAutoConfiguration {
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(controllerAuditHandlerInterceptor);
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RequestBodyAttributeAdviceAdapter.class)
+    public RequestBodyAttributeAdviceAdapter requestBodyAttributeAdviceAdapter() {
+        return new RequestBodyAttributeAdviceAdapter();
     }
 }

@@ -5,6 +5,7 @@ import com.github.dactiv.framework.security.audit.Auditable;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
@@ -166,11 +167,10 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             data.put(DEFAULT_PARAM_KEY, parameterMap);
         }
 
-        /*String value = CURRENT_BODY.get();
-
-        if (StringUtils.isNotEmpty(value)) {
-            data.put(DEFAULT_BODY_KEY, Casts.readValue(value, Map.class));
-        }*/
+        Object body = SpringMvcUtils.getRequestAttribute(RequestBodyAttributeAdviceAdapter.REQUEST_BODY_ATTRIBUTE_NAME);
+        if (Objects.nonNull(body)) {
+            data.put(DEFAULT_BODY_KEY, Casts.convertValue(body, Map.class));
+        }
 
         return data;
     }

@@ -71,6 +71,10 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
             return;
         }
 
+        if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
+            pluginAuditEvent = Casts.cast(event);
+        }
+
         try {
 
             String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();

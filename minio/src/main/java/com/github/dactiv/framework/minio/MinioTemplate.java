@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * minio 模版
@@ -111,6 +113,23 @@ public class MinioTemplate {
      * @throws Exception 上传错误时抛出
      */
     public ObjectWriteResponse upload(FileObject object, InputStream file, long size, String contentType) throws Exception {
+        return upload(object, file, new LinkedHashMap<>(), size, contentType);
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param object       文件对象描述
+     * @param file         文件内容
+     * @param size         文件大小
+     * @param userMetadata 用户元数据信息
+     * @param contentType  文件类型
+     *
+     * @return 对象写入响应信息
+     *
+     * @throws Exception 上传错误时抛出
+     */
+    public ObjectWriteResponse upload(FileObject object, InputStream file, Map<String, String> userMetadata, long size, String contentType) throws Exception {
 
         makeBucketIfNotExists(object);
 
@@ -121,6 +140,7 @@ public class MinioTemplate {
                 .object(object.getObjectName())
                 .stream(file, size, -1)
                 .contentType(contentType)
+                .userMetadata(userMetadata)
                 .build();
 
         return minioClient.putObject(args);

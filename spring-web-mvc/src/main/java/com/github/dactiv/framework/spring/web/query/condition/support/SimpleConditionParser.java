@@ -7,6 +7,7 @@ import com.github.dactiv.framework.spring.web.query.condition.Condition;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -28,6 +29,11 @@ public class SimpleConditionParser implements ConditionParser {
      * 默认条件名称前缀
      */
     public static final String DEFAULT_CONDITION_NAME_PREFIX = "filter";
+
+    /**
+     * 默认数组符号
+     */
+    public static final String DEFAULT_ARRAY_SYMBOL = "[]";
 
     /**
      * 默认条件名称前缀
@@ -59,6 +65,11 @@ public class SimpleConditionParser implements ConditionParser {
     private String fieldCloseSuffix = DEFAULT_FIELD_CLOSE_SUFFIX;
 
     /**
+     * 默认的数组符号
+     */
+    private String arraySymbol = DEFAULT_ARRAY_SYMBOL;
+
+    /**
      * 字段条件分隔符
      */
     private String fieldConditionSeparators = DEFAULT_FIELD_CONDITION_SEPARATORS;
@@ -78,7 +89,7 @@ public class SimpleConditionParser implements ConditionParser {
     public List<Condition> getCondition(String name, List<Object> value) {
 
         String[] fieldConditionList = StringUtils.substringsBetween(
-                name,
+                RegExUtils.replaceAll(name, arraySymbol , StringUtils.EMPTY),
                 fieldOpenPrefix,
                 fieldCloseSuffix
         );
@@ -92,7 +103,6 @@ public class SimpleConditionParser implements ConditionParser {
         for (String fieldCondition : fieldConditionList) {
 
             String propertyName = StringUtils.substringBeforeLast(fieldCondition, fieldConditionSeparators);
-
             Object propertyValue = value;
 
             if (CollectionUtils.isEmpty(value)) {
@@ -106,19 +116,14 @@ public class SimpleConditionParser implements ConditionParser {
             }
 
             Property p = new Property(propertyName, propertyValue);
-
             String condition = StringUtils.substringAfterLast(fieldCondition, fieldConditionSeparators);
-
             String end = fieldOpenPrefix + fieldCondition + fieldCloseSuffix;
-
             ConditionType type = ConditionType.And;
 
             if (!StringUtils.endsWith(name, end)) {
 
                 String s = end + fieldConditionSeparators;
-
                 String typeValue = StringUtils.substringBetween(name, s, fieldOpenPrefix);
-
                 type = NameEnumUtils.parse(StringUtils.capitalize(typeValue), ConditionType.class, true);
 
                 if (Objects.isNull(type)) {
@@ -210,5 +215,23 @@ public class SimpleConditionParser implements ConditionParser {
      */
     public void setFieldConditionSeparators(String fieldConditionSeparators) {
         this.fieldConditionSeparators = fieldConditionSeparators;
+    }
+
+    /**
+     * 获取数组符号
+     *
+     * @return 数组符号
+     */
+    public String getArraySymbol() {
+        return arraySymbol;
+    }
+
+    /**
+     * 设置数组符号
+     *
+     * @param arraySymbol 数组符号
+     */
+    public void setArraySymbol(String arraySymbol) {
+        this.arraySymbol = arraySymbol;
     }
 }

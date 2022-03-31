@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.minio.MinioTemplate;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
+import io.minio.GetObjectResponse;
 import io.minio.ListObjectsArgs;
 import io.minio.ObjectWriteResponse;
 import io.minio.Result;
@@ -19,6 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
+
+import java.util.Map;
 
 /**
  * minio 模版单元测试

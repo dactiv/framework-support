@@ -86,13 +86,9 @@ public class SimpleConditionParser implements ConditionParser {
     }
 
     @Override
-    public List<Condition> getCondition(String name, List<Object> value) {
-
-        String[] fieldConditionList = StringUtils.substringsBetween(
-                RegExUtils.replaceAll(name, arraySymbol , StringUtils.EMPTY),
-                fieldOpenPrefix,
-                fieldCloseSuffix
-        );
+    public List<Condition> getCondition(String filter, List<Object> value) {
+        String name = StringUtils.removeEnd(filter, arraySymbol);
+        String[] fieldConditionList = StringUtils.substringsBetween(name, fieldOpenPrefix, fieldCloseSuffix);
 
         List<Condition> result = new LinkedList<>();
 

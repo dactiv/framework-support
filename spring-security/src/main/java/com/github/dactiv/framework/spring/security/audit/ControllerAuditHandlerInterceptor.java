@@ -169,7 +169,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         Object body = SpringMvcUtils.getRequestAttribute(RequestBodyAttributeAdviceAdapter.REQUEST_BODY_ATTRIBUTE_NAME);
         if (Objects.nonNull(body)) {
-            data.put(DEFAULT_BODY_KEY, Casts.convertValue(body, Map.class));
+            data.put(DEFAULT_BODY_KEY, body);
         }
 
         return data;

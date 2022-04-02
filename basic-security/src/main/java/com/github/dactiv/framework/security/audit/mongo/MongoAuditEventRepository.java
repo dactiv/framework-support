@@ -1,6 +1,8 @@
 package com.github.dactiv.framework.security.audit.mongo;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
@@ -100,9 +102,13 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     @Override
     public AuditEvent get(Object id) {
+        if (!StringIdEntity.class.isAssignableFrom(id.getClass())) {
+            throw new SystemException("目标对象不是 StringIdEntity 对象");
+        }
 
+        StringIdEntity stringIdEntity = Casts.cast(id);
         //noinspection unchecked
-        Map<String, Object> map = mongoTemplate.findById(id, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+        Map<String, Object> map = mongoTemplate.findById(stringIdEntity.getId(), Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
 
         if (MapUtils.isNotEmpty(map)) {
             return createPluginAuditEvent(map);

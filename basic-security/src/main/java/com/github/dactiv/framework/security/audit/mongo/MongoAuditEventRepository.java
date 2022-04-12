@@ -33,17 +33,18 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
-    private SecurityProperties securityProperties;
+    private final SecurityProperties securityProperties;
 
-    public MongoAuditEventRepository() {
-    }
+    private final List<String> ignorePrincipals;
 
     public MongoAuditEventRepository(MongoTemplate mongoTemplate,
+                                     List<String> ignorePrincipals,
                                      SecurityProperties securityProperties) {
 
         this.mongoTemplate = mongoTemplate;
+        this.ignorePrincipals = ignorePrincipals;
         this.securityProperties = securityProperties;
     }
 

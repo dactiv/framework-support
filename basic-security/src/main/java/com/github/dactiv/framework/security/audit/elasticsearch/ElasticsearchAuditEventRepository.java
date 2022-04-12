@@ -40,19 +40,20 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
-    private SecurityProperties securityProperties;
+    private final SecurityProperties securityProperties;
 
-    private IndexGenerator indexGenerator;
+    private final List<String> ignorePrincipals;
 
-    public ElasticsearchAuditEventRepository() {
-    }
+    private final IndexGenerator indexGenerator;
 
     public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
+                                             List<String> ignorePrincipals,
                                              SecurityProperties securityProperties) {
 
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
+        this.ignorePrincipals = ignorePrincipals;
         this.securityProperties = securityProperties;
 
         this.indexGenerator = new DateIndexGenerator(
@@ -64,6 +65,10 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     @Override
     public void add(AuditEvent event) {
+
+        if (ignorePrincipals.contains(event.getPrincipal())) {
+            return ;
+        }
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
@@ -222,14 +227,5 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         } catch (Exception e) {
             return PluginAuditEvent.DEFAULT_INDEX_NAME + "-*";
         }
-    }
-
-    /**
-     * 设置索引生成器
-     *
-     * @param indexGenerator 索引生成器
-     */
-    public void setIndexGenerator(IndexGenerator indexGenerator) {
-        this.indexGenerator = indexGenerator;
     }
 }

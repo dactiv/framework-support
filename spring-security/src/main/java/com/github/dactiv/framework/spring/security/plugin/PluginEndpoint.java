@@ -315,6 +315,10 @@ public class PluginEndpoint {
                 target.setParent(parent.getId());
             }
 
+            if (CollectionUtils.isEmpty(target.getSources())) {
+                target.setSources(parent.getSources());
+            }
+
             target.setValue(StringUtils.join(values, SpringMvcUtils.COMMA_STRING));
             List<String> authorize = getSecurityAuthorize(method);
 

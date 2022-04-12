@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +16,8 @@ import java.util.Map;
  * @author maurice.chen
  */
 public interface PluginAuditEventRepository extends AuditEventRepository {
+
+    List<String> DEFAULT_IGNORE_PRINCIPALS = List.of("anonymousUser");
 
     /**
      * 获取分页信息

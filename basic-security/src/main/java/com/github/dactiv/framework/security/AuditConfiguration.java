@@ -158,7 +158,11 @@ public class AuditConfiguration {
         public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
                                                                SecurityProperties securityProperties) {
 
-            return new MongoAuditEventRepository(mongoTemplate, securityProperties);
+            return new MongoAuditEventRepository(
+                    mongoTemplate,
+                    PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS,
+                    securityProperties
+            );
 
         }
     }
@@ -178,7 +182,11 @@ public class AuditConfiguration {
         public PluginAuditEventRepository auditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
                                                                SecurityProperties securityProperties) {
 
-            return new ElasticsearchAuditEventRepository(elasticsearchRestTemplate, securityProperties);
+            return new ElasticsearchAuditEventRepository(
+                    elasticsearchRestTemplate,
+                    PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS,
+                    securityProperties
+            );
 
         }
     }

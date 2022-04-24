@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
@@ -73,5 +74,13 @@ public class BigDecimalScaleProperties {
      */
     public static BigDecimalScaleProperties of(int scale, RoundingMode roundingMode) {
         return new BigDecimalScaleProperties(scale, roundingMode);
+    }
+
+    public double valueOf(double value) {
+        return BigDecimal.valueOf(value).setScale(scale, roundingMode).doubleValue();
+    }
+
+    public long valueOf(long value) {
+        return BigDecimal.valueOf(value).setScale(scale, roundingMode).longValue();
     }
 }

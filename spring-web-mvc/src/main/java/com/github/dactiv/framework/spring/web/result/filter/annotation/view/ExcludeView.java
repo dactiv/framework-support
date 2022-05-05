@@ -17,6 +17,21 @@ import java.lang.annotation.*;
 public @interface ExcludeView {
 
     /**
+     * 明细视图
+     */
+    String DETAIL_VIEW = "detail_exc_view";
+
+    /**
+     * 集合视图
+     */
+    String LIST_VIEW = "list_exc_view";
+
+    /**
+     * id 名称视图值
+     */
+    String ID_NAME_VIEW = "id_name_exc_view";
+
+    /**
      * 匹配值，用于针对不同领域的业务响应不同结果的配置使用
      *
      * @return 值

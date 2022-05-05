@@ -18,6 +18,21 @@ import java.lang.annotation.*;
 public @interface IncludeView {
 
     /**
+     * 明细视图
+     */
+    String DETAIL_VIEW = "detail_inc_view";
+
+    /**
+     * 集合视图
+     */
+    String LIST_VIEW = "list_inc_view";
+
+    /**
+     * id 名称视图值
+     */
+    String ID_NAME_VIEW = "id_name_inc_view";
+
+    /**
      * 匹配值，用于针对不同领域的业务响应不同结果的配置使用
      *
      * @return 值

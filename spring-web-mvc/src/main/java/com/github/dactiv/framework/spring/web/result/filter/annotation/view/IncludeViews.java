@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Documented
 @JacksonAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 public @interface IncludeViews {
 
     /**

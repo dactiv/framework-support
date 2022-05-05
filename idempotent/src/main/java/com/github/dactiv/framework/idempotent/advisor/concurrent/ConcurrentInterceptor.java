@@ -239,16 +239,16 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      * @param key 键值
      * @param concurrent 并发注解
-     * @param supplier 执行过程供应者
+     * @param runnable 执行过程供应者
      *
      */
     private void invoke(String key,
                          Concurrent concurrent,
-                         Runnable supplier) {
+                         Runnable runnable) {
         TimeProperties waitTime = TimeProperties.of(concurrent.waitTime());
         TimeProperties leaseTime = TimeProperties.of(concurrent.leaseTime());
 
-        invoke(key, concurrent.type(), waitTime, leaseTime, concurrent.exception(), supplier);
+        invoke(key, concurrent.type(), waitTime, leaseTime, concurrent.exception(), runnable);
     }
 
     /**

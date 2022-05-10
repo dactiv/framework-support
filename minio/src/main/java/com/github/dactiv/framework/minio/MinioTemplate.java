@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
@@ -12,6 +13,7 @@ import com.github.dactiv.framework.minio.data.ObjectItem;
 import com.github.dactiv.framework.minio.data.VersionFileObject;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.http.Method;
 import io.minio.messages.Item;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
@@ -22,10 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * minio 模版
@@ -176,15 +176,9 @@ public class MinioTemplate {
                 .useApiVersion1(false)
                 .build();
 
-        List<ObjectItem> result = new LinkedList<>();
         Iterable<Result<Item>> results = minioClient.listObjects(args);
 
-        for (Result<Item> itemResult : results) {
-            Item item = itemResult.get();
-            result.add(new ObjectItem(item));
-        }
-
-        return result;
+        return covertObjectItem(results);
     }
 
     /**
@@ -249,6 +243,41 @@ public class MinioTemplate {
         }
 
         return minioClient.getObject(getObjectArgs.build());
+    }
+
+    /**
+     * 获取预览 url
+     *
+     * @param fileObject 文件对象
+     *
+     * @return url
+     */
+    public String getPresignedObjectUrl(FileObject fileObject) throws Exception {
+        return getPresignedObjectUrl(fileObject, null);
+    }
+
+    /**
+     * 获取预览 url
+     *
+     * @param fileObject 文件对象
+     * @param timeProperties 过期时间配置
+     *
+     * @return url
+     */
+    public String getPresignedObjectUrl(FileObject fileObject, TimeProperties timeProperties) throws Exception {
+        GetPresignedObjectUrlArgs.Builder builder = GetPresignedObjectUrlArgs
+                .builder()
+                .method(Method.GET)
+                .bucket(fileObject.getBucketName())
+                .region(fileObject.getRegion())
+                .object(fileObject.getObjectName());
+
+        if (Objects.nonNull(timeProperties)) {
+            builder.expiry((int)timeProperties.getValue(), timeProperties.getUnit());
+        }
+                //.expiry(1, TimeUnit.DAYS)
+                //.build()
+        return minioClient.getPresignedObjectUrl(builder.build());
     }
 
     /**
@@ -384,6 +413,18 @@ public class MinioTemplate {
             minioClient.removeBucket(removeBucketArgs);
         }
 
+    }
+
+    public List<ObjectItem> covertObjectItem(Iterable<Result<Item>> results) throws Exception {
+
+        List<ObjectItem> result = new LinkedList<>();
+
+        for (Result<Item> itemResult : results) {
+            Item item = itemResult.get();
+            result.add(new ObjectItem(item));
+        }
+
+        return result;
     }
 
     /**

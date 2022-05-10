@@ -5,23 +5,29 @@ import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.minio.MinioTemplate;
 import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
-import io.minio.GetObjectResponse;
-import io.minio.ListObjectsArgs;
-import io.minio.ObjectWriteResponse;
-import io.minio.Result;
+import io.minio.*;
+import io.minio.errors.*;
+import io.minio.http.Method;
 import io.minio.messages.Item;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * minio 模版单元测试
@@ -79,6 +85,25 @@ public class MinioTemplateTest {
         } catch (Exception e) {
             Assertions.assertTrue(IllegalArgumentException.class.isAssignableFrom(e.getClass()));
         }
+    }
+
+    @Test
+    void getPresignedObjectUrl() throws Exception {
+
+        Bucket bucket = Bucket.of(DEFAULT_TEST_BUCKET);
+        minioTemplate.makeBucketIfNotExists(bucket);
+
+        FileObject file = FileObject.of(bucket, "presignedObject");
+        minioTemplate.upload(
+                file,
+                resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream(),
+                IOUtils.toByteArray(resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream()).length,
+                MediaType.IMAGE_JPEG_VALUE
+        );
+
+        String url = minioTemplate.getPresignedObjectUrl(file, TimeProperties.of(1, TimeUnit.SECONDS));
+
+        Assertions.assertTrue(StringUtils.isNotEmpty(url));
     }
 
     @Test

@@ -23,6 +23,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -134,17 +135,55 @@ public class MinioTemplateTest {
         Assertions.assertFalse(iterable.iterator().hasNext());
 
         minioTemplate.upload(
+                FileObject.of(bucket, "folder/1"),
+                resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream(),
+                IOUtils.toByteArray(resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream()).length,
+                MediaType.IMAGE_JPEG_VALUE
+        );
+
+        minioTemplate.upload(
+                FileObject.of(bucket, "folder/2"),
+                resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream(),
+                IOUtils.toByteArray(resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream()).length,
+                MediaType.IMAGE_JPEG_VALUE
+        );
+
+        listObjectsArgs = ListObjectsArgs
+                .builder()
+                .bucket(bucket.getBucketName())
+                .prefix("folder/")
+                .build();
+
+        iterable = minioTemplate.getMinioClient().listObjects(listObjectsArgs);
+        int i = 1;
+        for (Result<Item> r : iterable) {
+            Assertions.assertEquals(r.get().objectName(), "folder/" + (i++));
+        }
+        minioTemplate.deleteObject(FileObject.of(bucket, "folder/"));
+
+        iterable = minioTemplate.getMinioClient().listObjects(listObjectsArgs);
+        Assertions.assertFalse(iterable.iterator().hasNext());
+
+        minioTemplate.upload(
                 deleteFile,
                 resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream(),
                 IOUtils.toByteArray(resourceLoader.getResource(DEFAULT_TEST_FILE).getInputStream()).length,
                 MediaType.IMAGE_JPEG_VALUE
         );
 
+        listObjectsArgs = ListObjectsArgs
+                .builder()
+                .bucket(bucket.getBucketName())
+                .prefix("delete")
+                .build();
+
         iterable = minioTemplate.getMinioClient().listObjects(listObjectsArgs);
         Assertions.assertEquals(iterable.iterator().next().get().objectName(), "delete");
 
         minioTemplate.deleteObject(deleteFile, true);
         Assertions.assertFalse(minioTemplate.isBucketExist(bucket));
+
+
     }
 
     @Test

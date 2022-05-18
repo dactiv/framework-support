@@ -14,9 +14,14 @@ import com.github.dactiv.framework.minio.data.VersionFileObject;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  * @author maurice.chen
  */
 public class MinioTemplate {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MinioTemplate.class);
 
     /**
      * minio 客户端
@@ -193,18 +200,48 @@ public class MinioTemplate {
 
         String bucketName = fileObject.getBucketName().toLowerCase();
 
-        RemoveObjectArgs.Builder args = RemoveObjectArgs
-                .builder()
-                .bucket(bucketName)
-                .region(fileObject.getRegion())
-                .object(fileObject.getObjectName());
+        if (StringUtils.endsWith(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR) ||
+                StringUtils.endsWith(fileObject.getObjectName(), Casts.DEFAULT_DOT_SYMBOL)) {
 
-        if (VersionFileObject.class.isAssignableFrom(fileObject.getClass())) {
-            VersionFileObject version = Casts.cast(fileObject);
-            args.versionId(version.getVersionId());
+            ListObjectsArgs args = ListObjectsArgs
+                    .builder()
+                    .bucket(fileObject.getBucketName())
+                    .region(fileObject.getRegion())
+                    .prefix(fileObject.getObjectName())
+                    .build();
+
+            Iterable<Result<Item>> list = minioClient.listObjects(args);
+            List<DeleteObject> objects = new LinkedList<>();
+            for (Result<Item> r : list) {
+                objects.add(new DeleteObject(r.get().objectName()));
+            }
+            RemoveObjectsArgs removeObjectsArgs = RemoveObjectsArgs
+                    .builder()
+                    .bucket(fileObject.getBucketName())
+                    .region(fileObject.getRegion())
+                    .objects(objects)
+                    .build();
+
+            Iterable<Result<DeleteError>> results = minioClient.removeObjects(removeObjectsArgs);
+            for (Result<DeleteError>  result : results) {
+                DeleteError error = result.get();
+                LOGGER.warn("Error in deleting object " + error.objectName() + "; " + error.message());
+            }
+        } else {
+
+            RemoveObjectArgs.Builder args = RemoveObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .region(fileObject.getRegion())
+                    .object(fileObject.getObjectName());
+
+            if (VersionFileObject.class.isAssignableFrom(fileObject.getClass())) {
+                VersionFileObject version = Casts.cast(fileObject);
+                args.versionId(version.getVersionId());
+            }
+
+            minioClient.removeObject(args.build());
         }
-
-        minioClient.removeObject(args.build());
 
         if (deleteBucketIfEmpty) {
 

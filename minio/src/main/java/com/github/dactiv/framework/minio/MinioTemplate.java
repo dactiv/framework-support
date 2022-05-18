@@ -22,11 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -186,6 +184,71 @@ public class MinioTemplate {
         Iterable<Result<Item>> results = minioClient.listObjects(args);
 
         return covertObjectItem(results);
+    }
+
+    /**
+     * 推送对象
+     *
+     * @param bucket 桶信息
+     * @param file 文件信息
+     *
+     * @return 对象写入响应信息
+     *
+     * @throws Exception 推送错误时跑出
+     */
+    public ObjectWriteResponse putObject(Bucket bucket, MultipartFile file) throws Exception {
+        return minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(bucket.getBucketName())
+                        .region(bucket.getRegion())
+                        .object(file.getOriginalFilename())
+                        .stream(file.getInputStream(), file.getSize(), -1)
+                        .build()
+        );
+    }
+
+    /**
+     * 推送对象
+     *
+     * @param fileObject 文件对象
+     * @param inputStream 输入流
+     *
+     * @return 对象写入响应信息
+     *
+     * @throws Exception 推送错误时跑出
+     */
+    public ObjectWriteResponse putObject(FileObject fileObject, InputStream inputStream) throws Exception {
+        return minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(fileObject.getBucketName())
+                        .region(fileObject.getRegion())
+                        .object(fileObject.getObjectName())
+                        .stream(inputStream, inputStream.available(), -1)
+                        .build()
+        );
+    }
+
+    /**
+     * 推送对象
+     *
+     * @param fileObject 文件对象
+     * @param inputStream 输入流
+     * @param objectSize 文件大小
+     * @param partSize 段大小
+     *
+     * @return 对象写入响应信息
+     *
+     * @throws Exception 推送错误时跑出
+     */
+    public ObjectWriteResponse putObject(FileObject fileObject, InputStream inputStream, int objectSize, int partSize) throws Exception {
+        return minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(fileObject.getBucketName())
+                        .region(fileObject.getRegion())
+                        .object(fileObject.getObjectName())
+                        .stream(inputStream,  objectSize, partSize)
+                        .build()
+        );
     }
 
     /**

@@ -183,7 +183,6 @@ public class MinioTemplateTest {
         minioTemplate.deleteObject(deleteFile, true);
         Assertions.assertFalse(minioTemplate.isBucketExist(bucket));
 
-
     }
 
     @Test

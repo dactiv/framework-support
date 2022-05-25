@@ -1,6 +1,8 @@
 package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.security.entity.BasicUserDetails;
 import com.github.dactiv.framework.security.entity.ResourceAuthority;
 import com.github.dactiv.framework.security.entity.RoleAuthority;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
@@ -326,5 +328,16 @@ public class SecurityUserDetails implements UserDetails {
      */
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+    }
+
+    /**
+     * 转换基础用户信息
+     *
+     * @param <T> 主键 id 类型
+     *
+     * @return 基础用户信息
+     */
+    public <T> BasicUserDetails<T> toBasicUserDetails() {
+        return BasicUserDetails.of(Casts.cast(getId()), getUsername(), getType());
     }
 }

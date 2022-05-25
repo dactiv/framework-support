@@ -11,6 +11,7 @@ import com.github.dactiv.framework.minio.data.Bucket;
 import com.github.dactiv.framework.minio.data.FileObject;
 import com.github.dactiv.framework.minio.data.ObjectItem;
 import com.github.dactiv.framework.minio.data.VersionFileObject;
+import com.google.common.collect.Multimap;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
@@ -42,7 +43,7 @@ public class MinioTemplate {
     /**
      * minio 客户端
      */
-    private final MinioClient minioClient;
+    private final EnhanceMinioClient minioClient;
 
     /**
      * json 对象映射
@@ -55,7 +56,7 @@ public class MinioTemplate {
      * @param minioClient  minio 客户端
      * @param objectMapper json 对象映射
      */
-    public MinioTemplate(MinioClient minioClient, ObjectMapper objectMapper) {
+    public MinioTemplate(EnhanceMinioClient minioClient, ObjectMapper objectMapper) {
         this.minioClient = minioClient;
         this.objectMapper = objectMapper;
     }
@@ -532,7 +533,7 @@ public class MinioTemplate {
      *
      * @return minio 客户端
      */
-    public MinioClient getMinioClient() {
+    public EnhanceMinioClient getMinioClient() {
         return minioClient;
     }
 }

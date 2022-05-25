@@ -28,12 +28,12 @@ public class MinioAutoConfiguration {
      * @return mini 客户端
      */
     @Bean
-    public MinioClient minioClient(MinioProperties minioProperties) {
-        return MinioClient
+    public EnhanceMinioClient minioClient(MinioProperties minioProperties) {
+        return new EnhanceMinioClient(MinioClient
                 .builder()
                 .endpoint(minioProperties.getEndpoint())
                 .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
-                .build();
+                .build());
     }
 
     /**
@@ -45,7 +45,7 @@ public class MinioAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(MinioTemplate.class)
-    public MinioTemplate minioTemplate(MinioClient minioClient, ObjectProvider<ObjectMapper> objectMapper) {
+    public MinioTemplate minioTemplate(EnhanceMinioClient minioClient, ObjectProvider<ObjectMapper> objectMapper) {
         return new MinioTemplate(minioClient, objectMapper.getIfUnique(ObjectMapper::new));
     }
 

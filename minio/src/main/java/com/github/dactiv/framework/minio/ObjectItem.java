@@ -1,10 +1,9 @@
-package com.github.dactiv.framework.minio.data;
+package com.github.dactiv.framework.minio;
 
 import io.minio.messages.Item;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**

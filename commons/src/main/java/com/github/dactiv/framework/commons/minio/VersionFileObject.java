@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.minio.data;
+package com.github.dactiv.framework.commons.minio;
 
 /**
  * 版本文件对象描述

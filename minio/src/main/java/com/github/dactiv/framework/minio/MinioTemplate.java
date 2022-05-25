@@ -7,13 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.minio.data.Bucket;
-import com.github.dactiv.framework.minio.data.FileObject;
-import com.github.dactiv.framework.minio.data.ObjectItem;
-import com.github.dactiv.framework.minio.data.VersionFileObject;
-import com.google.common.collect.Multimap;
+import com.github.dactiv.framework.commons.minio.Bucket;
+import com.github.dactiv.framework.commons.minio.FileObject;
+import com.github.dactiv.framework.commons.minio.VersionFileObject;
 import io.minio.*;
-import io.minio.errors.*;
 import io.minio.http.Method;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
@@ -25,11 +22,10 @@ import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * minio 模版

@@ -1,9 +1,9 @@
 package com.github.dactiv.framework.minio;
 
 import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.commons.minio.ExpirableBucket;
+import com.github.dactiv.framework.commons.minio.FileObject;
 import com.github.dactiv.framework.minio.config.AutoDeleteProperties;
-import com.github.dactiv.framework.minio.data.ExpirableBucket;
-import com.github.dactiv.framework.minio.data.FileObject;
 import io.minio.ListObjectsArgs;
 import io.minio.Result;
 import io.minio.messages.Item;

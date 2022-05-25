@@ -2,12 +2,12 @@ package com.github.dactiv.framework.minio.test;
 
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.commons.minio.Bucket;
+import com.github.dactiv.framework.commons.minio.FileObject;
 import com.github.dactiv.framework.minio.MinioTemplate;
-import com.github.dactiv.framework.minio.data.Bucket;
-import com.github.dactiv.framework.minio.data.FileObject;
-import io.minio.*;
-import io.minio.errors.*;
-import io.minio.http.Method;
+import io.minio.ListObjectsArgs;
+import io.minio.ObjectWriteResponse;
+import io.minio.Result;
 import io.minio.messages.Item;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -18,16 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**

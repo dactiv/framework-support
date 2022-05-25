@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.minio.config;
 
-import com.github.dactiv.framework.minio.data.ExpirableBucket;
+import com.github.dactiv.framework.commons.minio.ExpirableBucket;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;

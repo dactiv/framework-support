@@ -17,7 +17,6 @@ import com.github.dactiv.framework.spring.security.authentication.service.feign.
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
-import com.github.dactiv.framework.spring.web.result.RestResponseBodyAdvice;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;

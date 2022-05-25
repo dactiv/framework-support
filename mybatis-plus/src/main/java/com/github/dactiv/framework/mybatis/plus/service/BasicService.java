@@ -16,7 +16,6 @@ import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.mybatis.plus.MybatisPlusQueryGenerator;
-import com.github.dactiv.framework.mybatis.plus.baisc.VersionEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

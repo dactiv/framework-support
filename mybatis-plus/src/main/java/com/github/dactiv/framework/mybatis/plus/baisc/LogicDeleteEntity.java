@@ -3,7 +3,6 @@ package com.github.dactiv.framework.mybatis.plus.baisc;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
-import com.github.dactiv.framework.commons.id.number.NumberIdEntity;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.LinkedList;

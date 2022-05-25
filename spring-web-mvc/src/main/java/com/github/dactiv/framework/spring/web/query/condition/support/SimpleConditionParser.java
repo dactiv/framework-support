@@ -7,7 +7,6 @@ import com.github.dactiv.framework.spring.web.query.condition.Condition;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 

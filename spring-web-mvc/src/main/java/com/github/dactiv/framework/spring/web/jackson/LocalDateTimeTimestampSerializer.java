@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;

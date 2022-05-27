@@ -6,6 +6,7 @@ import com.github.dactiv.framework.spring.security.authentication.config.DeviceI
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -16,9 +17,12 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -34,7 +38,18 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
     public DeviceIdContextRepository(AuthenticationProperties properties, RedissonClient redissonClient) {
         this.properties = properties;
+
         this.redissonClient = redissonClient;
+    }
+
+    public List<AntPathRequestMatcher> getAntPathRequestMatcher() {
+        List<AntPathRequestMatcher> antPathRequestMatcher = new LinkedList<>();
+        antPathRequestMatcher.add(new AntPathRequestMatcher(this.properties.getLoginProcessingUrl()));
+        if (CollectionUtils.isNotEmpty(properties.getPermitUriAntMatchers())) {
+            properties.getPermitUriAntMatchers().forEach(AntPathRequestMatcher::new);
+        }
+
+        return antPathRequestMatcher;
     }
 
     @Override
@@ -117,7 +132,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
 
-            if (StringUtils.isBlank(userId) && StringUtils.equals(request.getRequestURI(), properties.getLoginProcessingUrl())) {
+            if (StringUtils.isBlank(userId) && getAntPathRequestMatcher().stream().anyMatch(s -> s.matches(request))) {
                 setSecurityContext(context, bucket);
             } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
 

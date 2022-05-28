@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -58,27 +59,29 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
     }
 
     @Override
-    public QueryWrapper<T> generate(List<Condition> conditions) {
+    public QueryWrapper<T> generate(Map<String, List<Condition>> filterConditionMap) {
 
         QueryWrapper<T> queryWrapper = Wrappers.query();
 
-        for (Condition c : conditions) {
+        for (Map.Entry<String, List<Condition>> entry: filterConditionMap.entrySet()) {
+            queryWrapper.and(subWrapper -> {
+                for (Condition c : entry.getValue()) {
 
-            QueryWrapper<T> temp = queryWrapper;
+                    List<WildcardParser<QueryWrapper<T>>> result = getWildcardParserList()
+                            .stream()
+                            .filter(w -> w.isSupport(c.getName()))
+                            .collect(Collectors.toList());
 
-            if (ConditionType.Or.equals(c.getType())) {
-                temp = queryWrapper.or();
-            }
+                    for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
+                        wildcardParser.structure(c.getProperty(), subWrapper);
+                    }
 
-            List<WildcardParser<QueryWrapper<T>>> result = getWildcardParserList()
-                    .stream()
-                    .filter(w -> w.isSupport(c.getName()))
-                    .collect(Collectors.toList());
+                    if (ConditionType.Or.equals(c.getType())) {
+                        subWrapper = subWrapper.or();
+                    }
 
-            for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
-                wildcardParser.structure(c.getProperty(), temp);
-            }
-
+                }
+            });
         }
 
         return queryWrapper;

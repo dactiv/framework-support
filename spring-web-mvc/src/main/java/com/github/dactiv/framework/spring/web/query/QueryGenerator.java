@@ -20,11 +20,11 @@ public interface QueryGenerator<T> {
     /**
      * 生成内容
      *
-     * @param conditions 条件信息
+     * @param filterConditionMap 条件信息
      *
      * @return 查询结果类型
      */
-    T generate(List<Condition> conditions);
+    T generate(Map<String, List<Condition>> filterConditionMap);
 
     /**
      * 获取通配符解析器集合
@@ -67,11 +67,12 @@ public interface QueryGenerator<T> {
      */
     default T createQueryWrapperFromMap(MultiValueMap<String, Object> columnMap) {
         // 创建条件
-        List<Condition> conditions = columnMap
+        /*List<Condition> conditions = columnMap
                 .entrySet()
                 .stream()
                 // 过滤掉空的值
                 .filter(e -> Objects.nonNull(e.getValue()))
+                .collect(Collectors.toList());
                 .flatMap(e ->
                         getConditionParserList()
                                 .stream()
@@ -79,8 +80,29 @@ public interface QueryGenerator<T> {
                                 .filter(c -> c.isSupport(e.getKey()))
                                 .flatMap(c -> c.getCondition(e.getKey(), columnMap.get(e.getKey())).stream())
                 )
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
 
-        return generate(conditions);
+        List<Map.Entry<String, List<Object>>> entryList = columnMap
+                .entrySet()
+                .stream()
+                // 过滤掉空的值
+                .filter(e -> Objects.nonNull(e.getValue()))
+                .collect(Collectors.toList());
+        Map<String, List<Condition>> filterConditionMap = new LinkedHashMap<>();
+        for (Map.Entry<String, List<Object>> entry : entryList) {
+            List<Condition> conditions = entry
+                    .getValue()
+                    .stream()
+                    .flatMap(e ->
+                            getConditionParserList()
+                                    .stream()
+                                    .filter(c -> c.isSupport(entry.getKey())) // 如果支持参数，就执行 getCondition 方法
+                                    .flatMap(c -> c.getCondition(entry.getKey(), columnMap.get(entry.getKey())).stream())
+                    ).collect(Collectors.toList());
+
+            filterConditionMap.put(entry.getKey(), conditions);
+        }
+
+        return generate(filterConditionMap);
     }
 }

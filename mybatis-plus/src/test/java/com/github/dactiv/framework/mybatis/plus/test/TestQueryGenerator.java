@@ -50,6 +50,7 @@ public class TestQueryGenerator {
         map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
 
         map.add("filter_[city.name_jeq]", "nanning");
+        map.add("filter_[name_eq]_or_[username_like]_or_[real_name_like]", "nanning");
 
         QueryWrapper<AllTypeEntity> queryWrapper = queryGenerator.createQueryWrapperFromMap(map);
 
@@ -68,7 +69,7 @@ public class TestQueryGenerator {
         Assertions.assertTrue(targetSql.contains("sync_status NOT IN (?,?)"));
 
         Assertions.assertTrue(targetSql.contains("type IS NOT NULL"));
-        Assertions.assertTrue(targetSql.contains("type <> ? "));
+        Assertions.assertTrue(targetSql.contains("type <> ?"));
 
         Assertions.assertEquals(StringUtils.countMatches(targetSql,"remark LIKE ?"), 3);
 
@@ -77,6 +78,6 @@ public class TestQueryGenerator {
         Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', ?, '$')"));
         Assertions.assertTrue(targetSql.contains("city->'$.name' = ?"));
         Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) OR JSON_CONTAINS(area, ?))"));
-
+        Assertions.assertTrue(targetSql.contains("name = ? OR username LIKE ? OR real_name LIKE ?"));
     }
 }

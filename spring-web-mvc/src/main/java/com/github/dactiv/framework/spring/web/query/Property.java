@@ -8,6 +8,16 @@ package com.github.dactiv.framework.spring.web.query;
 public class Property {
 
     /**
+     * 值字段
+     */
+    public static final String VALUE_FIELD = "value";
+
+    /**
+     * 属性名称字段
+     */
+    public static final String PROPERTY_NAME = "propertyName";
+
+    /**
      * 属性名
      */
     private String propertyName;

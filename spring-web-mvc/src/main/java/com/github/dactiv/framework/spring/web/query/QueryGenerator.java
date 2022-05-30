@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.web.query;
 import com.github.dactiv.framework.spring.web.query.condition.Condition;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -67,21 +68,6 @@ public interface QueryGenerator<T> {
      */
     default T createQueryWrapperFromMap(MultiValueMap<String, Object> columnMap) {
         // 创建条件
-        /*List<Condition> conditions = columnMap
-                .entrySet()
-                .stream()
-                // 过滤掉空的值
-                .filter(e -> Objects.nonNull(e.getValue()))
-                .collect(Collectors.toList());
-                .flatMap(e ->
-                        getConditionParserList()
-                                .stream()
-                                // 如果支持参数，就执行 getCondition 方法
-                                .filter(c -> c.isSupport(e.getKey()))
-                                .flatMap(c -> c.getCondition(e.getKey(), columnMap.get(e.getKey())).stream())
-                )
-                .collect(Collectors.toList());*/
-
         List<Map.Entry<String, List<Object>>> entryList = columnMap
                 .entrySet()
                 .stream()
@@ -100,7 +86,10 @@ public interface QueryGenerator<T> {
                                     .flatMap(c -> c.getCondition(entry.getKey(), columnMap.get(entry.getKey())).stream())
                     ).collect(Collectors.toList());
 
-            filterConditionMap.put(entry.getKey(), conditions);
+            if (CollectionUtils.isNotEmpty(conditions)) {
+                filterConditionMap.put(entry.getKey(), conditions);
+            }
+
         }
 
         return generate(filterConditionMap);

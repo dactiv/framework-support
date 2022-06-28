@@ -59,18 +59,28 @@ public class JacksonJsonTypeHandler<T> extends BaseTypeHandler<T> {
     @Override
     public T getNullableResult(ResultSet rs, String columnName) throws SQLException {
         final String json = rs.getString(columnName);
-        return StringUtils.isBlank(json) ? null : Casts.readValue(json, type);
+        return getJsonValue(json);
     }
 
     @Override
     public T getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         final String json = rs.getString(columnIndex);
-        return StringUtils.isBlank(json) ? null : Casts.readValue(json, type);
+        return getJsonValue(json);
     }
 
     @Override
     public T getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         final String json = cs.getString(columnIndex);
-        return StringUtils.isBlank(json) ? null : Casts.readValue(json, type);
+        return getJsonValue(json);
+    }
+
+    public T getJsonValue(String json) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        } else if (Object.class.equals(type)) {
+            return Casts.cast(json);
+        } else {
+            return Casts.readValue(json, type);
+        }
     }
 }

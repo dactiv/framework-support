@@ -3,6 +3,7 @@ package com.github.dactiv.framework.commons.page;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 滚动分页实体
@@ -11,6 +12,7 @@ import java.util.List;
  */
 public class ScrollPage<T> implements Serializable {
     private static final long serialVersionUID = 9118490108501020682L;
+
     /**
      * 分页请求
      */
@@ -19,6 +21,10 @@ public class ScrollPage<T> implements Serializable {
      * 数据元素
      */
     private List<T> elements;
+    /**
+     * 元数据信息
+     */
+    private Map<String, Object> meta;
 
     public ScrollPage() {
     }
@@ -94,6 +100,24 @@ public class ScrollPage<T> implements Serializable {
      */
     public void setElements(List<T> elements) {
         this.elements = elements;
+    }
+
+    /**
+     * 获取元数据信息
+     *
+     * @return 元数据信息
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * 设置元数据信息
+     *
+     * @param meta 元数据信息
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
 }

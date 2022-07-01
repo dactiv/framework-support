@@ -3,7 +3,7 @@ package com.github.dactiv.framework.idempotent.advisor.concurrent;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.exception.SystemException;
-import com.github.dactiv.framework.idempotent.ConcurrentProperties;
+import com.github.dactiv.framework.idempotent.ConcurrentConfig;
 import com.github.dactiv.framework.idempotent.LockType;
 import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
@@ -26,7 +26,7 @@ import java.util.function.Supplier;
  */
 public class ConcurrentInterceptor implements MethodInterceptor {
 
-    public static final String DEFAULT_EXCEPTION = "执行过程中出现并发";
+    public static final String DEFAULT_EXCEPTION = "请不要重复操作";
 
     /**
      * redisson 客户端
@@ -115,7 +115,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      * @param <R> 返回值类型
      * @return 返回值
      */
-    public <R> R invoke(ConcurrentProperties properties,
+    public <R> R invoke(ConcurrentConfig properties,
                         Supplier<R> supplier) {
 
         return invoke(
@@ -257,7 +257,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      * @param properties 并发配置
      * @param runnable 执行过程供应者
      */
-    public void invoke(ConcurrentProperties properties,
+    public void invoke(ConcurrentConfig properties,
                        Runnable runnable) {
 
         invoke(

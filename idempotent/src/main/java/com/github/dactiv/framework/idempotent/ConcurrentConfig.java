@@ -10,7 +10,7 @@ import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInter
  *
  * @author maurice.chen
  */
-public class ConcurrentProperties {
+public class ConcurrentConfig {
 
     /**
      * 键值
@@ -45,14 +45,14 @@ public class ConcurrentProperties {
      * 创建一个新的并发配置
      * @param key 键值
      */
-    public ConcurrentProperties(String key) {
+    public ConcurrentConfig(String key) {
         this.key = key;
     }
 
     /**
      * 创建一个新的并发配置
      */
-    public ConcurrentProperties() {
+    public ConcurrentConfig() {
     }
 
     /**
@@ -152,9 +152,9 @@ public class ConcurrentProperties {
      *
      * @return 新的配发配置，key 为:当前实例名称 + 后缀值，如果当前实例名称名称没有 ":" 符号，会自动加上。
      */
-    public ConcurrentProperties ofSuffix(Object suffix) {
+    public ConcurrentConfig ofSuffix(Object suffix) {
         String name = new CacheProperties(getKey()).getName(suffix);
-        ConcurrentProperties newOne = Casts.of(this, ConcurrentProperties.class);
+        ConcurrentConfig newOne = Casts.of(this, ConcurrentConfig.class);
         newOne.setKey(name);
         return newOne;
     }

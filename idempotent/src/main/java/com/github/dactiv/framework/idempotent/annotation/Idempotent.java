@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.idempotent.annotation;
 
 import com.github.dactiv.framework.commons.annotation.Time;
+import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
 
 import java.lang.annotation.*;
 
@@ -54,7 +55,7 @@ public @interface Idempotent {
      *
      * @return 信息
      */
-    String exception() default "请不要重复操作";
+    String exception() default ConcurrentInterceptor.DEFAULT_EXCEPTION;
 
     /**
      * 如果不使用 {@link #value()} 时，要忽略哪个参数不做 hashCode

@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.idempotent.advisor;
 
 import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.idempotent.IdempotentProperties;
+import com.github.dactiv.framework.idempotent.config.IdempotentProperties;
 import com.github.dactiv.framework.idempotent.annotation.Idempotent;
 import com.github.dactiv.framework.idempotent.exception.IdempotentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
@@ -28,6 +28,9 @@ import java.util.Objects;
  * @author maurice
  */
 public class IdempotentInterceptor implements MethodInterceptor {
+
+
+    public static final String DEFAULT_EXCEPTION = "请不要过快的操作";
 
     /**
      * redisson 客户端

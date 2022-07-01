@@ -1,4 +1,4 @@
-package com.github.dactiv.framework.idempotent;
+package com.github.dactiv.framework.idempotent.config;
 
 import com.github.dactiv.framework.idempotent.advisor.IdempotentInterceptor;
 import com.github.dactiv.framework.idempotent.advisor.IdempotentPointcutAdvisor;
@@ -6,7 +6,6 @@ import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInter
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentPointcutAdvisor;
 import com.github.dactiv.framework.idempotent.exception.IdempotentErrorResultResolver;
 import com.github.dactiv.framework.idempotent.generator.SpelExpressionValueGenerator;
-import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -29,15 +28,12 @@ import org.springframework.context.annotation.Configuration;
 public class IdempotentAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(ValueGenerator.class)
-    ValueGenerator keyGenerator() {
-        return new SpelExpressionValueGenerator();
-    }
-
-    @Bean
     @ConditionalOnMissingBean(ConcurrentInterceptor.class)
-    ConcurrentInterceptor concurrentInterceptor(RedissonClient redissonClient, ValueGenerator keyGenerator) {
-        return new ConcurrentInterceptor(redissonClient, keyGenerator);
+    ConcurrentInterceptor concurrentInterceptor(RedissonClient redissonClient,
+                                                IdempotentProperties idempotentProperties) {
+        SpelExpressionValueGenerator generator = new SpelExpressionValueGenerator();
+        generator.setPrefix(idempotentProperties.getConcurrentKeyPrefix());
+        return new ConcurrentInterceptor(redissonClient, generator);
     }
 
     @Bean
@@ -48,9 +44,10 @@ public class IdempotentAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(IdempotentInterceptor.class)
     IdempotentInterceptor idempotentInterceptor(RedissonClient redissonClient,
-                                                ValueGenerator keyGenerator,
                                                 IdempotentProperties idempotentProperties) {
-        return new IdempotentInterceptor(redissonClient, keyGenerator, idempotentProperties);
+        SpelExpressionValueGenerator generator = new SpelExpressionValueGenerator();
+        generator.setPrefix(idempotentProperties.getIdempotentKeyPrefix());
+        return new IdempotentInterceptor(redissonClient, generator, idempotentProperties);
     }
 
     @Bean

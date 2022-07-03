@@ -15,6 +15,10 @@ public class RestResult<T> implements Serializable {
 
     public static final String SUCCESS_EXECUTE_CODE = "200";
 
+    public static final String PROCESSING_EXECUTE_CODE = "102";
+
+    public static final String DEFAULT_PROCESSING_MESSAGE = "Processing";
+
     public static final String DEFAULT_SUCCESS_MESSAGE = "ok";
 
     public static final String FAIL_EXECUTE_CODE = "500";
@@ -145,6 +149,40 @@ public class RestResult<T> implements Serializable {
         return of(message, Integer.parseInt(SUCCESS_EXECUTE_CODE), executeCode, null);
     }
 
+    /**
+     * 创建一个执行中的抽象 rest 结果集实体类
+     *
+     * @param data 响应内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofProcessing(T data) {
+        return ofSuccess(PROCESSING_EXECUTE_CODE, data);
+    }
+
+    /**
+     * 创建一个执行中的抽象 rest 结果集实体类
+     *
+     * @param message 响应信息
+     * @param data    响应内容
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofProcessing(String message, T data) {
+        return of(message, Integer.parseInt(PROCESSING_EXECUTE_CODE), PROCESSING_EXECUTE_CODE, data);
+    }
+
+    /**
+     * 创建一个执行中的抽象 rest 结果集实体类
+     *
+     * @param message     响应信息
+     * @param executeCode 执行代码
+     *
+     * @return rest 结果集
+     */
+    public static <T> RestResult<T> ofProcessing(String message, String executeCode) {
+        return of(message, Integer.parseInt(PROCESSING_EXECUTE_CODE), executeCode, null);
+    }
 
     /**
      * 创建一个异常的抽象 rest 结果集实体类

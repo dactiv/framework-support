@@ -83,6 +83,29 @@ public class MinioTemplate {
     }
 
     /**
+     * 判断文件是否存在
+     *
+     * @param fileObject 文件对象
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isObjectExist(FileObject fileObject) {
+        try {
+            minioClient.statObject(
+                    StatObjectArgs
+                            .builder()
+                            .bucket(fileObject.getBucketName())
+                            .object(fileObject.getObjectName())
+                            .region(fileObject.getRegion())
+                            .build()
+            );
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 判断桶是否存在
      *
      * @param bucket 桶描述

@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import feign.RequestInterceptor;
+import feign.RequestTemplate;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,22 +35,31 @@ public class FeignAuthenticationConfiguration {
      */
     @Bean
     public RequestInterceptor feignAuthRequestInterceptor(AuthenticationProperties properties) {
-        return requestTemplate -> {
+        return requestTemplate -> initRequestTemplate(requestTemplate, properties);
+    }
 
-            SecurityProperties.User user = properties
-                    .getUsers()
-                    .stream()
-                    .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
-                    .findFirst()
-                    .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
+    /**
+     * 初始化 request template
+     *
+     * @param requestTemplate request template
+     * @param properties 认证配置信息
+     */
+    public static void initRequestTemplate(RequestTemplate requestTemplate, AuthenticationProperties properties) {
 
-            requestTemplate.header(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
+        SecurityProperties.User user = properties
+                .getUsers()
+                .stream()
+                .filter(u -> u.getName().equals(FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE))
+                .findFirst()
+                .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
 
-            String base64 = encodeUserProperties(properties, user);
+        requestTemplate.header(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
 
-            requestTemplate.header(properties.getTokenHeaderName(), base64);
-            requestTemplate.header(properties.getTokenResolverHeaderName(), FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE);
-        };
+        String base64 = encodeUserProperties(properties, user);
+
+        requestTemplate.header(properties.getTokenHeaderName(), base64);
+        requestTemplate.header(properties.getTokenResolverHeaderName(), FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE);
+
     }
 
     /**

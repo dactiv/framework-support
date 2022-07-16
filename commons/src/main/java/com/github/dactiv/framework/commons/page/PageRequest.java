@@ -29,6 +29,15 @@ public class PageRequest extends ScrollPageRequest {
     /**
      * 分页请求对象，用于在分页查询时，通过该对象得知要查询的页数。
      *
+     * @param size 分页大小
+     */
+    public PageRequest(int size) {
+        super(size);
+    }
+
+    /**
+     * 分页请求对象，用于在分页查询时，通过该对象得知要查询的页数。
+     *
      * @param number 页号
      * @param size 内容大小
      */
@@ -66,6 +75,29 @@ public class PageRequest extends ScrollPageRequest {
             offset = 0;
         }
         return offset;
+    }
+
+    /**
+     * 创建一个分页请求对象，默认第一页
+     *
+     * @param size 分页大小
+     *
+     * @return 分页请求对象
+     */
+    public static PageRequest of(int size) {
+        return new PageRequest(DEFAULT_PAGE, size);
+    }
+
+    /**
+     * 创建一个分页请求对象
+     *
+     * @param number 第几页
+     * @param size 分页大小
+     *
+     * @return 分页请求对象
+     */
+    public static PageRequest of(int number, int size) {
+        return new PageRequest(number, size);
     }
 
 }

@@ -7,7 +7,7 @@ import java.io.Serializable;
  *
  * @author maurice.chen
  */
-public class BasicUserDetails<T> implements Serializable {
+public class BasicUserDetails<T> implements Serializable, TypeUserDetails<T> {
 
     /**
      * 用户 id
@@ -107,17 +107,6 @@ public class BasicUserDetails<T> implements Serializable {
      * @return 新的基础用户信息
      */
     public static <T> BasicUserDetails<T> of(T userId, String username, String userType) {
-        return new BasicUserDetails(userId, username, userType);
-    }
-
-    /**
-     * 设置用户信息
-     *
-     * @param userDetails 基础用户信息
-     */
-    public void setUserDetails(BasicUserDetails<T> userDetails) {
-        this.setUserId(userDetails.getUserId());
-        this.setUsername(userDetails.getUsername());
-        this.setUserType(userDetails.getUserType());
+        return new BasicUserDetails<>(userId, username, userType);
     }
 }

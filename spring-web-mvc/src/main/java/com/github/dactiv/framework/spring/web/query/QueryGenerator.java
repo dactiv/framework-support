@@ -76,20 +76,15 @@ public interface QueryGenerator<T> {
                 .collect(Collectors.toList());
         Map<String, List<Condition>> filterConditionMap = new LinkedHashMap<>();
         for (Map.Entry<String, List<Object>> entry : entryList) {
-            List<Condition> conditions = entry
-                    .getValue()
+            List<Condition> conditions = getConditionParserList()
                     .stream()
-                    .flatMap(e ->
-                            getConditionParserList()
-                                    .stream()
-                                    .filter(c -> c.isSupport(entry.getKey())) // 如果支持参数，就执行 getCondition 方法
-                                    .flatMap(c -> c.getCondition(entry.getKey(), columnMap.get(entry.getKey())).stream())
-                    ).collect(Collectors.toList());
+                    .filter(c -> c.isSupport(entry.getKey())) // 如果支持参数，就执行 getCondition 方法
+                    .flatMap(c -> c.getCondition(entry.getKey(), columnMap.get(entry.getKey())).stream())
+                    .collect(Collectors.toList());
 
             if (CollectionUtils.isNotEmpty(conditions)) {
                 filterConditionMap.put(entry.getKey(), conditions);
             }
-
         }
 
         return generate(filterConditionMap);

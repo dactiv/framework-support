@@ -1,7 +1,9 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.CacheProperties;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author maurice.chen
  */
-public interface UserDetailsService {
+public interface UserDetailsService<T> {
 
     /**
      * 认证缓存块名称
@@ -117,4 +119,27 @@ public interface UserDetailsService {
                                     SecurityUserDetails userDetails) {
         return getPasswordEncoder().matches(presentedPassword, userDetails.getPassword());
     }
+
+    /**
+     * 转换慕白哦用户
+     *
+     * @param userDetails 当前安全用户明细
+     *
+     * @return 目标用户实体
+     */
+    default T convertTargetUser(SecurityUserDetails userDetails) {
+        throw new UnsupportedOperationException("不支持此操作");
+    }
+
+    /**
+     * 更新目标用户密码
+     *
+     * @param targetUser 目标用户
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     */
+    default void updatePassword(T targetUser , String oldPassword, String newPassword) {
+        throw new UnsupportedOperationException("不支持此操作");
+    }
+
 }

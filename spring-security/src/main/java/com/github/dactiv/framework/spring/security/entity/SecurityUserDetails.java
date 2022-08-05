@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.security.entity.BasicUserDetails;
 import com.github.dactiv.framework.security.entity.ResourceAuthority;
 import com.github.dactiv.framework.security.entity.RoleAuthority;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class SecurityUserDetails implements UserDetails {
+public class SecurityUserDetails implements UserDetails, BasicIdentification<Object> {
 
     private static final long serialVersionUID = 1369484231035811533L;
 

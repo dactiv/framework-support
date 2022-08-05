@@ -13,7 +13,9 @@ import java.util.UUID;
  */
 public class PluginAuditEvent extends AuditEvent {
 
-    public static final String DEFAULT_INDEX_NAME = "audit-event";
+    public static final String PRINCIPAL_FIELD_NAME = "principal";
+
+    public static final String TYPE_FIELD_NAME = "type";
 
     private static final long serialVersionUID = 8633684304971875621L;
 

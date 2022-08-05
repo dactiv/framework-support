@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.security.audit;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -48,12 +49,25 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
      * @return 审计事件
      */
     default AuditEvent createAuditEvent(Map<String, Object> map) {
-        Instant instant = Instant.ofEpochMilli(Casts.cast(map.get("timestamp"), Long.class));
-        String principal = map.get("principal").toString();
-        String type = map.get("type").toString();
+        Instant instant = Instant.ofEpochMilli(
+                Casts.cast(map.get(RestResult.DEFAULT_TIMESTAMP_NAME), Long.class)
+        );
+        String principal = map.get(PluginAuditEvent.PRINCIPAL_FIELD_NAME).toString();
+        String type = map.get(PluginAuditEvent.TYPE_FIELD_NAME).toString();
         //noinspection unchecked
-        Map<String, Object> data = Casts.cast(map.get("data"), Map.class);
+        Map<String, Object> data = Casts.cast(map.get(RestResult.DEFAULT_DATA_NAME), Map.class);
 
         return new AuditEvent(instant, principal, type, data);
+    }
+
+    default boolean validPrincipal(String principal, String securityPropertiesUsername, List<String> ignorePrincipals) {
+        if (principal.equals(securityPropertiesUsername)) {
+            return false;
+        }
+
+        if (ignorePrincipals.contains(principal)) {
+            return false;
+        }
+        return true;
     }
 }

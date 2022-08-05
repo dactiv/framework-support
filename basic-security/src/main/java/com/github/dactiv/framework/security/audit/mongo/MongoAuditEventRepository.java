@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.security.audit.mongo;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
@@ -33,6 +34,10 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
+    public static final String DEFAULT_COLLECTION_NAME = "t_audit_event";
+
+    public static final String DEFAULT_ID_FIELD = "_id";
+
     private final MongoTemplate mongoTemplate;
 
     private final SecurityProperties securityProperties;
@@ -53,8 +58,8 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
-        if (pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-            return;
+        if (!validPrincipal(pluginAuditEvent.getPrincipal(), securityProperties.getUser().getName(), ignorePrincipals)) {
+            return ;
         }
 
         if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
@@ -64,7 +69,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         try {
 
             if (!pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-                event = mongoTemplate.save(pluginAuditEvent, PluginAuditEvent.DEFAULT_INDEX_NAME);
+                event = mongoTemplate.save(pluginAuditEvent, DEFAULT_COLLECTION_NAME);
             }
 
         } catch (Exception e) {
@@ -78,10 +83,10 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         Criteria criteria = createCriteria(principal, after, type);
 
-        Query query = new Query(criteria).with(Sort.by(Sort.Order.desc("timestamp")));
+        Query query = new Query(criteria).with(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
 
         //noinspection rawtypes
-        List<Map> result = mongoTemplate.find(query, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+        List<Map> result = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
 
         return result.stream().map(this::createPluginAuditEvent).collect(Collectors.toList());
     }
@@ -93,10 +98,10 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         Query query = new Query(criteria)
                 .with(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()))
-                .with(Sort.by(Sort.Order.desc("timestamp")));
+                .with(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
 
         //noinspection rawtypes
-        List<Map> data = mongoTemplate.find(query, Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+        List<Map> data = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
 
         return new Page<>(pageRequest, data.stream().map(this::createPluginAuditEvent).collect(Collectors.toList()));
     }
@@ -109,7 +114,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         StringIdEntity stringIdEntity = Casts.cast(id);
         //noinspection unchecked
-        Map<String, Object> map = mongoTemplate.findById(stringIdEntity.getId(), Map.class, PluginAuditEvent.DEFAULT_INDEX_NAME);
+        Map<String, Object> map = mongoTemplate.findById(stringIdEntity.getId(), Map.class, DEFAULT_COLLECTION_NAME);
 
         if (MapUtils.isNotEmpty(map)) {
             return createPluginAuditEvent(map);
@@ -129,7 +134,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         AuditEvent auditEvent = createAuditEvent(map);
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
-        pluginAuditEvent.setId(map.get("_id").toString());
+        pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
 
         return pluginAuditEvent;
     }
@@ -148,15 +153,15 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         Criteria criteria = new Criteria();
 
         if (StringUtils.isNotBlank(principal)) {
-            criteria = criteria.and("principal").is(principal);
+            criteria = criteria.and(PluginAuditEvent.PRINCIPAL_FIELD_NAME).is(principal);
         }
 
         if (StringUtils.isNotBlank(type)) {
-            criteria = criteria.and("type").is(type);
+            criteria = criteria.and(PluginAuditEvent.TYPE_FIELD_NAME).is(type);
         }
 
         if (Objects.nonNull(after)) {
-            criteria = criteria.and("timestamp").gte(after);
+            criteria = criteria.and(RestResult.DEFAULT_TIMESTAMP_NAME).gte(after);
         }
 
         return criteria;

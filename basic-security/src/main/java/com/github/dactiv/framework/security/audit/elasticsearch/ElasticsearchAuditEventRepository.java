@@ -3,6 +3,7 @@ package com.github.dactiv.framework.security.audit.elasticsearch;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.commons.id.IdEntity;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
@@ -19,6 +20,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
@@ -26,6 +28,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 
 import java.time.Instant;
 import java.util.*;
@@ -37,6 +40,8 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 public class ElasticsearchAuditEventRepository implements PluginAuditEventRepository {
+
+    public static final String DEFAULT_INDEX_NAME = "audit-event";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
@@ -57,8 +62,8 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         this.securityProperties = securityProperties;
 
         this.indexGenerator = new DateIndexGenerator(
-                PluginAuditEvent.DEFAULT_INDEX_NAME,
-                "-",
+                DEFAULT_INDEX_NAME,
+                RuleBasedTransactionAttribute.PREFIX_ROLLBACK_RULE,
                 RestResult.DEFAULT_TIMESTAMP_NAME
         );
     }
@@ -66,14 +71,10 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     @Override
     public void add(AuditEvent event) {
 
-        if (ignorePrincipals.contains(event.getPrincipal())) {
-            return ;
-        }
-
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
-        if (pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-            return;
+        if (!validPrincipal(pluginAuditEvent.getPrincipal(), securityProperties.getUser().getName(), ignorePrincipals)) {
+            return ;
         }
 
         if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
@@ -105,7 +106,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC));
+                .withSort(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC));
 
         return elasticsearchRestTemplate
                 .search(builder.build(), Map.class, IndexCoordinates.of(index))
@@ -124,7 +125,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
                 .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort("timestamp").order(SortOrder.DESC))
+                .withSort(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         List<PluginAuditEvent> content = elasticsearchRestTemplate
@@ -171,7 +172,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         AuditEvent auditEvent = createAuditEvent(map);
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
-        pluginAuditEvent.setId(map.get("id").toString());
+        pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
 
         return pluginAuditEvent;
     }
@@ -189,15 +190,15 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
         if (StringUtils.isNotBlank(type)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("type", type));
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.TYPE_FIELD_NAME, type));
         }
 
         if (Objects.nonNull(after)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("timestamp").gte(after.getEpochSecond()));
+            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery(RestResult.DEFAULT_TIMESTAMP_NAME).gte(after.getEpochSecond()));
         }
 
         if (StringUtils.isNotBlank(principal)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("principal", principal));
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.PRINCIPAL_FIELD_NAME, principal));
         }
 
         return queryBuilder;
@@ -217,15 +218,15 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
             AuditEvent auditEvent = new AuditEvent(
                     after,
-                    StringUtils.defaultString(principal, ""),
-                    StringUtils.defaultString(type, ""),
+                    StringUtils.defaultString(principal, StringUtils.EMPTY),
+                    StringUtils.defaultString(type, StringUtils.EMPTY),
                     new LinkedHashMap<>()
             );
 
             return indexGenerator.generateIndex(auditEvent).toLowerCase();
 
         } catch (Exception e) {
-            return PluginAuditEvent.DEFAULT_INDEX_NAME + "-*";
+            return DEFAULT_INDEX_NAME + RuleBasedTransactionAttribute.PREFIX_ROLLBACK_RULE + ProxyFactoryBean.GLOBAL_SUFFIX;
         }
     }
 }

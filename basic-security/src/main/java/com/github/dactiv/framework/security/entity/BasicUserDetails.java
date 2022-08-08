@@ -10,6 +10,11 @@ import java.io.Serializable;
 public class BasicUserDetails<T> implements Serializable, TypeUserDetails<T> {
 
     /**
+     * 用户 id 字段名称
+     */
+    public static final String USER_ID_FIELD = "userId";
+
+    /**
      * 用户 id
      */
     private T userId;

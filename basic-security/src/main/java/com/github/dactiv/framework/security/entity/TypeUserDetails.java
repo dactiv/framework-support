@@ -54,7 +54,7 @@ public interface TypeUserDetails<T> {
      *
      * @param userDetails 基础用户信息
      */
-    default void setUserDetails(BasicUserDetails<T> userDetails) {
+    default void setUserDetails(TypeUserDetails<T> userDetails) {
         this.setUserId(userDetails.getUserId());
         this.setUsername(userDetails.getUsername());
         this.setUserType(userDetails.getUserType());

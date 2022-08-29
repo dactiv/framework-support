@@ -10,11 +10,15 @@ import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.minio.Bucket;
 import com.github.dactiv.framework.commons.minio.FileObject;
 import com.github.dactiv.framework.commons.minio.VersionFileObject;
+import com.google.common.collect.Multimap;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.http.Method;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
+import io.minio.messages.Part;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -35,6 +42,21 @@ import java.util.*;
 public class MinioTemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinioTemplate.class);
+
+    /**
+     * 分片参数参数
+     */
+    public static final String PART_NUMBER_PARAM_NAME = "partNumber";
+
+    /**
+     * 分片数量参数
+     */
+    public static final String CHUNK_PARAM_NAME = "chunk";
+
+    /**
+     * 上传 id
+     */
+    public static final String UPLOAD_ID_PARAM_NAME = "uploadId";
 
     /**
      * minio 客户端
@@ -369,25 +391,41 @@ public class MinioTemplate {
      * 获取预览 url
      *
      * @param fileObject 文件对象
+     * @param method 签署方法
      *
      * @return url
      */
-    public String getPresignedObjectUrl(FileObject fileObject) throws Exception {
-        return getPresignedObjectUrl(fileObject, null);
+    public String getPresignedObjectUrl(FileObject fileObject, Method method) throws Exception {
+        return getPresignedObjectUrl(fileObject, method, null);
     }
 
     /**
      * 获取预览 url
      *
      * @param fileObject 文件对象
+     * @param method 签署方法
      * @param timeProperties 过期时间配置
      *
      * @return url
      */
-    public String getPresignedObjectUrl(FileObject fileObject, TimeProperties timeProperties) throws Exception {
+    public String getPresignedObjectUrl(FileObject fileObject, Method method, TimeProperties timeProperties) throws Exception {
+        return getPresignedObjectUrl(fileObject, method, timeProperties, null);
+    }
+
+    /**
+     * 获取签署 url
+     *
+     * @param fileObject 文件对象
+     * @param method 签署方法
+     * @param timeProperties 过期时间配置
+     * @param queryParams 扩展的查询参数
+     *
+     * @return url
+     */
+    public String getPresignedObjectUrl(FileObject fileObject, Method method, TimeProperties timeProperties, Map<String, String> queryParams) throws Exception {
         GetPresignedObjectUrlArgs.Builder builder = GetPresignedObjectUrlArgs
                 .builder()
-                .method(Method.GET)
+                .method(method)
                 .bucket(fileObject.getBucketName())
                 .region(fileObject.getRegion())
                 .object(fileObject.getObjectName());
@@ -395,8 +433,11 @@ public class MinioTemplate {
         if (Objects.nonNull(timeProperties)) {
             builder.expiry((int)timeProperties.getValue(), timeProperties.getUnit());
         }
-                //.expiry(1, TimeUnit.DAYS)
-                //.build()
+
+        if (MapUtils.isNotEmpty(queryParams)) {
+            builder.extraQueryParams(queryParams);
+        }
+
         return minioClient.getPresignedObjectUrl(builder.build());
     }
 
@@ -535,6 +576,14 @@ public class MinioTemplate {
 
     }
 
+    /**
+     * 将查询结果转换为 ObjectItem 对象
+     *
+     * @param results 查询结果
+     *
+     * @return ObjectItem 对象集合
+     *
+     */
     public List<ObjectItem> covertObjectItem(Iterable<Result<Item>> results) throws Exception {
 
         List<ObjectItem> result = new LinkedList<>();
@@ -545,6 +594,253 @@ public class MinioTemplate {
         }
 
         return result;
+    }
+
+    /**
+     * 完成分片上传，执行合并文件
+     *
+     * @param fileObject       文件对象
+     * @param uploadId         上传ID
+     * @param parts            分片
+     *
+     * @return 文件对象创建情况响应体
+     */
+    public ObjectWriteResponse completeMultipartUpload(FileObject fileObject,
+                                                       String uploadId,
+                                                       Part[] parts) throws Exception {
+        return completeMultipartUpload(fileObject, uploadId, parts, null);
+    }
+
+    /**
+     * 完成分片上传，执行合并文件
+     *
+     * @param fileObject       文件对象
+     * @param uploadId         上传ID
+     * @param parts            分片
+     * @param extraHeaders     额外消息头
+     *
+     * @return 文件对象创建情况响应体
+     */
+    public ObjectWriteResponse completeMultipartUpload(FileObject fileObject,
+                                                       String uploadId,
+                                                       Part[] parts,
+                                                       Multimap<String, String> extraHeaders) throws Exception {
+        return completeMultipartUpload(fileObject, uploadId, parts, extraHeaders, null);
+    }
+
+    /**
+     * 完成分片上传，执行合并文件
+     *
+     * @param fileObject       文件对象
+     * @param uploadId         上传ID
+     * @param parts            分片
+     * @param extraHeaders     额外消息头
+     * @param extraQueryParams 额外查询参数
+     *
+     * @return 文件对象创建情况响应体
+     */
+    public ObjectWriteResponse completeMultipartUpload(FileObject fileObject,
+                                                       String uploadId,
+                                                       Part[] parts,
+                                                       Multimap<String, String> extraHeaders,
+                                                       Multimap<String, String> extraQueryParams) throws Exception {
+        return minioClient.completeMultipartUpload(fileObject, uploadId, parts, extraHeaders, extraQueryParams);
+    }
+
+    /**
+     * 创建分片上传请求
+     *
+     * @param fileObject       文件对象
+     *
+     * @return 创建分片上传响应体
+     */
+    public CreateMultipartUploadResponse createMultipartUpload(FileObject fileObject) throws Exception {
+        return createMultipartUpload(fileObject, null);
+    }
+
+    /**
+     * 创建分片上传请求
+     *
+     * @param fileObject       文件对象
+     * @param extraHeaders     消息头
+     *
+     * @return 创建分片上传响应体
+     */
+    public CreateMultipartUploadResponse createMultipartUpload(FileObject fileObject,
+                                                               Multimap<String, String> extraHeaders) throws Exception {
+        return createMultipartUpload(fileObject, extraHeaders, null);
+    }
+
+    /**
+     * 创建分片上传请求
+     *
+     * @param fileObject       文件对象
+     * @param extraHeaders     消息头
+     * @param extraQueryParams 额外查询参数
+     *
+     * @return 创建分片上传响应体
+     */
+    public CreateMultipartUploadResponse createMultipartUpload(FileObject fileObject,
+                                                               Multimap<String, String> extraHeaders,
+                                                               Multimap<String, String> extraQueryParams) throws Exception {
+        return minioClient.createMultipartUpload(fileObject, extraHeaders, extraQueryParams);
+    }
+
+    /**
+     * 针对文件对象查询文件分片内容
+     *
+     * @param fileObject 文件对象
+     * @param maxParts 文件部分内容的最大值
+     * @param uploadId 上传 id
+     *
+     * @return 文件分片内容响应体
+     */
+    public ListPartsResponse listParts(FileObject fileObject,
+                                       Integer maxParts,
+                                       String uploadId) throws Exception {
+        return listParts(fileObject, maxParts, 0, uploadId);
+    }
+
+    /**
+     * 针对文件对象查询文件分片内容
+     *
+     * @param fileObject 文件对象
+     * @param maxParts 文件部分内容的最大值
+     * @param partNumberMarker 文件部分内容位置编号
+     * @param uploadId 上传 id
+     *
+     * @return 文件分片内容响应体
+     */
+    public ListPartsResponse listParts(FileObject fileObject,
+                                       Integer maxParts,
+                                       Integer partNumberMarker,
+                                       String uploadId) throws Exception {
+        return listParts(fileObject, maxParts, partNumberMarker, uploadId, null);
+    }
+
+    /**
+     * 针对文件对象查询文件分片内容
+     *
+     * @param fileObject 文件对象
+     * @param maxParts 文件部分内容的最大值
+     * @param partNumberMarker 文件部分内容位置编号
+     * @param uploadId 上传 id
+     * @param extraHeaders 额外消息头
+     *
+     * @return 文件分片内容响应体
+     */
+    public ListPartsResponse listParts(FileObject fileObject,
+                                       Integer maxParts,
+                                       Integer partNumberMarker,
+                                       String uploadId,
+                                       Multimap<String, String> extraHeaders) throws Exception {
+        return listParts(fileObject, maxParts, partNumberMarker, uploadId, extraHeaders, null);
+    }
+
+    /**
+     * 针对文件对象查询文件分片内容
+     *
+     * @param fileObject 文件对象
+     * @param maxParts 文件部分内容的最大值
+     * @param partNumberMarker 文件部分内容位置编号
+     * @param uploadId 上传 id
+     * @param extraHeaders 额外消息头
+     * @param extraQueryParams 额外查询参数
+     *
+     * @return 文件分片内容响应体
+     */
+    public ListPartsResponse listParts(FileObject fileObject,
+                                       Integer maxParts,
+                                       Integer partNumberMarker,
+                                       String uploadId,
+                                       Multimap<String, String> extraHeaders,
+                                       Multimap<String, String> extraQueryParams) throws Exception {
+        return minioClient.listParts(fileObject, maxParts, partNumberMarker, uploadId, extraHeaders, extraQueryParams);
+    }
+
+    /**
+     * 查询对象信息
+     *
+     * @param fileObject 文件对象
+     *
+     * @return 响应内容
+     *
+     * @throws Exception 查询对象信息错误时抛出
+     */
+    public StatObjectResponse statObject(FileObject fileObject) throws Exception {
+        return statObject(fileObject, null);
+
+    }
+
+    /**
+     * 查询对象信息
+     *
+     * @param fileObject 文件对象
+     * @param matchEtag etag 值
+     *
+     * @return 响应内容
+     *
+     * @throws Exception 查询对象信息错误时抛出
+     */
+    public StatObjectResponse statObject(FileObject fileObject, String matchEtag) throws Exception {
+        return statObject(fileObject, matchEtag, null);
+
+    }
+
+    /**
+     * 查询对象信息
+     *
+     * @param fileObject 文件对象
+     * @param matchEtag etag 值
+     * @param headers 头信息
+     *
+     * @return 响应内容
+     *
+     * @throws Exception 查询对象信息错误时抛出
+     */
+    public StatObjectResponse statObject(FileObject fileObject, String matchEtag, Map<String, String> headers) throws Exception {
+        return statObject(fileObject, matchEtag, headers, null);
+
+    }
+
+    /**
+     * 查询对象信息
+     *
+     * @param fileObject 文件对象
+     * @param matchEtag etag 值
+     * @param headers 头信息
+     * @param queryParams 查询参数信息
+     *
+     * @return 响应内容
+     *
+     * @throws Exception 查询对象信息错误时抛出
+     */
+    public StatObjectResponse statObject(FileObject fileObject, String matchEtag, Map<String, String> headers, Map<String, String> queryParams) throws Exception {
+        ObjectConditionalReadArgs.Builder<StatObjectArgs.Builder, StatObjectArgs> statObjectArgs = StatObjectArgs
+                .builder()
+                .region(fileObject.getRegion())
+                .bucket(fileObject.getBucketName())
+                .object(fileObject.getObjectName());
+
+        if (VersionFileObject.class.isAssignableFrom(fileObject.getClass())) {
+            VersionFileObject object = Casts.cast(fileObject);
+            statObjectArgs.versionId(object.getVersionId());
+        }
+
+        if (StringUtils.isNotEmpty(matchEtag)) {
+            statObjectArgs.matchETag(matchEtag);
+        }
+        /*if (StringUtils.isNotEmpty(notMatchEtag)) {
+            statObjectArgs.notMatchETag(notMatchEtag);
+        }*/
+        if (MapUtils.isNotEmpty(headers)) {
+            statObjectArgs.extraHeaders(headers);
+        }
+        if (MapUtils.isNotEmpty(queryParams)) {
+            statObjectArgs.extraQueryParams(queryParams);
+        }
+
+        return minioClient.statObject(statObjectArgs.build());
     }
 
     /**

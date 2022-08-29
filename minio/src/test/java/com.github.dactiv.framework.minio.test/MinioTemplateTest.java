@@ -8,6 +8,7 @@ import com.github.dactiv.framework.minio.MinioTemplate;
 import io.minio.ListObjectsArgs;
 import io.minio.ObjectWriteResponse;
 import io.minio.Result;
+import io.minio.http.Method;
 import io.minio.messages.Item;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -95,7 +96,7 @@ public class MinioTemplateTest {
                 MediaType.IMAGE_JPEG_VALUE
         );
 
-        String url = minioTemplate.getPresignedObjectUrl(file, TimeProperties.of(1, TimeUnit.SECONDS));
+        String url = minioTemplate.getPresignedObjectUrl(file, Method.GET, TimeProperties.of(1, TimeUnit.SECONDS), null);
 
         Assertions.assertTrue(StringUtils.isNotEmpty(url));
     }

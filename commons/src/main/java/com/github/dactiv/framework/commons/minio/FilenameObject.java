@@ -126,7 +126,6 @@ public class FilenameObject extends FileObject {
      */
     public static FilenameObject of(FileObject fileObject) {
         FilenameObject filenameObject = of(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), fileObject.getObjectName());
-        filenameObject.setObjectName(String.valueOf(System.currentTimeMillis()));
         filenameObject.setObjectName(System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + filenameObject.getFilename());
         return filenameObject;
     }

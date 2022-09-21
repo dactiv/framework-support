@@ -137,7 +137,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
         pluginAuditEvent.setPrincipalType(map.getOrDefault(PluginAuditEvent.PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
-
+        pluginAuditEvent.setPrincipalId(map.getOrDefault(PluginAuditEvent.PRINCIPAL_ID_FIELD_NAME, StringUtils.EMPTY).toString());
         pluginAuditEvent.setMeta(Casts.cast(map.getOrDefault(PluginAuditEvent.META_FIELD_NAME, Map.of())));
 
         return pluginAuditEvent;

@@ -79,7 +79,7 @@ public class CookieRememberService implements RememberMeServices {
             return null;
         }
 
-        UserDetailsService userDetailsService = getUserDetailsService(redisObject.getType());
+        UserDetailsService<?> userDetailsService = getUserDetailsService(redisObject.getType());
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 redisObject.getUsername(),
@@ -157,7 +157,7 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return 用户明细服务实现
      */
-    private UserDetailsService getUserDetailsService(String type) {
+    private UserDetailsService<?> getUserDetailsService(String type) {
         return userDetailsServices
                 .stream()
                 .filter(u -> u.getType().contains(type))

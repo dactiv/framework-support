@@ -15,6 +15,12 @@ public class PluginAuditEvent extends AuditEvent {
 
     public static final String PRINCIPAL_FIELD_NAME = "principal";
 
+    public static final String PRINCIPAL_TYPE_FIELD_NAME = "principal_type";
+
+    public static final String PRINCIPAL_ID_FIELD_NAME = "principal_id";
+
+    public static final String META_FIELD_NAME = "meta";
+
     public static final String TYPE_FIELD_NAME = "type";
 
     private static final long serialVersionUID = 8633684304971875621L;
@@ -27,6 +33,8 @@ public class PluginAuditEvent extends AuditEvent {
     private Map<String, Object> meta;
 
     private String principalId;
+
+    private String principalType;
 
     public PluginAuditEvent(AuditEvent auditEvent) {
         super(auditEvent.getTimestamp(), auditEvent.getPrincipal(), auditEvent.getType(), auditEvent.getData());
@@ -100,5 +108,23 @@ public class PluginAuditEvent extends AuditEvent {
      */
     public void setPrincipalId(String principalId) {
         this.principalId = principalId;
+    }
+
+    /**
+     * 获取当事人类型
+     *
+     * @return 当事人类型
+     */
+    public String getPrincipalType() {
+        return principalType;
+    }
+
+    /**
+     * 设置当事人类型
+     *
+     * @param principalType 当事人类型
+     */
+    public void setPrincipalType(String principalType) {
+        this.principalType = principalType;
     }
 }

@@ -137,8 +137,14 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         if (SecurityUserDetails.class.isAssignableFrom(principal.getClass())) {
             SecurityUserDetails securityUserDetails = Casts.cast(principal, SecurityUserDetails.class);
 
-            PluginAuditEvent auditEvent = new PluginAuditEvent(Instant.now(), securityUserDetails.getUsername(), type, data);
+            PluginAuditEvent auditEvent = new PluginAuditEvent(
+                    Instant.now(),
+                    securityUserDetails.getUsername(),
+                    type,
+                    data
+            );
             auditEvent.setPrincipalId(securityUserDetails.getId().toString());
+            auditEvent.setPrincipalType(securityUserDetails.getType());
             auditEvent.setMeta(securityUserDetails.getMeta());
 
             return auditEvent;

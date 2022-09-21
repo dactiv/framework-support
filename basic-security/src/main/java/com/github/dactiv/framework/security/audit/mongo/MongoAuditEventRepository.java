@@ -131,10 +131,14 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
      * @return 插件审计事件
      */
     public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
-        AuditEvent auditEvent = createAuditEvent(map);
 
+        AuditEvent auditEvent = createAuditEvent(map);
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
+
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
+        pluginAuditEvent.setPrincipalType(map.getOrDefault(PluginAuditEvent.PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
+
+        pluginAuditEvent.setMeta(Casts.cast(map.getOrDefault(PluginAuditEvent.META_FIELD_NAME, Map.of())));
 
         return pluginAuditEvent;
     }

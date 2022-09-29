@@ -181,7 +181,12 @@ public class SpringMvcUtils {
      * @return 设备唯一识别
      */
     public static String getDeviceIdentified(HttpServletRequest request) {
+
         String deviceIdentified = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
+
+        if (StringUtils.isBlank(deviceIdentified)) {
+            deviceIdentified = request.getParameter(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME);
+        }
 
         if (StringUtils.isBlank(deviceIdentified)) {
             deviceIdentified = request.getSession().getId();

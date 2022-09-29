@@ -218,8 +218,15 @@ public class PluginEndpoint {
                             .values()
                             .stream()
                             .filter(p -> p.getId().equals(plugin.parent()))
-                            .findFirst().orElse(null);
-
+                            .findFirst()
+                            .orElse(null);
+                    if (Objects.isNull(temp)) {
+                        temp = pluginInfoList
+                                .stream()
+                                .filter(p -> p.getId().equals(plugin.parent()))
+                                .findFirst()
+                                .orElse(null);
+                    }
                     if (Objects.isNull(temp)) {
                         List<Method> methods = missingParentMap.computeIfAbsent(plugin.parent(), s -> new ArrayList<>());
                         methods.add(method);
@@ -236,7 +243,7 @@ public class PluginEndpoint {
 
         }
 
-        parent
+        /*parent
                 .values()
                 .stream()
                 .filter(p -> generateSources.stream().anyMatch(s -> p.getSources().contains(s)))
@@ -245,7 +252,14 @@ public class PluginEndpoint {
                     if (StringUtils.isBlank(p.getType())) {
                         p.setType(ResourceType.Menu.toString());
                     }
-                });
+                });*/
+        parent
+                .values()
+                .stream()
+                .filter(p -> generateSources.stream().anyMatch(s -> p.getSources().contains(s)))
+                .peek(p -> p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME))
+                .filter(p -> StringUtils.isBlank(p.getType()))
+                .forEach(p -> p.setType(ResourceType.Menu.toString()));
 
         pluginInfoList.addAll(parent.values());
 

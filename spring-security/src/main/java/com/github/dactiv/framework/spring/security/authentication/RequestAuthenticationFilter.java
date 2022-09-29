@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -131,41 +132,41 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             throw new AuthenticationServiceException("授权类型不正确");
         }
 
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        String token = request.getHeader(properties.getTokenHeaderName());
+        String username;
+        String password;
 
-        if (StringUtils.isBlank(username) && StringUtils.isBlank(password)) {
-            String token = request.getHeader(properties.getTokenHeaderName());
+        if (StringUtils.isNotBlank(token)) {
+            String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
 
-            if (StringUtils.isNotBlank(token)) {
-                String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
+            List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
+                    .stream()
+                    .filter(a -> a.isSupport(resolverType))
+                    .collect(Collectors.toList());
 
-                List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
-                        .stream()
-                        .filter(a -> a.isSupport(resolverType))
-                        .collect(Collectors.toList());
-
-                if (CollectionUtils.isEmpty(resolvers)) {
-                    throw new SystemException("找不到类型 [" + resolverType + "] token 解析器实现");
-                }
-
-                if (resolvers.size() > 1) {
-                    throw new SystemException("针对 [" + resolverType + "] 类型找到一个以上的 token 解析器实现");
-                }
-
-                MultiValueMap<String, String> body = resolvers.iterator().next().decode(token);
-
-                username = body.getFirst(properties.getUsernameParamName());
-                password = body.getFirst(properties.getPasswordParamName());
+            if (CollectionUtils.isEmpty(resolvers)) {
+                throw new SystemException("找不到类型 [" + resolverType + "] token 解析器实现");
             }
+
+            if (resolvers.size() > 1) {
+                throw new SystemException("针对 [" + resolverType + "] 类型找到一个以上的 token 解析器实现");
+            }
+
+            MultiValueMap<String, String> body = resolvers.iterator().next().decode(token);
+
+            username = body.getFirst(properties.getUsernameParamName());
+            password = body.getFirst(properties.getPasswordParamName());
+        } else {
+            username = obtainUsername(request);
+            password = obtainPassword(request);
+
+            username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
+            password = StringUtils.defaultString(password, StringUtils.EMPTY);
         }
 
-        username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
-        password = StringUtils.defaultString(password, StringUtils.EMPTY);
+        UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(username, password);
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-
-        return new RequestAuthenticationToken(request, response, token, type);
+        return new RequestAuthenticationToken(request, response, usernamePasswordToken, type);
 
     }
 

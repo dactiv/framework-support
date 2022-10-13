@@ -3,6 +3,9 @@ package com.github.dactiv.framework.commons.minio;
 import com.github.dactiv.framework.commons.Casts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.ResourceBundleEditor;
+import org.springframework.util.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * 带文件名称的文件对象描述
@@ -125,8 +128,16 @@ public class FilenameObject extends FileObject {
      * @return 带文件名称的文件对象描述
      */
     public static FilenameObject of(FileObject fileObject) {
-        FilenameObject filenameObject = of(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), fileObject.getObjectName());
-        filenameObject.setObjectName(System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + filenameObject.getFilename());
+        FilenameObject filenameObject = of(
+                fileObject.getBucketName(),
+                fileObject.getRegion(),
+                fileObject.getObjectName(),
+                fileObject.getObjectName()
+        );
+        String filename = DigestUtils.md5DigestAsHex(
+                (System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + filenameObject.getFilename()).getBytes(StandardCharsets.UTF_8)
+        );
+        filenameObject.setObjectName(filename);
         return filenameObject;
     }
 }

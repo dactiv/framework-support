@@ -243,16 +243,6 @@ public class PluginEndpoint {
 
         }
 
-        /*parent
-                .values()
-                .stream()
-                .filter(p -> generateSources.stream().anyMatch(s -> p.getSources().contains(s)))
-                .forEach(p -> {
-                    p.setParent(PluginInfo.DEFAULT_ROOT_PARENT_NAME);
-                    if (StringUtils.isBlank(p.getType())) {
-                        p.setType(ResourceType.Menu.toString());
-                    }
-                });*/
         parent
                 .values()
                 .stream()

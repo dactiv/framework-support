@@ -2,9 +2,9 @@ package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -135,6 +135,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         String token = request.getHeader(properties.getTokenHeaderName());
         String username;
         String password;
+        boolean rememberMe;
 
         if (StringUtils.isNotBlank(token)) {
             String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
@@ -156,18 +157,36 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
             username = body.getFirst(properties.getUsernameParamName());
             password = body.getFirst(properties.getPasswordParamName());
+            rememberMe = BooleanUtils.toBoolean(body.getFirst(properties.getRememberMe().getParamName()));
         } else {
             username = obtainUsername(request);
             password = obtainPassword(request);
 
             username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
             password = StringUtils.defaultString(password, StringUtils.EMPTY);
+
+            rememberMe = obtainRememberMe(request);
         }
 
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(username, password);
 
-        return new RequestAuthenticationToken(request, response, usernamePasswordToken, type);
+        if (request.getRequestURI().equals(properties.getLoginProcessingUrl())) {
+            rememberMe = false;
+        }
 
+        return new RequestAuthenticationToken(request, response, usernamePasswordToken, type, rememberMe);
+
+    }
+
+    /**
+     * 获取记住我
+     *
+     * @param request http servlet request
+     *
+     * @return true 记住我，否则 false
+     */
+    protected boolean obtainRememberMe(HttpServletRequest request) {
+        return BooleanUtils.toBoolean(request.getParameter(properties.getRememberMe().getParamName()));
     }
 
     /**

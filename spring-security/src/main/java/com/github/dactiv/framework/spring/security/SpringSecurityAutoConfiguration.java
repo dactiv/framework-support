@@ -35,6 +35,8 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
@@ -84,7 +86,7 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(DeviceIdContextRepository.class)
     public DeviceIdContextRepository deviceIdentifiedSecurityContextRepository(AuthenticationProperties properties,
-                                                                        RedissonClient redissonClient) {
+                                                                               RedissonClient redissonClient) {
 
         DeviceIdContextRepository repository = new DeviceIdContextRepository(
                 properties,
@@ -101,7 +103,7 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(RememberMeServices.class)
     public CookieRememberService cookieRememberService(AuthenticationProperties properties,
                                                        RedissonClient redissonClient,
-                                                       ObjectProvider<UserDetailsService> userDetailsService) {
+                                                       ObjectProvider<UserDetailsService<?>> userDetailsService) {
         return new CookieRememberService(
                 properties,
                 redissonClient,
@@ -123,6 +125,13 @@ public class SpringSecurityAutoConfiguration {
                 successResponse.orderedStream().collect(Collectors.toList()),
                 properties
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationManager.class)
+    public AuthenticationManager authenticationManager(RedissonClient redissonClient,
+                                                       ObjectProvider<UserDetailsService<?>> userDetailsService) {
+        return new RequestAuthenticationProvider(redissonClient, userDetailsService.orderedStream().collect(Collectors.toList()));
     }
 
     @Bean
@@ -155,15 +164,6 @@ public class SpringSecurityAutoConfiguration {
         consensusBased.setAllowIfEqualGrantedDeniedDecisions(false);
 
         return consensusBased;
-    }
-
-    @Bean
-    public RequestAuthenticationProvider requestAuthenticationProvider(RedissonClient redissonClient,
-                                                                       ObjectProvider<UserDetailsService> userDetailsService) {
-        return new RequestAuthenticationProvider(
-                redissonClient,
-                userDetailsService.orderedStream().collect(Collectors.toList())
-        );
     }
 
     @Configuration

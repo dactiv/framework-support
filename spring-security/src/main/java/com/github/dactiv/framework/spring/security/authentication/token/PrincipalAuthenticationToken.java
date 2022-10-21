@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication.token;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,13 +26,18 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
     private final String type;
 
     /**
+     * 是否记住我认证
+     */
+    private final boolean rememberMe;
+
+    /**
      * 当前用户认证 token
      *
      * @param username 登陆账户
      * @param type  用户类型
      */
-    public PrincipalAuthenticationToken(String username, String type) {
-        this(new UsernamePasswordAuthenticationToken(username, null), type);
+    public PrincipalAuthenticationToken(String username, String type, boolean rememberMe) {
+        this(new UsernamePasswordAuthenticationToken(username, null), type, rememberMe);
     }
 
     /**
@@ -41,8 +47,9 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
      * @param type  用户类型
      */
     public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
-                                        String type) {
-        this(token, type, new ArrayList<>());
+                                        String type,
+                                        boolean rememberMe) {
+        this(token, type, rememberMe, new ArrayList<>());
     }
 
     /**
@@ -56,9 +63,10 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
     public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
                                         String type,
                                         UserDetails userDetails,
-                                        Collection<? extends GrantedAuthority> authorities) {
+                                        Collection<? extends GrantedAuthority> authorities,
+                                        boolean rememberMe) {
 
-        this(token, type, authorities);
+        this(token, type, rememberMe, authorities);
         setAuthenticated(true);
         setDetails(userDetails);
     }
@@ -72,10 +80,12 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
      */
     public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
                                         String type,
+                                        boolean rememberMe,
                                         Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.token = token;
         this.type = type;
+        this.rememberMe = rememberMe;
     }
 
     @Override
@@ -90,7 +100,7 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public String getName() {
-        return getType() + ":" + token.getPrincipal();
+        return getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal();
     }
 
     /**
@@ -100,5 +110,9 @@ public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
      */
     public String getType() {
         return type;
+    }
+
+    public boolean isRememberMe() {
+        return rememberMe;
     }
 }

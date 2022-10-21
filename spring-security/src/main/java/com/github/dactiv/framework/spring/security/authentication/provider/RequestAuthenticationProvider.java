@@ -6,6 +6,7 @@ import com.github.dactiv.framework.spring.security.authentication.UserDetailsSer
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
@@ -42,7 +43,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     /**
      * 用户明细符合集合
      */
-    private List<UserDetailsService> userDetailsServices;
+    private List<UserDetailsService<?>> userDetailsServices;
 
     /**
      * redisson 客户端
@@ -59,7 +60,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
-    public RequestAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService> userDetailsServices) {
+    public RequestAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService<?>> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
         this.redissonClient = redissonClient;
     }
@@ -70,8 +71,12 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         // 获取 token
         RequestAuthenticationToken token = Casts.cast(authentication);
 
+        if (token.isRememberMe()) {
+            return null;
+        }
+
         // 通过 token 获取对应 type 实现的 UserDetailsService
-        Optional<UserDetailsService> optional = getUserDetailsService(token);
+        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
 
         String message = messages.getMessage(
                 "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
@@ -79,7 +84,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         );
 
         // 获取实现类
-        UserDetailsService userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+        UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
         // 开始授权，如果失败抛出异常
         SecurityUserDetails userDetails = doAuthenticate(token, userDetailsService);
 
@@ -114,7 +119,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         return result;
     }
 
-    protected SecurityUserDetails doAuthenticate(RequestAuthenticationToken token, UserDetailsService userDetailsService) {
+    protected SecurityUserDetails doAuthenticate(RequestAuthenticationToken token, UserDetailsService<?> userDetailsService) {
         SecurityUserDetails userDetails = null;
         CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(token);
 
@@ -143,10 +148,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         checkUserDetails(userDetails);
 
         String presentedPassword = token.getCredentials().toString();
-
-        // 如果用户账户密码不正确，抛出用户名或密码错误异常
         if (!userDetailsService.matchesPassword(presentedPassword, token, userDetails)) {
-
             throw new BadCredentialsException(messages.getMessage(
                     "PrincipalAuthenticationProvider.badCredentials",
                     "用户名或密码错误"));
@@ -157,9 +159,9 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
             if (Objects.isNull(authenticationCache.getExpiresTime())) {
-                bucket.set(userDetails);
+                bucket.setAsync(userDetails);
             } else {
-                bucket.set(
+                bucket.setAsync(
                         userDetails,
                         authenticationCache.getExpiresTime().getValue(),
                         authenticationCache.getExpiresTime().getUnit()
@@ -178,7 +180,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return redis 集合
      */
-    public RList<GrantedAuthority> getAuthorizationList(RequestAuthenticationToken token, UserDetailsService userDetailsService) {
+    public RList<GrantedAuthority> getAuthorizationList(RequestAuthenticationToken token, UserDetailsService<?> userDetailsService) {
         CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
 
         return redissonClient.getList(authorizationCache.getName());
@@ -238,15 +240,16 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return spring security 认证信息
      */
-    protected PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
-                                                                       PrincipalAuthenticationToken token,
-                                                                       Collection<? extends GrantedAuthority> grantedAuthorities) {
+    public PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
+                                                                    PrincipalAuthenticationToken token,
+                                                                    Collection<? extends GrantedAuthority> grantedAuthorities) {
 
         return new PrincipalAuthenticationToken(
                 new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
                 token.getType(),
                 userDetails,
-                grantedAuthorities
+                grantedAuthorities,
+                false
         );
     }
 
@@ -257,7 +260,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return 用户明细服务
      */
-    public Optional<UserDetailsService> getUserDetailsService(PrincipalAuthenticationToken token) {
+    public Optional<UserDetailsService<?>> getUserDetailsService(PrincipalAuthenticationToken token) {
         return userDetailsServices.stream().filter(uds -> uds.getType().contains(token.getType())).findFirst();
     }
 
@@ -282,7 +285,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return 账户认证的用户明细服务集合
      */
-    public List<UserDetailsService> getUserDetailsServices() {
+    public List<UserDetailsService<?>> getUserDetailsServices() {
         return userDetailsServices;
     }
 
@@ -291,7 +294,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
-    public void setUserDetailsServices(List<UserDetailsService> userDetailsServices) {
+    public void setUserDetailsServices(List<UserDetailsService<?>> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
     }
 

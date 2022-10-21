@@ -1,12 +1,13 @@
 package com.github.dactiv.framework.spring.security;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
-import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
+import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.ObjectProvider;
@@ -21,6 +22,7 @@ import org.springframework.security.access.intercept.aopalliance.MethodSecurityI
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -47,38 +49,38 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
     private final DeviceIdContextRepository deviceIdContextRepository;
 
-    private final RequestAuthenticationProvider requestAuthenticationProvider;
-
     private final AuthenticationProperties properties;
 
     private final JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
 
     private final JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler;
 
-    private final ApplicationEventPublisher eventPublisher;
+    private final CookieRememberService cookieRememberService;
 
     private final AuthenticationManager authenticationManager;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
 
     public WebSecurityDefaultConfigurerAdapter(DeviceIdContextRepository deviceIdContextRepository,
-                                               RequestAuthenticationProvider requestAuthenticationProvider,
                                                AuthenticationProperties properties,
                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
                                                ApplicationEventPublisher eventPublisher,
                                                AuthenticationManager authenticationManager,
+                                               CookieRememberService cookieRememberService,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.deviceIdContextRepository = deviceIdContextRepository;
-        this.requestAuthenticationProvider = requestAuthenticationProvider;
         this.properties = properties;
         this.jsonAuthenticationFailureHandler = jsonAuthenticationFailureHandler;
         this.jsonAuthenticationSuccessHandler = jsonAuthenticationSuccessHandler;
         this.eventPublisher = eventPublisher;
         this.authenticationManager = authenticationManager;
+        this.cookieRememberService = cookieRememberService;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
     }
@@ -117,13 +119,13 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
         DelegatingAuthenticationEntryPoint authenticationEntryPoint = new DelegatingAuthenticationEntryPoint(map);
         authenticationEntryPoint.setDefaultEntryPoint(new Http403ForbiddenEntryPoint());
 
-        httpSecurity.authorizeRequests()
+        httpSecurity
+                .authorizeRequests()
                 .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .authenticationProvider(requestAuthenticationProvider)
                 .httpBasic()
                 .disable()
                 .formLogin()
@@ -146,20 +148,20 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
             for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
                 a.configure(httpSecurity);
             }
-        } else {
-
-            RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
-                    properties,
-                    authenticationTypeTokenResolvers
-            );
-
-            filter.setAuthenticationManager(authenticationManager);
-            filter.setApplicationEventPublisher(eventPublisher);
-            filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
-            filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-
-            httpSecurity.addFilter(filter);
         }
+
+        RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
+                properties,
+                authenticationTypeTokenResolvers
+        );
+
+        filter.setAuthenticationManager(authenticationManager);
+        filter.setApplicationEventPublisher(eventPublisher);
+        filter.setRememberMeServices(cookieRememberService);
+        filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
+        filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
+
+        httpSecurity.addFilter(filter);
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
     }

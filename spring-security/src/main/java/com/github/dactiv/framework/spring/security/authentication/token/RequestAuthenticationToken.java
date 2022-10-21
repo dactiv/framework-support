@@ -35,8 +35,9 @@ public class RequestAuthenticationToken extends PrincipalAuthenticationToken {
     public RequestAuthenticationToken(HttpServletRequest httpServletRequest,
                                       HttpServletResponse httpServletResponse,
                                       UsernamePasswordAuthenticationToken token,
-                                      String type) {
-        super(token, type);
+                                      String type,
+                                      boolean rememberMe) {
+        super(token, type, rememberMe);
 
         this.httpServletResponse = httpServletResponse;
         this.httpServletRequest = httpServletRequest;

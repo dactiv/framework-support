@@ -2,6 +2,7 @@ package com.github.dactiv.framework.spring.security.authentication.config;
 
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,10 +29,18 @@ public class RememberMeProperties {
     private String paramName = DEFAULT_PARAM_NAME;
 
     /**
-     * 缓存信息
+     * 记住我缓存信息
      */
     private CacheProperties cache = new CacheProperties(
             "spring:security:remember-me:",
+            new TimeProperties(7, TimeUnit.DAYS)
+    );
+
+    /**
+     * 认证缓存信息
+     */
+    private CacheProperties authenticationCache = new CacheProperties(
+            UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME,
             new TimeProperties(7, TimeUnit.DAYS)
     );
 
@@ -49,6 +58,24 @@ public class RememberMeProperties {
      * 缓存配置，用于记录 cookie 存储时间和服务器 redis key 存储时间
      */
     private CookieProperties cookie = new CookieProperties();
+
+    /**
+     * 获取认证缓存配置
+     *
+     * @return 认证缓存配置
+     */
+    public CacheProperties getAuthenticationCache() {
+        return authenticationCache;
+    }
+
+    /**
+     * 设置认证缓存配置
+     *
+     * @param authenticationCache 认证缓存配置
+     */
+    public void setAuthenticationCache(CacheProperties authenticationCache) {
+        this.authenticationCache = authenticationCache;
+    }
 
     /**
      * 获取记住我参数名

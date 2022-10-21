@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class DefaultUserDetailsService implements UserDetailsService {
+public class DefaultUserDetailsService implements UserDetailsService<SecurityUserDetails> {
 
     public static final String DEFAULT_TYPES = "Default";
 
@@ -91,4 +91,8 @@ public class DefaultUserDetailsService implements UserDetailsService {
         return userDetails;
     }
 
+    @Override
+    public SecurityUserDetails convertTargetUser(SecurityUserDetails userDetails) {
+        return userDetails;
+    }
 }

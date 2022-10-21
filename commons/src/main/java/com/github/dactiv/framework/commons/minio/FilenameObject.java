@@ -1,6 +1,9 @@
 package com.github.dactiv.framework.commons.minio;
 
+import com.github.dactiv.framework.commons.Casts;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.ResourceBundleEditor;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -126,16 +129,33 @@ public class FilenameObject extends FileObject {
      * @return 带文件名称的文件对象描述
      */
     public static FilenameObject of(FileObject fileObject) {
-        FilenameObject filenameObject = of(
+
+        String prefix = "";
+        if (StringUtils.contains(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR)) {
+            prefix = StringUtils.substringBeforeLast(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
+        }
+        String originalFilename = fileObject.getObjectName();
+
+        if (StringUtils.isNotEmpty(prefix)) {
+            originalFilename = StringUtils.substringAfterLast(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
+        }
+
+        String objectName = DigestUtils.md5DigestAsHex(
+                (System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + fileObject.getObjectName()).getBytes(StandardCharsets.UTF_8)
+        );
+        String suffix = StringUtils.substringAfterLast(fileObject.getObjectName(), Casts.DEFAULT_DOT_SYMBOL);
+        if (StringUtils.isNotEmpty(suffix)) {
+            objectName = objectName + Casts.DEFAULT_DOT_SYMBOL + suffix;
+        }
+        if (StringUtils.isNotEmpty(prefix)) {
+            objectName = prefix + AntPathMatcher.DEFAULT_PATH_SEPARATOR + objectName;
+        }
+        return of(
                 fileObject.getBucketName(),
                 fileObject.getRegion(),
-                fileObject.getObjectName(),
-                fileObject.getObjectName()
+                objectName,
+                originalFilename
         );
-        String filename = DigestUtils.md5DigestAsHex(
-                (System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + filenameObject.getFilename()).getBytes(StandardCharsets.UTF_8)
-        );
-        filenameObject.setObjectName(filename);
-        return filenameObject;
     }
+
 }

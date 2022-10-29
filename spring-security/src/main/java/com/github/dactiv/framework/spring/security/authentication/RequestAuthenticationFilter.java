@@ -38,6 +38,8 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
+    private final List<UserDetailsService<?>> userDetailsServices;
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
@@ -58,7 +60,8 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
     }
 
     public RequestAuthenticationFilter(AuthenticationProperties properties,
-                                       List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver) {
+                                       List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
+                                       List<UserDetailsService<?>> userDetailsServices) {
         this.properties = properties;
 
         setRequiresAuthenticationRequestMatcher(
@@ -69,6 +72,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         setPasswordParameter(properties.getPasswordParamName());
 
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
+        this.userDetailsServices = userDetailsServices;
     }
 
     @Override
@@ -133,60 +137,28 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         }
 
         String token = request.getHeader(properties.getTokenHeaderName());
-        String username;
-        String password;
-        boolean rememberMe;
 
         if (StringUtils.isNotBlank(token)) {
             String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
 
-            List<AuthenticationTypeTokenResolver> resolvers = authenticationTypeTokenResolvers
+            AuthenticationTypeTokenResolver resolver = authenticationTypeTokenResolvers
                     .stream()
                     .filter(a -> a.isSupport(resolverType))
-                    .collect(Collectors.toList());
+                    .findFirst()
+                    .orElseThrow(() -> new SystemException("找不到类型 [" + resolverType + "] token 解析器实现"));
 
-            if (CollectionUtils.isEmpty(resolvers)) {
-                throw new SystemException("找不到类型 [" + resolverType + "] token 解析器实现");
-            }
+            return resolver.createToken(request, response, token);
 
-            if (resolvers.size() > 1) {
-                throw new SystemException("针对 [" + resolverType + "] 类型找到一个以上的 token 解析器实现");
-            }
-
-            MultiValueMap<String, String> body = resolvers.iterator().next().decode(token);
-
-            username = body.getFirst(properties.getUsernameParamName());
-            password = body.getFirst(properties.getPasswordParamName());
-            rememberMe = BooleanUtils.toBoolean(body.getFirst(properties.getRememberMe().getParamName()));
         } else {
-            username = obtainUsername(request);
-            password = obtainPassword(request);
+            UserDetailsService<?> userDetailsService = userDetailsServices
+                    .stream()
+                    .filter(u -> u.getType().contains(type))
+                    .findFirst()
+                    .orElseThrow(() -> new SystemException("找不到类型为 [" + type + "] 的用户明细服务实现"));
 
-            username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
-            password = StringUtils.defaultString(password, StringUtils.EMPTY);
-
-            rememberMe = obtainRememberMe(request);
+            return userDetailsService.createToken(request, response, type);
         }
 
-        UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(username, password);
-
-        if (request.getRequestURI().equals(properties.getLoginProcessingUrl())) {
-            rememberMe = false;
-        }
-
-        return new RequestAuthenticationToken(request, response, usernamePasswordToken, type, rememberMe);
-
-    }
-
-    /**
-     * 获取记住我
-     *
-     * @param request http servlet request
-     *
-     * @return true 记住我，否则 false
-     */
-    protected boolean obtainRememberMe(HttpServletRequest request) {
-        return BooleanUtils.toBoolean(request.getParameter(properties.getRememberMe().getParamName()));
     }
 
     /**

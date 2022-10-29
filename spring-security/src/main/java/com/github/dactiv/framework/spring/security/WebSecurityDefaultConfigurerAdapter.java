@@ -4,6 +4,7 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
+import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
@@ -65,6 +66,8 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
 
+    private final List<UserDetailsService<?>> userDetailsServices;
+
     public WebSecurityDefaultConfigurerAdapter(DeviceIdContextRepository deviceIdContextRepository,
                                                AuthenticationProperties properties,
                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
@@ -72,6 +75,7 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
                                                ApplicationEventPublisher eventPublisher,
                                                AuthenticationManager authenticationManager,
                                                CookieRememberService cookieRememberService,
+                                               ObjectProvider<UserDetailsService<?>> userDetailsServices,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.deviceIdContextRepository = deviceIdContextRepository;
@@ -82,6 +86,7 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
         this.authenticationManager = authenticationManager;
         this.cookieRememberService = cookieRememberService;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().collect(Collectors.toList());
+        this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
     }
 
@@ -152,7 +157,8 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
 
         RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
                 properties,
-                authenticationTypeTokenResolvers
+                authenticationTypeTokenResolvers,
+                userDetailsServices
         );
 
         filter.setAuthenticationManager(authenticationManager);

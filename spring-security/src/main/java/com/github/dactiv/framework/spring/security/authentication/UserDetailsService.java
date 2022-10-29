@@ -7,10 +7,13 @@ import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -100,8 +103,12 @@ public interface UserDetailsService<T> {
      * 当认证成功的后置处理方法
      *
      * @param result 认证结果
+     * @param request http servlet request
+     * @param response http servlet response
+     *
+     * @throws AuthenticationException 处理成功认证流程出现异常后抛出
      */
-    default void onSuccessAuthentication(PrincipalAuthenticationToken result) {
+    default void onSuccessAuthentication(PrincipalAuthenticationToken result, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
     }
 
@@ -142,4 +149,14 @@ public interface UserDetailsService<T> {
         throw new UnsupportedOperationException("不支持此操作");
     }
 
+    /**
+     * 创建认证 token
+     *
+     * @param request http servlet request
+     * @param response http servlet response
+     * @param type 认证类型
+     *
+     * @return 认证 token
+     */
+    Authentication createToken(HttpServletRequest request, HttpServletResponse response, String type);
 }

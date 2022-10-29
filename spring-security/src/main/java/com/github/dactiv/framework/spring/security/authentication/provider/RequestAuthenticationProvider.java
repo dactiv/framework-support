@@ -114,7 +114,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
 
         PrincipalAuthenticationToken result = createSuccessAuthentication(userDetails, token, grantedAuthorities);
-        userDetailsService.onSuccessAuthentication(result);
+        userDetailsService.onSuccessAuthentication(result, token.getHttpServletRequest(), token.getHttpServletResponse());
 
         return result;
     }

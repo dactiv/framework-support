@@ -145,8 +145,8 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
-    public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver() {
-        return new FeignAuthenticationTypeTokenResolver();
+    public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver(AuthenticationProperties properties) {
+        return new FeignAuthenticationTypeTokenResolver(properties);
     }
 
     @Bean

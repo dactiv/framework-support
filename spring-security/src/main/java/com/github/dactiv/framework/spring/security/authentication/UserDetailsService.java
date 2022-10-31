@@ -7,6 +7,7 @@ import com.github.dactiv.framework.commons.id.BasicIdentification;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -159,4 +160,23 @@ public interface UserDetailsService<T> {
      * @return 认证 token
      */
     Authentication createToken(HttpServletRequest request, HttpServletResponse response, String type);
+
+    /**
+     * 创建认证成功 token
+     *
+     * @param userDetails 当亲啊用户
+     * @param token token 信息
+     * @param grantedAuthorities 权限信息
+     *
+     * @return 新的认证 token
+     */
+    default PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails, PrincipalAuthenticationToken token, Collection<? extends GrantedAuthority> grantedAuthorities) {
+        return new PrincipalAuthenticationToken(
+                new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
+                token.getType(),
+                userDetails,
+                grantedAuthorities,
+                false
+        );
+    }
 }

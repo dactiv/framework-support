@@ -243,14 +243,18 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     public PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
                                                                     PrincipalAuthenticationToken token,
                                                                     Collection<? extends GrantedAuthority> grantedAuthorities) {
+        // 通过 token 获取对应 type 实现的 UserDetailsService
+        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
 
-        return new PrincipalAuthenticationToken(
-                new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
-                token.getType(),
-                userDetails,
-                grantedAuthorities,
-                false
+        String message = messages.getMessage(
+                "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
         );
+
+        // 获取实现类
+        UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+
+        return userDetailsService.createSuccessAuthentication(userDetails, token, grantedAuthorities);
     }
 
     /**

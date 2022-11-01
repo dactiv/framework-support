@@ -3,6 +3,8 @@ package com.github.dactiv.framework.spring.security.authentication.service.feign
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
+import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,7 +40,10 @@ public class FeignAuthenticationTypeTokenResolver implements AuthenticationTypeT
         MultiValueMap<String, String> body = decodeUserProperties(token);
         String username = body.getFirst(properties.getUsernameParamName());
         String password = body.getFirst(properties.getPasswordParamName());
-        return new UsernamePasswordAuthenticationToken(username, password);
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+
+        return new RequestAuthenticationToken(request, response, authenticationToken, DefaultUserDetailsService.DEFAULT_TYPES, false);
     }
 
     /**

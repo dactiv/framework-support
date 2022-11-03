@@ -4,6 +4,7 @@ import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
+import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
@@ -129,13 +130,24 @@ public interface UserDetailsService<T> {
     }
 
     /**
-     * 转换慕白哦用户
+     * 转换目标用户
      *
      * @param userDetails 当前安全用户明细
      *
      * @return 目标用户实体
      */
     default T convertTargetUser(SecurityUserDetails userDetails) {
+        throw new UnsupportedOperationException("不支持此操作");
+    }
+
+    /**
+     * 转换目标用户
+     *
+     * @param userDetails 用户明细
+     *
+     * @return 目标用户实体
+     */
+    default T convertTargetUser(TypeUserDetails<?> userDetails) {
         throw new UnsupportedOperationException("不支持此操作");
     }
 

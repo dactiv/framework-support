@@ -8,6 +8,7 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
+import com.github.dactiv.framework.commons.jackson.serializer.DoubleSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -51,6 +52,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -169,6 +172,13 @@ public class SpringWebMvcAutoConfiguration {
         module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer());
         module.addSerializer(ValueEnum.class, new ValueEnumSerializer());
         module.addSerializer(NameEnum.class, new NameEnumSerializer());
+
+        NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        numberFormat.setMaximumFractionDigits(properties.getJsonNumberMaximumFractionDigits());
+        numberFormat.setRoundingMode(RoundingMode.FLOOR);
+
+        DoubleSerializer doubleSerializer = new DoubleSerializer(numberFormat);
+        module.addSerializer(Double.class, doubleSerializer);
 
         Map<SerializationFeature, Boolean> map = jacksonProperties.getSerialization();
         Boolean isWriteDatesAsTimestamps = map.get(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

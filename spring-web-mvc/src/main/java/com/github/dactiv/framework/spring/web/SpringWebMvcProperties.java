@@ -57,6 +57,11 @@ public class SpringWebMvcProperties {
      */
     private int webSocketDeploymentBuffers = 1024;
 
+    /**
+     * json 响应的数值最大浮点数（保留多少位小数）
+     */
+    private int jsonNumberMaximumFractionDigits = 2;
+
     public SpringWebMvcProperties() {
     }
 
@@ -213,5 +218,23 @@ public class SpringWebMvcProperties {
      */
     public void setSupportHttpStatus(List<HttpStatus> supportHttpStatus) {
         this.supportHttpStatus = supportHttpStatus;
+    }
+
+    /**
+     * 获取 json 响应的数值最大浮点数（保留多少位小数）
+     *
+     * @return 数值最大浮点数
+     */
+    public int getJsonNumberMaximumFractionDigits() {
+        return jsonNumberMaximumFractionDigits;
+    }
+
+    /**
+     * 设置json 响应的数值最大浮点数（保留多少位小数）
+     *
+     * @param jsonNumberMaximumFractionDigits 最大浮点数（保留多少位小数）
+     */
+    public void setJsonNumberMaximumFractionDigits(int jsonNumberMaximumFractionDigits) {
+        this.jsonNumberMaximumFractionDigits = jsonNumberMaximumFractionDigits;
     }
 }

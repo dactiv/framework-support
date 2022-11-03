@@ -175,7 +175,7 @@ public class SpringWebMvcAutoConfiguration {
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance();
         numberFormat.setMaximumFractionDigits(properties.getJsonNumberMaximumFractionDigits());
-        numberFormat.setRoundingMode(RoundingMode.FLOOR);
+        numberFormat.setRoundingMode(properties.getJsonNumberRoundingMode());
 
         DoubleSerializer doubleSerializer = new DoubleSerializer(numberFormat);
         module.addSerializer(Double.class, doubleSerializer);

@@ -6,6 +6,7 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpStatus;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +62,11 @@ public class SpringWebMvcProperties {
      * json 响应的数值最大浮点数（保留多少位小数）
      */
     private int jsonNumberMaximumFractionDigits = 2;
+
+    /**
+     * json 响应的数值浮点四舍五入模型
+     */
+    private RoundingMode jsonNumberRoundingMode = RoundingMode.FLOOR;
 
     public SpringWebMvcProperties() {
     }
@@ -236,5 +242,23 @@ public class SpringWebMvcProperties {
      */
     public void setJsonNumberMaximumFractionDigits(int jsonNumberMaximumFractionDigits) {
         this.jsonNumberMaximumFractionDigits = jsonNumberMaximumFractionDigits;
+    }
+
+    /**
+     * 获取 json 响应的数值浮点四舍五入模型
+     *
+     * @return
+     */
+    public RoundingMode getJsonNumberRoundingMode() {
+        return jsonNumberRoundingMode;
+    }
+
+    /**
+     * 设置 json 响应的数值浮点四舍五入模型
+     *
+     * @param jsonNumberRoundingMode json 响应的数值浮点四舍五入模型
+     */
+    public void setJsonNumberRoundingMode(RoundingMode jsonNumberRoundingMode) {
+        this.jsonNumberRoundingMode = jsonNumberRoundingMode;
     }
 }

@@ -130,7 +130,7 @@ public class FilenameObject extends FileObject {
      */
     public static FilenameObject of(FileObject fileObject) {
 
-        String prefix = "";
+        String prefix = StringUtils.EMPTY;
         if (StringUtils.contains(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR)) {
             prefix = StringUtils.substringBeforeLast(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
         }

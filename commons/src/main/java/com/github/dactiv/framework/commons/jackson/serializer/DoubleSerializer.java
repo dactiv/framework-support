@@ -3,7 +3,6 @@ package com.github.dactiv.framework.commons.jackson.serializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.github.dactiv.framework.commons.enumerate.NameEnum;
 
 import java.io.IOException;
 import java.math.RoundingMode;
@@ -33,7 +32,7 @@ public class DoubleSerializer extends JsonSerializer<Double> {
     @Override
     public void serialize(Double value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (value != null) {
-            gen.writeString(this.numberFormat.format(value));
+            gen.writeNumber(this.numberFormat.format(value));
         }
     }
 }

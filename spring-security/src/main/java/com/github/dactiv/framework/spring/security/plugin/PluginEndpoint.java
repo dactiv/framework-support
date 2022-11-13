@@ -39,6 +39,8 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.*;
@@ -422,18 +424,30 @@ public class PluginEndpoint {
 
         List<String> uri = new ArrayList<>();
 
-        if (StringUtils.isBlank(parent.getValue())) {
-            return StringUtils.appendIfMissing(targetValue, "/**");
-        } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
+        List<String> parentValueList = new LinkedList<>();
 
+        if (StringUtils.isBlank(parent.getValue())) {
+            if (Method.class.isAssignableFrom(target.getClass())) {
+                Method method = Casts.cast(target);
+                RequestMapping requestMapping = AnnotationUtils.findAnnotation(method.getDeclaringClass(), RequestMapping.class);
+                if (Objects.nonNull(requestMapping)) {
+                    parentValueList =  Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).collect(Collectors.toList());
+                }
+            } else {
+                return StringUtils.appendIfMissing(targetValue, "/**");
+            }
+        } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
             TargetObject targetObject = Casts.cast(target);
             if (Method.class.isAssignableFrom(targetObject.getTarget().getClass())) {
                 return StringUtils.appendIfMissing(targetValue, "/**");
             }
-
         }
 
-        for (String parentValue : StringUtils.split(parent.getValue())) {
+        if (CollectionUtils.isEmpty(parentValueList)) {
+            parentValueList = Arrays.asList(StringUtils.split(parent.getValue()));
+        }
+
+        for (String parentValue : parentValueList) {
             for (String value : StringUtils.split(targetValue)) {
                 parentValue = StringUtils.remove(parentValue, "**");
                 String url = StringUtils.appendIfMissing(parentValue, value + "/**");

@@ -426,12 +426,13 @@ public class PluginEndpoint {
 
         List<String> parentValueList = new LinkedList<>();
 
+
         if (StringUtils.isBlank(parent.getValue())) {
-            if (Method.class.isAssignableFrom(target.getClass())) {
+            if (Method.class.isAssignableFrom(target.getClass()) && StringUtils.isEmpty(parent.getValue())) {
                 Method method = Casts.cast(target);
                 RequestMapping requestMapping = AnnotationUtils.findAnnotation(method.getDeclaringClass(), RequestMapping.class);
                 if (Objects.nonNull(requestMapping)) {
-                    parentValueList =  Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).collect(Collectors.toList());
+                    parentValueList = Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).collect(Collectors.toList());
                 }
             } else {
                 return StringUtils.appendIfMissing(targetValue, "/**");
@@ -443,8 +444,16 @@ public class PluginEndpoint {
             }
         }
 
-        if (CollectionUtils.isEmpty(parentValueList)) {
-            parentValueList = Arrays.asList(StringUtils.split(parent.getValue()));
+        if (StringUtils.isNotEmpty(parent.getValue())) {
+            String prefix = StringUtils.appendIfMissing(parent.getValue(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
+            if (CollectionUtils.isEmpty(parentValueList)) {
+                parentValueList.add(prefix);
+            } else {
+                parentValueList = parentValueList
+                        .stream()
+                        .map(s -> StringUtils.prependIfMissing(s, prefix))
+                        .collect(Collectors.toList());
+            }
         }
 
         for (String parentValue : parentValueList) {
@@ -519,7 +528,7 @@ public class PluginEndpoint {
         }
 
         return values.stream()
-                .map(v -> parent == null ? v : getRequestValueString(target, v, parent))
+                .map(v -> Objects.isNull(parent) ? v : getRequestValueString(target, v, parent))
                 .collect(Collectors.toList());
     }
 

@@ -482,48 +482,48 @@ public class PluginEndpoint {
         List<String> values = new ArrayList<>();
         // 如果找不到 RequestMapping 注解，什么都不做
         RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-        if (requestMapping != null) {
+        if (Objects.nonNull(requestMapping)) {
             values = Arrays.asList(requestMapping.value());
         }
 
         // 如果为空值，表示可能是 GetMapping 注解
-        if (values.isEmpty()) {
+        if (CollectionUtils.isEmpty(values)) {
             // 如果找不到 GetMapping 注解，什么都不做
             GetMapping annotation = AnnotationUtils.findAnnotation(method, GetMapping.class);
-            if (annotation != null) {
+            if (Objects.nonNull(annotation)) {
                 values = Arrays.asList(annotation.value());
             }
         }
 
         // 如果为空值，表示可能是 PostMapping 注解
-        if (values.isEmpty()) {
+        if (CollectionUtils.isEmpty(values)) {
             // 如果找不到 PostMapping 注解，什么都不做
             PostMapping annotation = AnnotationUtils.findAnnotation(method, PostMapping.class);
-            if (annotation != null) {
+            if (Objects.nonNull(annotation)) {
                 values = Arrays.asList(annotation.value());
             }
         }
 
         // 如果为空值，表示可能是 PutMapping 注解
-        if (values.isEmpty()) {
+        if (CollectionUtils.isEmpty(values)) {
             // 如果找不到 PutMapping 注解，什么都不做
             PutMapping annotation = AnnotationUtils.findAnnotation(method, PutMapping.class);
-            if (annotation != null) {
+            if (Objects.nonNull(annotation)) {
                 values = Arrays.asList(annotation.value());
             }
         }
 
         // 如果为空值，表示可能是 DeleteMapping 注解
-        if (values.isEmpty()) {
+        if (CollectionUtils.isEmpty(values)) {
             // 如果找不到 PutMapping 注解，什么都不做
             DeleteMapping annotation = AnnotationUtils.findAnnotation(method, DeleteMapping.class);
-            if (annotation != null) {
+            if (Objects.nonNull(annotation)) {
                 values = Arrays.asList(annotation.value());
             }
         }
 
         // 如果为空值，表示注解没命名，直接用方法名
-        if (values.isEmpty()) {
+        if (CollectionUtils.isEmpty(values)) {
             values = Collections.singletonList(method.getName());
         }
 

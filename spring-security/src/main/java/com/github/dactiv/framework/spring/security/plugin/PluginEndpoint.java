@@ -445,20 +445,19 @@ public class PluginEndpoint {
         }
 
         if (StringUtils.isNotEmpty(parent.getValue())) {
-            String prefix = StringUtils.appendIfMissing(parent.getValue(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
+            String prefix = StringUtils.appendIfMissing(StringUtils.removeEnd(parent.getValue(),"**"), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
             if (CollectionUtils.isEmpty(parentValueList)) {
                 parentValueList.add(prefix);
             } else {
                 parentValueList = parentValueList
                         .stream()
-                        .map(s -> StringUtils.prependIfMissing(s, prefix))
+                        .map(s -> StringUtils.prependIfMissing(StringUtils.removeStart(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR), prefix))
                         .collect(Collectors.toList());
             }
         }
 
         for (String parentValue : parentValueList) {
             for (String value : StringUtils.split(targetValue)) {
-                parentValue = StringUtils.remove(parentValue, "**");
                 String url = StringUtils.appendIfMissing(parentValue, value + "/**");
                 uri.add(RegExUtils.removeAll(url, "\\{.*\\}"));
             }

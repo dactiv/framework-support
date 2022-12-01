@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.DeviceIdProperties;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
@@ -72,6 +73,10 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
                 RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
                 SecurityContext cacheSecurityContext = bucket.get();
                 if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
+                    TimeProperties time = properties.getDeviceId().getCache().getExpiresTime();
+                    if (Objects.nonNull(time)) {
+                        bucket.expireAsync(time.getValue(), time.getUnit());
+                    }
                     return cacheSecurityContext;
                 }
             }
@@ -172,11 +177,15 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      * @param bucket  安全上下文的桶对象
      */
     protected void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
-        bucket.set(
-                context,
-                properties.getDeviceId().getCache().getExpiresTime().getValue(),
-                properties.getDeviceId().getCache().getExpiresTime().getUnit()
-        );
+
+        TimeProperties time = properties.getDeviceId().getCache().getExpiresTime();
+
+        if (Objects.nonNull(time)) {
+            bucket.set(context, time.getValue(), time.getUnit());
+        } else {
+            bucket.set(context);
+        }
+
         SecurityContextHolder.setContext(context);
     }
 

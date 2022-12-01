@@ -115,12 +115,6 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
             super.saveContext(context, request, response);
         }
 
-        String token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
-
-        if (StringUtils.isBlank(token)) {
-            return;
-        }
-
         if (Objects.isNull(context.getAuthentication()) || !context.getAuthentication().isAuthenticated()) {
             return;
         }
@@ -128,6 +122,17 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         Object details = context.getAuthentication().getDetails();
         if (Objects.isNull(details) || !isSecurityUserDetails(details)) {
             return;
+        }
+
+        String token;
+        if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
+            MobileUserDetails mobileUserDetails = Casts.cast(details);
+            token = mobileUserDetails.getDeviceIdentified();
+        } else {
+            token = request.getHeader(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_HEADER_NAME);
+            if (StringUtils.isBlank(token)) {
+                return;
+            }
         }
 
         RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
@@ -140,14 +145,6 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
             if (StringUtils.isBlank(userId) && getAntPathRequestMatcher().stream().anyMatch(s -> s.matches(request))) {
                 setSecurityContext(context, bucket);
             } else if (isCurrentUserSecurityContext(userId, cacheSecurityContext, token)) {
-
-                if (MobileUserDetails.class.isAssignableFrom(details.getClass())) {
-                    MobileUserDetails mobileUserDetails = Casts.cast(details);
-                    if (StringUtils.isNotBlank(mobileUserDetails.getDeviceIdentified())) {
-                        bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
-                    }
-                }
-
                 setSecurityContext(context, bucket);
             }
 

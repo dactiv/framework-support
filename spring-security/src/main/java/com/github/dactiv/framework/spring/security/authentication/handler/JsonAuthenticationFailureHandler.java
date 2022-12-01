@@ -40,7 +40,7 @@ public class JsonAuthenticationFailureHandler implements AuthenticationFailureHa
         );
 
         if (CollectionUtils.isNotEmpty(failureResponses)) {
-            failureResponses.forEach(f -> f.setting(result, request));
+            failureResponses.forEach(f -> f.setting(result, request, e));
         }
 
         response.setStatus(result.getStatus());

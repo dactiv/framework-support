@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.spring.security.authentication.handler;
 
 import com.github.dactiv.framework.commons.RestResult;
+import org.springframework.security.core.AuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -17,6 +18,7 @@ public interface JsonAuthenticationFailureResponse {
      *
      * @param result  响应内容
      * @param request http 请求
+     * @param e 异常信息
      */
-    void setting(RestResult<Map<String, Object>> result, HttpServletRequest request);
+    void setting(RestResult<Map<String, Object>> result, HttpServletRequest request, AuthenticationException e);
 }

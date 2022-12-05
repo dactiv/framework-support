@@ -1,8 +1,11 @@
 package com.github.dactiv.framework.commons.enumerate;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.annotation.GetValueStrategy;
+import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.commons.exception.ValueEnumNotFoundException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.util.*;
 
@@ -11,19 +14,17 @@ import java.util.*;
  *
  * @author maurice.chen
  */
-@SuppressWarnings("unchecked")
 public class ValueEnumUtils {
 
     /**
      * 通过{@link ValueEnum} 接口子类 class 获取 map 集合
      *
      * @param enumClass key value 枚举
-     * @param <V>       值泛型类型
      *
      * @return 以 {@link #getName(ValueEnum)} 为 key {@link ValueEnum#getValue()} 位置的 map 集合
      */
-    public static <V> Map<String, V> castMap(Class<? extends Enum<? extends ValueEnum<V>>> enumClass) {
-        return castMap(enumClass, (V) null);
+    public static Map<String, Object> castMap(Class<? extends Enum<? extends ValueEnum<?>>> enumClass) {
+        return castMap(enumClass, (Object) null);
     }
 
     /**
@@ -31,20 +32,19 @@ public class ValueEnumUtils {
      *
      * @param enumClass key value 枚举
      * @param ignore    要忽略的值
-     * @param <V>       值泛型类型
      *
      * @return 以 {@link #getName(ValueEnum)}} 为 key {@link ValueEnum#getValue()} 位置的 map 集合
      */
-    public static <V> Map<String, V> castMap(Class<? extends Enum<? extends ValueEnum<V>>> enumClass, V... ignore) {
+    public static Map<String, Object> castMap(Class<? extends Enum<? extends ValueEnum<?>>> enumClass, Object... ignore) {
 
-        Map<String, V> result = new LinkedHashMap<>();
-        Enum<? extends ValueEnum<V>>[] values = enumClass.getEnumConstants();
+        Map<String, Object> result = new LinkedHashMap<>();
+        Enum<? extends ValueEnum<?>>[] values = enumClass.getEnumConstants();
 
         if (ArrayUtils.isEmpty(values)) {
             return result;
         }
 
-        List<V> ignoreList = new ArrayList<>(16);
+        List<Object> ignoreList = new ArrayList<>(16);
 
         if (ArrayUtils.isNotEmpty(ignore)) {
             ignoreList = Arrays.asList(ignore);
@@ -52,14 +52,14 @@ public class ValueEnumUtils {
 
         List<String> jsonIgnoreList = NameEnumUtils.getJsonIgnoreList(enumClass);
 
-        for (Enum<? extends ValueEnum<V>> o : values) {
+        for (Enum<? extends ValueEnum<?>> o : values) {
 
-            ValueEnum<V> ve = (ValueEnum<V>) o;
+            ValueEnum<?> ve = (ValueEnum<?>) o;
             if (jsonIgnoreList.contains(o.toString())) {
                 continue;
             }
 
-            V value = ve.getValue();
+            Object value = getValueByStrategyAnnotation(ve);
             if (ignoreList.contains(value)) {
                 continue;
             }
@@ -96,7 +96,8 @@ public class ValueEnumUtils {
 
         for (Enum<? extends ValueEnum<?>> o : values) {
             ValueEnum<?> ve = Casts.cast(o);
-            if (Objects.equals(ve.getValue(), value)) {
+            Object enumValue = getValueByStrategyAnnotation(ve);
+            if (Objects.equals(enumValue, value)) {
                 return getName(ve);
             }
         }
@@ -117,8 +118,7 @@ public class ValueEnumUtils {
 
     private static void throwNotFoundExceptionIfNecessary(Object value, Class<? extends Enum<? extends ValueEnum<?>>> enumClass, boolean ignoreNotFound) {
         if (!ignoreNotFound) {
-            String msg = enumClass.getName() + " 中找不到值为: " + value + " 的对应名称，" + enumClass.getName() +
-                    "信息为:" + castMap((Class<? extends Enum<? extends ValueEnum<Object>>>) enumClass);
+            String msg = enumClass.getName() + " 中找不到值为: " + value + " 的对应名称，" + enumClass.getName() + "信息为:" + castMap(enumClass);
             throw new ValueEnumNotFoundException(msg);
         }
     }
@@ -151,7 +151,8 @@ public class ValueEnumUtils {
 
         for (Enum<? extends ValueEnum<?>> o : values) {
             ValueEnum<?> ve = Casts.cast(o);
-            if (Objects.equals(ve.getValue(), value)) {
+            Object enumValue = getValueByStrategyAnnotation(ve);
+            if (Objects.equals(enumValue, value)) {
                 return Casts.cast(ve);
             }
         }
@@ -159,6 +160,25 @@ public class ValueEnumUtils {
         throwNotFoundExceptionIfNecessary(value, enumClass, ignoreNotFound);
 
         return null;
+    }
+
+    public static Object getValueByStrategyAnnotation(ValueEnum<?> valueEnum) {
+        GetValueStrategy getValueStrategy = AnnotatedElementUtils.findMergedAnnotation(valueEnum.getClass(), GetValueStrategy.class);
+        if (Objects.isNull(getValueStrategy)) {
+            return valueEnum.getValue();
+        }
+
+        GetValueStrategy.Type type = getValueStrategy.type();
+
+        if (GetValueStrategy.Type.Value.equals(type)) {
+            return valueEnum.getValue();
+        } else if (GetValueStrategy.Type.Name.equals(type) && NameEnum.class.isAssignableFrom(valueEnum.getClass())) {
+            NameEnum nameEnum = Casts.cast(valueEnum);
+            return nameEnum.getName();
+        }
+
+        Enum<? extends ValueEnum<?>> e = Casts.cast(valueEnum);
+        return e.name();
     }
 
 }

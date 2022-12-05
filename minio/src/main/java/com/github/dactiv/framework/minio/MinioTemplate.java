@@ -12,7 +12,6 @@ import com.github.dactiv.framework.commons.minio.FileObject;
 import com.github.dactiv.framework.commons.minio.VersionFileObject;
 import com.google.common.collect.Multimap;
 import io.minio.*;
-import io.minio.errors.*;
 import io.minio.http.Method;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
@@ -28,10 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**

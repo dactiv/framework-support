@@ -2,7 +2,6 @@ package com.github.dactiv.framework.commons.enumerate;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.annotation.GetValueStrategy;
-import com.github.dactiv.framework.commons.annotation.JsonCollectionGenericType;
 import com.github.dactiv.framework.commons.exception.ValueEnumNotFoundException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;

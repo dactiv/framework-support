@@ -1,9 +1,11 @@
 package com.github.dactiv.framework.minio;
 
-import com.github.dactiv.framework.commons.minio.Bucket;
 import com.github.dactiv.framework.commons.minio.FileObject;
 import com.google.common.collect.Multimap;
-import io.minio.*;
+import io.minio.CreateMultipartUploadResponse;
+import io.minio.ListPartsResponse;
+import io.minio.MinioClient;
+import io.minio.ObjectWriteResponse;
 import io.minio.errors.*;
 import io.minio.messages.Part;
 

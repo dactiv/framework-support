@@ -1,7 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

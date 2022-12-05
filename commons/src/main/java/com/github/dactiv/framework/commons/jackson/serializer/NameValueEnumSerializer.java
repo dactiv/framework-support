@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
+import com.github.dactiv.framework.commons.enumerate.ValueEnumUtils;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class NameValueEnumSerializer extends JsonSerializer<NameValueEnum> {
 
     @Override
     public void serialize(NameValueEnum value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        Object enumValue = value.getValue();
+        Object enumValue = ValueEnumUtils.getValueByStrategyAnnotation(value);
 
         gen.writeStartObject();
 

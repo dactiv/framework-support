@@ -62,7 +62,7 @@ public class NameValueEnumTypeHandler<E extends Enum<E>> extends EnumTypeHandler
 
         if (ValueEnum.class.isAssignableFrom(value.getClass())) {
             ValueEnum<?> valueEnum = Casts.cast(value);
-            return valueEnum.getValue();
+            return ValueEnumUtils.getValueByStrategyAnnotation(valueEnum);
         } else if (NameEnum.class.isAssignableFrom(value.getClass())) {
             NameEnum nameEnum = Casts.cast(value);
             return nameEnum.toString();

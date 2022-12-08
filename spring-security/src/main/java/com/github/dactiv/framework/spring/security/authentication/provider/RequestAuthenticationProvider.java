@@ -6,6 +6,7 @@ import com.github.dactiv.framework.spring.security.authentication.UserDetailsSer
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
@@ -153,7 +154,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                     "用户名或密码错误"));
         }
 
-        userDetails.setType(token.getType());
+        if (StringUtils.isEmpty(userDetails.getType())) {
+            userDetails.setType(token.getType());
+        }
+
         // 如果启用认证缓存，存储用户信息到缓存里
         if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());

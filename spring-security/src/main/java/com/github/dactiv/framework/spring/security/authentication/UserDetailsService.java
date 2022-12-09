@@ -189,4 +189,28 @@ public interface UserDetailsService<T> {
                 false
         );
     }
+
+    /**
+     * 执行缓存认证信息之前，触发此方法
+     *
+     * @param token 当前用户认证 token
+     * @param userDetails 用户明细
+     * @param authenticationCache 认证缓存配置
+     *
+     * @return true 执行缓存，否则 false
+     */
+    default boolean preAuthenticationCache(PrincipalAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
+        return true;
+    }
+
+    /**
+     * 执行缓存认证信息之后，触发此方法
+     *
+     * @param token 当前用户认证 token
+     * @param userDetails 用户明细
+     * @param authenticationCache 认证缓存配置
+     */
+    default void postAuthenticationCache(PrincipalAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
+
+    }
 }

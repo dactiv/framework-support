@@ -161,6 +161,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         // 如果启用认证缓存，存储用户信息到缓存里
         if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
+            boolean cache = userDetailsService.preAuthenticationCache(token, userDetails, authenticationCache);
+            if (!cache) {
+                return userDetails;
+            }
             if (Objects.isNull(authenticationCache.getExpiresTime())) {
                 bucket.setAsync(userDetails);
             } else {
@@ -170,6 +174,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                         authenticationCache.getExpiresTime().getUnit()
                 );
             }
+            userDetailsService.postAuthenticationCache(token, userDetails, authenticationCache);
         }
 
         return userDetails;

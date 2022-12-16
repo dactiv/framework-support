@@ -105,7 +105,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
     public String getDeviceId(String token) {
         CipherService cipherService = cipherAlgorithmService.getCipherService(properties.getDeviceId().getCipherAlgorithmName());
-        ByteSource byteSource = cipherService.decrypt(Base64.decode(properties.getDeviceId().getKey()), Base64.decode(token));
+        ByteSource byteSource = cipherService.decrypt(Base64.decode(token),Base64.decode(properties.getDeviceId().getKey()));
         String text = new String(byteSource.obtainBytes(), StandardCharsets.UTF_8);
         return StringUtils.substringBefore(text, CacheProperties.DEFAULT_SEPARATOR);
     }

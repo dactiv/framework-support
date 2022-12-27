@@ -2,10 +2,13 @@ package com.github.dactiv.framework.commons.enumerate;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.annotation.GetValueStrategy;
+import com.github.dactiv.framework.commons.annotation.IgnoreField;
 import com.github.dactiv.framework.commons.exception.ValueEnumNotFoundException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -37,9 +40,22 @@ public class ValueEnumUtils {
     public static Map<String, Object> castMap(Class<? extends Enum<? extends ValueEnum<?>>> enumClass, Object... ignore) {
 
         Map<String, Object> result = new LinkedHashMap<>();
-        Enum<? extends ValueEnum<?>>[] values = enumClass.getEnumConstants();
+        List<Enum<? extends ValueEnum<?>>> values = new LinkedList<>();
+        CollectionUtils.addAll(values, enumClass.getEnumConstants());
 
-        if (ArrayUtils.isEmpty(values)) {
+        if (CollectionUtils.isEmpty(values)) {
+            return result;
+        }
+
+        for (Field o : enumClass.getDeclaredFields()) {
+            IgnoreField ignoreField = o.getAnnotation(IgnoreField.class);
+            if (Objects.isNull(ignoreField)) {
+                continue;
+            }
+            values.removeIf(s -> s.toString().equals(o.getName()));
+        }
+
+        if (CollectionUtils.isEmpty(values)) {
             return result;
         }
 

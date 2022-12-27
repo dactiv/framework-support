@@ -40,8 +40,14 @@ public class ValueEnumUtils {
     public static Map<String, Object> castMap(Class<? extends Enum<? extends ValueEnum<?>>> enumClass, Object... ignore) {
 
         Map<String, Object> result = new LinkedHashMap<>();
+
+        Enum<? extends ValueEnum<?>>[] enums = enumClass.getEnumConstants();
+        if (ArrayUtils.isEmpty(enums)) {
+            return result;
+        }
+
         List<Enum<? extends ValueEnum<?>>> values = new LinkedList<>();
-        CollectionUtils.addAll(values, enumClass.getEnumConstants());
+        CollectionUtils.addAll(values, enums);
 
         if (CollectionUtils.isEmpty(values)) {
             return result;

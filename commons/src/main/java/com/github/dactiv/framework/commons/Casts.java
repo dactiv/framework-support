@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dactiv.framework.commons.annotation.IgnoreField;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
@@ -15,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -459,6 +461,18 @@ public class Casts {
         BeanUtils.copyProperties(source, result, ignoreProperties);
 
         return result;
+    }
+
+    public static List<Field> getIgnoreField(Class<?> targetClass) {
+        List<Field> fields = new LinkedList<>();
+        for (Field o : targetClass.getDeclaredFields()) {
+            IgnoreField ignoreField = o.getAnnotation(IgnoreField.class);
+            if (Objects.isNull(ignoreField)) {
+                continue;
+            }
+            fields.add(o);
+        }
+        return fields;
     }
 
 }

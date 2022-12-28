@@ -2,10 +2,10 @@ package com.github.dactiv.framework.commons.enumerate;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.annotation.GetValueStrategy;
-import com.github.dactiv.framework.commons.annotation.IgnoreField;
 import com.github.dactiv.framework.commons.exception.ValueEnumNotFoundException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
@@ -53,13 +53,8 @@ public class ValueEnumUtils {
             return result;
         }
 
-        for (Field o : enumClass.getDeclaredFields()) {
-            IgnoreField ignoreField = o.getAnnotation(IgnoreField.class);
-            if (Objects.isNull(ignoreField)) {
-                continue;
-            }
-            values.removeIf(s -> s.toString().equals(o.getName()));
-        }
+        List<Field> fields = Casts.getIgnoreField(enumClass);
+        values.removeIf(s -> fields.stream().anyMatch(f -> StringUtils.equals(f.getName(), s.toString())));
 
         if (CollectionUtils.isEmpty(values)) {
             return result;

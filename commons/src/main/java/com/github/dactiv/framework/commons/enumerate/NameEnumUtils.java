@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.NameEnumNotFoundException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Field;
@@ -78,11 +80,21 @@ public class NameEnumUtils {
      */
     public static Map<String, Object> castMap(Class<? extends Enum<? extends NameEnum>> enumClass, String... ignore) {
         Map<String, Object> result = new LinkedHashMap<>();
-        Enum<? extends NameEnum>[] values = enumClass.getEnumConstants();
 
-        if (ArrayUtils.isEmpty(values)) {
+        Enum<? extends NameEnum>[] enums = enumClass.getEnumConstants();
+        if (ArrayUtils.isEmpty(enums)) {
             return result;
         }
+
+        List<Enum<? extends NameEnum>> values = new LinkedList<>();
+        CollectionUtils.addAll(values, enums);
+
+        if (CollectionUtils.isEmpty(values)) {
+            return result;
+        }
+
+        List<Field> fields = Casts.getIgnoreField(enumClass);
+        values.removeIf(s -> fields.stream().anyMatch(f -> StringUtils.equals(f.getName(), s.toString())));
 
         List<String> ignoreList = new ArrayList<>();
 

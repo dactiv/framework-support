@@ -2,11 +2,14 @@ package com.github.dactiv.framework.spring.security.authentication.rememberme;
 
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.crypto.algorithm.Base64;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
-import org.apache.commons.codec.binary.Base64;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.util.AntPathMatcher;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -75,10 +75,7 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
-            bucket.expireAsync(
-                    properties.getRememberMe().getCache().getExpiresTime().getValue(),
-                    properties.getRememberMe().getCache().getExpiresTime().getUnit()
-            );
+            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toDuration());
         }
 
         CacheProperties cache = properties.getRememberMe().getAuthenticationCache();
@@ -104,7 +101,7 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         if (Objects.nonNull(cache.getExpiresTime())) {
-            userDetailsBucket.expireAsync(cache.getExpiresTime().getValue(), cache.getExpiresTime().getUnit());
+            userDetailsBucket.expireAsync(cache.getExpiresTime().toDuration());
         }
 
         PrincipalAuthenticationToken result = new PrincipalAuthenticationToken(
@@ -235,10 +232,6 @@ public class CookieRememberService implements RememberMeServices {
         cookie.setMaxAge(maxAge);
         cookie.setValue(cookieValue);
 
-        if (maxAge < 1) {
-            cookie.setVersion(1);
-        }
-
         cookie.setHttpOnly(true);
 
         response.addCookie(cookie);
@@ -256,7 +249,7 @@ public class CookieRememberService implements RememberMeServices {
         String json = Casts.writeValueAsString(token);
 
         return properties.getRememberMe().isBase64Value()
-                ? Base64.encodeBase64String(json.getBytes(StandardCharsets.UTF_8))
+                ? Base64.encodeToString(json.getBytes(StandardCharsets.UTF_8))
                 : json;
     }
 
@@ -270,7 +263,7 @@ public class CookieRememberService implements RememberMeServices {
     private RememberMeToken getTokenValue(String token) {
 
         if (properties.getRememberMe().isBase64Value()) {
-            token = new String(Base64.decodeBase64(token));
+            token = Base64.decodeToString(token);
         }
 
         return Casts.readValue(token, RememberMeToken.class);

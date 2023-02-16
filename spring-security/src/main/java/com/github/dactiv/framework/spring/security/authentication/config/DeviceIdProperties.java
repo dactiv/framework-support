@@ -3,10 +3,10 @@ package com.github.dactiv.framework.spring.security.authentication.config;
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.crypto.CipherAlgorithmService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeUnit;
 
 /**

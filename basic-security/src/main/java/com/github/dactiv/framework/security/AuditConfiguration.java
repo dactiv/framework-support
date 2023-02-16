@@ -21,7 +21,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.*;
@@ -179,11 +179,11 @@ public class AuditConfiguration {
     public static class ElasticsearchAuditConfiguration {
 
         @Bean
-        public PluginAuditEventRepository auditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
+        public PluginAuditEventRepository auditEventRepository(ElasticsearchOperations elasticsearchOperations,
                                                                SecurityProperties securityProperties) {
 
             return new ElasticsearchAuditEventRepository(
-                    elasticsearchRestTemplate,
+                    elasticsearchOperations,
                     PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS,
                     securityProperties
             );

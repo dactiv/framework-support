@@ -16,7 +16,6 @@ import com.github.dactiv.framework.spring.security.authentication.service.Defaul
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.framework.spring.security.plugin.PluginEndpoint;
-import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
@@ -30,22 +29,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.vote.AuthenticatedVoter;
-import org.springframework.security.access.vote.ConsensusBased;
-import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * spring security 重写支持自动配置类
@@ -61,7 +50,7 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     @ConfigurationProperties("dactiv.authentication.plugin")
     PluginEndpoint pluginEndpoint(ObjectProvider<InfoContributor> infoContributor) {
-        return new PluginEndpoint(infoContributor.stream().collect(Collectors.toList()));
+        return new PluginEndpoint(infoContributor.stream().toList());
     }
 
     @Bean
@@ -106,14 +95,14 @@ public class SpringSecurityAutoConfiguration {
         return new CookieRememberService(
                 properties,
                 redissonClient,
-                userDetailsService.orderedStream().collect(Collectors.toList())
+                userDetailsService.orderedStream().toList()
         );
     }
 
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
     public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureResponse) {
-        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().collect(Collectors.toList()));
+        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().toList());
     }
 
     @Bean
@@ -121,7 +110,7 @@ public class SpringSecurityAutoConfiguration {
     public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(ObjectProvider<JsonAuthenticationSuccessResponse> successResponse,
                                                                              AuthenticationProperties properties) {
         return new JsonAuthenticationSuccessHandler(
-                successResponse.orderedStream().collect(Collectors.toList()),
+                successResponse.orderedStream().toList(),
                 properties
         );
     }
@@ -130,7 +119,7 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(RedissonClient redissonClient,
                                                        ObjectProvider<UserDetailsService<?>> userDetailsService) {
-        return new RequestAuthenticationProvider(redissonClient, userDetailsService.orderedStream().collect(Collectors.toList()));
+        return new RequestAuthenticationProvider(redissonClient, userDetailsService.orderedStream().toList());
     }
 
     @Bean
@@ -148,7 +137,7 @@ public class SpringSecurityAutoConfiguration {
         return new FeignAuthenticationTypeTokenResolver(properties);
     }
 
-    @Bean
+    /*@Bean
     public AccessDecisionManager accessDecisionManager() {
         List<AccessDecisionVoter<?>> decisionVoters
                 = Arrays.asList(
@@ -163,7 +152,7 @@ public class SpringSecurityAutoConfiguration {
         consensusBased.setAllowIfEqualGrantedDeniedDecisions(false);
 
         return consensusBased;
-    }
+    }*/
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)

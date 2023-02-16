@@ -77,7 +77,7 @@ public class JacksonJsonCollectionPostInterceptor extends AbstractJsonCollection
                         .map(o -> getEnumValue(o, targetClass))
                         .filter(Objects::nonNull);
                 if (List.class.equals(collectionClass)) {
-                    newValue = stream.collect(Collectors.toList());
+                    newValue = stream.toList();
                 } else if (Set.class.equals(collectionClass)) {
                     newValue = stream.collect(Collectors.toSet());
                 } else {

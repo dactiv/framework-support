@@ -2,11 +2,11 @@ package com.github.dactiv.framework.spring.security.authentication.service.feign
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.crypto.algorithm.Base64;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -78,7 +78,7 @@ public class FeignAuthenticationConfiguration {
 
         String token = Casts.castRequestBodyMapToString(requestBody);
 
-        return Base64.encodeBase64String(token.getBytes(StandardCharsets.UTF_8));
+        return Base64.encodeToString(token.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

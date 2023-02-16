@@ -5,22 +5,21 @@ import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 /**
  * 用户类型表决器实现，用于判断当前 controller 方法里面是否带有 {@link Plugin} 注解的记录是否符合当前用户调用
  *
  * @author maurice
  */
-public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocation> {
+public class PluginSourceTypeVoter implements AuthorizationManager<MethodInvocation> {
 
     /**
      * 默认同意的来源类型值
@@ -32,38 +31,39 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
      */
     private List<String> grantedSources = DEFAULT_GRANTED_SOURCES;
 
-    public boolean supports(ConfigAttribute attribute) {
-        return true;
+    public PluginSourceTypeVoter() {
     }
 
-    public boolean supports(Class<?> targetClass) {
-        return MethodInvocation.class.isAssignableFrom(targetClass);
+    public PluginSourceTypeVoter(List<String> grantedSources) {
+        this.grantedSources = grantedSources;
     }
 
     @Override
-    public int vote(Authentication authentication, MethodInvocation object, Collection<ConfigAttribute> attributes) {
-
-        if (!authentication.isAuthenticated()) {
-            return AccessDecisionVoter.ACCESS_ABSTAIN;
-        }
-
-        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
-            return AccessDecisionVoter.ACCESS_ABSTAIN;
-        }
+    public AuthorizationDecision check(Supplier<Authentication> supplier, MethodInvocation object) {
 
         Plugin plugin = AnnotationUtils.findAnnotation(object.getMethod(), Plugin.class);
 
         if (plugin == null) {
-            return AccessDecisionVoter.ACCESS_ABSTAIN;
+            return null;
+        }
+
+        Authentication authentication = supplier.get();
+
+        if (!authentication.isAuthenticated()) {
+            return new AuthorizationDecision(false);
+        }
+
+        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
+            return new AuthorizationDecision(false);
         }
 
         List<String> resourceTypes = Arrays
                 .stream(plugin.sources())
                 .filter(s -> !grantedSources.contains(s))
-                .collect(Collectors.toList());
+                .toList();
 
         if (CollectionUtils.isEmpty(resourceTypes)) {
-            return AccessDecisionVoter.ACCESS_GRANTED;
+            return new AuthorizationDecision(true);
         }
 
         if (SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
@@ -71,13 +71,13 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             SecurityUserDetails userDetails = Casts.cast(authentication.getDetails(), SecurityUserDetails.class);
 
             if (!resourceTypes.contains(userDetails.getType())) {
-                return AccessDecisionVoter.ACCESS_DENIED;
+                return new AuthorizationDecision(false);
             } else {
-                return AccessDecisionVoter.ACCESS_GRANTED;
+                return new AuthorizationDecision(true);
             }
         }
 
-        return AccessDecisionVoter.ACCESS_ABSTAIN;
+        return new AuthorizationDecision(false);
     }
 
     /**

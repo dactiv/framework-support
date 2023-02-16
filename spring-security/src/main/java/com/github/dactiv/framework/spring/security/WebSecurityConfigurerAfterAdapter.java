@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security;
 
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 
@@ -12,20 +11,11 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 public interface WebSecurityConfigurerAfterAdapter {
 
     /**
-     * 配置认证管理
-     *
-     * @param managerBuilder 认证管理绑定器
-     */
-    default void configure(AuthenticationManagerBuilder managerBuilder) throws Exception {
-
-    }
-
-    /**
      * 配置 http 访问安全
      *
      * @param httpSecurity http 访问安全
      */
-    default void configure(HttpSecurity httpSecurity) throws Exception {
+    default void configure(HttpSecurity httpSecurity) {
 
     }
 
@@ -34,7 +24,7 @@ public interface WebSecurityConfigurerAfterAdapter {
      *
      * @param web web 安全
      */
-    default void configure(WebSecurity web) throws Exception {
+    default void configure(WebSecurity web) {
 
     }
 }

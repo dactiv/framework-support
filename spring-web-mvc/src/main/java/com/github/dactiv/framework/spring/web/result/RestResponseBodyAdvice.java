@@ -6,7 +6,8 @@ import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
-import org.apache.commons.collections.CollectionUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;

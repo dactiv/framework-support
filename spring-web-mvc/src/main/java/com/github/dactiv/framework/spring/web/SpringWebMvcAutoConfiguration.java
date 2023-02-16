@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * spring mvc 自动配置实现
@@ -199,7 +198,7 @@ public class SpringWebMvcAutoConfiguration {
     @Bean
     @ConfigurationProperties("dactiv.enumerate")
     public EnumerateEndpoint enumerateEndpoint(ObjectProvider<InfoContributor> infoContributor) {
-        return new EnumerateEndpoint(infoContributor.stream().collect(Collectors.toList()));
+        return new EnumerateEndpoint(infoContributor.stream().toList());
     }
 
     @Bean

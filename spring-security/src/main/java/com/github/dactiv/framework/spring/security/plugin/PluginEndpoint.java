@@ -12,8 +12,9 @@ import com.github.dactiv.framework.security.plugin.PluginInfo;
 import com.github.dactiv.framework.security.plugin.TargetObject;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
+import jakarta.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,12 +45,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 /**
  * 插件信息终端
@@ -271,7 +270,7 @@ public class PluginEndpoint {
             List<String> uri = new ArrayList<>();
             for (String value : mapping.value()) {
                 // 添加 /** 通配符，作用是为了可能某些需要带参数过来
-                String url = StringUtils.appendIfMissing(value, "/**");
+                String url = StringUtils.appendIfMissing(value, SpringMvcUtils.ANT_PATH_MATCH_ALL);
                 // 删除.（逗号）后缀的所有内容，作用是可能有些配置是
                 // 有.html 和 .json的类似配置，但其实一个就够了
                 uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
@@ -431,15 +430,15 @@ public class PluginEndpoint {
                 Method method = Casts.cast(target);
                 RequestMapping requestMapping = AnnotationUtils.findAnnotation(method.getDeclaringClass(), RequestMapping.class);
                 if (Objects.nonNull(requestMapping)) {
-                    parentValueList = Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).collect(Collectors.toList());
+                    parentValueList = Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).toList();
                 }
             } else {
-                return StringUtils.appendIfMissing(targetValue, "/**");
+                return StringUtils.appendIfMissing(targetValue, SpringMvcUtils.ANT_PATH_MATCH_ALL);
             }
         } else if (TargetObject.class.isAssignableFrom(target.getClass())) {
             TargetObject targetObject = Casts.cast(target);
             if (Method.class.isAssignableFrom(targetObject.getTarget().getClass())) {
-                return StringUtils.appendIfMissing(targetValue, "/**");
+                return StringUtils.appendIfMissing(targetValue, SpringMvcUtils.ANT_PATH_MATCH_ALL);
             }
         }
 
@@ -451,13 +450,13 @@ public class PluginEndpoint {
                 parentValueList = parentValueList
                         .stream()
                         .map(s -> StringUtils.prependIfMissing(StringUtils.removeStart(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR), prefix))
-                        .collect(Collectors.toList());
+                        .toList();
             }
         }
 
         for (String parentValue : parentValueList) {
             for (String value : StringUtils.split(targetValue)) {
-                String url = StringUtils.appendIfMissing(parentValue, value + "/**");
+                String url = StringUtils.appendIfMissing(parentValue, value + SpringMvcUtils.ANT_PATH_MATCH_ALL);
                 uri.add(RegExUtils.removeAll(url, "\\{.*\\}"));
             }
         }
@@ -527,7 +526,7 @@ public class PluginEndpoint {
 
         return values.stream()
                 .map(v -> Objects.isNull(parent) ? v : getRequestValueString(target, v, parent))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

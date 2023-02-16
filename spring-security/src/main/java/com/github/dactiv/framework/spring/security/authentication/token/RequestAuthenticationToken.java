@@ -1,9 +1,10 @@
 package com.github.dactiv.framework.spring.security.authentication.token;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.Serial;
 
 /**
  * 请求认证 token
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RequestAuthenticationToken extends PrincipalAuthenticationToken {
 
+    @Serial
     private static final long serialVersionUID = 8070060147431763553L;
 
     /**

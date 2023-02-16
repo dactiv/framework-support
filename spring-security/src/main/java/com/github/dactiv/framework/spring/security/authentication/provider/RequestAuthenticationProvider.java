@@ -107,7 +107,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                 list.addAllAsync(grantedAuthorities);
 
                 if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                    list.expireAsync(authorizationCache.getExpiresTime().getValue(), authorizationCache.getExpiresTime().getUnit());
+                    list.expireAsync(authorizationCache.getExpiresTime().toDuration());
                 }
             }
 
@@ -165,15 +165,12 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             if (!cache) {
                 return userDetails;
             }
-            if (Objects.isNull(authenticationCache.getExpiresTime())) {
-                bucket.setAsync(userDetails);
-            } else {
-                bucket.setAsync(
-                        userDetails,
-                        authenticationCache.getExpiresTime().getValue(),
-                        authenticationCache.getExpiresTime().getUnit()
-                );
+
+            bucket.setAsync(userDetails);
+            if (Objects.nonNull(authenticationCache.getExpiresTime())) {
+                bucket.expireAsync(authenticationCache.getExpiresTime().toDuration());
             }
+
             userDetailsService.postAuthenticationCache(token, userDetails, authenticationCache);
         }
 

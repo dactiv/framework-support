@@ -14,7 +14,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 默认用户明细实现
@@ -41,7 +40,7 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService<Securi
             );
 
             userDetails.setRoleAuthorities(
-                    user.getRoles().stream().map(RoleAuthority::new).collect(Collectors.toList())
+                    user.getRoles().stream().map(RoleAuthority::new).toList()
             );
 
             userDetailsMap.put(userDetails.getUsername(), userDetails);

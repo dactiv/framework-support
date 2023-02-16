@@ -1,11 +1,10 @@
 package com.github.dactiv.framework.spring.web.device;
 
 import com.github.dactiv.framework.commons.Casts;
+import jakarta.servlet.http.HttpServletRequest;
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.springframework.web.context.request.RequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 设备工具类

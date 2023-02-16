@@ -9,24 +9,20 @@ import com.github.dactiv.framework.spring.security.authentication.handler.JsonAu
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
-import org.apache.commons.collections.CollectionUtils;
+import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
-import org.springframework.security.access.vote.AbstractAccessDecisionManager;
-import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -34,7 +30,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * spring security 配置实现
@@ -44,7 +39,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties(AuthenticationProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public class WebSecurityDefaultConfigurerAdapter {
 
     private final DeviceIdContextRepository deviceIdContextRepository;
 
@@ -83,39 +78,17 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
         this.eventPublisher = eventPublisher;
         this.authenticationManager = authenticationManager;
         this.cookieRememberService = cookieRememberService;
-        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().collect(Collectors.toList());
-        this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
-        this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
+        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().toList();
+        this.userDetailsServices = userDetailsServices.stream().toList();
+        this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().toList();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder managerBuilder) throws Exception {
-        if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
-            for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
-                a.configure(managerBuilder);
-            }
-        } else {
-            super.configure(managerBuilder);
-        }
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
-            for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
-                a.configure(web);
-            }
-        } else {
-            super.configure(web);
-        }
-    }
-
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> map = new LinkedHashMap<>();
         map.put(
-                new AntPathRequestMatcher("/**"),
+                new AntPathRequestMatcher(SpringMvcUtils.ANT_PATH_MATCH_ALL),
                 (req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase())
         );
 
@@ -123,8 +96,8 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
         authenticationEntryPoint.setDefaultEntryPoint(new Http403ForbiddenEntryPoint());
 
         httpSecurity
-                .authorizeRequests()
-                .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
+                .authorizeHttpRequests()
+                .requestMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -168,6 +141,25 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
         httpSecurity.addFilter(filter);
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
+
+        return httpSecurity.build();
+    }
+
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> {
+            if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
+                for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
+                    a.configure(web);
+                }
+            }
+        };
+    }
+
+    @Bean
+    public PluginSourceTypeVoter pluginSourceTypeVoter() {
+        return new PluginSourceTypeVoter(PluginSourceTypeVoter.DEFAULT_GRANTED_SOURCES);
     }
 
     /**
@@ -177,7 +169,7 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
      */
     public static void addConsensusBasedToMethodSecurityInterceptor(HttpSecurity http,
                                                                     AuthenticationProperties properties) {
-        try {
+        /*try {
             MethodSecurityInterceptor methodSecurityInterceptor = http
                     .getSharedObject(ApplicationContext.class)
                     .getBean(MethodSecurityInterceptor.class);
@@ -196,7 +188,7 @@ public class WebSecurityDefaultConfigurerAdapter extends WebSecurityConfigurerAd
             }
         } catch (Exception ignored) {
 
-        }
+        }*/
     }
 
 }

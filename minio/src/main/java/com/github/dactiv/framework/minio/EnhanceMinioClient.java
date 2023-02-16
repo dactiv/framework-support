@@ -4,14 +4,17 @@ import com.github.dactiv.framework.commons.minio.FileObject;
 import com.google.common.collect.Multimap;
 import io.minio.CreateMultipartUploadResponse;
 import io.minio.ListPartsResponse;
-import io.minio.MinioClient;
+import io.minio.MinioAsyncClient;
 import io.minio.ObjectWriteResponse;
-import io.minio.errors.*;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.XmlParserException;
 import io.minio.messages.Part;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -19,10 +22,10 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author maurice.chen
  */
-public class EnhanceMinioClient extends MinioClient {
-
-    protected EnhanceMinioClient(MinioClient client) {
+public class EnhanceMinioClient extends MinioAsyncClient {
+    protected EnhanceMinioClient(MinioAsyncClient client) {
         super(client);
+
     }
 
     /**
@@ -34,8 +37,8 @@ public class EnhanceMinioClient extends MinioClient {
      *
      * @return 创建分片上传响应体
      */
-    public CreateMultipartUploadResponse createMultipartUpload(FileObject fileObject, Multimap<String, String> headers, Multimap<String, String> extraQueryParams) throws NoSuchAlgorithmException, InsufficientDataException, IOException, InvalidKeyException, ServerException, XmlParserException, ErrorResponseException, InternalException, InvalidResponseException {
-        return super.createMultipartUpload(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), headers, extraQueryParams);
+    public CreateMultipartUploadResponse createMultipartUpload(FileObject fileObject, Multimap<String, String> headers, Multimap<String, String> extraQueryParams) throws InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InternalException, ExecutionException, InterruptedException {
+        return super.createMultipartUploadAsync(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), headers, extraQueryParams).get();
     }
 
     /**
@@ -49,8 +52,8 @@ public class EnhanceMinioClient extends MinioClient {
      *
      * @return 文件对象创建情况响应体
      */
-    public ObjectWriteResponse completeMultipartUpload(FileObject fileObject, String uploadId, Part[] parts, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws NoSuchAlgorithmException, InsufficientDataException, IOException, InvalidKeyException, ServerException, XmlParserException, ErrorResponseException, InternalException, InvalidResponseException {
-        return super.completeMultipartUpload(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), uploadId, parts, extraHeaders, extraQueryParams);
+    public ObjectWriteResponse completeMultipartUpload(FileObject fileObject, String uploadId, Part[] parts, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InternalException, ExecutionException, InterruptedException {
+        return super.completeMultipartUploadAsync(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), uploadId, parts, extraHeaders, extraQueryParams).get();
     }
 
     /**
@@ -65,7 +68,7 @@ public class EnhanceMinioClient extends MinioClient {
      *
      * @return 文件分片内容响应体
      */
-    public ListPartsResponse listParts(FileObject fileObject, Integer maxParts, Integer partNumberMarker, String uploadId, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws NoSuchAlgorithmException, InsufficientDataException, IOException, InvalidKeyException, ServerException, XmlParserException, ErrorResponseException, InternalException, InvalidResponseException {
-        return super.listParts(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), maxParts, partNumberMarker, uploadId, extraHeaders, extraQueryParams);
+    public ListPartsResponse listParts(FileObject fileObject, Integer maxParts, Integer partNumberMarker, String uploadId, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InternalException, ExecutionException, InterruptedException {
+        return super.listPartsAsync(fileObject.getBucketName(), fileObject.getRegion(), fileObject.getObjectName(), maxParts, partNumberMarker, uploadId, extraHeaders, extraQueryParams).get();
     }
 }

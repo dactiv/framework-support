@@ -14,7 +14,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 抽象对象字段或属性的 json 集合类，用于实现在 orm 对象中，有引用范型集合的字段或属性时的特殊映射，
@@ -72,7 +71,7 @@ public abstract class AbstractJsonCollectionPostInterceptor implements Intercept
                     .stream()
                     .map(v -> doMappingResult(v, entry.getKey(), map.get(entry.getKey())))
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
             newResult.addAll(mapValues);
         }
 
@@ -86,7 +85,7 @@ public abstract class AbstractJsonCollectionPostInterceptor implements Intercept
         return Arrays
                 .stream(propertyDescriptors)
                 .filter(p -> this.getJsonCollectionGenericType(p, targetClass) != null)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     protected JsonCollectionGenericType getJsonCollectionGenericType(PropertyDescriptor propertyDescriptor, Class<?> targetClass) {

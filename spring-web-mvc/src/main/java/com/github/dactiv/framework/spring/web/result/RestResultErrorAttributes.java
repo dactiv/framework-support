@@ -111,7 +111,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
     private HttpStatus getStatus(WebRequest webRequest) {
 
         Integer status = Casts.cast(webRequest.getAttribute(
-                "javax.servlet.error.status_code",
+                "jakarta.servlet.error.status_code",
                 RequestAttributes.SCOPE_REQUEST
         ));
 

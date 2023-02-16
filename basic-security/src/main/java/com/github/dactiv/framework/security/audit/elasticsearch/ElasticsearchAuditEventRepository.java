@@ -1,5 +1,8 @@
 package com.github.dactiv.framework.security.audit.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.json.JsonData;
+import co.elastic.clients.util.ObjectBuilder;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
@@ -11,28 +14,23 @@ import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.framework.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.framework.security.audit.elasticsearch.index.support.DateIndexGenerator;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * es 审计事件仓库实现
@@ -45,7 +43,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
-    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     private final SecurityProperties securityProperties;
 
@@ -53,11 +51,11 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchAuditEventRepository(ElasticsearchRestTemplate elasticsearchRestTemplate,
+    public ElasticsearchAuditEventRepository(ElasticsearchOperations elasticsearchOperations,
                                              List<String> ignorePrincipals,
                                              SecurityProperties securityProperties) {
 
-        this.elasticsearchRestTemplate = elasticsearchRestTemplate;
+        this.elasticsearchOperations = elasticsearchOperations;
         this.ignorePrincipals = ignorePrincipals;
         this.securityProperties = securityProperties;
 
@@ -89,7 +87,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                     .withId(pluginAuditEvent.getId())
                     .withObject(pluginAuditEvent);
 
-            elasticsearchRestTemplate.index(indexQueryBuilder.build(), IndexCoordinates.of(index));
+            elasticsearchOperations.index(indexQueryBuilder.build(), IndexCoordinates.of(index));
 
         } catch (Exception e) {
             LOGGER.error("新增" + event.getPrincipal() + "审计事件失败", e);
@@ -102,18 +100,18 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         String index = getIndex(after, principal, type);
 
-        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(q -> createQueryBuilder(q, after, type, principal))
+                .withSort(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
 
-        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
-                .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC));
-
-        return elasticsearchRestTemplate
+        List<PluginAuditEvent> result = elasticsearchOperations
                 .search(builder.build(), Map.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
                 .map(this::createPluginAuditEvent)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new LinkedList<>(result);
     }
 
     @Override
@@ -121,19 +119,17 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
         String index = getIndex(after, principal, type);
 
-        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
-
-        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
-                .withQuery(queryBuilder)
-                .withSort(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC))
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(q -> createQueryBuilder(q, after, type, principal))
+                .withSort(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
-        List<PluginAuditEvent> content = elasticsearchRestTemplate
+        List<PluginAuditEvent> content = elasticsearchOperations
                 .search(builder.build(), Map.class, IndexCoordinates.of(index))
                 .stream()
                 .map(SearchHit::getContent)
                 .map(this::createPluginAuditEvent)
-                .collect(Collectors.toList());
+                .toList();
 
         return new Page<>(pageRequest, new ArrayList<>(content));
     }
@@ -148,7 +144,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         StringIdEntity stringIdEntity = Casts.cast(target);
 
         //noinspection unchecked
-        Map<String, Object> map = elasticsearchRestTemplate.get(
+        Map<String, Object> map = elasticsearchOperations.get(
                 stringIdEntity.getId(),
                 Map.class,
                 IndexCoordinates.of(indexGenerator.generateIndex(stringIdEntity))
@@ -186,22 +182,22 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
      *
      * @return 查询条件
      */
-    private QueryBuilder createQueryBuilder(Instant after, String type, String principal) {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+    private ObjectBuilder<Query> createQueryBuilder(Query.Builder builder, Instant after, String type, String principal) {
+        List<Query> queryList = new LinkedList<>();
 
         if (StringUtils.isNotBlank(type)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.TYPE_FIELD_NAME, type));
+            queryList.add(Query.of(q -> q.term(t -> t.field(PluginAuditEvent.TYPE_FIELD_NAME).value(type))));
         }
 
         if (Objects.nonNull(after)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery(RestResult.DEFAULT_TIMESTAMP_NAME).gte(after.getEpochSecond()));
+            queryList.add(Query.of(q -> q.range(r -> r.field(RestResult.DEFAULT_TIMESTAMP_NAME).gte(JsonData.of(after)))));
         }
 
         if (StringUtils.isNotBlank(principal)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.PRINCIPAL_FIELD_NAME, principal));
+            queryList.add(Query.of(q -> q.term(t -> t.field(PluginAuditEvent.PRINCIPAL_FIELD_NAME).value(principal))));
         }
 
-        return queryBuilder;
+        return builder.bool(t -> t.must(queryList));
     }
 
     /**

@@ -8,7 +8,7 @@ import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.audit.PluginAuditEventRepository;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +20,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * mongo 审计事件仓库实现
@@ -88,7 +88,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         //noinspection rawtypes
         List<Map> result = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
 
-        return result.stream().map(this::createPluginAuditEvent).collect(Collectors.toList());
+        return new LinkedList<>(result.stream().map(this::createPluginAuditEvent).toList());
     }
 
     @Override
@@ -103,7 +103,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         //noinspection rawtypes
         List<Map> data = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
 
-        return new Page<>(pageRequest, data.stream().map(this::createPluginAuditEvent).collect(Collectors.toList()));
+        return new Page<>(pageRequest, new LinkedList<>(data.stream().map(this::createPluginAuditEvent).toList()));
     }
 
     @Override

@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Collectors;
 
 /**
  * nacos 动态 cron 调度监听器实现，用于存在自动调度任务时，通过该类来进行 cron 任务调动的动态改变
@@ -112,7 +111,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     // 匹配等于条件的值
                     .filter(m -> propertySource.containsProperty(m.getMatch().toString()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (result.stream().anyMatch(m -> m.evaluation(propertySource.getProperty(m.getMatch().toString()), target))) {
                 changeScheduledInfos.add(target);
@@ -455,7 +454,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
                     .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             list.addAll(result);
         }
@@ -468,7 +467,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
                     .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             list.addAll(result);
         }

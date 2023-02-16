@@ -2,7 +2,7 @@ package com.github.dactiv.framework.security.audit;
 
 import com.github.dactiv.framework.commons.ReflectionUtils;
 import com.github.dactiv.framework.security.audit.elasticsearch.index.IndexGenerator;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedList;

@@ -1,0 +1,2 @@
+com.github.dactiv.framework.minio.MinioAutoConfiguration
+com.github.dactiv.framework.minio.MinioAutoDeleteConfiguration

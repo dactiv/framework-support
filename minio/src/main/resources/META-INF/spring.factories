@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    com.github.dactiv.framework.minio.MinioAutoConfiguration,\
-    com.github.dactiv.framework.minio.MinioAutoDeleteConfiguration

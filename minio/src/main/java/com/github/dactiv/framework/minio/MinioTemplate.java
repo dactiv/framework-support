@@ -17,7 +17,7 @@ import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import io.minio.messages.Part;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +140,7 @@ public class MinioTemplate {
                 .region(bucket.getRegion())
                 .build();
 
-        return minioClient.bucketExists(builder);
+        return minioClient.bucketExists(builder).get();
     }
 
     /**
@@ -186,7 +186,7 @@ public class MinioTemplate {
                 .userMetadata(userMetadata)
                 .build();
 
-        return minioClient.putObject(args);
+        return minioClient.putObject(args).get();
 
     }
 
@@ -242,7 +242,7 @@ public class MinioTemplate {
                         .object(file.getOriginalFilename())
                         .stream(file.getInputStream(), file.getSize(), -1)
                         .build()
-        );
+        ).get();
     }
 
     /**
@@ -263,7 +263,7 @@ public class MinioTemplate {
                         .object(fileObject.getObjectName())
                         .stream(inputStream, inputStream.available(), -1)
                         .build()
-        );
+        ).get();
     }
 
     /**
@@ -286,7 +286,7 @@ public class MinioTemplate {
                         .object(fileObject.getObjectName())
                         .stream(inputStream,  objectSize, partSize)
                         .build()
-        );
+        ).get();
     }
 
     /**
@@ -341,7 +341,7 @@ public class MinioTemplate {
                 args.versionId(version.getVersionId());
             }
 
-            minioClient.removeObject(args.build());
+            minioClient.removeObject(args.build()).get();
         }
 
         if (deleteBucketIfEmpty) {
@@ -380,7 +380,7 @@ public class MinioTemplate {
             getObjectArgs.versionId(version.getVersionId());
         }
 
-        return minioClient.getObject(getObjectArgs.build());
+        return minioClient.getObject(getObjectArgs.build()).get();
     }
 
     /**
@@ -466,7 +466,7 @@ public class MinioTemplate {
                 .object(StringUtils.defaultString(toObject.getObjectName(), fromObject.getObjectName()))
                 .source(copySource.build());
 
-        return minioClient.copyObject(args.build());
+        return minioClient.copyObject(args.build()).get();
     }
 
     /**
@@ -558,7 +558,7 @@ public class MinioTemplate {
                 .region(bucket.getRegion())
                 .build();
 
-        boolean exist = minioClient.bucketExists(existsArgs);
+        boolean exist = minioClient.bucketExists(existsArgs).get();
 
         if (exist) {
             RemoveBucketArgs removeBucketArgs = RemoveBucketArgs
@@ -567,7 +567,7 @@ public class MinioTemplate {
                     .region(bucket.getRegion())
                     .build();
 
-            minioClient.removeBucket(removeBucketArgs);
+            minioClient.removeBucket(removeBucketArgs).get();
         }
 
     }
@@ -836,7 +836,7 @@ public class MinioTemplate {
             statObjectArgs.extraQueryParams(queryParams);
         }
 
-        return minioClient.statObject(statObjectArgs.build());
+        return minioClient.statObject(statObjectArgs.build()).get();
     }
 
     /**

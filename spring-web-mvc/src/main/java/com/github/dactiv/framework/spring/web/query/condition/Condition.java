@@ -5,37 +5,20 @@ import com.github.dactiv.framework.spring.web.query.Property;
 /**
  * 条件信息, 用于记录一个条件里包含的过滤查询内容
  *
+ * @param name     名称
+ * @param type     类型
+ * @param property 属性
  * @author maurice.chen
  */
-public class Condition {
-
-    /**
-     * 名称
-     */
-    private final String name;
-
-    /**
-     * 类型
-     */
-    private final ConditionType type;
-
-    /**
-     * 属性
-     */
-    private final Property property;
-
-    public Condition(String name, ConditionType type, Property property) {
-        this.name = name;
-        this.type = type;
-        this.property = property;
-    }
+public record Condition(String name, ConditionType type, Property property) {
 
     /**
      * 获取条件名称
      *
      * @return 条件名称
      */
-    public String getName() {
+    @Override
+    public String name() {
         return name;
     }
 
@@ -44,7 +27,8 @@ public class Condition {
      *
      * @return 条件类型
      */
-    public ConditionType getType() {
+    @Override
+    public ConditionType type() {
         return type;
     }
 
@@ -53,7 +37,8 @@ public class Condition {
      *
      * @return 属性
      */
-    public Property getProperty() {
+    @Override
+    public Property property() {
         return property;
     }
 

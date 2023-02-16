@@ -15,5 +15,7 @@ spring:
     username: root
     password: qwerty123
     type: com.zaxxer.hikari.HikariDataSource
-    schema: classpath:sql/schema.sql
-    data: classpath:sql/data.sql
+  sql:
+    init:
+      schema-locations: classpath:sql/schema.sql
+      data-locations: classpath:sql/data.sql

@@ -14,13 +14,12 @@ import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import com.github.dactiv.framework.spring.web.query.condition.support.SimpleConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Mybatis-Plus 查询生成器实现
@@ -69,14 +68,14 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
 
                     List<WildcardParser<QueryWrapper<T>>> result = getWildcardParserList()
                             .stream()
-                            .filter(w -> w.isSupport(c.getName()))
-                            .collect(Collectors.toList());
+                            .filter(w -> w.isSupport(c.name()))
+                            .toList();
 
                     for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
-                        wildcardParser.structure(c.getProperty(), subWrapper);
+                        wildcardParser.structure(c.property(), subWrapper);
                     }
 
-                    if (ConditionType.Or.equals(c.getType())) {
+                    if (ConditionType.Or.equals(c.type())) {
                         subWrapper = subWrapper.or();
                     }
 

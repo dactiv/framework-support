@@ -7,7 +7,7 @@ import com.github.dactiv.framework.idempotent.exception.IdempotentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
@@ -17,6 +17,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -136,20 +137,18 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
         if (CollectionUtils.isNotEmpty(existValues)) {
 
-            boolean setResult = bucket.trySet(
+            boolean setResult = bucket.setIfAbsent(
                     values,
-                    idempotent.expirationTime().value(),
-                    idempotent.expirationTime().unit()
+                    Duration.of(idempotent.expirationTime().value(), idempotent.expirationTime().unit().toChronoUnit())
             );
 
             return values.stream().anyMatch(existValues::contains) || !setResult;
 
         }
 
-        return !bucket.trySet(
+        return !bucket.setIfAbsent(
                 values,
-                idempotent.expirationTime().value(),
-                idempotent.expirationTime().unit()
+                Duration.of(idempotent.expirationTime().value(), idempotent.expirationTime().unit().toChronoUnit())
         );
     }
 

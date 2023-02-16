@@ -2,7 +2,9 @@ package com.github.dactiv.framework.commons;
 
 import com.github.dactiv.framework.commons.annotation.Time;
 
+import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeProperties implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2842217678288186207L;
     /**
      * 值
@@ -247,5 +250,14 @@ public class TimeProperties implements Serializable {
      */
     public static TimeProperties ofNanoseconds(Integer value) {
         return new TimeProperties(value, TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     * 转换为期间
+     *
+     * @return 期间
+     */
+    public Duration toDuration() {
+        return Duration.of(value, unit.toChronoUnit());
     }
 }

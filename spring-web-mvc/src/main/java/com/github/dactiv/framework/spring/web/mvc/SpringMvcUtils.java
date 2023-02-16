@@ -4,6 +4,8 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import nl.basjes.parse.useragent.UserAgent;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +17,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -37,6 +37,8 @@ public class SpringMvcUtils {
     public final static String COMMA_STRING = ",";
 
     public final static String DEFAULT_ATTACHMENT_NAME = "attachment;filename=";
+
+    public final static String ANT_PATH_MATCH_ALL = "/**";
 
     /**
      * 获取 request 的 attribute
@@ -100,8 +102,7 @@ public class SpringMvcUtils {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        if (requestAttributes instanceof ServletRequestAttributes) {
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+        if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
             return Optional.of(servletRequestAttributes.getRequest());
         }
 

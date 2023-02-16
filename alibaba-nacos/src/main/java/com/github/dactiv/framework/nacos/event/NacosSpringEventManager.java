@@ -10,7 +10,7 @@ import com.alibaba.nacos.api.naming.pojo.ListView;
 import com.alibaba.nacos.api.naming.pojo.Service;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * nacos 的 spring 事件管理器
@@ -100,7 +99,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
 
         for (NacosServiceEventListener sel : listeners) {
 
@@ -182,7 +181,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                     List<NacosServiceListenerValidator> validators = nacosServiceListenerValidators
                             .stream()
                             .filter(v -> v.isSupport(nacosService))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     boolean isContinue = false;
 

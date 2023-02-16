@@ -1,18 +1,16 @@
 package com.github.dactiv.framework.spring.security.authentication.service.feign;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.crypto.algorithm.Base64;
 import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
-import org.apache.commons.codec.binary.Base64;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 
 /**
  * feign 认证类型 token 解析器实现
@@ -53,7 +51,7 @@ public class FeignAuthenticationTypeTokenResolver implements AuthenticationTypeT
      * @return 参数信息
      */
     public static MultiValueMap<String, String> decodeUserProperties(String token) {
-        String param = new String(Base64.decodeBase64(token), StandardCharsets.UTF_8);
+        String param = Base64.decodeToString(token);
         return Casts.castRequestBodyMap(param);
     }
 }

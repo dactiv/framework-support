@@ -2,7 +2,7 @@ package com.github.dactiv.framework.minio;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.minio.config.MinioProperties;
-import io.minio.MinioClient;
+import io.minio.MinioAsyncClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,8 +29,7 @@ public class MinioAutoConfiguration {
      */
     @Bean
     public EnhanceMinioClient minioClient(MinioProperties minioProperties) {
-        return new EnhanceMinioClient(MinioClient
-                .builder()
+        return new EnhanceMinioClient(MinioAsyncClient.builder()
                 .endpoint(minioProperties.getEndpoint())
                 .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build());

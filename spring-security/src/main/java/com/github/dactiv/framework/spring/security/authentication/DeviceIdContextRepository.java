@@ -12,6 +12,8 @@ import com.github.dactiv.framework.spring.security.authentication.config.DeviceI
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
@@ -25,8 +27,6 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,7 +95,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         if (isCurrentUserSecurityContext(userId, cacheSecurityContext, deviceId)) {
             TimeProperties time = properties.getDeviceId().getCache().getExpiresTime();
             if (Objects.nonNull(time)) {
-                bucket.expireAsync(time.getValue(), time.getUnit());
+                bucket.expireAsync(time.toDuration());
             }
             return cacheSecurityContext;
         }

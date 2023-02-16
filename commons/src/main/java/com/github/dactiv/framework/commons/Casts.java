@@ -18,7 +18,6 @@ import org.springframework.util.MultiValueMap;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 转型工具类
@@ -433,7 +432,7 @@ public class Casts {
                 .stream()
                 .map(StringUtils::trimToEmpty)
                 .filter(variableValue::containsKey)
-                .collect(Collectors.toList());
+                .toList();
 
         String temp = url;
 

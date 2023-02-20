@@ -137,23 +137,6 @@ public class SpringSecurityAutoConfiguration {
         return new FeignAuthenticationTypeTokenResolver(properties);
     }
 
-    /*@Bean
-    public AccessDecisionManager accessDecisionManager() {
-        List<AccessDecisionVoter<?>> decisionVoters
-                = Arrays.asList(
-                new WebExpressionVoter(),
-                new RoleVoter(),
-                new AuthenticatedVoter(),
-                new PluginSourceTypeVoter()
-        );
-
-        ConsensusBased consensusBased = new ConsensusBased(decisionVoters);
-
-        consensusBased.setAllowIfEqualGrantedDeniedDecisions(false);
-
-        return consensusBased;
-    }*/
-
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {

@@ -140,8 +140,6 @@ public class WebSecurityDefaultConfigurerAdapter {
 
         httpSecurity.addFilter(filter);
 
-        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
-
         return httpSecurity.build();
     }
 
@@ -160,35 +158,6 @@ public class WebSecurityDefaultConfigurerAdapter {
     @Bean
     public PluginSourceTypeVoter pluginSourceTypeVoter() {
         return new PluginSourceTypeVoter(PluginSourceTypeVoter.DEFAULT_GRANTED_SOURCES);
-    }
-
-    /**
-     * 添加 ConsensusBased 访问管理器到方法拦截器中
-     *
-     * @param http http security
-     */
-    public static void addConsensusBasedToMethodSecurityInterceptor(HttpSecurity http,
-                                                                    AuthenticationProperties properties) {
-        /*try {
-            MethodSecurityInterceptor methodSecurityInterceptor = http
-                    .getSharedObject(ApplicationContext.class)
-                    .getBean(MethodSecurityInterceptor.class);
-
-            AccessDecisionManager accessDecisionManager = methodSecurityInterceptor.getAccessDecisionManager();
-
-            if (AbstractAccessDecisionManager.class.isAssignableFrom(accessDecisionManager.getClass())) {
-
-                AbstractAccessDecisionManager adm = (AbstractAccessDecisionManager) accessDecisionManager;
-                adm.getDecisionVoters().add(new PluginSourceTypeVoter());
-
-                ConsensusBased consensusBased = new ConsensusBased(adm.getDecisionVoters());
-                consensusBased.setAllowIfEqualGrantedDeniedDecisions(properties.isAllowIfEqualGrantedDeniedDecisions());
-
-                methodSecurityInterceptor.setAccessDecisionManager(consensusBased);
-            }
-        } catch (Exception ignored) {
-
-        }*/
     }
 
 }

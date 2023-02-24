@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  *
  * @author maurice
  */
-public class PluginSourceTypeVoter implements AuthorizationManager<MethodInvocation> {
+public class PluginSourceAuthorizationManager implements AuthorizationManager<MethodInvocation> {
 
     /**
      * 默认同意的来源类型值
@@ -31,10 +31,10 @@ public class PluginSourceTypeVoter implements AuthorizationManager<MethodInvocat
      */
     private List<String> grantedSources = DEFAULT_GRANTED_SOURCES;
 
-    public PluginSourceTypeVoter() {
+    public PluginSourceAuthorizationManager() {
     }
 
-    public PluginSourceTypeVoter(List<String> grantedSources) {
+    public PluginSourceAuthorizationManager(List<String> grantedSources) {
         this.grantedSources = grantedSources;
     }
 

@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security;
 
+import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
@@ -8,19 +9,28 @@ import com.github.dactiv.framework.spring.security.authentication.config.Authent
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
-import com.github.dactiv.framework.spring.security.plugin.PluginSourceTypeVoter;
+import com.github.dactiv.framework.spring.security.plugin.PluginSourceAuthorizationManager;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.Pointcuts;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authorization.AuthorizationEventPublisher;
+import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
@@ -137,7 +147,7 @@ public class WebSecurityDefaultConfigurerAdapter {
         filter.setRememberMeServices(cookieRememberService);
         filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
         filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-
+        filter.setSecurityContextRepository(deviceIdContextRepository);
         httpSecurity.addFilter(filter);
 
         return httpSecurity.build();
@@ -156,8 +166,19 @@ public class WebSecurityDefaultConfigurerAdapter {
     }
 
     @Bean
-    public PluginSourceTypeVoter pluginSourceTypeVoter() {
-        return new PluginSourceTypeVoter(PluginSourceTypeVoter.DEFAULT_GRANTED_SOURCES);
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    static Advisor pluginAuthorizationMethodInterceptor(ObjectProvider<SecurityContextHolderStrategy> strategyProvider,
+                                                        ObjectProvider<AuthorizationEventPublisher> eventPublisherProvider) {
+
+        AuthorizationManagerBeforeMethodInterceptor interceptor = new AuthorizationManagerBeforeMethodInterceptor(
+                Pointcuts.union(new AnnotationMatchingPointcut(null, Plugin.class, true),
+                        new AnnotationMatchingPointcut(Plugin.class, true)), new PluginSourceAuthorizationManager());
+        interceptor.setOrder(AuthorizationInterceptorsOrder.PRE_AUTHORIZE.getOrder() + 1);
+
+        strategyProvider.ifAvailable(interceptor::setSecurityContextHolderStrategy);
+        eventPublisherProvider.ifAvailable(interceptor::setAuthorizationEventPublisher);
+
+        return interceptor;
     }
 
 }

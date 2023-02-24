@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -91,24 +90,6 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         Authentication token = createToken(request, response);
 
         return getAuthenticationManager().authenticate(token);
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request,
-                                            HttpServletResponse response,
-                                            FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
-
-        SecurityContextHolder.getContext().setAuthentication(authResult);
-
-        getRememberMeServices().loginSuccess(request, response, authResult);
-
-        // 推送用户成功登陆事件
-        if (this.eventPublisher != null) {
-            eventPublisher.publishEvent(new InteractiveAuthenticationSuccessEvent(authResult, this.getClass()));
-        }
-
-        getSuccessHandler().onAuthenticationSuccess(request, response, chain, authResult);
     }
 
     /**

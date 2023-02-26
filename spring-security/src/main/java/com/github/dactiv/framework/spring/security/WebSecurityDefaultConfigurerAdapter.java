@@ -148,6 +148,7 @@ public class WebSecurityDefaultConfigurerAdapter {
         filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
         filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
         filter.setSecurityContextRepository(deviceIdContextRepository);
+
         httpSecurity.addFilter(filter);
 
         return httpSecurity.build();

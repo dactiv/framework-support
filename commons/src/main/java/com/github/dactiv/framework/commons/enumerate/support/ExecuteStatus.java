@@ -91,6 +91,13 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
         void setException(String exception);
 
         /**
+         * 获取异常
+         *
+         * @return 异常信息
+         */
+        String getException();
+
+        /**
          * 设置成功时间
          *
          * @param successTime 成功时间
@@ -98,10 +105,24 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
         void setSuccessTime(Date successTime);
 
         /**
+         * 获取成功时间
+         *
+         * @return 成功时间
+         */
+        Date getSuccessTime();
+
+        /**
          * 设置状态
          *
          * @param status 状态
          */
         void setExecuteStatus(ExecuteStatus status);
+
+        /**
+         * 获取状态
+         *
+         * @return 状态
+         */
+        ExecuteStatus getExecuteStatus();
     }
 }

@@ -40,6 +40,10 @@ public class SpringMvcUtils {
 
     public final static String ANT_PATH_MATCH_ALL = "/**";
 
+    public final static String HTTP_PROTOCOL_PREFIX = "http://";
+
+    public final static String HTTPS_PROTOCOL_PREFIX = "https://";
+
     /**
      * 获取 request 的 attribute
      *

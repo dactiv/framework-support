@@ -94,7 +94,7 @@ public class MinioTemplate {
                     .bucket(bucket.getBucketName().toLowerCase())
                     .region(bucket.getRegion())
                     .build();
-            minioClient.makeBucket(makeBucketArgs);
+            minioClient.makeBucket(makeBucketArgs).get();
         }
 
         return found;

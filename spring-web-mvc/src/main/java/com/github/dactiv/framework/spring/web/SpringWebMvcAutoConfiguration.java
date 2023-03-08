@@ -30,8 +30,6 @@ import com.github.dactiv.framework.spring.web.result.error.support.MissingServle
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultSerializerProvider;
 import com.github.dactiv.framework.spring.web.result.filter.holder.ClearFilterResultHolderFilter;
-import io.undertow.server.DefaultByteBufferPool;
-import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -43,7 +41,6 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.boot.autoconfigure.websocket.servlet.UndertowWebSocketServletWebServerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -78,27 +75,12 @@ public class SpringWebMvcAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {
 
-        private final SpringWebMvcProperties properties;
-
-        public DefaultWebMvcConfigurer(SpringWebMvcProperties properties) {
-            this.properties = properties;
-        }
-
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
             argumentResolvers.add(new GenericsListHandlerMethodArgumentResolver(getValidator()));
             argumentResolvers.add(new DeviceHandlerMethodArgumentResolver());
         }
 
-        @Override
-        public void customize(UndertowServletWebServerFactory factory) {
-            super.customize(factory);
-            factory.addDeploymentInfoCustomizers(deploymentInfo -> {
-                WebSocketDeploymentInfo webSocketDeploymentInfo = new WebSocketDeploymentInfo();
-                webSocketDeploymentInfo.setBuffers(new DefaultByteBufferPool(false, properties.getWebSocketDeploymentBuffers()));
-                deploymentInfo.addServletContextAttribute("io.undertow.websockets.jsr.WebSocketDeploymentInfo", webSocketDeploymentInfo);
-            });
-        }
     }
 
     @Bean

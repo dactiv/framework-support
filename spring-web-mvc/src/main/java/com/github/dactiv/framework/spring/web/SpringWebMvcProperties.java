@@ -56,7 +56,7 @@ public class SpringWebMvcProperties {
     /**
      * Undertow 的 webSocketDeploymentBuffers 默认值
      */
-    private int webSocketDeploymentBuffers = 1024;
+    private int webSocketDeploymentBuffers = 2048;
 
     /**
      * json 响应的数值最大浮点数（保留多少位小数）
@@ -247,7 +247,7 @@ public class SpringWebMvcProperties {
     /**
      * 获取 json 响应的数值浮点四舍五入模型
      *
-     * @return
+     * @return 四舍五入模型
      */
     public RoundingMode getJsonNumberRoundingMode() {
         return jsonNumberRoundingMode;

@@ -426,12 +426,14 @@ public class PluginEndpoint {
         List<String> parentValueList = new LinkedList<>();
 
 
-        if (StringUtils.isBlank(parent.getValue())) {
+        if (StringUtils.isEmpty(StringUtils.trimToEmpty(parent.getValue()))) {
             if (Method.class.isAssignableFrom(target.getClass()) && StringUtils.isEmpty(parent.getValue())) {
                 Method method = Casts.cast(target);
                 RequestMapping requestMapping = AnnotationUtils.findAnnotation(method.getDeclaringClass(), RequestMapping.class);
                 if (Objects.nonNull(requestMapping)) {
                     parentValueList = Arrays.stream(requestMapping.value()).map(s -> StringUtils.appendIfMissing(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR)).collect(Collectors.toList());
+                } else {
+                    return StringUtils.appendIfMissing(targetValue, "/**");
                 }
             } else {
                 return StringUtils.appendIfMissing(targetValue, "/**");

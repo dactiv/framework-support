@@ -32,6 +32,8 @@ public class Casts {
      */
     public static final String DEFAULT_DOT_SYMBOL = ".";
 
+    public final static String NEGATIVE_PREFIX = "-";
+
     /**
      * 默认等于符号
      */

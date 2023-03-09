@@ -91,9 +91,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
     @NacosCronScheduled(cron = "${spring.cloud.nacos.discovery.event.unsubscribe-service-cron:0 0/1 * * * ?}")
     public void scanThenUnsubscribeService() {
 
-        NamingService namingService = nacosServiceManager.getNamingService(
-                discoveryProperties.getNacosProperties()
-        );
+        NamingService namingService = nacosServiceManager.getNamingService();
 
         List<NacosServiceEventListener> listeners = listenerCache
                 .values()
@@ -127,9 +125,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
      */
     @NacosCronScheduled(cron = "${spring.cloud.nacos.discovery.event.subscribe-service-cron:30 0/1 * * * ?}")
     public void scanThenSubscribeService() {
-        NamingService namingService = nacosServiceManager.getNamingService(
-                discoveryProperties.getNacosProperties()
-        );
+        NamingService namingService = nacosServiceManager.getNamingService();
 
         NamingMaintainService namingMaintainService = nacosServiceManager.getNamingMaintainService(
                 discoveryProperties.getNacosProperties()

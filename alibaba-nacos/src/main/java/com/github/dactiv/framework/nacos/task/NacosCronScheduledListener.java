@@ -220,7 +220,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             // 定义 key 内容
             List<MatchEvaluation> matchEvaluations = new LinkedList<>();
 
-            NacosCronScheduledInfo info = (NacosCronScheduledInfo) cronScheduledInfo;
+            NacosCronScheduledInfo info = Casts.cast(cronScheduledInfo);
 
             // 定义表达式匹配定值类
             MatchEvaluation cronEvaluation = new MatchEvaluation(
@@ -409,7 +409,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 if (StringUtils.isNotBlank(name)) {
 
                     // 如果 name 没有 .后缀名，通过配置信息获取
-                    String defaultName = StringUtils.appendIfMissing(name, "." + nacosConfigProperties.getFileExtension());
+                    String defaultName = StringUtils.appendIfMissing(name, Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
 
                     // 如果默认要侦听的配置信息
                     NacosConfigProperties.Config config = new NacosConfigProperties.Config(
@@ -422,7 +422,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
                     // 获取活动环境配置，并构造 [name-环境值.后缀] 的配置文件侦听
                     for (String profile : applicationContext.getEnvironment().getActiveProfiles()) {
-                        String profileName = StringUtils.appendIfMissing(name, "-" + profile + "." + nacosConfigProperties.getFileExtension());
+                        String profileName = StringUtils.appendIfMissing(name, Casts.NEGATIVE_PREFIX + profile + Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
 
                         NacosConfigProperties.Config profileConfig = new NacosConfigProperties.Config(
                                 profileName,

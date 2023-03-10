@@ -1,12 +1,11 @@
 package com.github.dactiv.framework.spring.security.authentication.rememberme;
 
 import com.github.dactiv.framework.commons.CacheProperties;
-import com.github.dactiv.framework.commons.Casts;
-import com.github.dactiv.framework.commons.id.number.IntegerIdEntity;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.util.DigestUtils;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -15,10 +14,12 @@ import java.util.Objects;
  *
  * @author maurice.chen
  */
-public class RememberMeToken extends IntegerIdEntity {
+public class RememberMeToken implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 5489556035568760298L;
+
+    private Object id;
 
     /**
      * 登陆账户
@@ -38,13 +39,13 @@ public class RememberMeToken extends IntegerIdEntity {
     private String type;
 
     public RememberMeToken(SecurityUserDetails details) {
-        setId(Casts.cast(details.getId(), Integer.class));
+        setId(details.getId());
         this.username = details.getUsername();
         this.type = details.getType();
 
         String value = this.username
                 + CacheProperties.DEFAULT_SEPARATOR + this.type
-                + CacheProperties.DEFAULT_SEPARATOR + getCreationTime().getTime();
+                + CacheProperties.DEFAULT_SEPARATOR + System.currentTimeMillis();
 
         this.token = DigestUtils.md5DigestAsHex(value.getBytes(StandardCharsets.UTF_8));
     }
@@ -56,6 +57,14 @@ public class RememberMeToken extends IntegerIdEntity {
     }
 
     public RememberMeToken() {
+    }
+
+    public Object getId() {
+        return id;
+    }
+
+    public void setId(Object id) {
+        this.id = id;
     }
 
     @Override

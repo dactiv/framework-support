@@ -14,29 +14,29 @@ import java.util.Collection;
  */
 public class RememberMeAuthenticationToken extends SimpleAuthenticationToken {
 
-    private Integer id;
+    private Object id;
 
-    public RememberMeAuthenticationToken(String username, String type, Integer id) {
+    public RememberMeAuthenticationToken(String username, String type, Object id) {
         super(username, type, true);
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Integer id) {
+    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id) {
         super(token, type, true);
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, Collection<? extends GrantedAuthority> authorities, Integer id) {
+    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, Collection<? extends GrantedAuthority> authorities, Object id) {
         super(token, type, userDetails, authorities, true);
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Integer id, Collection<? extends GrantedAuthority> authorities) {
+    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id, Collection<? extends GrantedAuthority> authorities) {
         super(token, type, true, authorities);
     }
 
-    public Integer getId() {
+    public Object getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Object id) {
         this.id = id;
     }
 
@@ -45,4 +45,5 @@ public class RememberMeAuthenticationToken extends SimpleAuthenticationToken {
         result.setId(getId());
         return result;
     }
+
 }

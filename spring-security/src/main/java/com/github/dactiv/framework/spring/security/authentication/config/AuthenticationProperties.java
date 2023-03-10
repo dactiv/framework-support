@@ -1,5 +1,8 @@
 package com.github.dactiv.framework.spring.security.authentication.config;
 
+import com.github.dactiv.framework.commons.CacheProperties;
+import com.github.dactiv.framework.commons.TimeProperties;
+import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
@@ -99,6 +102,16 @@ public class AuthenticationProperties {
      * 记住我配置
      */
     private RememberMeProperties rememberMe = new RememberMeProperties();
+
+    /**
+     * 认证缓存配置信息
+     */
+    private CacheProperties authenticationCache = CacheProperties.of(UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
+
+    /**
+     * 授权缓存配置信息
+     */
+    private CacheProperties authorizationCache = CacheProperties.of(UserDetailsService.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
      * 获取默认用户信息集合
@@ -314,5 +327,41 @@ public class AuthenticationProperties {
      */
     public void setRememberMe(RememberMeProperties rememberMe) {
         this.rememberMe = rememberMe;
+    }
+
+    /**
+     * 获取认证缓存配置信息
+     *
+     * @return 认证缓存配置信息
+     */
+    public CacheProperties getAuthenticationCache() {
+        return authenticationCache;
+    }
+
+    /**
+     * 设置认证缓存配置信息
+     *
+     * @param authenticationCache 认证缓存配置信息
+     */
+    public void setAuthenticationCache(CacheProperties authenticationCache) {
+        this.authenticationCache = authenticationCache;
+    }
+
+    /**
+     * 获取授权缓存配置信息
+     *
+     * @return 授权缓存配置信息
+     */
+    public CacheProperties getAuthorizationCache() {
+        return authorizationCache;
+    }
+
+    /**
+     * 设置授权缓存配置信息
+     *
+     * @param authorizationCache 授权缓存配置信息
+     */
+    public void setAuthorizationCache(CacheProperties authorizationCache) {
+        this.authorizationCache = authorizationCache;
     }
 }

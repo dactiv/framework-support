@@ -1,10 +1,11 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.CacheProperties;
-import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,8 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 账户认证的用户明细服务
@@ -78,11 +79,9 @@ public interface UserDetailsService<T> {
      *
      * @return 缓存名称
      */
-    default CacheProperties getAuthorizationCache(PrincipalAuthenticationToken token) {
-        return new CacheProperties(
-                DEFAULT_AUTHORIZATION_KEY_NAME + token.getType() + ":" + token.getPrincipal(),
-                new TimeProperties(7, TimeUnit.DAYS)
-        );
+    default CacheProperties getAuthorizationCache(SimpleAuthenticationToken token, CacheProperties authorizationCache) {
+        String key = authorizationCache.getName(this.getClass().getSimpleName() + CacheProperties.DEFAULT_SEPARATOR + token.getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal());
+        return new CacheProperties(key, authorizationCache.getExpiresTime());
     }
 
     /**
@@ -92,23 +91,20 @@ public interface UserDetailsService<T> {
      *
      * @return 缓存名称
      */
-    default CacheProperties getAuthenticationCache(PrincipalAuthenticationToken token) {
-        return new CacheProperties(
-                DEFAULT_AUTHENTICATION_KEY_NAME + token.getType() + ":" + token.getPrincipal(),
-                new TimeProperties(7, TimeUnit.DAYS)
-        );
+    default CacheProperties getAuthenticationCache(SimpleAuthenticationToken token, CacheProperties authenticationCache) {
+        String key = authenticationCache.getName(this.getClass().getSimpleName() + CacheProperties.DEFAULT_SEPARATOR + token.getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal());
+        return new CacheProperties(key, authenticationCache.getExpiresTime());
     }
 
     /**
      * 当认证成功的后置处理方法
      *
      * @param result 认证结果
-     * @param request http servlet request
-     * @param response http servlet response
+     * @param authentication 认证信息
      *
      * @throws AuthenticationException 处理成功认证流程出现异常后抛出
      */
-    default void onSuccessAuthentication(PrincipalAuthenticationToken result, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    default void onSuccessAuthentication(SimpleAuthenticationToken result, Authentication authentication) throws AuthenticationException {
 
     }
 
@@ -135,7 +131,7 @@ public interface UserDetailsService<T> {
      * @return 目标用户实体
      */
     default T convertTargetUser(SecurityUserDetails userDetails) {
-        throw new UnsupportedOperationException("不支持此操作");
+        throw new UnsupportedOperationException("不支持 convertTargetUser 操作");
     }
 
     /**
@@ -146,7 +142,7 @@ public interface UserDetailsService<T> {
      * @return 目标用户实体
      */
     default T convertTargetUser(TypeUserDetails<?> userDetails) {
-        throw new UnsupportedOperationException("不支持此操作");
+        throw new UnsupportedOperationException("不支持 convertTargetUser 操作");
     }
 
     /**
@@ -157,7 +153,7 @@ public interface UserDetailsService<T> {
      * @param newPassword 新密码
      */
     default void updatePassword(T targetUser , String oldPassword, String newPassword) {
-        throw new UnsupportedOperationException("不支持此操作");
+        throw new UnsupportedOperationException("不支持 updatePassword 操作");
     }
 
     /**
@@ -174,19 +170,20 @@ public interface UserDetailsService<T> {
     /**
      * 创建认证成功 token
      *
-     * @param userDetails 当亲啊用户
+     * @param userDetails 当前啊用户
      * @param token token 信息
      * @param grantedAuthorities 权限信息
      *
      * @return 新的认证 token
      */
-    default PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails, PrincipalAuthenticationToken token, Collection<? extends GrantedAuthority> grantedAuthorities) {
+    default PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails, SimpleAuthenticationToken token, Collection<? extends GrantedAuthority> grantedAuthorities) {
         return new PrincipalAuthenticationToken(
                 new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
                 token.getType(),
                 userDetails,
                 grantedAuthorities,
-                false
+                token.isRememberMe(),
+                new Date()
         );
     }
 
@@ -199,7 +196,7 @@ public interface UserDetailsService<T> {
      *
      * @return true 执行缓存，否则 false
      */
-    default boolean preAuthenticationCache(PrincipalAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
+    default boolean preAuthenticationCache(SimpleAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
         return true;
     }
 
@@ -210,7 +207,18 @@ public interface UserDetailsService<T> {
      * @param userDetails 用户明细
      * @param authenticationCache 认证缓存配置
      */
-    default void postAuthenticationCache(PrincipalAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
+    default void postAuthenticationCache(SimpleAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
 
+    }
+
+    /**
+     * 获取记住我用户信息
+     *
+     * @param token 记住我认证 token
+     *
+     * @return spring security 用户实现
+     */
+    default SecurityUserDetails getRememberMeUserDetails(RememberMeAuthenticationToken token) {
+        throw new UnsupportedOperationException("不支持 getRememberMeUserDetails 操作");
     }
 }

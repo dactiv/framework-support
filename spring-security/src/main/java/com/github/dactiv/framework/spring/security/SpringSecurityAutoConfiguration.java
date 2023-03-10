@@ -89,14 +89,8 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(RememberMeServices.class)
-    public CookieRememberService cookieRememberService(AuthenticationProperties properties,
-                                                       RedissonClient redissonClient,
-                                                       ObjectProvider<UserDetailsService<?>> userDetailsService) {
-        return new CookieRememberService(
-                properties,
-                redissonClient,
-                userDetailsService.orderedStream().toList()
-        );
+    public CookieRememberService cookieRememberService(AuthenticationProperties properties, RedissonClient redissonClient) {
+        return new CookieRememberService(properties, redissonClient);
     }
 
     @Bean
@@ -118,8 +112,13 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(RedissonClient redissonClient,
+                                                       AuthenticationProperties authenticationProperties,
                                                        ObjectProvider<UserDetailsService<?>> userDetailsService) {
-        return new RequestAuthenticationProvider(redissonClient, userDetailsService.orderedStream().toList());
+        return new RequestAuthenticationProvider(
+                redissonClient,
+                authenticationProperties,
+                userDetailsService.orderedStream().toList()
+        );
     }
 
     @Bean

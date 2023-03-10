@@ -1,11 +1,9 @@
 package com.github.dactiv.framework.spring.security.authentication.rememberme;
 
-import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.crypto.algorithm.Base64;
-import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +20,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,12 +34,9 @@ public class CookieRememberService implements RememberMeServices {
 
     private final RedissonClient redissonClient;
 
-    private final List<UserDetailsService<?>> userDetailsServices;
-
-    public CookieRememberService(AuthenticationProperties properties, RedissonClient redissonClient, List<UserDetailsService<?>> userDetailsServices) {
+    public CookieRememberService(AuthenticationProperties properties, RedissonClient redissonClient) {
         this.properties = properties;
         this.redissonClient = redissonClient;
-        this.userDetailsServices = userDetailsServices;
     }
 
     @Override
@@ -59,62 +53,11 @@ public class CookieRememberService implements RememberMeServices {
             return null;
         }
 
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(rememberMeToken.getId());
-
-        RememberMeToken redisObject = bucket.get();
-
-        if (Objects.isNull(redisObject)) {
-            removeCookie(request, response);
-            return null;
-        }
-
-        // 如果两个 token 不相等，报错
-        if (!rememberMeToken.equals(redisObject)) {
-            removeCookie(request, response);
-            return null;
-        }
-
-        if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
-            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toDuration());
-        }
-
-        CacheProperties cache = properties.getRememberMe().getAuthenticationCache();
-        String cacheName = cache.getName(redisObject.getType() + CacheProperties.DEFAULT_SEPARATOR + redisObject.getUsername());
-        UserDetailsService<?> userDetailsService = getUserDetailsService(redisObject.getType());
-        if (Objects.nonNull(userDetailsService)) {
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                    redisObject.getUsername(),
-                    redisObject.getToken()
-            );
-            PrincipalAuthenticationToken authenticationToken = new PrincipalAuthenticationToken(token, redisObject.getType(), false);
-
-            cacheName = userDetailsService.getAuthenticationCache(authenticationToken).getName();
-        }
-
-        // 先从获取认证缓存获取一次用户信息，如果没有。在调用获取认证用户明细方法，具体密码校验自身实现。
-        RBucket<SecurityUserDetails> userDetailsBucket = redissonClient.getBucket(cacheName);
-        SecurityUserDetails userDetails = userDetailsBucket.get();
-
-        if (Objects.isNull(userDetails)) {
-            removeCookie(request, response);
-            return null;
-        }
-
-        if (Objects.nonNull(cache.getExpiresTime())) {
-            userDetailsBucket.expireAsync(cache.getExpiresTime().toDuration());
-        }
-
-        PrincipalAuthenticationToken result = new PrincipalAuthenticationToken(
-                new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword()),
-                userDetails.getType(),
-                userDetails,
-                userDetails.getAuthorities(),
-                true
+        return new RememberMeAuthenticationToken(
+                new UsernamePasswordAuthenticationToken(rememberMeToken.getUsername(), rememberMeToken.getToken()),
+                rememberMeToken.getType(),
+                rememberMeToken.getId()
         );
-
-        loginSuccess(request, response, result);
-
-        return result;
     }
 
     @Override
@@ -134,30 +77,22 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         SecurityUserDetails details = Casts.cast(authentication.getDetails());
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(Casts.cast(details.getId(), Integer.class));
+
+        String key = properties.getRememberMe().getCache().getName(Casts.cast(details.getId(), Integer.class));
+        RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
 
         RememberMeToken rememberMeToken = new RememberMeToken(details);
         bucket.setAsync(rememberMeToken);
+
+        if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
+            rememberMeToken = bucket.get();
+            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toDuration());
+        }
 
         int maxAge = (int) properties.getRememberMe().getCache().getExpiresTime().toSeconds();
 
         //removeCookie(request, response);
         setCookie(rememberMeToken, maxAge, request, response);
-    }
-
-    /**
-     * 根据类型获取用户明细服务实现
-     *
-     * @param type 类型
-     *
-     * @return 用户明细服务实现
-     */
-    private UserDetailsService<?> getUserDetailsService(String type) {
-        return userDetailsServices
-                .stream()
-                .filter(u -> u.getType().contains(type))
-                .findFirst()
-                .orElse(null);
     }
 
     /**
@@ -179,19 +114,7 @@ public class CookieRememberService implements RememberMeServices {
                 .filter(c -> c.getName().equals(properties.getRememberMe().getCookie().getName()))
                 .findFirst();
 
-        return optional.isEmpty() ? null : optional.get().getValue();
-    }
-
-    /**
-     * 获取 redis 的记住我 token 桶信息
-     *
-     * @param id 主键 id
-     *
-     * @return 记住我 token 桶信息
-     */
-    public RBucket<RememberMeToken> getRememberMeTokenBucket(Integer id) {
-        String key = properties.getRememberMe().getCache().getName(id);
-        return redissonClient.getBucket(key);
+        return optional.map(Cookie::getValue).orElse(null);
     }
 
     /**

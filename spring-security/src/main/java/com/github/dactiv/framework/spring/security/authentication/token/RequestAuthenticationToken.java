@@ -11,7 +11,7 @@ import java.io.Serial;
  *
  * @author maurice
  */
-public class RequestAuthenticationToken extends PrincipalAuthenticationToken {
+public class RequestAuthenticationToken extends SimpleAuthenticationToken {
 
     @Serial
     private static final long serialVersionUID = 8070060147431763553L;
@@ -33,6 +33,7 @@ public class RequestAuthenticationToken extends PrincipalAuthenticationToken {
      * @param httpServletResponse http servlet response
      * @param token               登陆账户密码认证令牌
      * @param type                认证类型
+     * @param rememberMe 是否记住我
      */
     public RequestAuthenticationToken(HttpServletRequest httpServletRequest,
                                       HttpServletResponse httpServletResponse,

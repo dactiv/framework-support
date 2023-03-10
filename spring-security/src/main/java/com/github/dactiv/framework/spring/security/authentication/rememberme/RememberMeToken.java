@@ -6,6 +6,7 @@ import com.github.dactiv.framework.commons.id.number.IntegerIdEntity;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.util.DigestUtils;
 
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ import java.util.Objects;
  */
 public class RememberMeToken extends IntegerIdEntity {
 
+    @Serial
     private static final long serialVersionUID = 5489556035568760298L;
 
     /**

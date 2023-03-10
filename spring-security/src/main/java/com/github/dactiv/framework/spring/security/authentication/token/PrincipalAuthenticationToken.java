@@ -1,118 +1,58 @@
 package com.github.dactiv.framework.spring.security.authentication.token;
 
-import com.github.dactiv.framework.commons.CacheProperties;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 /**
- * 当前用户认证 token
+ * 认证成功后的当前用户 token
  *
  * @author maurice.chen
  */
-public class PrincipalAuthenticationToken extends AbstractAuthenticationToken {
-
-    private static final long serialVersionUID = 3747271533448473641L;
-
-    private final UsernamePasswordAuthenticationToken token;
+public class PrincipalAuthenticationToken extends SimpleAuthenticationToken {
 
     /**
-     * 用户类型
+     * 最后认证时间
      */
-    private final String type;
+    private Date lastAuthenticationTime;
+
+    public PrincipalAuthenticationToken(String username, String type, boolean rememberMe, Date lastAuthenticationTime) {
+        super(username, type, rememberMe);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
+
+    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, boolean rememberMe, Date lastAuthenticationTime) {
+        super(token, type, rememberMe);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
+
+    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, Collection<? extends GrantedAuthority> authorities, boolean rememberMe, Date lastAuthenticationTime) {
+        super(token, type, userDetails, authorities, rememberMe);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
+
+    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, boolean rememberMe, Collection<? extends GrantedAuthority> authorities, Date lastAuthenticationTime) {
+        super(token, type, rememberMe, authorities);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
 
     /**
-     * 是否记住我认证
-     */
-    private final boolean rememberMe;
-
-    /**
-     * 当前用户认证 token
+     * 获取最后认证时间
      *
-     * @param username 登陆账户
-     * @param type  用户类型
+     * @return 最后认证时间
      */
-    public PrincipalAuthenticationToken(String username, String type, boolean rememberMe) {
-        this(new UsernamePasswordAuthenticationToken(username, null), type, rememberMe);
+    public Date getLastAuthenticationTime() {
+        return lastAuthenticationTime;
     }
 
     /**
-     * 当前用户认证 token
-     *
-     * @param token 登陆账户密码认证令牌
-     * @param type  用户类型
+     * 设置最后认证时间
+     * @param lastAuthenticationTime
      */
-    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
-                                        String type,
-                                        boolean rememberMe) {
-        this(token, type, rememberMe, new ArrayList<>());
-    }
-
-    /**
-     * 当前用户认证 token
-     *
-     * @param token       登陆账户密码认证令牌
-     * @param type        用户类型
-     * @param userDetails 用户明细实体
-     * @param authorities 授权信息
-     */
-    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
-                                        String type,
-                                        UserDetails userDetails,
-                                        Collection<? extends GrantedAuthority> authorities,
-                                        boolean rememberMe) {
-
-        this(token, type, rememberMe, authorities);
-        setAuthenticated(true);
-        setDetails(userDetails);
-    }
-
-    /**
-     * 当前用户认证 token
-     *
-     * @param token       登陆账户密码认证令牌
-     * @param type        用户类型
-     * @param authorities 授权信息
-     */
-    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,
-                                        String type,
-                                        boolean rememberMe,
-                                        Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.token = token;
-        this.type = type;
-        this.rememberMe = rememberMe;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token.getCredentials();
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return token.getPrincipal();
-    }
-
-    @Override
-    public String getName() {
-        return getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal();
-    }
-
-    /**
-     * 获取用户类型
-     *
-     * @return 用户类型
-     */
-    public String getType() {
-        return type;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
+    public void setLastAuthenticationTime(Date lastAuthenticationTime) {
+        this.lastAuthenticationTime = lastAuthenticationTime;
     }
 }

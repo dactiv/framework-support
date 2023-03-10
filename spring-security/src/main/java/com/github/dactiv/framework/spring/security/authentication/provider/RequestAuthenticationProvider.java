@@ -3,7 +3,11 @@ package com.github.dactiv.framework.spring.security.authentication.provider;
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
+import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.rememberme.RememberMeToken;
+import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -55,13 +60,16 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      */
     private boolean hideUserNotFoundExceptions = true;
 
+    private final AuthenticationProperties properties;
+
     /**
      * 当前用户认证供应者实现
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
-    public RequestAuthenticationProvider(RedissonClient redissonClient, List<UserDetailsService<?>> userDetailsServices) {
+    public RequestAuthenticationProvider(RedissonClient redissonClient, AuthenticationProperties properties, List<UserDetailsService<?>> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
+        this.properties = properties;
         this.redissonClient = redissonClient;
     }
 
@@ -69,11 +77,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         // 获取 token
-        RequestAuthenticationToken token = Casts.cast(authentication);
-
-        if (token.isRememberMe()) {
-            return null;
-        }
+        SimpleAuthenticationToken token = Casts.cast(authentication);
 
         // 通过 token 获取对应 type 实现的 UserDetailsService
         Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
@@ -85,12 +89,23 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 获取实现类
         UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
-        // 开始授权，如果失败抛出异常
-        SecurityUserDetails userDetails = doAuthenticate(token, userDetailsService);
+        SecurityUserDetails userDetails;
+        if (authentication instanceof RequestAuthenticationToken requestAuthenticationToken) {
+            // 开始授权，如果失败抛出异常
+            userDetails = doPrincipalAuthenticate(requestAuthenticationToken, userDetailsService);
+        } else if (authentication instanceof RememberMeAuthenticationToken rememberMeAuthenticationToken) {
+            userDetails = doRememberMeAuthentication(rememberMeAuthenticationToken, userDetailsService);
+        } else {
+            String error = messages.getMessage(
+                    "PrincipalAuthenticationProvider.authenticateNotFound",
+                    "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
+            );
+            throw new AuthenticationServiceException(error);
+        }
 
         Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
         // 获取认证缓存
-        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
+        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token, properties.getAuthorizationCache());
         // 如果启用授权缓存，从授权缓存获取用户授权信息
         if (Objects.nonNull(authorizationCache) && CollectionUtils.isEmpty(grantedAuthorities)) {
             RList<GrantedAuthority> list = getAuthorizationList(token, userDetailsService);
@@ -113,15 +128,61 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         }
 
-        PrincipalAuthenticationToken result = createSuccessAuthentication(userDetails, token, grantedAuthorities);
-        userDetailsService.onSuccessAuthentication(result, token.getHttpServletRequest(), token.getHttpServletResponse());
+        SimpleAuthenticationToken result = createSuccessAuthentication(userDetails, token, grantedAuthorities);
+        userDetailsService.onSuccessAuthentication(result, authentication);
 
         return result;
     }
 
-    protected SecurityUserDetails doAuthenticate(RequestAuthenticationToken token, UserDetailsService<?> userDetailsService) {
+    protected SecurityUserDetails doRememberMeAuthentication(RememberMeAuthenticationToken rememberMeAuthenticationToken, UserDetailsService<?> userDetailsService) {
+
+        String key = properties.getRememberMe().getCache().getName(rememberMeAuthenticationToken.getId());
+        RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
+        RememberMeToken redisObject = bucket.get();
+
+        if (Objects.isNull(redisObject)) {
+            String error = messages.getMessage(
+                    "PrincipalAuthenticationProvider.rememberMeCredentialsExpired",
+                    "记住我凭证已超时"
+            );
+            throw new CredentialsExpiredException(error);
+        }
+
+        // 如果两个 token 不相等，报错
+        if (!redisObject.equals(rememberMeAuthenticationToken.toRememberToken())) {
+            String error = messages.getMessage(
+                    "PrincipalAuthenticationProvider.rememberMeBadCredentials",
+                    "记住我凭证错误"
+            );
+            throw new RememberMeAuthenticationException(error);
+        }
+        CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(rememberMeAuthenticationToken, properties.getAuthenticationCache());
         SecurityUserDetails userDetails = null;
-        CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(token);
+        // 如果启用认证缓存，从认证缓存里获取用户
+        if (Objects.nonNull(authenticationCache)) {
+            RBucket<SecurityUserDetails> userDetailsBucket = redissonClient.getBucket(authenticationCache.getName());
+            userDetails = userDetailsBucket.get();
+        }
+
+        if (Objects.isNull(userDetails)) {
+            userDetails = userDetailsService.getRememberMeUserDetails(rememberMeAuthenticationToken);
+        }
+
+        if (Objects.isNull(userDetails)) {
+            String error = messages.getMessage(
+                    "PrincipalAuthenticationProvider.rememberMeUserDetailsNotFound",
+                    "记住我凭证错误"
+            );
+            throw new RememberMeAuthenticationException(error);
+        }
+
+        return userDetails;
+    }
+
+    protected SecurityUserDetails doPrincipalAuthenticate(RequestAuthenticationToken token, UserDetailsService<?> userDetailsService) {
+
+        SecurityUserDetails userDetails = null;
+        CacheProperties authenticationCache = userDetailsService.getAuthenticationCache(token, properties.getAuthenticationCache());
 
         // 如果启用认证缓存，从认证缓存里获取用户
         if (Objects.nonNull(authenticationCache)) {
@@ -185,9 +246,8 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return redis 集合
      */
-    public RList<GrantedAuthority> getAuthorizationList(RequestAuthenticationToken token, UserDetailsService<?> userDetailsService) {
-        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token);
-
+    public RList<GrantedAuthority> getAuthorizationList(SimpleAuthenticationToken token, UserDetailsService<?> userDetailsService) {
+        CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token, properties.getAuthorizationCache());
         return redissonClient.getList(authorizationCache.getName());
     }
 
@@ -246,7 +306,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * @return spring security 认证信息
      */
     public PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
-                                                                    PrincipalAuthenticationToken token,
+                                                                    SimpleAuthenticationToken token,
                                                                     Collection<? extends GrantedAuthority> grantedAuthorities) {
         // 通过 token 获取对应 type 实现的 UserDetailsService
         Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
@@ -269,13 +329,13 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return 用户明细服务
      */
-    public Optional<UserDetailsService<?>> getUserDetailsService(PrincipalAuthenticationToken token) {
+    public Optional<UserDetailsService<?>> getUserDetailsService(SimpleAuthenticationToken token) {
         return userDetailsServices.stream().filter(uds -> uds.getType().contains(token.getType())).findFirst();
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return RequestAuthenticationToken.class.isAssignableFrom(authentication);
+        return SimpleAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 

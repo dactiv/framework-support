@@ -11,7 +11,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,16 +22,19 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final List<JsonAuthenticationSuccessResponse> successResponses;
 
     private final AuthenticationProperties properties;
 
+    private final AntPathRequestMatcher loginRequestMatcher;
+
     public JsonAuthenticationSuccessHandler(List<JsonAuthenticationSuccessResponse> successResponses,
                                             AuthenticationProperties properties) {
         this.successResponses = successResponses;
         this.properties = properties;
+        this.loginRequestMatcher = new AntPathRequestMatcher(properties.getLoginProcessingUrl());
     }
 
     @Override
@@ -49,7 +53,12 @@ public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHa
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+                                        Authentication authentication) throws IOException, ServletException {
+
+        if (!loginRequestMatcher.matches(request)) {
+            super.onAuthenticationSuccess(request, response, authentication);
+            return ;
+        }
 
         RestResult<Object> result = RestResult.ofSuccess(HttpStatus.OK.getReasonPhrase(), authentication.getDetails());
 

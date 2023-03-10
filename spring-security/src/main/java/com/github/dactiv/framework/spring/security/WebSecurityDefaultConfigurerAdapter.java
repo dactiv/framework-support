@@ -118,6 +118,8 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .disable()
                 .logout()
                 .disable()
+                .rememberMe()
+                .disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and()

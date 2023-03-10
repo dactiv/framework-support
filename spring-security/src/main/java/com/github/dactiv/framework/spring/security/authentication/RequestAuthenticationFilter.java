@@ -14,11 +14,13 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 认证 filter 实现, 用于结合 {@link UserDetailsService} 多用户类型认证的统一入口
@@ -26,31 +28,12 @@ import java.util.List;
  * @author maurice.chen
  */
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final AuthenticationProperties properties;
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     private final List<UserDetailsService<?>> userDetailsServices;
-
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            HttpServletRequest request = (HttpServletRequest) req;
-            HttpServletResponse response = (HttpServletResponse) res;
-
-            Authentication rememberMeAuth = getRememberMeServices().autoLogin(request, response);
-
-            if (rememberMeAuth != null) {
-                successfulAuthentication(request, response, chain, rememberMeAuth);
-                return;
-            }
-        }
-
-        super.doFilter(req, res, chain);
-    }
 
     public RequestAuthenticationFilter(AuthenticationProperties properties,
                                        List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
@@ -66,6 +49,29 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
         this.userDetailsServices = userDetailsServices;
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        if (this.securityContextHolderStrategy.getContext().getAuthentication() != null) {
+            super.doFilter(request, response, chain);
+            return;
+        }
+
+        Authentication rememberMeAuth = getRememberMeServices().autoLogin((HttpServletRequest) request, (HttpServletResponse) response);
+        if (Objects.isNull(rememberMeAuth)) {
+            super.doFilter(request, response, chain);
+            return;
+        }
+
+        try {
+            Authentication authentication = this.getAuthenticationManager().authenticate(rememberMeAuth);
+            successfulAuthentication((HttpServletRequest) request, (HttpServletResponse) response, chain, authentication);
+        } catch (AuthenticationException ex) {
+            unsuccessfulAuthentication((HttpServletRequest) request, (HttpServletResponse) response, ex);
+        }
+
+        chain.doFilter(request, response);
     }
 
     @Override

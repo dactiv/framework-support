@@ -154,6 +154,12 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
         // CACHE 内容来源 postProcessAfterInitialization 方法进行构造
         CACHE.values().forEach(c -> {
+            LOGGER.info(
+                    "构造 [{}] 的 cron 调度, 当前 cron 表达式为: {}, 时区为: {}",
+                    c.getName(),
+                    c.getExpression(),
+                    c.getTimeZone()
+            );
             ScheduledTask scheduledTask = scheduledTaskRegistrar.scheduleCronTask(c.createCronTask());
             c.setScheduledTask(scheduledTask);
         });
@@ -243,13 +249,6 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
                 matchEvaluations.add(zoneEvaluation);
             }
-
-            LOGGER.info(
-                    "构造 [{}] 的 cron 调度, 当前 cron 表达式为: {}, 时区为: {}",
-                    cronScheduledInfo.getName(),
-                    cronScheduledInfo.getExpression(),
-                    cronScheduledInfo.getTimeZone()
-            );
             // 添加到 CACHE 中
             CACHE.put(matchEvaluations, info);
 

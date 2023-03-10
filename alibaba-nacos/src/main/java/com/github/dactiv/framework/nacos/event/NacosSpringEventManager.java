@@ -136,6 +136,10 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
             // 获取所有服务
             ListView<String> view = namingService.getServicesOfServer(1, Integer.MAX_VALUE, discoveryProperties.getGroup());
 
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("当前 nacos 中的所有服务为:" + view.getData());
+            }
+
             for (String s : view.getData()) {
                 // 通过服务名获取服务信息
                 Service service = namingMaintainService.queryService(s, discoveryProperties.getGroup());
@@ -228,24 +232,6 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
     }
 
     /**
-     * 获取 naocs 的命名服务
-     *
-     * @return naocs 的命名服务
-     */
-    public NamingService getNamingService() {
-        return nacosServiceManager.getNamingService(discoveryProperties.getNacosProperties());
-    }
-
-    /**
-     * 获取 naocs 的命名维护服务
-     *
-     * @return naocs 的命名维护服务
-     */
-    public NamingMaintainService getNamingMaintainService() {
-        return nacosServiceManager.getNamingMaintainService(discoveryProperties.getNacosProperties());
-    }
-
-    /**
      * 监听本服务注册完成事件，当注册完成时候，同步所有插件菜单。
      *
      * @param event 事件原型
@@ -255,4 +241,21 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
         scanThenSubscribeService();
     }
 
+    /**
+     * 获取服务发现配置
+     *
+     * @return 服务发现配置
+     */
+    public NacosDiscoveryProperties getDiscoveryProperties() {
+        return discoveryProperties;
+    }
+
+    /**
+     * 获取服务管理
+     *
+     * @return 服务管理
+     */
+    public NacosServiceManager getNacosServiceManager() {
+        return nacosServiceManager;
+    }
 }

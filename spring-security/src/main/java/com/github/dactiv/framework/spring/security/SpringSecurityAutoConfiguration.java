@@ -95,8 +95,9 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
-    public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureResponse) {
-        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().toList());
+    public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureResponse,
+                                                                             AuthenticationProperties authenticationProperties) {
+        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().toList(), authenticationProperties);
     }
 
     @Bean

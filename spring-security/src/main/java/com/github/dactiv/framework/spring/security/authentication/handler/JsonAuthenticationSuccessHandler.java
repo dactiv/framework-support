@@ -26,15 +26,15 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
 
     private final List<JsonAuthenticationSuccessResponse> successResponses;
 
-    private final AuthenticationProperties properties;
+    private final AuthenticationProperties authenticationProperties;
 
     private final AntPathRequestMatcher loginRequestMatcher;
 
     public JsonAuthenticationSuccessHandler(List<JsonAuthenticationSuccessResponse> successResponses,
-                                            AuthenticationProperties properties) {
+                                            AuthenticationProperties authenticationProperties) {
         this.successResponses = successResponses;
-        this.properties = properties;
-        this.loginRequestMatcher = new AntPathRequestMatcher(properties.getLoginProcessingUrl());
+        this.authenticationProperties = authenticationProperties;
+        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         FilterChain chain,
                                         Authentication authentication) throws IOException, ServletException {
 
-        if (!request.getRequestURI().equals(properties.getLoginProcessingUrl())) {
+        if (!request.getRequestURI().equals(authenticationProperties.getLoginProcessingUrl())) {
             chain.doFilter(request, response);
         } else {
             onAuthenticationSuccess(request, response, authentication);
@@ -53,10 +53,9 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+                                        Authentication authentication) throws IOException{
 
         if (!loginRequestMatcher.matches(request)) {
-            super.onAuthenticationSuccess(request, response, authentication);
             return ;
         }
 

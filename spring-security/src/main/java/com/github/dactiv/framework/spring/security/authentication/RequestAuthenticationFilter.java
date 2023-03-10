@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -28,6 +31,8 @@ import java.util.Objects;
  * @author maurice.chen
  */
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestAuthenticationFilter.class);
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final AuthenticationProperties properties;
 
@@ -58,7 +63,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             return;
         }
 
-        Authentication rememberMeAuth = getRememberMeServices().autoLogin((HttpServletRequest) request, (HttpServletResponse) response);
+        Authentication rememberMeAuth = getRememberMeServices().autoLogin(Casts.cast(request), Casts.cast(response));
         if (Objects.isNull(rememberMeAuth)) {
             super.doFilter(request, response, chain);
             return;
@@ -66,9 +71,10 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
         try {
             Authentication authentication = this.getAuthenticationManager().authenticate(rememberMeAuth);
-            successfulAuthentication((HttpServletRequest) request, (HttpServletResponse) response, chain, authentication);
+            successfulAuthentication(Casts.cast(request), Casts.cast(response), chain, authentication);
         } catch (AuthenticationException ex) {
-            unsuccessfulAuthentication((HttpServletRequest) request, (HttpServletResponse) response, ex);
+            LOGGER.error("记住我认证出现异常", ex);
+            unsuccessfulAuthentication(Casts.cast(request), Casts.cast(response), ex);
         }
 
         chain.doFilter(request, response);

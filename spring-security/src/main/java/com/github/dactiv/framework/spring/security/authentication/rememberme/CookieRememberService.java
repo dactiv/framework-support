@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.security.authentication.rememberme;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.crypto.algorithm.Base64;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import jakarta.servlet.http.Cookie;
@@ -68,7 +69,13 @@ public class CookieRememberService implements RememberMeServices {
     @Override
     public void loginSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-        if (!isRememberMeRequested(request)) {
+        if (!PrincipalAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+            return ;
+        }
+
+        PrincipalAuthenticationToken token = Casts.cast(authentication);
+
+        if (!isRememberMeRequested(request, token)) {
             return;
         }
 
@@ -81,17 +88,18 @@ public class CookieRememberService implements RememberMeServices {
         String key = properties.getRememberMe().getCache().getName(Casts.cast(details.getId(), Integer.class));
         RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
 
-        RememberMeToken rememberMeToken = new RememberMeToken(details);
-        bucket.setAsync(rememberMeToken);
+        RememberMeToken rememberMeToken = bucket.get();
+        if (Objects.isNull(rememberMeToken)) {
+            rememberMeToken = new RememberMeToken(details);
+            bucket.set(rememberMeToken);
+        }
 
         if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
-            rememberMeToken = bucket.get();
             bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toDuration());
         }
 
         int maxAge = (int) properties.getRememberMe().getCache().getExpiresTime().toSeconds();
 
-        //removeCookie(request, response);
         setCookie(rememberMeToken, maxAge, request, response);
     }
 
@@ -124,9 +132,13 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return true 是，否则 false
      */
-    protected boolean isRememberMeRequested(HttpServletRequest request) {
+    protected boolean isRememberMeRequested(HttpServletRequest request, PrincipalAuthenticationToken token) {
         // 如果配置永远使用记住我，永远返回 true
         if (properties.getRememberMe().isAlways()) {
+            return true;
+        }
+
+        if (token.isRememberMe()) {
             return true;
         }
 

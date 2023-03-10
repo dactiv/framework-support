@@ -18,18 +18,22 @@ public class RememberMeAuthenticationToken extends SimpleAuthenticationToken {
 
     public RememberMeAuthenticationToken(String username, String type, Object id) {
         super(username, type, true);
+        this.id = id;
     }
 
     public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id) {
         super(token, type, true);
+        this.id = id;
     }
 
     public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, Collection<? extends GrantedAuthority> authorities, Object id) {
         super(token, type, userDetails, authorities, true);
+        this.id = id;
     }
 
     public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id, Collection<? extends GrantedAuthority> authorities) {
         super(token, type, true, authorities);
+        this.id = id;
     }
 
     public Object getId() {

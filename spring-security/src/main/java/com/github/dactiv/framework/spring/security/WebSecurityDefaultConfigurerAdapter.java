@@ -1,16 +1,12 @@
 package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.security.plugin.Plugin;
-import com.github.dactiv.framework.spring.security.authentication.AuthenticationTypeTokenResolver;
-import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
-import com.github.dactiv.framework.spring.security.authentication.RequestAuthenticationFilter;
-import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
+import com.github.dactiv.framework.spring.security.authentication.*;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceAuthorizationManager;
-import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.Pointcuts;
@@ -23,7 +19,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
@@ -31,14 +26,8 @@ import org.springframework.security.authorization.method.AuthorizationManagerBef
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -96,15 +85,6 @@ public class WebSecurityDefaultConfigurerAdapter {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
-        LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> map = new LinkedHashMap<>();
-        map.put(
-                new AntPathRequestMatcher(SpringMvcUtils.ANT_PATH_MATCH_ALL),
-                (req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase())
-        );
-
-        DelegatingAuthenticationEntryPoint authenticationEntryPoint = new DelegatingAuthenticationEntryPoint(map);
-        authenticationEntryPoint.setDefaultEntryPoint(new Http403ForbiddenEntryPoint());
-
         httpSecurity
                 .authorizeHttpRequests()
                 .requestMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
@@ -121,7 +101,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .rememberMe()
                 .disable()
                 .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
+                .authenticationEntryPoint(new RestResultAuthenticationEntryPoint())
                 .and()
                 .cors()
                 .disable()

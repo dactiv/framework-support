@@ -66,10 +66,10 @@ public class BindingResultErrorResultResolver implements ErrorResultResolver {
     }
 
     private BindingResult extractBindingResult(Throwable error) {
-        if (error instanceof BindingResult) {
-            return Casts.cast(error);
-        } else if (error instanceof MethodArgumentNotValidException) {
-            return Casts.cast(error, MethodArgumentNotValidException.class).getBindingResult();
+        if (error instanceof BindingResult e) {
+            return e;
+        } else if (error instanceof MethodArgumentNotValidException ae) {
+            return ae.getBindingResult();
         }
         return null;
     }

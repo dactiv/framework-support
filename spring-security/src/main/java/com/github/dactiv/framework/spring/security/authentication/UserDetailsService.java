@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
-import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
@@ -25,16 +24,6 @@ import java.util.List;
  * @author maurice.chen
  */
 public interface UserDetailsService<T> {
-
-    /**
-     * 认证缓存块名称
-     */
-    String DEFAULT_AUTHENTICATION_KEY_NAME = "spring:security:authentication:";
-
-    /**
-     * 授权缓存块名称
-     */
-    String DEFAULT_AUTHORIZATION_KEY_NAME = "spring:security:authorization:";
 
     /**
      * 获取认证用户明细
@@ -71,30 +60,6 @@ public interface UserDetailsService<T> {
      * @return 密码编码器
      */
     PasswordEncoder getPasswordEncoder();
-
-    /**
-     * 获取授权缓存
-     *
-     * @param token 当前用户认证 token
-     *
-     * @return 缓存名称
-     */
-    default CacheProperties getAuthorizationCache(SimpleAuthenticationToken token, CacheProperties authorizationCache) {
-        String key = authorizationCache.getName(this.getClass().getSimpleName() + CacheProperties.DEFAULT_SEPARATOR + token.getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal());
-        return new CacheProperties(key, authorizationCache.getExpiresTime());
-    }
-
-    /**
-     * 获取授权缓存名称
-     *
-     * @param token 当前用户认证 token
-     *
-     * @return 缓存名称
-     */
-    default CacheProperties getAuthenticationCache(SimpleAuthenticationToken token, CacheProperties authenticationCache) {
-        String key = authenticationCache.getName(this.getClass().getSimpleName() + CacheProperties.DEFAULT_SEPARATOR + token.getType() + CacheProperties.DEFAULT_SEPARATOR + token.getPrincipal());
-        return new CacheProperties(key, authenticationCache.getExpiresTime());
-    }
 
     /**
      * 当认证成功的后置处理方法
@@ -185,30 +150,6 @@ public interface UserDetailsService<T> {
                 token.isRememberMe(),
                 new Date()
         );
-    }
-
-    /**
-     * 执行缓存认证信息之前，触发此方法
-     *
-     * @param token 当前用户认证 token
-     * @param userDetails 用户明细
-     * @param authenticationCache 认证缓存配置
-     *
-     * @return true 执行缓存，否则 false
-     */
-    default boolean preAuthenticationCache(SimpleAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
-        return true;
-    }
-
-    /**
-     * 执行缓存认证信息之后，触发此方法
-     *
-     * @param token 当前用户认证 token
-     * @param userDetails 用户明细
-     * @param authenticationCache 认证缓存配置
-     */
-    default void postAuthenticationCache(SimpleAuthenticationToken token, SecurityUserDetails userDetails, CacheProperties authenticationCache) {
-
     }
 
     /**

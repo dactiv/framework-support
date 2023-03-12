@@ -34,6 +34,11 @@ public class PrincipalAuthenticationToken extends SimpleAuthenticationToken {
         this.lastAuthenticationTime = lastAuthenticationTime;
     }
 
+    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, boolean rememberMe, Date lastAuthenticationTime) {
+        super(token, type, userDetails, userDetails.getAuthorities(), rememberMe);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
+
     public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, boolean rememberMe, Collection<? extends GrantedAuthority> authorities, Date lastAuthenticationTime) {
         super(token, type, rememberMe, authorities);
         this.lastAuthenticationTime = lastAuthenticationTime;
@@ -50,7 +55,8 @@ public class PrincipalAuthenticationToken extends SimpleAuthenticationToken {
 
     /**
      * 设置最后认证时间
-     * @param lastAuthenticationTime
+     *
+     * @param lastAuthenticationTime 最后认证时间
      */
     public void setLastAuthenticationTime(Date lastAuthenticationTime) {
         this.lastAuthenticationTime = lastAuthenticationTime;

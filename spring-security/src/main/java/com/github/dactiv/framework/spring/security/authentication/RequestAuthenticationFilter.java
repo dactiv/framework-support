@@ -34,23 +34,23 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAuthenticationFilter.class);
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
-    private final AuthenticationProperties properties;
+    private final AuthenticationProperties authenticationProperties;
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     private final List<UserDetailsService<?>> userDetailsServices;
 
-    public RequestAuthenticationFilter(AuthenticationProperties properties,
+    public RequestAuthenticationFilter(AuthenticationProperties authenticationProperties,
                                        List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                        List<UserDetailsService<?>> userDetailsServices) {
-        this.properties = properties;
+        this.authenticationProperties = authenticationProperties;
 
         setRequiresAuthenticationRequestMatcher(
-                new AntPathRequestMatcher(properties.getLoginProcessingUrl(), HttpMethod.POST.name())
+                new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name())
         );
 
-        setUsernameParameter(properties.getUsernameParamName());
-        setPasswordParameter(properties.getPasswordParamName());
+        setUsernameParameter(authenticationProperties.getUsernameParamName());
+        setPasswordParameter(authenticationProperties.getPasswordParamName());
 
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
         this.userDetailsServices = userDetailsServices;
@@ -63,18 +63,30 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             return;
         }
 
-        Authentication rememberMeAuth = getRememberMeServices().autoLogin(Casts.cast(request), Casts.cast(response));
-        if (Objects.isNull(rememberMeAuth)) {
+        Authentication token = getRememberMeServices().autoLogin(Casts.cast(request), Casts.cast(response));
+        if (Objects.isNull(token)) {
             super.doFilter(request, response, chain);
             return;
         }
 
         try {
-            Authentication authentication = this.getAuthenticationManager().authenticate(rememberMeAuth);
+            Authentication authentication = getAuthenticationManager().authenticate(token);
             successfulAuthentication(Casts.cast(request), Casts.cast(response), chain, authentication);
+            chain.doFilter(request, response);
         } catch (AuthenticationException ex) {
             LOGGER.error("记住我认证出现异常", ex);
             unsuccessfulAuthentication(Casts.cast(request), Casts.cast(response), ex);
+        }
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+
+        super.successfulAuthentication(request, response, chain, authResult);
+        String token = request.getHeader(authenticationProperties.getTokenHeaderName());
+
+        if (StringUtils.isEmpty(StringUtils.trimToEmpty(token))) {
+            return ;
         }
 
         chain.doFilter(request, response);
@@ -123,10 +135,10 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             throw new AuthenticationServiceException("授权类型不正确");
         }
 
-        String token = request.getHeader(properties.getTokenHeaderName());
+        String token = request.getHeader(authenticationProperties.getTokenHeaderName());
 
         if (StringUtils.isNotBlank(token)) {
-            String resolverType = request.getHeader(properties.getTokenResolverHeaderName());
+            String resolverType = request.getHeader(authenticationProperties.getTokenResolverHeaderName());
 
             AuthenticationTypeTokenResolver resolver = authenticationTypeTokenResolvers
                     .stream()
@@ -157,10 +169,10 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
      */
     protected String obtainType(HttpServletRequest request) {
 
-        String type = request.getHeader(properties.getTypeHeaderName());
+        String type = request.getHeader(authenticationProperties.getTypeHeaderName());
 
         if (StringUtils.isBlank(type)) {
-            type = request.getParameter(properties.getTypeParamName());
+            type = request.getParameter(authenticationProperties.getTypeParamName());
         }
 
         return type;

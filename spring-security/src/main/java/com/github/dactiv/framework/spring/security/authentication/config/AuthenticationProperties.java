@@ -2,7 +2,8 @@ package com.github.dactiv.framework.spring.security.authentication.config;
 
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
-import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
+import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
+import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
@@ -94,11 +95,6 @@ public class AuthenticationProperties {
     private String passwordParamName = SECURITY_FORM_PASSWORD_PARAM_NAME;
 
     /**
-     * 是否允许访问投票器的拒绝和同意相等时允许访问
-     */
-    private boolean allowIfEqualGrantedDeniedDecisions = false;
-
-    /**
      * 记住我配置
      */
     private RememberMeProperties rememberMe = new RememberMeProperties();
@@ -106,12 +102,22 @@ public class AuthenticationProperties {
     /**
      * 认证缓存配置信息
      */
-    private CacheProperties authenticationCache = CacheProperties.of(UserDetailsService.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
+    private CacheProperties authenticationCache = CacheProperties.of(RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
      * 授权缓存配置信息
      */
-    private CacheProperties authorizationCache = CacheProperties.of(UserDetailsService.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
+    private CacheProperties authorizationCache = CacheProperties.of(RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
+
+    /**
+     * 不做认证缓存的用户明细服务类型
+     */
+    private List<String> ignoreAuthenticationCacheTypes = List.of(DefaultUserDetailsService.DEFAULT_TYPES);
+
+    /**
+     * 不做授权缓存的用户明细服务类型
+     */
+    private List<String> ignoreAuthorizationCacheTypes = List.of(DefaultUserDetailsService.DEFAULT_TYPES);
 
     /**
      * 获取默认用户信息集合
@@ -294,24 +300,6 @@ public class AuthenticationProperties {
     }
 
     /**
-     * 获取是否允许访问投票器的拒绝和同意相等时允许访问
-     *
-     * @return true 是，否则 false
-     */
-    public boolean isAllowIfEqualGrantedDeniedDecisions() {
-        return allowIfEqualGrantedDeniedDecisions;
-    }
-
-    /**
-     * 设置是否允许访问投票器的拒绝和同意相等时允许访问
-     *
-     * @param allowIfEqualGrantedDeniedDecisions true 是，否则 false
-     */
-    public void setAllowIfEqualGrantedDeniedDecisions(boolean allowIfEqualGrantedDeniedDecisions) {
-        this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
-    }
-
-    /**
      * 获取记住我配置
      *
      * @return 记住我配置
@@ -363,5 +351,40 @@ public class AuthenticationProperties {
      */
     public void setAuthorizationCache(CacheProperties authorizationCache) {
         this.authorizationCache = authorizationCache;
+    }
+
+    /**
+     * 获取不做认证缓存的用户明细服务类型
+     *
+     * @return 不做认证缓存的用户明细服务类型
+     */
+    public List<String> getIgnoreAuthenticationCacheTypes() {
+        return ignoreAuthenticationCacheTypes;
+    }
+
+    /**
+     * 设置不做认证缓存的用户明细服务类型
+     *
+     * @param ignoreAuthenticationCacheTypes 不做认证缓存的用户明细服务类型
+     */
+    public void setIgnoreAuthenticationCacheTypes(List<String> ignoreAuthenticationCacheTypes) {
+        this.ignoreAuthenticationCacheTypes = ignoreAuthenticationCacheTypes;
+    }
+
+    /**
+     * 获取不做授权缓存的用户明细服务类型
+     * @return 不做授权缓存的用户明细服务类型
+     */
+    public List<String> getIgnoreAuthorizationCacheTypes() {
+        return ignoreAuthorizationCacheTypes;
+    }
+
+    /**
+     * 设置不做授权缓存的用户明细服务类型
+     *
+     * @param ignoreAuthorizationCacheTypes 不做授权缓存的用户明细服务类型
+     */
+    public void setIgnoreAuthorizationCacheTypes(List<String> ignoreAuthorizationCacheTypes) {
+        this.ignoreAuthorizationCacheTypes = ignoreAuthorizationCacheTypes;
     }
 }

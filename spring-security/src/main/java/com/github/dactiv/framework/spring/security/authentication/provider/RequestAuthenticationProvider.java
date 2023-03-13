@@ -134,9 +134,8 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
         CacheProperties authenticationCache = null;
         if (Objects.nonNull(properties.getAuthenticationCache())) {
-            String suffix = CacheProperties.DEFAULT_SEPARATOR + token.getName();
             authenticationCache = CacheProperties.of(
-                    properties.getAuthenticationCache().getName(suffix),
+                    properties.getAuthenticationCache().getName(token.getName()),
                     properties.getAuthenticationCache().getExpiresTime()
             );
         }
@@ -171,9 +170,8 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         CacheProperties authenticationCache = null;
         // 如果启用认证缓存，从认证缓存里获取用户
         if (Objects.nonNull(properties.getAuthenticationCache())) {
-            String suffix = CacheProperties.DEFAULT_SEPARATOR + token.getName();
             authenticationCache = CacheProperties.of(
-                    properties.getAuthenticationCache().getName(suffix),
+                    properties.getAuthenticationCache().getName(token.getName()),
                     properties.getAuthenticationCache().getExpiresTime()
             );
         }

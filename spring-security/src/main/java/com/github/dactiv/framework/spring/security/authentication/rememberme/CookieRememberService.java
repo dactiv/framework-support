@@ -59,7 +59,7 @@ public class CookieRememberService implements RememberMeServices {
             return null;
         }
 
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(rememberMeToken.getId());
+        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(rememberMeToken.getUsername(), rememberMeToken.getType());
 
         RememberMeToken redisObject = bucket.get();
 
@@ -137,7 +137,7 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         SecurityUserDetails details = Casts.cast(authentication.getDetails());
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(Casts.cast(details.getId(), Integer.class));
+        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(details.getType(), details.getUsername());
 
         RememberMeToken rememberMeToken = new RememberMeToken(details);
         bucket.setAsync(rememberMeToken);
@@ -177,23 +177,24 @@ public class CookieRememberService implements RememberMeServices {
             return null;
         }
 
-        Optional<Cookie> optional = Arrays
+        return Arrays
                 .stream(cookies)
                 .filter(c -> c.getName().equals(properties.getRememberMe().getCookie().getName()))
-                .findFirst();
-
-        return optional.isEmpty() ? null : optional.get().getValue();
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
     }
 
     /**
      * 获取 redis 的记住我 token 桶信息
      *
-     * @param id 主键 id
+     * @param username 登陆账号
+     * @param type 登陆饿理性
      *
      * @return 记住我 token 桶信息
      */
-    public RBucket<RememberMeToken> getRememberMeTokenBucket(Integer id) {
-        String key = properties.getRememberMe().getCache().getName(id);
+    public RBucket<RememberMeToken> getRememberMeTokenBucket(String username, String type) {
+        String key = properties.getRememberMe().getCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + username);
         return redissonClient.getBucket(key);
     }
 

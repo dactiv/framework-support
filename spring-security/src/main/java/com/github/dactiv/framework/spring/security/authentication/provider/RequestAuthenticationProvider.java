@@ -112,7 +112,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
     protected SecurityUserDetails doRememberMeAuthentication(RememberMeAuthenticationToken token) {
 
-        String key = properties.getRememberMe().getCache().getName(token.getId());
+        String key = properties.getRememberMe().getCache().getName(token.getName());
         RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
         RememberMeToken redisObject = bucket.get();
 

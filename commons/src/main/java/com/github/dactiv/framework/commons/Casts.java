@@ -220,7 +220,7 @@ public class Casts {
     }
 
     /**
-     * 将 MultiValueMap 对象转换为 name=value&name2=value2&name3=value3 格式字符串
+     * 将 MultiValueMap 对象转换为 name=value&amp;name2=value2&amp;name3=value3 格式字符串
      *
      * @param newRequestBody MultiValueMap 对象
      *

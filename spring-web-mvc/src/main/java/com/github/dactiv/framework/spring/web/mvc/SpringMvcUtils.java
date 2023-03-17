@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.basjes.parse.useragent.UserAgent;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +21,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -30,7 +32,9 @@ import java.util.Optional;
  **/
 public class SpringMvcUtils {
 
-    private final static String IP_UNKNOWN_STRING = "unknown";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcUtils.class);
+
+    private final static String UNKNOWN_STRING = "unknown";
 
     private final static Integer IP_MIN_LENGTH = 15;
 
@@ -122,8 +126,7 @@ public class SpringMvcUtils {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        if (requestAttributes instanceof ServletRequestAttributes) {
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+        if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
             return Optional.ofNullable(servletRequestAttributes.getResponse());
         }
 
@@ -253,7 +256,7 @@ public class SpringMvcUtils {
      */
     public static String getIpAddress() {
         Optional<HttpServletRequest> optional = getHttpServletRequest();
-        return optional.map(SpringMvcUtils::getIpAddress).orElse(null);
+        return optional.map(SpringMvcUtils::getIpAddress).orElse(UNKNOWN_STRING);
     }
 
     /**
@@ -266,19 +269,19 @@ public class SpringMvcUtils {
     public static String getIpAddress(HttpServletRequest request) {
 
         String ip = request.getHeader("x-forwarded-for");
-        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
         }
-        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (StringUtils.isBlank(ip) || IP_UNKNOWN_STRING.equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN_STRING.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
 
@@ -290,6 +293,41 @@ public class SpringMvcUtils {
         }
 
         return ip;
+    }
+
+    /**
+     * 获取 mac 地址
+     *
+     * @return  mac 地址
+     */
+    public static String getMacAddress() {
+        Optional<HttpServletRequest> optional = getHttpServletRequest();
+        return optional.map(SpringMvcUtils::getMacAddress).orElse(UNKNOWN_STRING);
+    }
+
+    /**
+     * 获取 mac 地址
+     *
+     * @param request  mac 地址
+     *
+     * @return  mac 地址
+     */
+    public static String getMacAddress(HttpServletRequest request) {
+
+        try {
+            InetAddress ipAddress = InetAddress.getByName(request.getRemoteAddr());
+            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(ipAddress);
+            byte[] macAddressBytes = networkInterface.getHardwareAddress();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < macAddressBytes.length; i++) {
+                sb.append(String.format("%02X%s", macAddressBytes[i], (i < macAddressBytes.length - 1) ? Casts.NEGATIVE_PREFIX : StringUtils.EMPTY));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            LOGGER.warn("获取 mac 地址出错", e);
+            return UNKNOWN_STRING;
+        }
+
     }
 
 }

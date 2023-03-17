@@ -401,11 +401,11 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
             String name = nacosConfigProperties.getName();
 
             // 如果名称为空，通过 spring.application.name 来构造默认侦听信息
-            if (StringUtils.isBlank(name)) {
+            if (StringUtils.isEmpty(name)) {
                 // 获取 spring.application.name 信息
                 name = applicationContext.getEnvironment().getProperty("spring.application.name");
                 // 如果为空，表示不对服务应用名做 nacos 配置管理，直接略过
-                if (StringUtils.isNotBlank(name)) {
+                if (StringUtils.isNotEmpty(name)) {
 
                     // 如果 name 没有 .后缀名，通过配置信息获取
                     String defaultName = StringUtils.appendIfMissing(name, Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());

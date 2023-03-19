@@ -53,4 +53,13 @@ public class TotalPage<T> extends Page<T>{
     public boolean hasNext() {
         return this.getNumber() + 1 < this.getTotalPages();
     }
+
+    /**
+     * 获取总数量
+     *
+     * @return 总数量
+     */
+    public long getTotalCount() {
+        return totalCount;
+    }
 }

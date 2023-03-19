@@ -4,6 +4,7 @@ import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.crypto.access.AccessToken;
 import com.github.dactiv.framework.crypto.access.ExpirationToken;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SimpleExpirationToken extends SimpleToken implements ExpirationToken {
 
+    @Serial
     private static final long serialVersionUID = -2524113941584019855L;
 
     /**

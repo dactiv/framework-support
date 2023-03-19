@@ -1,6 +1,8 @@
 
 package com.github.dactiv.framework.crypto.algorithm.exception;
 
+import java.io.Serial;
+
 /**
  * 编码异常类，在转换编码错误或找不到编码类型时抛出
  *
@@ -8,6 +10,7 @@ package com.github.dactiv.framework.crypto.algorithm.exception;
  */
 public class CodecException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 2903493323137209720L;
 
     /**

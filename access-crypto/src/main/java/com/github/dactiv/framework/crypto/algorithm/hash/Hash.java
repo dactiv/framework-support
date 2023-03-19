@@ -8,6 +8,7 @@ import com.github.dactiv.framework.crypto.algorithm.SimpleByteSource;
 import com.github.dactiv.framework.crypto.algorithm.exception.CodecException;
 import com.github.dactiv.framework.crypto.algorithm.exception.UnknownAlgorithmException;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Hash extends AbstractByteSource implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 6396657711027799821L;
 
     /**

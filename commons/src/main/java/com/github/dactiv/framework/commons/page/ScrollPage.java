@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons.page;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.Map;
  * @author maurice.chen
  */
 public class ScrollPage<T> implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = 9118490108501020682L;
 
     /**

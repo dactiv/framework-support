@@ -1,6 +1,8 @@
 
 package com.github.dactiv.framework.crypto.algorithm.exception;
 
+import java.io.Serial;
+
 /**
  * 加密解密异常,当加密解密错误时候抛出。
  *
@@ -8,6 +10,7 @@ package com.github.dactiv.framework.crypto.algorithm.exception;
  */
 public class CryptoException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -6698840153536223973L;
 
     /**

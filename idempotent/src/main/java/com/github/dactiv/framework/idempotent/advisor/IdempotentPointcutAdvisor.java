@@ -6,6 +6,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 
+import java.io.Serial;
 import java.lang.reflect.Method;
 
 /**
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
  */
 public class IdempotentPointcutAdvisor extends AbstractPointcutAdvisor {
 
+    @Serial
     private static final long serialVersionUID = -2973618152809395856L;
 
     private final IdempotentInterceptor idempotentInterceptor;

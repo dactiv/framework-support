@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
 import nl.basjes.parse.useragent.UserAgent;
 
+import java.io.Serial;
+
 /**
  * 移动端的用户明细实现
  *
@@ -11,8 +13,12 @@ import nl.basjes.parse.useragent.UserAgent;
  */
 public class MobileUserDetails extends SecurityUserDetails {
 
+    @Serial
     private static final long serialVersionUID = -848955060608795664L;
 
+    /**
+     * 默认移动端登陆类型
+     */
     public static final String DEFAULT_TYPE = "mobile";
 
     /**

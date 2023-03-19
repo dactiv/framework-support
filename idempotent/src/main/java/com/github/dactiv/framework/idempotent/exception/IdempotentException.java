@@ -2,6 +2,8 @@ package com.github.dactiv.framework.idempotent.exception;
 
 import com.github.dactiv.framework.commons.exception.SystemException;
 
+import java.io.Serial;
+
 /**
  * 幂等性异常
  *
@@ -9,6 +11,7 @@ import com.github.dactiv.framework.commons.exception.SystemException;
  */
 public class IdempotentException extends SystemException {
 
+    @Serial
     private static final long serialVersionUID = -8218863087525865969L;
 
     public IdempotentException() {

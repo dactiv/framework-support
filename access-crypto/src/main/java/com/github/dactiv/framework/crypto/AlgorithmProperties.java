@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.crypto;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,6 +10,7 @@ import java.io.Serializable;
  */
 public class AlgorithmProperties implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 3207978889614838003L;
     /**
      * 算法

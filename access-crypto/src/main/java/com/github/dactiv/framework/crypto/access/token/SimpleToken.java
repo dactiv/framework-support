@@ -3,6 +3,7 @@ package com.github.dactiv.framework.crypto.access.token;
 import com.github.dactiv.framework.crypto.access.AccessToken;
 import com.github.dactiv.framework.crypto.algorithm.ByteSource;
 
+import java.io.Serial;
 import java.util.UUID;
 
 /**
@@ -12,6 +13,7 @@ import java.util.UUID;
  */
 public class SimpleToken implements AccessToken {
 
+    @Serial
     private static final long serialVersionUID = 427463584890877727L;
 
     /**

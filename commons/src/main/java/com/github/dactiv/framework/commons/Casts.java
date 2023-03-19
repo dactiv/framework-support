@@ -32,7 +32,15 @@ public class Casts {
      */
     public static final String DEFAULT_DOT_SYMBOL = ".";
 
-    public final static String NEGATIVE_PREFIX = "-";
+    /**
+     * 负极符号
+     */
+    public final static String NEGATIVE_SYMBOL = "-";
+
+    /**
+     * 分号
+     */
+    public final static String SEMICOLON = ";";
 
     /**
      * 默认等于符号

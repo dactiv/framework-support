@@ -421,7 +421,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
                     // 获取活动环境配置，并构造 [name-环境值.后缀] 的配置文件侦听
                     for (String profile : applicationContext.getEnvironment().getActiveProfiles()) {
-                        String profileName = StringUtils.appendIfMissing(name, Casts.NEGATIVE_PREFIX + profile + Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
+                        String profileName = StringUtils.appendIfMissing(name, Casts.NEGATIVE_SYMBOL + profile + Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
 
                         NacosConfigProperties.Config profileConfig = new NacosConfigProperties.Config(
                                 profileName,

@@ -51,7 +51,7 @@ public class TotalPage<T> extends Page<T>{
 
     @Override
     public boolean hasNext() {
-        return this.getNumber() + 1 < this.getTotalPages();
+        return this.getNumber() < this.getTotalPages();
     }
 
     /**

@@ -18,6 +18,9 @@ import org.springframework.util.MultiValueMap;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 转型工具类
@@ -235,6 +238,18 @@ public class Casts {
      * @return 转换后的字符串
      */
     public static String castRequestBodyMapToString(MultiValueMap<String, String> newRequestBody) {
+        return castRequestBodyMapToString(newRequestBody, (s) -> s);
+    }
+
+    /**
+     * 将 MultiValueMap 对象转换为 name=value&amp;name2=value2&amp;name3=value3 格式字符串
+     *
+     * @param newRequestBody MultiValueMap 对象
+     * @param function 处理字符串的功能
+     *
+     * @return 转换后的字符串
+     */
+    public static String castRequestBodyMapToString(MultiValueMap<String, String> newRequestBody, Function<String, String> function) {
         StringBuilder result = new StringBuilder();
 
         newRequestBody
@@ -243,7 +258,7 @@ public class Casts {
                                 v -> result
                                         .append(key)
                                         .append(DEFAULT_EQ_SYMBOL)
-                                        .append(value.size() > 1 ? value : value.get(0))
+                                        .append(value.size() > 1 ? value.stream().map(function).toList() : function.apply(value.get(0)))
                                         .append(DEFAULT_AND_SYMBOL)
                         )
                 );

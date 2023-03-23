@@ -34,7 +34,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    public static final String DEFAULT_COLLECTION_NAME = "t_audit_event";
+    public static final String DEFAULT_COLLECTION_NAME = "col_audit_event";
 
     public static final String DEFAULT_ID_FIELD = "_id";
 

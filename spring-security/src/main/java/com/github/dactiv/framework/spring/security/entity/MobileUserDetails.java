@@ -2,7 +2,6 @@ package com.github.dactiv.framework.spring.security.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
-import nl.basjes.parse.useragent.UserAgent;
 
 import java.io.Serial;
 
@@ -28,12 +27,6 @@ public class MobileUserDetails extends SecurityUserDetails {
     private String deviceIdentified;
 
     /**
-     * 设备
-     */
-    @JsonIgnore
-    private UserAgent device;
-
-    /**
      * 移动端用户明细实现
      */
     public MobileUserDetails() {
@@ -47,12 +40,10 @@ public class MobileUserDetails extends SecurityUserDetails {
      * @param username         登录账户
      * @param password         密码
      * @param deviceIdentified 设备唯一是被
-     * @param device           设备
      */
-    public MobileUserDetails(Integer id, String username, String password, String deviceIdentified, UserAgent device) {
+    public MobileUserDetails(Integer id, String username, String password, String deviceIdentified) {
         super(id, username, password, UserStatus.Enabled);
         this.deviceIdentified = deviceIdentified;
-        this.device = device;
         setType(DEFAULT_TYPE);
     }
 
@@ -66,29 +57,11 @@ public class MobileUserDetails extends SecurityUserDetails {
     }
 
     /**
-     * 获取设备
-     *
-     * @return 设备
-     */
-    public UserAgent getDevice() {
-        return device;
-    }
-
-    /**
      * 设置设备唯一识别
      *
      * @param deviceIdentified 设备唯一识别
      */
     public void setDeviceIdentified(String deviceIdentified) {
         this.deviceIdentified = deviceIdentified;
-    }
-
-    /**
-     * 获取设备信息
-     *
-     * @param device 设备信息
-     */
-    public void setDevice(UserAgent device) {
-        this.device = device;
     }
 }

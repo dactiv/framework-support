@@ -7,6 +7,7 @@ import com.github.dactiv.framework.spring.security.authentication.handler.JsonAu
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.framework.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.framework.spring.security.plugin.PluginSourceAuthorizationManager;
+import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.Pointcuts;
@@ -60,6 +61,8 @@ public class WebSecurityDefaultConfigurerAdapter {
 
     private final List<UserDetailsService<?>> userDetailsServices;
 
+    private final List<ErrorResultResolver> resultResolvers;
+
     public WebSecurityDefaultConfigurerAdapter(DeviceIdContextRepository deviceIdContextRepository,
                                                AuthenticationProperties properties,
                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
@@ -68,6 +71,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                                                AuthenticationManager authenticationManager,
                                                CookieRememberService cookieRememberService,
                                                ObjectProvider<UserDetailsService<?>> userDetailsServices,
+                                               ObjectProvider<ErrorResultResolver> resultResolvers,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.deviceIdContextRepository = deviceIdContextRepository;
@@ -80,6 +84,7 @@ public class WebSecurityDefaultConfigurerAdapter {
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().toList();
         this.userDetailsServices = userDetailsServices.stream().toList();
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().toList();
+        this.resultResolvers = resultResolvers.stream().toList();
     }
 
     @Bean
@@ -101,7 +106,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .rememberMe()
                 .disable()
                 .exceptionHandling()
-                .authenticationEntryPoint(new RestResultAuthenticationEntryPoint())
+                .authenticationEntryPoint(new RestResultAuthenticationEntryPoint(resultResolvers))
                 .and()
                 .cors()
                 .disable()

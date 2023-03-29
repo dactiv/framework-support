@@ -2,6 +2,8 @@ package com.github.dactiv.framework.spring.security.authentication;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
+import com.github.dactiv.framework.commons.exception.ErrorCodeException;
+import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
@@ -10,8 +12,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * rest 结果集认证入口点实现
@@ -19,18 +22,31 @@ import java.util.Objects;
  * @author maurice.chen
  */
 public class RestResultAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
     public static final String ERROR_INTERNAL_ATTRIBUTE = DefaultErrorAttributes.class.getName() + ".ERROR";
+
+    private final List<ErrorResultResolver> resultResolvers;
+
+    public RestResultAuthenticationEntryPoint(List<ErrorResultResolver> resultResolvers) {
+        this.resultResolvers = resultResolvers;
+    }
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
 
-
-        RestResult<Map<String, Object>> result = RestResult.ofException(String.valueOf(response.getStatus()), e);
+        RestResult<Object> result = RestResult.ofException(String.valueOf(response.getStatus()), e);
         Throwable throwable = Casts.cast(request.getAttribute(ERROR_INTERNAL_ATTRIBUTE));
 
         if (Objects.nonNull(throwable)) {
-            result.setMessage(throwable.getMessage());
+            Optional<ErrorResultResolver> optional = resultResolvers
+                    .stream()
+                    .filter(r -> r.isSupport(throwable))
+                    .findFirst();
+
+            if (optional.isPresent()) {
+                result = optional.get().resolve(throwable);
+            } else {
+                result.setMessage(ErrorCodeException.DEFAULT_ERROR_MESSAGE);
+            }
         }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

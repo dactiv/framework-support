@@ -9,6 +9,7 @@ import com.github.dactiv.framework.crypto.algorithm.ByteSource;
 import com.github.dactiv.framework.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.DeviceIdProperties;
+import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
@@ -20,9 +21,11 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -89,8 +92,9 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         }
 
         String deviceId = this.getDeviceId(token);
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(deviceId);
-        SecurityContext cacheSecurityContext = bucket.get();
+        RBucket<SecurityUserDetails> bucket = getSecurityContextBucket(deviceId);
+        SecurityUserDetails userDetails = bucket.get();
+        SecurityContext cacheSecurityContext = createSecurityContext(userDetails);
 
         if (isCurrentUserSecurityContext(userId, cacheSecurityContext, deviceId)) {
             TimeProperties time = properties.getDeviceId().getCache().getExpiresTime();
@@ -124,12 +128,12 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
     }
 
     public void deleteByMobileUserDetails(MobileUserDetails mobileUserDetails) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
+        RBucket<SecurityUserDetails> bucket = getSecurityContextBucket(mobileUserDetails.getDeviceIdentified());
         bucket.deleteAsync();
     }
 
     public void deleteByDeviceId(String deviceId) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(deviceId);
+        RBucket<SecurityUserDetails> bucket = getSecurityContextBucket(deviceId);
         bucket.deleteAsync();
     }
 
@@ -179,8 +183,9 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         MobileUserDetails mobileUserDetails = Casts.cast(details);
         String token = mobileUserDetails.getDeviceIdentified();
 
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(token);
-        SecurityContext cacheSecurityContext = bucket.get();
+        RBucket<SecurityUserDetails> bucket = getSecurityContextBucket(token);
+        SecurityUserDetails userDetails = bucket.get();
+        SecurityContext cacheSecurityContext = createSecurityContext(userDetails);
 
         if (Objects.nonNull(cacheSecurityContext)) {
 
@@ -217,14 +222,14 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      * @param context 安全上下文
      * @param bucket  安全上下文的桶对象
      */
-    protected void setSecurityContext(SecurityContext context, RBucket<SecurityContext> bucket) {
-
+    protected void setSecurityContext(SecurityContext context, RBucket<SecurityUserDetails> bucket) {
+        SecurityUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
         TimeProperties time = properties.getDeviceId().getCache().getExpiresTime();
 
         if (Objects.nonNull(time)) {
-            bucket.set(context, time.getValue(), time.getUnit());
+            bucket.set(userDetails, time.getValue(), time.getUnit());
         } else {
-            bucket.set(context);
+            bucket.set(userDetails);
         }
 
         SecurityContextHolder.setContext(context);
@@ -239,8 +244,9 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
 
         if (StringUtils.isNotBlank(id)) {
 
-            RBucket<SecurityContext> bucket = getSecurityContextBucket(id);
-            SecurityContext securityContext = bucket.get();
+            RBucket<SecurityUserDetails> bucket = getSecurityContextBucket(id);
+            SecurityUserDetails securityUserDetails = bucket.get();
+            SecurityContext securityContext = createSecurityContext(securityUserDetails);
 
             String userId = request.getHeader(properties.getDeviceId().getAccessUserIdHeaderName());
             result = isCurrentUserSecurityContext(userId, securityContext, id);
@@ -253,6 +259,16 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
         return result;
     }
 
+    public SecurityContext createSecurityContext(SecurityUserDetails userDetails) {
+        if (Objects.isNull(userDetails)) {
+            return null;
+        }
+        UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword());
+        Authentication authentication = new SimpleAuthenticationToken(usernamePasswordToken, userDetails.getType(), userDetails, userDetails.getAuthorities(), false);
+
+        return new SecurityContextImpl(authentication);
+    }
+
     /**
      * 获取 spring 安全上下文的 桶
      *
@@ -260,7 +276,7 @@ public class DeviceIdContextRepository extends HttpSessionSecurityContextReposit
      *
      * @return redis 桶
      */
-    public RBucket<SecurityContext> getSecurityContextBucket(String deviceIdentified) {
+    public RBucket<SecurityUserDetails> getSecurityContextBucket(String deviceIdentified) {
         return redissonClient.getBucket(properties.getDeviceId().getCache().getName(deviceIdentified));
     }
 

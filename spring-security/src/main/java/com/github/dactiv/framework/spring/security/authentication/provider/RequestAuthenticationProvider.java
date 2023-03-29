@@ -182,35 +182,37 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
 
         //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
-        if (Objects.isNull(userDetails)) {
-            try {
-                Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
 
-                String message = messages.getMessage(
-                        "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
-                        "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
-                );
+        try {
+            Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
 
-                UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+            String message = messages.getMessage(
+                    "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                    "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
+            );
 
+            UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+
+            if (Objects.isNull(userDetails)) {
                 userDetails = userDetailsService.getAuthenticationUserDetails(token);
-                checkUserDetails(userDetails);
+            }
 
-                String presentedPassword = token.getCredentials().toString();
-                if (!userDetailsService.matchesPassword(presentedPassword, token, userDetails)) {
-                    throw new BadCredentialsException(messages.getMessage(
-                            "PrincipalAuthenticationProvider.badCredentials",
-                            "用户名或密码错误"));
-                }
-            } catch (AuthenticationException e) {
-                // 如果 hideUserNotFoundExceptions true 并且是 UsernameNotFoundException 异常，抛出 用户名密码错误异常
-                if (UsernameNotFoundException.class.isAssignableFrom(e.getClass()) && hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException(messages.getMessage(
-                            "PrincipalAuthenticationProvider.badCredentials",
-                            "用户名或密码错误"));
-                } else {
-                    throw e;
-                }
+            checkUserDetails(userDetails);
+
+            String presentedPassword = token.getCredentials().toString();
+            if (!userDetailsService.matchesPassword(presentedPassword, token, userDetails)) {
+                throw new BadCredentialsException(messages.getMessage(
+                        "PrincipalAuthenticationProvider.badCredentials",
+                        "用户名或密码错误"));
+            }
+        } catch (AuthenticationException e) {
+            // 如果 hideUserNotFoundExceptions true 并且是 UsernameNotFoundException 异常，抛出 用户名密码错误异常
+            if (UsernameNotFoundException.class.isAssignableFrom(e.getClass()) && hideUserNotFoundExceptions) {
+                throw new BadCredentialsException(messages.getMessage(
+                        "PrincipalAuthenticationProvider.badCredentials",
+                        "用户名或密码错误"));
+            } else {
+                throw e;
             }
         }
 

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -143,7 +144,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                     result.setExecuteCode(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
                 }
             }
-
+            response.setStatusCode(HttpStatusCode.valueOf(result.getStatus()));
             return result;
         } else {
             return body;

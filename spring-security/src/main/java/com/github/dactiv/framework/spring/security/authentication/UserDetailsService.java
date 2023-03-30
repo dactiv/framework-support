@@ -62,18 +62,6 @@ public interface UserDetailsService<T> {
     PasswordEncoder getPasswordEncoder();
 
     /**
-     * 当认证成功的后置处理方法
-     *
-     * @param result 认证结果
-     * @param authentication 认证信息
-     *
-     * @throws AuthenticationException 处理成功认证流程出现异常后抛出
-     */
-    default void onSuccessAuthentication(SimpleAuthenticationToken result, Authentication authentication) throws AuthenticationException {
-
-    }
-
-    /**
      * 匹配密码是否正确
      *
      * @param presentedPassword 提交过来的密码
@@ -161,5 +149,9 @@ public interface UserDetailsService<T> {
      */
     default SecurityUserDetails getRememberMeUserDetails(RememberMeAuthenticationToken token) {
         throw new UnsupportedOperationException("不支持 getRememberMeUserDetails 操作");
+    }
+
+    default boolean isSupportCache(SimpleAuthenticationToken token) {
+        return true;
     }
 }

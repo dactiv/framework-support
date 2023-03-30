@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.security.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
 
 import java.io.Serial;
@@ -23,7 +23,6 @@ public class MobileUserDetails extends SecurityUserDetails {
     /**
      * 设备唯一识别
      */
-    @JsonIgnore
     private String deviceIdentified;
 
     /**
@@ -44,7 +43,6 @@ public class MobileUserDetails extends SecurityUserDetails {
     public MobileUserDetails(Integer id, String username, String password, String deviceIdentified) {
         super(id, username, password, UserStatus.Enabled);
         this.deviceIdentified = deviceIdentified;
-        setType(DEFAULT_TYPE);
     }
 
     /**
@@ -63,5 +61,15 @@ public class MobileUserDetails extends SecurityUserDetails {
      */
     public void setDeviceIdentified(String deviceIdentified) {
         this.deviceIdentified = deviceIdentified;
+    }
+
+    public String toUniqueValue() {
+        return getId()
+                + CacheProperties.DEFAULT_SEPARATOR
+                + getUsername()
+                + CacheProperties.DEFAULT_SEPARATOR
+                + getDeviceIdentified()
+                + CacheProperties.DEFAULT_SEPARATOR
+                + getType();
     }
 }

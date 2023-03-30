@@ -15,7 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * 基础认证 feign 配置
@@ -78,7 +78,7 @@ public class FeignAuthenticationConfiguration {
 
         String token = Casts.castRequestBodyMapToString(requestBody);
 
-        return Base64.encodeToString(token.getBytes(StandardCharsets.UTF_8));
+        return Base64.encodeToString(token.getBytes(Charset.defaultCharset()));
     }
 
     /**

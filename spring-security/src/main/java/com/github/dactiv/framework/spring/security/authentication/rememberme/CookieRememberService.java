@@ -23,7 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.util.AntPathMatcher;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -68,10 +68,6 @@ public class CookieRememberService implements RememberMeServices {
     @Override
     public void loginFail(HttpServletRequest request, HttpServletResponse response) {
         removeCookie(request, response);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        if (Objects.isNull(securityContext.getAuthentication())) {
-            return ;
-        }
     }
 
     @Override
@@ -202,7 +198,7 @@ public class CookieRememberService implements RememberMeServices {
         String json = Casts.writeValueAsString(token);
 
         return properties.getRememberMe().isBase64Value()
-                ? Base64.encodeToString(json.getBytes(StandardCharsets.UTF_8))
+                ? Base64.encodeToString(json.getBytes(Charset.defaultCharset()))
                 : json;
     }
 

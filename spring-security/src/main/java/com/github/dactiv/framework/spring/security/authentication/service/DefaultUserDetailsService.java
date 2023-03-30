@@ -4,6 +4,7 @@ import com.github.dactiv.framework.security.entity.RoleAuthority;
 import com.github.dactiv.framework.spring.security.authentication.AbstractUserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -55,6 +56,11 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService<Securi
     @Override
     public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityUserDetails userDetails) {
         return userDetails.getAuthorities();
+    }
+
+    @Override
+    public boolean isSupportCache(SimpleAuthenticationToken token) {
+        return false;
     }
 
     @Override

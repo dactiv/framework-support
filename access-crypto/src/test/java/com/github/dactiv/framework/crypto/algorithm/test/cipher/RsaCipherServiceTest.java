@@ -11,7 +11,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.KeyPair;
 
 /**
@@ -63,7 +63,7 @@ public class RsaCipherServiceTest {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
         final StringBuilder out = new StringBuilder();
-        Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
+        Reader in = new InputStreamReader(is, Charset.defaultCharset());
         for (; ; ) {
             int rsz = in.read(buffer, 0, buffer.length);
             if (rsz < 0)

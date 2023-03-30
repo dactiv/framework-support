@@ -6,7 +6,7 @@ import org.springframework.beans.propertyeditors.ResourceBundleEditor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.DigestUtils;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * 带文件名称的文件对象描述
@@ -141,7 +141,7 @@ public class FilenameObject extends FileObject {
         }
 
         String objectName = DigestUtils.md5DigestAsHex(
-                (System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + fileObject.getObjectName()).getBytes(StandardCharsets.UTF_8)
+                (System.currentTimeMillis() + ResourceBundleEditor.BASE_NAME_SEPARATOR + fileObject.getObjectName()).getBytes(Charset.defaultCharset())
         );
         String suffix = StringUtils.substringAfterLast(fileObject.getObjectName(), Casts.DEFAULT_DOT_SYMBOL);
         if (StringUtils.isNotEmpty(suffix)) {

@@ -6,7 +6,7 @@ import org.springframework.util.DigestUtils;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
@@ -47,7 +47,7 @@ public class RememberMeToken implements Serializable {
                 + CacheProperties.DEFAULT_SEPARATOR + this.type
                 + CacheProperties.DEFAULT_SEPARATOR + System.currentTimeMillis();
 
-        this.token = DigestUtils.md5DigestAsHex(value.getBytes(StandardCharsets.UTF_8));
+        this.token = DigestUtils.md5DigestAsHex(value.getBytes(Charset.defaultCharset()));
     }
 
     public RememberMeToken(String username, String token, String type) {

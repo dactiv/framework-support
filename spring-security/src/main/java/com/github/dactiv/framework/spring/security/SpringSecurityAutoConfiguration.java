@@ -2,7 +2,7 @@ package com.github.dactiv.framework.spring.security;
 
 import com.github.dactiv.framework.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.framework.spring.security.audit.RequestBodyAttributeAdviceAdapter;
-import com.github.dactiv.framework.spring.security.authentication.DeviceIdContextRepository;
+import com.github.dactiv.framework.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.framework.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
@@ -72,19 +72,14 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(DeviceIdContextRepository.class)
-    public DeviceIdContextRepository deviceIdentifiedSecurityContextRepository(AuthenticationProperties properties,
-                                                                               RedissonClient redissonClient) {
+    @ConditionalOnMissingBean(AccessTokenContextRepository.class)
+    public AccessTokenContextRepository accessTokenContextRepository(AuthenticationProperties properties,
+                                                                     RedissonClient redissonClient) {
 
-        DeviceIdContextRepository repository = new DeviceIdContextRepository(
-                properties,
-                redissonClient
+        return new AccessTokenContextRepository(
+                redissonClient,
+                properties
         );
-
-        repository.setAllowSessionCreation(properties.getDeviceId().isAllowSessionCreation());
-        repository.setDisableUrlRewriting(properties.getDeviceId().isDisableUrlRewriting());
-
-        return repository;
     }
 
     @Bean

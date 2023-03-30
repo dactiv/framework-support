@@ -41,7 +41,7 @@ import java.util.List;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebSecurityDefaultConfigurerAdapter {
 
-    private final DeviceIdContextRepository deviceIdContextRepository;
+    private final AccessTokenContextRepository accessTokenContextRepository;
 
     private final AuthenticationProperties properties;
 
@@ -63,7 +63,7 @@ public class WebSecurityDefaultConfigurerAdapter {
 
     private final List<ErrorResultResolver> resultResolvers;
 
-    public WebSecurityDefaultConfigurerAdapter(DeviceIdContextRepository deviceIdContextRepository,
+    public WebSecurityDefaultConfigurerAdapter(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties properties,
                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
@@ -74,7 +74,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                                                ObjectProvider<ErrorResultResolver> resultResolvers,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
-        this.deviceIdContextRepository = deviceIdContextRepository;
+        this.accessTokenContextRepository = accessTokenContextRepository;
         this.properties = properties;
         this.jsonAuthenticationFailureHandler = jsonAuthenticationFailureHandler;
         this.jsonAuthenticationSuccessHandler = jsonAuthenticationSuccessHandler;
@@ -115,7 +115,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .requestCache()
                 .disable()
                 .securityContext()
-                .securityContextRepository(deviceIdContextRepository);
+                .securityContextRepository(accessTokenContextRepository);
 
         if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
             for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
@@ -134,7 +134,7 @@ public class WebSecurityDefaultConfigurerAdapter {
         filter.setRememberMeServices(cookieRememberService);
         filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
         filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-        filter.setSecurityContextRepository(deviceIdContextRepository);
+        filter.setSecurityContextRepository(accessTokenContextRepository);
 
         httpSecurity.addFilter(filter);
 

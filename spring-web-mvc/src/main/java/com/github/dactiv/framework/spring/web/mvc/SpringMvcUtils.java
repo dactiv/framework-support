@@ -21,8 +21,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Optional;
 
 /**
@@ -226,7 +228,7 @@ public class SpringMvcUtils {
      */
     public static ResponseEntity<byte[]> createDownloadResponseEntity(RestResult<byte[]> result) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), StandardCharsets.UTF_8));
+        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), Charset.defaultCharset()));
         return new ResponseEntity<>(result.getData(), headers, HttpStatus.OK);
     }
 
@@ -244,7 +246,7 @@ public class SpringMvcUtils {
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(filename, StandardCharsets.UTF_8));
+        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(filename, Charset.defaultCharset()));
 
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(new File(path)), headers, HttpStatus.CREATED);
     }

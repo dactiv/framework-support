@@ -7,7 +7,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * rest 日志请求拦截器
@@ -31,7 +31,7 @@ public class LoggingClientHttpRequestInterceptor implements CustomClientHttpRequ
         LOGGER.debug("URI         : {}", request.getURI());
         LOGGER.debug("Method      : {}", request.getMethod());
         LOGGER.debug("Headers     : {}", request.getHeaders());
-        LOGGER.debug("Request body: {}", new String(body, StandardCharsets.UTF_8));
+        LOGGER.debug("Request body: {}", new String(body, Charset.defaultCharset()));
         LOGGER.debug("==========================request end================================================");
     }
 

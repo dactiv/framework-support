@@ -3,7 +3,6 @@ package com.github.dactiv.framework.spring.security.authentication.config;
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.spring.security.authentication.provider.RequestAuthenticationProvider;
-import com.github.dactiv.framework.spring.security.authentication.service.DefaultUserDetailsService;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
@@ -60,9 +59,9 @@ public class AuthenticationProperties {
     private String loginProcessingUrl = DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL;
 
     /**
-     * 设备唯一识别配置
+     * 访问 token 配置
      */
-    private DeviceIdProperties deviceId = new DeviceIdProperties();
+    private AccessTokenProperties accessToken = new AccessTokenProperties();
 
     /**
      * 认证类型 header 名称
@@ -110,16 +109,6 @@ public class AuthenticationProperties {
     private CacheProperties authorizationCache = CacheProperties.of(RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
-     * 不做认证缓存的用户明细服务类型
-     */
-    private List<String> ignoreAuthenticationCacheTypes = List.of(DefaultUserDetailsService.DEFAULT_TYPES);
-
-    /**
-     * 不做授权缓存的用户明细服务类型
-     */
-    private List<String> ignoreAuthorizationCacheTypes = List.of(DefaultUserDetailsService.DEFAULT_TYPES);
-
-    /**
      * 获取默认用户信息集合
      *
      * @return 默认用户信息集合
@@ -156,21 +145,21 @@ public class AuthenticationProperties {
     }
 
     /**
-     * 获取设备唯一识别配置
+     * 获取访问 token 配置
      *
-     * @return 设备唯一识别配置
+     * @return 访问 token 配置
      */
-    public DeviceIdProperties getDeviceId() {
-        return deviceId;
+    public AccessTokenProperties getAccessToken() {
+        return accessToken;
     }
 
     /**
-     * 设置设备唯一识别配置
+     * 设置访问 token 配置
      *
-     * @param deviceId 设备唯一识别配置
+     * @param accessToken 访问 token 配置
      */
-    public void setDeviceId(DeviceIdProperties deviceId) {
-        this.deviceId = deviceId;
+    public void setAccessToken(AccessTokenProperties accessToken) {
+        this.accessToken = accessToken;
     }
 
     /**
@@ -351,40 +340,5 @@ public class AuthenticationProperties {
      */
     public void setAuthorizationCache(CacheProperties authorizationCache) {
         this.authorizationCache = authorizationCache;
-    }
-
-    /**
-     * 获取不做认证缓存的用户明细服务类型
-     *
-     * @return 不做认证缓存的用户明细服务类型
-     */
-    public List<String> getIgnoreAuthenticationCacheTypes() {
-        return ignoreAuthenticationCacheTypes;
-    }
-
-    /**
-     * 设置不做认证缓存的用户明细服务类型
-     *
-     * @param ignoreAuthenticationCacheTypes 不做认证缓存的用户明细服务类型
-     */
-    public void setIgnoreAuthenticationCacheTypes(List<String> ignoreAuthenticationCacheTypes) {
-        this.ignoreAuthenticationCacheTypes = ignoreAuthenticationCacheTypes;
-    }
-
-    /**
-     * 获取不做授权缓存的用户明细服务类型
-     * @return 不做授权缓存的用户明细服务类型
-     */
-    public List<String> getIgnoreAuthorizationCacheTypes() {
-        return ignoreAuthorizationCacheTypes;
-    }
-
-    /**
-     * 设置不做授权缓存的用户明细服务类型
-     *
-     * @param ignoreAuthorizationCacheTypes 不做授权缓存的用户明细服务类型
-     */
-    public void setIgnoreAuthorizationCacheTypes(List<String> ignoreAuthorizationCacheTypes) {
-        this.ignoreAuthorizationCacheTypes = ignoreAuthorizationCacheTypes;
     }
 }

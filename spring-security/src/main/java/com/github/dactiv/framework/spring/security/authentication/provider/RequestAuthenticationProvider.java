@@ -102,12 +102,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             throw new AuthenticationServiceException(error);
         }
 
-        SimpleAuthenticationToken result = createSuccessAuthentication(userDetails, token);
-
-        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
-        optional.ifPresent(o -> o.onSuccessAuthentication(result, authentication));
-
-        return result;
+        return createSuccessAuthentication(userDetails, token);
     }
 
     protected SecurityUserDetails doRememberMeAuthentication(RememberMeAuthenticationToken token) {
@@ -168,31 +163,32 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         SecurityUserDetails userDetails = null;
         CacheProperties authenticationCache = null;
+
+        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
+
+        String message = messages.getMessage(
+                "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
+        );
+
+        UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+        boolean cache = userDetailsService.isSupportCache(token);
         // 如果启用认证缓存，从认证缓存里获取用户
-        if (Objects.nonNull(properties.getAuthenticationCache())) {
+        if (Objects.nonNull(properties.getAuthenticationCache()) && userDetailsService.isSupportCache(token)) {
             authenticationCache = CacheProperties.of(
                     properties.getAuthenticationCache().getName(token.getName()),
                     properties.getAuthenticationCache().getExpiresTime()
             );
         }
 
-        if (Objects.nonNull(authenticationCache) && !properties.getIgnoreAuthenticationCacheTypes().contains(token.getType())) {
+        if (Objects.nonNull(authenticationCache)) {
             RBucket<SecurityUserDetails> bucket = redissonClient.getBucket(authenticationCache.getName());
             userDetails = bucket.get();
         }
 
-        //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
-
         try {
-            Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
 
-            String message = messages.getMessage(
-                    "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
-                    "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
-            );
-
-            UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
-
+            //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
             if (Objects.isNull(userDetails)) {
                 userDetails = userDetailsService.getAuthenticationUserDetails(token);
             }
@@ -220,7 +216,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             userDetails.setType(token.getType());
         }
 
-        if (properties.getIgnoreAuthenticationCacheTypes().contains(token.getType())) {
+        if (!cache) {
             return userDetails;
         }
 
@@ -285,9 +281,8 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     /**
      * 创建认证信息
      *
-     * @param userDetails        当前用户
-     * @param token              当前认真 token
-     *
+     * @param userDetails 当前用户
+     * @param token       当前认真 token
      * @return spring security 认证信息
      */
     public PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails,
@@ -310,13 +305,9 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
 
-        if (properties.getIgnoreAuthorizationCacheTypes().contains(token.getType())) {
-            return userDetailsService.createSuccessAuthentication(userDetails, token, grantedAuthorities);
-        }
-
         // 获取认证缓存
         CacheProperties authorizationCache = null;
-        if (Objects.nonNull(properties.getAuthorizationCache())) {
+        if (Objects.nonNull(properties.getAuthorizationCache()) && userDetailsService.isSupportCache(token)) {
             authorizationCache = CacheProperties.of(
                     properties.getAuthorizationCache().getName(token.getName()),
                     properties.getAuthorizationCache().getExpiresTime()
@@ -352,7 +343,6 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * 获取账户认证的用户明细服务
      *
      * @param token 当前用户认证 token
-     *
      * @return 用户明细服务
      */
     public Optional<UserDetailsService<?>> getUserDetailsService(SimpleAuthenticationToken token) {

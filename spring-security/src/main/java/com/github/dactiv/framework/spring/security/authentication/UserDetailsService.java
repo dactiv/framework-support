@@ -130,12 +130,18 @@ public interface UserDetailsService<T> {
      * @return 新的认证 token
      */
     default PrincipalAuthenticationToken createSuccessAuthentication(SecurityUserDetails userDetails, SimpleAuthenticationToken token, Collection<? extends GrantedAuthority> grantedAuthorities) {
+
+        boolean isRememberMe = false;
+        if (RememberMeAuthenticationToken.class.isAssignableFrom(token.getClass())) {
+            isRememberMe = true;
+        }
+
         return new PrincipalAuthenticationToken(
                 new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
                 token.getType(),
                 userDetails,
                 grantedAuthorities,
-                token.isRememberMe(),
+                isRememberMe,
                 new Date()
         );
     }

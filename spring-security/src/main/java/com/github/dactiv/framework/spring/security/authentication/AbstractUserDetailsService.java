@@ -35,10 +35,6 @@ public abstract class AbstractUserDetailsService<T> implements UserDetailsServic
         boolean rememberMe = obtainRememberMe(request);
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(username, password);
 
-        if (request.getRequestURI().equals(properties.getLoginProcessingUrl())) {
-            rememberMe = false;
-        }
-
         return new RequestAuthenticationToken(request, response, usernamePasswordToken, type, rememberMe);
     }
 

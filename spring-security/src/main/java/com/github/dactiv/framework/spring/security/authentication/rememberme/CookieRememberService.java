@@ -12,14 +12,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.util.AntPathMatcher;
 
@@ -147,22 +144,7 @@ public class CookieRememberService implements RememberMeServices {
      * @return true 是，否则 false
      */
     protected boolean isRememberMeRequested(HttpServletRequest request, PrincipalAuthenticationToken token) {
-        // 如果配置永远使用记住我，永远返回 true
-        if (properties.getRememberMe().isAlways()) {
-            return true;
-        }
-
-        if (token.isRememberMe()) {
-            return true;
-        }
-
-        String paramValue = request.getParameter(properties.getRememberMe().getParamName());
-
-        if (StringUtils.isBlank(paramValue)) {
-            return false;
-        }
-
-        return BooleanUtils.toBoolean(paramValue);
+        return properties.getRememberMe().isAlways() || token.isRememberMe();
     }
 
     /**

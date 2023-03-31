@@ -13,6 +13,8 @@ import com.github.dactiv.framework.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
+import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +25,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.codec.SerializationCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.DeferredSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -150,8 +153,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
         super.saveContext(context, request, response);
 
-        saveRedissonSecurityContext(context);
-
+        saveRedissonSecurityContext(context, request, response);
     }
 
     /**
@@ -164,15 +166,26 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         bucket.deleteAsync();
     }
 
-    private void saveRedissonSecurityContext(SecurityContext context) {
+    protected void saveRedissonSecurityContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
         if (Objects.isNull(context.getAuthentication()) || !context.getAuthentication().isAuthenticated()) {
             return;
         }
 
-        Object details = context.getAuthentication().getDetails();
+        Authentication authentication = context.getAuthentication();
+
+        if (authentication instanceof RememberMeAuthenticationToken rememberMeToken && rememberMeToken.isRememberMe()) {
+            return ;
+        }
+
+        if (authentication instanceof SimpleAuthenticationToken simpleToken && simpleToken.isRememberMe()) {
+            return ;
+        }
+
+        Object details = authentication.getDetails();
         if (Objects.isNull(details) || !MobileUserDetails.class.isAssignableFrom(details.getClass())) {
             return;
         }
+
 
         MobileUserDetails mobileUserDetails = Casts.cast(details);
         String accessToken = mobileUserDetails

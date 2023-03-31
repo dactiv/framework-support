@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -75,8 +76,7 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         PrincipalAuthenticationToken token = Casts.cast(authentication);
-
-        if (!isRememberMeRequested(request, token)) {
+        if (!isRememberMeRequested(request) && !token.isRememberMe()) {
             return;
         }
 
@@ -143,8 +143,9 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return true 是，否则 false
      */
-    protected boolean isRememberMeRequested(HttpServletRequest request, PrincipalAuthenticationToken token) {
-        return properties.getRememberMe().isAlways() || token.isRememberMe();
+    protected boolean isRememberMeRequested(HttpServletRequest request) {
+        String rememberMeValue = request.getParameter(properties.getRememberMe().getParamName());
+        return properties.getRememberMe().isAlways() || BooleanUtils.toBoolean(rememberMeValue);
     }
 
     /**

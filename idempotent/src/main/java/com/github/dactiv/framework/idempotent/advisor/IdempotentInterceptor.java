@@ -115,7 +115,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
                 Object v = arguments[i];
 
-                if (properties.getIgnoreClasses().stream().anyMatch(c -> c.isAssignableFrom(v.getClass()))) {
+                if (Objects.isNull(v) || properties.getIgnoreClasses().stream().anyMatch(c -> c.isAssignableFrom(v.getClass()))) {
                     continue;
                 }
 

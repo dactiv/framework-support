@@ -101,6 +101,9 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
             RBucket<SecurityContext> bucket = getSecurityContextBucket(plaintextUserDetail);
             SecurityContext context = bucket.get();
+            if (Objects.isNull(context)) {
+                return null;
+            }
 
             MobileUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
             String existToken = userDetails.getMeta().getOrDefault(AccessTokenProperties.DEFAULT_ACCESS_TOKEN_PARAM_NAME, StringUtils.EMPTY).toString();

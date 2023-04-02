@@ -109,7 +109,7 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(RedissonClient redissonClient,
                                                        AuthenticationProperties authenticationProperties,
-                                                       ObjectProvider<UserDetailsService<?>> userDetailsService) {
+                                                       ObjectProvider<UserDetailsService> userDetailsService) {
         return new RequestAuthenticationProvider(
                 redissonClient,
                 authenticationProperties,

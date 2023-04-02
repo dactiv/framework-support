@@ -38,11 +38,11 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
-    private final List<UserDetailsService<?>> userDetailsServices;
+    private final List<UserDetailsService> userDetailsServices;
 
     public RequestAuthenticationFilter(AuthenticationProperties authenticationProperties,
                                        List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
-                                       List<UserDetailsService<?>> userDetailsServices) {
+                                       List<UserDetailsService> userDetailsServices) {
         this.authenticationProperties = authenticationProperties;
 
         setRequiresAuthenticationRequestMatcher(
@@ -149,7 +149,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             return resolver.createToken(request, response, token);
 
         } else {
-            UserDetailsService<?> userDetailsService = userDetailsServices
+            UserDetailsService userDetailsService = userDetailsServices
                     .stream()
                     .filter(u -> u.getType().contains(type))
                     .findFirst()

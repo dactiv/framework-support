@@ -14,9 +14,8 @@ import org.springframework.security.core.Authentication;
  *
  * @author maurice.chen
  *
- * @param <T> 实体类型
  */
-public abstract class AbstractUserDetailsService<T> implements UserDetailsService<T>{
+public abstract class AbstractUserDetailsService implements UserDetailsService {
 
     private final AuthenticationProperties properties;
 

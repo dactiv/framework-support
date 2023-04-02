@@ -19,7 +19,7 @@ import java.util.*;
  *
  * @author maurice.chen
  */
-public class DefaultUserDetailsService extends AbstractUserDetailsService<SecurityUserDetails> {
+public class DefaultUserDetailsService extends AbstractUserDetailsService {
 
     public static final String DEFAULT_TYPES = "Default";
 
@@ -81,11 +81,6 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService<Securi
             throw new BadCredentialsException("用户名密码错误");
         }
 
-        return userDetails;
-    }
-
-    @Override
-    public SecurityUserDetails convertTargetUser(SecurityUserDetails userDetails) {
         return userDetails;
     }
 

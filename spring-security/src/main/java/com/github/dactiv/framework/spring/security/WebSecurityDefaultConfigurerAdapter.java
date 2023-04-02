@@ -59,7 +59,7 @@ public class WebSecurityDefaultConfigurerAdapter {
 
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
 
-    private final List<UserDetailsService<?>> userDetailsServices;
+    private final List<UserDetailsService> userDetailsServices;
 
     private final List<ErrorResultResolver> resultResolvers;
 
@@ -70,7 +70,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                                                ApplicationEventPublisher eventPublisher,
                                                AuthenticationManager authenticationManager,
                                                CookieRememberService cookieRememberService,
-                                               ObjectProvider<UserDetailsService<?>> userDetailsServices,
+                                               ObjectProvider<UserDetailsService> userDetailsServices,
                                                ObjectProvider<ErrorResultResolver> resultResolvers,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {

@@ -55,7 +55,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     /**
      * 用户明细符合集合
      */
-    private List<UserDetailsService<?>> userDetailsServices;
+    private List<UserDetailsService> userDetailsServices;
 
     /**
      * redisson 客户端
@@ -76,7 +76,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      */
     public RequestAuthenticationProvider(RedissonClient redissonClient,
                                          AuthenticationProperties properties,
-                                         List<UserDetailsService<?>> userDetailsServices) {
+                                         List<UserDetailsService> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
         this.properties = properties;
         this.redissonClient = redissonClient;
@@ -142,7 +142,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
 
         if (Objects.isNull(userDetails)) {
-            Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
+            Optional<UserDetailsService> optional = getUserDetailsService(token);
             if (optional.isPresent()) {
                 userDetails = optional.get().getRememberMeUserDetails(token);
             }
@@ -164,14 +164,14 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         SecurityUserDetails userDetails = null;
         CacheProperties authenticationCache = null;
 
-        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
+        Optional<UserDetailsService> optional = getUserDetailsService(token);
 
         String message = messages.getMessage(
                 "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
                 "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
         );
 
-        UserDetailsService<?> userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
+        UserDetailsService userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
         boolean cache = userDetailsService.isSupportCache(token);
         // 如果启用认证缓存，从认证缓存里获取用户
         if (Objects.nonNull(properties.getAuthenticationCache()) && userDetailsService.isSupportCache(token)) {
@@ -289,7 +289,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                                                                     SimpleAuthenticationToken token) {
 
         // 通过 token 获取对应 type 实现的 UserDetailsService
-        Optional<UserDetailsService<?>> optional = getUserDetailsService(token);
+        Optional<UserDetailsService> optional = getUserDetailsService(token);
 
         if (optional.isEmpty()) {
             return new PrincipalAuthenticationToken(
@@ -301,7 +301,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             );
         }
 
-        UserDetailsService<?> userDetailsService = optional.get();
+        UserDetailsService userDetailsService = optional.get();
 
         Collection<? extends GrantedAuthority> grantedAuthorities = userDetails.getAuthorities();
 
@@ -345,7 +345,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * @param token 当前用户认证 token
      * @return 用户明细服务
      */
-    public Optional<UserDetailsService<?>> getUserDetailsService(SimpleAuthenticationToken token) {
+    public Optional<UserDetailsService> getUserDetailsService(SimpleAuthenticationToken token) {
 
         return userDetailsServices
                 .stream()
@@ -374,7 +374,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return 账户认证的用户明细服务集合
      */
-    public List<UserDetailsService<?>> getUserDetailsServices() {
+    public List<UserDetailsService> getUserDetailsServices() {
         return userDetailsServices;
     }
 
@@ -383,7 +383,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
-    public void setUserDetailsServices(List<UserDetailsService<?>> userDetailsServices) {
+    public void setUserDetailsServices(List<UserDetailsService> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
     }
 

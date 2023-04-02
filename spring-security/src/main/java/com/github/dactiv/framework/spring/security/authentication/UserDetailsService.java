@@ -1,6 +1,5 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
-import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.RequestAuthenticationToken;
@@ -23,7 +22,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public interface UserDetailsService<T> {
+public interface UserDetailsService {
 
     /**
      * 获取认证用户明细
@@ -77,35 +76,13 @@ public interface UserDetailsService<T> {
     }
 
     /**
-     * 转换目标用户
-     *
-     * @param userDetails 当前安全用户明细
-     *
-     * @return 目标用户实体
-     */
-    default T convertTargetUser(SecurityUserDetails userDetails) {
-        throw new UnsupportedOperationException("不支持 convertTargetUser 操作");
-    }
-
-    /**
-     * 转换目标用户
-     *
-     * @param userDetails 用户明细
-     *
-     * @return 目标用户实体
-     */
-    default T convertTargetUser(TypeUserDetails<?> userDetails) {
-        throw new UnsupportedOperationException("不支持 convertTargetUser 操作");
-    }
-
-    /**
      * 更新目标用户密码
      *
-     * @param targetUser 目标用户
+     * @param userDetails 目标用户
      * @param oldPassword 旧密码
      * @param newPassword 新密码
      */
-    default void updatePassword(T targetUser , String oldPassword, String newPassword) {
+    default void updatePassword(SecurityUserDetails userDetails , String oldPassword, String newPassword) {
         throw new UnsupportedOperationException("不支持 updatePassword 操作");
     }
 

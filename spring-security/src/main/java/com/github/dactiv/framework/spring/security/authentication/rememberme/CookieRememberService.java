@@ -115,6 +115,16 @@ public class CookieRememberService implements RememberMeServices {
     }
 
     /**
+     * 删除记住我 token
+     *
+     * @param userDetails 用户明细
+     */
+    public void deleteRememberMeToken(TypeUserDetails<Object> userDetails) {
+        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(userDetails);
+        bucket.deleteAsync();
+    }
+
+    /**
      * 获取记住我的 cookie 值
      *
      * @param request http 请求

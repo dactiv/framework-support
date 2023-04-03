@@ -10,7 +10,7 @@ import java.io.Serial;
  *
  * @author maurice
  */
-public class MobileUserDetails extends SecurityUserDetails {
+public class MobileUserDetails extends SecurityUserDetails implements DeviceIdentifiedUserDetails {
 
     @Serial
     private static final long serialVersionUID = -848955060608795664L;

@@ -11,6 +11,7 @@ import com.github.dactiv.framework.crypto.algorithm.ByteSource;
 import com.github.dactiv.framework.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.framework.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
+import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
@@ -34,6 +35,7 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.nio.charset.Charset;
+import java.security.Security;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,7 +128,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public RBucket<SecurityContext> getSecurityContextBucket(MobileUserDetails mobileUserDetails) {
-        String key = authenticationProperties.getAccessToken().getCache().getName(mobileUserDetails.getType() + CacheProperties.DEFAULT_SEPARATOR + mobileUserDetails.getDeviceIdentified());
+        return getSecurityContextBucket(mobileUserDetails.getType(), mobileUserDetails.getDeviceIdentified());
+    }
+
+    public RBucket<SecurityContext> getSecurityContextBucket(String type, String deviceIdentified) {
+        String key = authenticationProperties.getAccessToken().getCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
         return redissonClient.getBucket(key, new SerializationCodec());
     }
 
@@ -166,6 +172,17 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
      */
     public void deleteContext(MobileUserDetails mobileUserDetails) {
         RBucket<SecurityContext> bucket = getSecurityContextBucket(mobileUserDetails);
+        bucket.deleteAsync();
+    }
+
+    /**
+     * 删除缓存
+     *
+     * @param type 用户类型
+     * @param deviceIdentified 设备唯一识别
+     */
+    public void deleteContext(String type, String deviceIdentified) {
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(type, deviceIdentified);
         bucket.deleteAsync();
     }
 

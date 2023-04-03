@@ -47,7 +47,7 @@ public class RestResultAuthenticationEntryPoint implements AuthenticationEntryPo
             if (optional.isPresent()) {
                 result = optional.get().resolve(throwable);
             } else {
-                result = RestResult.ofException(e);
+                result = RestResult.ofException(throwable);
             }
         } else if (InsufficientAuthenticationException.class.isAssignableFrom(e.getClass())) {
             result = RestResult.of(HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED.value(), String.valueOf(HttpStatus.UNAUTHORIZED.value()));

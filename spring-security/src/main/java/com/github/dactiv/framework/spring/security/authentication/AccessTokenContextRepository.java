@@ -139,17 +139,17 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     public String generatePlaintextString(MobileUserDetails mobileUserDetails) {
         Map<String, Object> map = Map.of(
                 IdEntity.ID_FIELD_NAME, mobileUserDetails.getId(),
-                AuthenticationProperties.SECURITY_FORM_PASSWORD_PARAM_NAME, mobileUserDetails.getPassword(),
                 AuthenticationProperties.SECURITY_FORM_USERNAME_PARAM_NAME, mobileUserDetails.getUsername(),
                 PluginAuditEvent.TYPE_FIELD_NAME, mobileUserDetails.getType(),
                 DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileUserDetails.getDeviceIdentified(),
                 NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis()
         );
 
-        String json = Casts.writeValueAsString(map);
+        String plaintext = Casts.writeValueAsString(map);
+
         CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
         byte[] key = Base64.decode(authenticationProperties.getAccessToken().getKey());
-        ByteSource source = cipherService.encrypt(json.getBytes(Charset.defaultCharset()), key);
+        ByteSource source = cipherService.encrypt(plaintext.getBytes(Charset.defaultCharset()), key);
 
         return source.getBase64();
     }

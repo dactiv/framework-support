@@ -16,6 +16,13 @@ public interface ByteSource {
     byte[] obtainBytes();
 
     /**
+     * 获取字符串信息
+     *
+     * @return 字符串信息
+     */
+    public String obtainString();
+
+    /**
      * 获取本字节原的 16 进制字符串
      *
      * @return 16 进制字符串

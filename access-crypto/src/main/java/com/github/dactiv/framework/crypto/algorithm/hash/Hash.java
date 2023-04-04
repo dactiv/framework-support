@@ -10,6 +10,7 @@ import com.github.dactiv.framework.crypto.algorithm.exception.UnknownAlgorithmEx
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -48,7 +49,7 @@ public class Hash extends AbstractByteSource implements Serializable {
     /**
      * 字节数组
      */
-    private byte[] bytes;
+    private final byte[] bytes;
 
     /**
      * 盐值
@@ -224,9 +225,13 @@ public class Hash extends AbstractByteSource implements Serializable {
     }
 
     @Override
+    public String obtainString() {
+        return new String(obtainBytes(), Charset.defaultCharset());
+    }
+
+    @Override
     public boolean equals(Object o) {
-        if (o instanceof Hash) {
-            Hash other = (Hash) o;
+        if (o instanceof Hash other) {
             return MessageDigest.isEqual(obtainBytes(), other.obtainBytes());
         }
         return false;

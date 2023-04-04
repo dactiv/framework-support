@@ -4,6 +4,7 @@ package com.github.dactiv.framework.crypto.algorithm;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serial;
+import java.nio.charset.Charset;
 
 /**
  * 简单的字节原实现
@@ -105,5 +106,9 @@ public class SimpleByteSource extends AbstractByteSource {
     @Override
     public byte[] obtainBytes() {
         return bytes;
+    }
+
+    public String obtainString() {
+        return new String(obtainBytes(), Charset.defaultCharset());
     }
 }

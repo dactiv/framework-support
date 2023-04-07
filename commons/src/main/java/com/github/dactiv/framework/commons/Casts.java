@@ -178,6 +178,23 @@ public class Casts {
     /**
      * 将 bytes 内容转换为指定类型的对象
      *
+     * @param json  json 字符串
+     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>   对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(String json, JavaType type) {
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * 将 bytes 内容转换为指定类型的对象
+     *
      * @param bytes bytes 内容
      * @param type  指定类型的对象 class
      * @param <T>   对象范型实体值
@@ -202,6 +219,23 @@ public class Casts {
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(byte[] bytes, JavaType type) {
+        try {
+            return objectMapper.readValue(bytes, type);
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * 将 bytes 内容转换为指定类型的对象
+     *
+     * @param bytes bytes 内容
+     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>   对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(byte[] bytes, TypeReference<T> type) {
         try {
             return objectMapper.readValue(bytes, type);
         } catch (IOException e) {

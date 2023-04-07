@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 转型工具类
@@ -300,6 +301,39 @@ public class Casts {
         }
 
         return result.toString();
+    }
+
+    /**
+     * 将 key 为 String， value 为 String 数组的 map 数据转换成 key 为 String，value 为 object 的 map 对象
+     *
+     * @param map key 为 String， value 为 String 数组的 map
+     *
+     * @return key 为 String，value 为 object 的 map 对象
+     */
+    public static Map<String, Object> castMapToStringObject(Map<String, String[]> map) {
+        return castMapToStringObject(map, s -> s);
+    }
+
+    /**
+     * 将 key 为 String， value 为 String 数组的 map 数据转换成 key 为 String，value 为 object 的 map 对象
+     *
+     * @param map key 为 String， value 为 String 数组的 map
+     * @param function 处理字符串的功能
+     *
+     * @return key 为 String，value 为 object 的 map 对象
+     */
+    public static Map<String, Object> castMapToStringObject(Map<String, String[]> map, Function<String, Object> function) {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        map.forEach((k,v) -> {
+            if (v.length > 1) {
+                result.put(k, Arrays.stream(v).map(function).collect(Collectors.toList()));
+            } else {
+                result.put(k, function.apply(v[0]));
+            }
+        });
+
+        return result;
     }
 
     /**

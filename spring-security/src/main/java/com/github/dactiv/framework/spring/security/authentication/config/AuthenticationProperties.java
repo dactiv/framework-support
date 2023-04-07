@@ -99,6 +99,11 @@ public class AuthenticationProperties {
     private RememberMeProperties rememberMe = new RememberMeProperties();
 
     /**
+     * ip 认证配置
+     */
+    private List<IpAuthenticationProperties> ipAuthentication = new LinkedList<>();
+
+    /**
      * 认证缓存配置信息
      */
     private CacheProperties authenticationCache = CacheProperties.of(RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
@@ -232,6 +237,24 @@ public class AuthenticationProperties {
      */
     public void setTokenResolverHeaderName(String tokenResolverHeaderName) {
         this.tokenResolverHeaderName = tokenResolverHeaderName;
+    }
+
+    /**
+     * 获取 ip 认证配置
+     *
+     * @return  ip 认证配置
+     */
+    public List<IpAuthenticationProperties> getIpAuthentication() {
+        return ipAuthentication;
+    }
+
+    /**
+     * 设置 ip 认证配置
+     *
+     * @param ipAuthentication  ip 认证配置
+     */
+    public void setIpAuthentication(List<IpAuthenticationProperties> ipAuthentication) {
+        this.ipAuthentication = ipAuthentication;
     }
 
     /**

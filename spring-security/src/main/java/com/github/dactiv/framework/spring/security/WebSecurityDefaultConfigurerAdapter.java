@@ -137,6 +137,7 @@ public class WebSecurityDefaultConfigurerAdapter {
         filter.setSecurityContextRepository(accessTokenContextRepository);
 
         httpSecurity.addFilter(filter);
+        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

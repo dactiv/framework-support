@@ -3,18 +3,23 @@ package com.github.dactiv.framework.commons.jackson.serializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.github.dactiv.framework.commons.Casts;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 敏感数据加 * 的 json 序列化实现
  *
  * @author maurice
  */
-public class DesensitizeSerializer extends JsonSerializer<String> {
+public class DesensitizeSerializer extends JsonSerializer<Object> {
 
     /**
      * 默认倍数值
@@ -51,7 +56,25 @@ public class DesensitizeSerializer extends JsonSerializer<String> {
     }
 
     @Override
-    public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeString(desensitize(s));
+    public void serialize(Object s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        jsonGenerator.writeObject(getDesensitizeValue(s));
+    }
+
+    public Object getDesensitizeValue(Object s) {
+        if (s instanceof Collection<?> c) {
+            return c.stream().map(v -> desensitize(v.toString())).collect(Collectors.toList());
+        } else if (s instanceof Map<?,?> map) {
+            Map<?, Object> convert = Casts.cast(map);
+
+            convert.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.nonNull(entry.getValue()))
+                    .filter(entry -> String.class.isAssignableFrom(entry.getValue().getClass()) || Collection.class.isAssignableFrom(entry.getValue().getClass()))
+                    .forEach(e -> e.setValue(getDesensitizeValue(e.getValue())));
+
+            return convert;
+        } else {
+            return desensitize(s.toString());
+        }
     }
 }

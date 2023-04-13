@@ -12,7 +12,17 @@ public class BasicUserDetails<T> implements Serializable, TypeUserDetails<T> {
     /**
      * 用户 id 字段名称
      */
-    public static final String USER_ID_FIELD = "userId";
+    public static final String USER_ID_FIELD_NAME = "userId";
+
+    /**
+     * 用户类型字段名称
+     */
+    public static final String USER_TYPE_FIELD_NAME = "userType";
+
+    /**
+     * 登陆账户字段名称
+     */
+    public static final String USERNAME_FIELD_NAME = "username";
 
     /**
      * 用户 id

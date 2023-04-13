@@ -45,6 +45,11 @@ public class Casts {
     public final static String SEMICOLON = ";";
 
     /**
+     * 逗号
+     */
+    public final static String COMMA = ",";
+
+    /**
      * 默认等于符号
      */
     public static final String DEFAULT_EQ_SYMBOL = "=";

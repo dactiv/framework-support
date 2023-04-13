@@ -40,7 +40,11 @@ public class SpringMvcUtils {
 
     private final static Integer IP_MIN_LENGTH = 15;
 
-    public final static String COMMA_STRING = ",";
+    /**
+     * @deprecated 使用 {@link Casts#COMMA} 替代
+     */
+    @Deprecated
+    public final static String COMMA_STRING = Casts.COMMA;
 
     public final static String DEFAULT_ATTACHMENT_NAME = "attachment;filename=";
 

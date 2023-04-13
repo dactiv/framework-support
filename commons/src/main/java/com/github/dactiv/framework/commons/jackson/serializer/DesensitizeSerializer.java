@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 敏感数据加 * 的 json 序列化实现
@@ -23,60 +25,33 @@ public class DesensitizeSerializer extends JsonSerializer<String> {
      */
     private static final String DEFAULT_DESENSITIZE_SYMBOL = "*";
 
-    @Override
-    public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-
-        int avgLength = s.length() / DEFAULT_MULTIPLE_VALUE;
-
-        if (avgLength == 1) {
-            jsonGenerator.writeString(DEFAULT_DESENSITIZE_SYMBOL);
+    public static String desensitize(String string) {
+        if (StringUtils.isEmpty(string)) {
+            return string;
         }
 
-        String left = StringUtils.substring(s, 0, avgLength);
-        String right = StringUtils.substring(s, avgLength, s.length());
+        int length = string.length();
 
-        // 左脱敏
-        String leftPad = serializeString(left, true);
-        // 有脱敏
-        String rightPad = serializeString(right, false);
+        if (length <= DEFAULT_MULTIPLE_VALUE) {
+            return string;
+        }
 
-        jsonGenerator.writeString(leftPad + rightPad);
+        double avgLength = (double) length / DEFAULT_MULTIPLE_VALUE / DEFAULT_MULTIPLE_VALUE;
+
+        int startIndex = BigDecimal.valueOf(avgLength).setScale(0, RoundingMode.HALF_DOWN).intValue();
+        int endIndex = BigDecimal.valueOf(avgLength).setScale(0, RoundingMode.HALF_UP).intValue();
+        int numAsterisks = length - startIndex - endIndex;
+
+        if (startIndex + endIndex >= DEFAULT_MULTIPLE_VALUE) {
+            numAsterisks--;
+        }
+
+        String exp = "(?<=.{" + startIndex + "}).(?=.*.{" + (numAsterisks) + "}$)";
+        return string.replaceAll(exp, DEFAULT_DESENSITIZE_SYMBOL);
     }
 
-    /**
-     * 序列化字符串
-     *
-     * @param s    字符串
-     * @param left 是否左边脱敏，true 是，否则 false
-     *
-     * @return 脱敏后的字符串
-     */
-    private String serializeString(String s, boolean left) {
-
-        int avgLength = s.length() / DEFAULT_MULTIPLE_VALUE;
-
-        if (avgLength == 1) {
-            return s;
-        }
-
-        String result;
-
-        if (left) {
-            String temp = StringUtils.substring(s, 0, avgLength);
-            result = StringUtils.rightPad(temp, s.length(), DEFAULT_DESENSITIZE_SYMBOL);
-        } else {
-
-            int index = 0;
-
-            if (s.length() > DEFAULT_MULTIPLE_VALUE) {
-                index = s.length() / DEFAULT_MULTIPLE_VALUE;
-            }
-
-            String temp = StringUtils.substring(s, index, s.length());
-            result = StringUtils.leftPad(temp, s.length() - 1, DEFAULT_DESENSITIZE_SYMBOL);
-        }
-
-        return result;
-
+    @Override
+    public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        jsonGenerator.writeString(desensitize(s));
     }
 }

@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.security.entity;
 
+import com.github.dactiv.framework.commons.CacheProperties;
+
 /**
  * 带用户类型的用户明细实体
  *
@@ -58,5 +60,14 @@ public interface TypeUserDetails<T> {
         this.setUserId(userDetails.getUserId());
         this.setUsername(userDetails.getUsername());
         this.setUserType(userDetails.getUserType());
+    }
+
+    /**
+     * 获取唯一值
+     *
+     * @return 唯一值
+     */
+    default String toUniqueValue() {
+        return getUserType() + CacheProperties.DEFAULT_SEPARATOR + getUserId() + CacheProperties.DEFAULT_SEPARATOR + getUsername();
     }
 }

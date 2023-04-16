@@ -90,7 +90,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
     protected void configReceive(String dataId, String configInfo) throws IOException {
 
         // 获取后缀名
-        String fileExtension = StringUtils.substringAfterLast(dataId, Casts.DEFAULT_DOT_SYMBOL);
+        String fileExtension = StringUtils.substringAfterLast(dataId, Casts.DOT);
 
         // 通过 configInfo 创建配置信息
         List<PropertySource<?>> properties = NacosDataParserHandler.getInstance().parseNacosData(dataId, configInfo, fileExtension);
@@ -408,7 +408,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 if (StringUtils.isNotEmpty(name)) {
 
                     // 如果 name 没有 .后缀名，通过配置信息获取
-                    String defaultName = StringUtils.appendIfMissing(name, Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
+                    String defaultName = StringUtils.appendIfMissing(name, Casts.DOT + nacosConfigProperties.getFileExtension());
 
                     // 如果默认要侦听的配置信息
                     NacosConfigProperties.Config config = new NacosConfigProperties.Config(
@@ -421,7 +421,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
 
                     // 获取活动环境配置，并构造 [name-环境值.后缀] 的配置文件侦听
                     for (String profile : applicationContext.getEnvironment().getActiveProfiles()) {
-                        String profileName = StringUtils.appendIfMissing(name, Casts.NEGATIVE_SYMBOL + profile + Casts.DEFAULT_DOT_SYMBOL + nacosConfigProperties.getFileExtension());
+                        String profileName = StringUtils.appendIfMissing(name, Casts.NEGATIVE + profile + Casts.DOT + nacosConfigProperties.getFileExtension());
 
                         NacosConfigProperties.Config profileConfig = new NacosConfigProperties.Config(
                                 profileName,

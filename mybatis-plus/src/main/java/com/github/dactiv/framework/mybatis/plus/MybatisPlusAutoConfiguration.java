@@ -3,6 +3,7 @@ package com.github.dactiv.framework.mybatis.plus;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.github.dactiv.framework.mybatis.plus.interceptor.LastModifiedDateInnerInterceptor;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.query.QueryGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -36,8 +37,9 @@ public class MybatisPlusAutoConfiguration {
 
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
-        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor(true));
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
+        interceptor.addInnerInterceptor(new LastModifiedDateInnerInterceptor(true));
         return interceptor;
     }
 

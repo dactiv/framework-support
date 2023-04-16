@@ -302,7 +302,7 @@ public class MinioTemplate {
         String bucketName = fileObject.getBucketName().toLowerCase();
 
         if (StringUtils.endsWith(fileObject.getObjectName(), AntPathMatcher.DEFAULT_PATH_SEPARATOR) ||
-                StringUtils.endsWith(fileObject.getObjectName(), Casts.DEFAULT_DOT_SYMBOL)) {
+                StringUtils.endsWith(fileObject.getObjectName(), Casts.DOT)) {
 
             ListObjectsArgs args = ListObjectsArgs
                     .builder()

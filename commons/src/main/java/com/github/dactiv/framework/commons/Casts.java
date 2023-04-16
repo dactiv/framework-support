@@ -32,12 +32,17 @@ public class Casts {
     /**
      * 默认点符号
      */
-    public static final String DEFAULT_DOT_SYMBOL = ".";
+    public static final String DOT = ".";
+
+    /**
+     *
+     */
+    public static final String UNDERSCORE = "_";
 
     /**
      * 负极符号
      */
-    public final static String NEGATIVE_SYMBOL = "-";
+    public final static String NEGATIVE = "-";
 
     /**
      * 分号
@@ -52,22 +57,22 @@ public class Casts {
     /**
      * 默认等于符号
      */
-    public static final String DEFAULT_EQ_SYMBOL = "=";
+    public static final String EQ = "=";
 
     /**
      * 默认 and 符号
      */
-    public static final String DEFAULT_AND_SYMBOL = "&";
+    public static final String HTTP_AND = "&";
 
     /**
      * 路径变量开始符号
      */
-    public static final String PATH_VARIABLE_SYMBOL_START = "{";
+    public static final String HTTP_PATH_VARIABLE_START = "{";
 
     /**
      * 路径变量结束符号
      */
-    public static final String PATH_VARIABLE_SYMBOL_END = "}";
+    public static final String HTTP_PATH_VARIABLE_END = "}";
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -259,13 +264,33 @@ public class Casts {
     public static MultiValueMap<String, String> castRequestBodyMap(String body) {
         MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 
-        Arrays.stream(StringUtils.split(body, DEFAULT_AND_SYMBOL)).forEach(b -> {
-            String key = StringUtils.substringBefore(b, DEFAULT_EQ_SYMBOL);
-            String value = StringUtils.substringAfter(b, DEFAULT_EQ_SYMBOL);
+        Arrays.stream(StringUtils.split(body, HTTP_AND)).forEach(b -> {
+            String key = StringUtils.substringBefore(b, EQ);
+            String value = StringUtils.substringAfter(b, EQ);
             result.add(key, value);
         });
 
         return result;
+    }
+
+    public static String toSnakeCase(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return name;
+        }
+        StringBuilder result = new StringBuilder();
+        boolean isFirst = true;
+        for (char c : name.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                if (!isFirst) {
+                    result.append(UNDERSCORE);
+                }
+                result.append(Character.toLowerCase(c));
+                isFirst = false;
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
     /**
@@ -295,9 +320,9 @@ public class Casts {
                         .forEach(
                                 v -> result
                                         .append(key)
-                                        .append(DEFAULT_EQ_SYMBOL)
+                                        .append(EQ)
                                         .append(value.size() > 1 ? value.stream().map(function).toList() : function.apply(value.get(0)))
-                                        .append(DEFAULT_AND_SYMBOL)
+                                        .append(HTTP_AND)
                         )
                 );
 
@@ -426,7 +451,7 @@ public class Casts {
 
         Map<String, Object> result = new LinkedHashMap<>(source);
 
-        String[] strings = StringUtils.split(path, DEFAULT_DOT_SYMBOL);
+        String[] strings = StringUtils.split(path, DOT);
 
         for (String s : strings) {
             result = Casts.cast(result.get(s));
@@ -520,7 +545,7 @@ public class Casts {
      */
     public static String setUrlPathVariableValue(String url, Map<String, String> variableValue) {
 
-        String[] vars = StringUtils.substringsBetween(url, PATH_VARIABLE_SYMBOL_START, PATH_VARIABLE_SYMBOL_END);
+        String[] vars = StringUtils.substringsBetween(url, HTTP_PATH_VARIABLE_START, HTTP_PATH_VARIABLE_END);
 
         List<String> varList = Arrays.asList(vars);
 
@@ -533,7 +558,7 @@ public class Casts {
         String temp = url;
 
         for (String s : existList) {
-            String searchString = PATH_VARIABLE_SYMBOL_START + s + PATH_VARIABLE_SYMBOL_END;
+            String searchString = HTTP_PATH_VARIABLE_START + s + HTTP_PATH_VARIABLE_END;
             temp = StringUtils.replace(temp, searchString, variableValue.get(s));
         }
 

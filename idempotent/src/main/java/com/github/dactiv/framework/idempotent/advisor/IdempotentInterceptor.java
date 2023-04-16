@@ -95,7 +95,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
         String key = idempotent.key();
 
         if (StringUtils.isBlank(key)) {
-            key = method.getDeclaringClass().getName() + Casts.DEFAULT_DOT_SYMBOL + method.getName();
+            key = method.getDeclaringClass().getName() + Casts.DOT + method.getName();
         }
 
         Object keyValue = valueGenerator.generate(key, method, arguments);

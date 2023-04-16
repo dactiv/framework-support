@@ -11,7 +11,6 @@ import com.github.dactiv.framework.crypto.algorithm.ByteSource;
 import com.github.dactiv.framework.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.framework.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
-import com.github.dactiv.framework.security.entity.TypeUserDetails;
 import com.github.dactiv.framework.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
@@ -35,7 +34,6 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.nio.charset.Charset;
-import java.security.Security;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

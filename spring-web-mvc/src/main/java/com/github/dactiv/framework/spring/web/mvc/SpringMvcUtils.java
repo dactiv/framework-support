@@ -326,7 +326,7 @@ public class SpringMvcUtils {
             byte[] macAddressBytes = networkInterface.getHardwareAddress();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < macAddressBytes.length; i++) {
-                sb.append(String.format("%02X%s", macAddressBytes[i], (i < macAddressBytes.length - 1) ? Casts.NEGATIVE_SYMBOL : StringUtils.EMPTY));
+                sb.append(String.format("%02X%s", macAddressBytes[i], (i < macAddressBytes.length - 1) ? Casts.NEGATIVE : StringUtils.EMPTY));
             }
             return sb.toString();
         } catch (Exception e) {

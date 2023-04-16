@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.audit;
 
+import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.security.audit.Auditable;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
@@ -105,7 +106,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             type = plugin.name();
             Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
             if (root != null) {
-                type = root.name() + ":" + type;
+                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
             }
         }
 
@@ -126,9 +127,9 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Map<String, Object> data = getData(request, response, handler);
 
         if (ex == null && HttpStatus.OK.value() == response.getStatus()) {
-            type = type + ":" + successSuffixName;
+            type = type + CacheProperties.DEFAULT_SEPARATOR + successSuffixName;
         } else {
-            type = type + ":" + failureSuffixName;
+            type = type + CacheProperties.DEFAULT_SEPARATOR + failureSuffixName;
 
             if (Objects.nonNull(ex)) {
                 data.put(exceptionKeyName, ex.getMessage());

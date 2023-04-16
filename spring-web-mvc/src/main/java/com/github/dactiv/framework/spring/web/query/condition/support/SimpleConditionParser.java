@@ -46,7 +46,10 @@ public class SimpleConditionParser implements ConditionParser {
 
     /**
      * 默认字段条件分隔符
+     *
+     * @deprecated 使用 {@link com.github.dactiv.framework.commons.Casts#UNDERSCORE}
      */
+    @Deprecated
     public static final String DEFAULT_FIELD_CONDITION_SEPARATORS = "_";
 
     /**

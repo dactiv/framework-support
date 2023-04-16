@@ -71,9 +71,9 @@ public class JsonContainsWildcardParser<T> implements WildcardParser<QueryWrappe
      */
     public static String getExpression(String propertyName, int index) {
 
-        if (StringUtils.contains(propertyName, Casts.DEFAULT_DOT_SYMBOL)) {
-            String path = StringUtils.substringAfter(propertyName, Casts.DEFAULT_DOT_SYMBOL);
-            String field = StringUtils.substringBefore(propertyName, Casts.DEFAULT_DOT_SYMBOL);
+        if (StringUtils.contains(propertyName, Casts.DOT)) {
+            String path = StringUtils.substringAfter(propertyName, Casts.DOT);
+            String field = StringUtils.substringBefore(propertyName, Casts.DOT);
             return "JSON_CONTAINS(" + field + "->'$[*]." + path  + "', {" + index + "}, '$')";
         }
 

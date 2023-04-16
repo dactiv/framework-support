@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.web.query.condition.support;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnumUtils;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.query.Property;
@@ -45,14 +46,6 @@ public class SimpleConditionParser implements ConditionParser {
     public static final String DEFAULT_FIELD_CLOSE_SUFFIX = "]";
 
     /**
-     * 默认字段条件分隔符
-     *
-     * @deprecated 使用 {@link com.github.dactiv.framework.commons.Casts#UNDERSCORE}
-     */
-    @Deprecated
-    public static final String DEFAULT_FIELD_CONDITION_SEPARATORS = "_";
-
-    /**
      * 条件名称前缀
      */
     private String conditionNamePrefix = DEFAULT_CONDITION_NAME_PREFIX;
@@ -74,7 +67,7 @@ public class SimpleConditionParser implements ConditionParser {
     /**
      * 字段条件分隔符
      */
-    private String fieldConditionSeparators = DEFAULT_FIELD_CONDITION_SEPARATORS;
+    private String fieldConditionSeparators = Casts.UNDERSCORE;
 
     /**
      * 创建一个简单的条件解析器实现

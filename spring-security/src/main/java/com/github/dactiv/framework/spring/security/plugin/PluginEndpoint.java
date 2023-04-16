@@ -276,7 +276,7 @@ public class PluginEndpoint {
                 // 有.html 和 .json的类似配置，但其实一个就够了
                 uri.add(RegExUtils.removePattern(url, "\\{.*\\}"));
             }
-            parent.setValue(StringUtils.join(uri, SpringMvcUtils.COMMA_STRING));
+            parent.setValue(StringUtils.join(uri, Casts.COMMA));
 
         }
 
@@ -324,11 +324,11 @@ public class PluginEndpoint {
                 target.setSources(parent.getSources());
             }
 
-            target.setValue(StringUtils.join(values, SpringMvcUtils.COMMA_STRING));
+            target.setValue(StringUtils.join(values, Casts.COMMA));
             List<String> authorize = getSecurityAuthorize(method);
 
             if (!authorize.isEmpty()) {
-                target.setAuthority(StringUtils.join(authorize, SpringMvcUtils.COMMA_STRING));
+                target.setAuthority(StringUtils.join(authorize, Casts.COMMA));
             }
 
             result.add(target);
@@ -463,7 +463,7 @@ public class PluginEndpoint {
             }
         }
 
-        return StringUtils.join(uri, SpringMvcUtils.COMMA_STRING);
+        return StringUtils.join(uri, Casts.COMMA);
     }
 
     /**

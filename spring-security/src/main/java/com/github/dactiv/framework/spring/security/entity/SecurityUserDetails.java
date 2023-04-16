@@ -7,7 +7,6 @@ import com.github.dactiv.framework.security.entity.BasicUserDetails;
 import com.github.dactiv.framework.security.entity.ResourceAuthority;
 import com.github.dactiv.framework.security.entity.RoleAuthority;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
-import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -108,7 +107,7 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
                 resourceAuthorities.stream()
                         .filter(x -> StringUtils.isNotBlank(x.getAuthority()))
                         .filter(x -> !DEFAULT_IS_AUTHENTICATED_METHOD_NAME.equals(x.getAuthority()))
-                        .flatMap(x -> Arrays.stream(StringUtils.split(x.getAuthority(), SpringMvcUtils.COMMA_STRING)))
+                        .flatMap(x -> Arrays.stream(StringUtils.split(x.getAuthority(), Casts.COMMA)))
                         .map(StringUtils::trimToEmpty)
                         .filter(StringUtils::isNotEmpty)
                         .filter(x -> StringUtils.startsWith(x, ResourceAuthority.DEFAULT_RESOURCE_PREFIX))

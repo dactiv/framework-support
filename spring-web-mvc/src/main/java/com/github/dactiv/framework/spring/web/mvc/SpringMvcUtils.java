@@ -40,12 +40,6 @@ public class SpringMvcUtils {
 
     private final static Integer IP_MIN_LENGTH = 15;
 
-    /**
-     * @deprecated 使用 {@link Casts#COMMA} 替代
-     */
-    @Deprecated
-    public final static String COMMA_STRING = Casts.COMMA;
-
     public final static String DEFAULT_ATTACHMENT_NAME = "attachment;filename=";
 
     public final static String ANT_PATH_MATCH_ALL = "/**";
@@ -293,8 +287,8 @@ public class SpringMvcUtils {
 
         //使用代理，则获取第一个IP地址
         if (StringUtils.isNotBlank(ip) && ip.length() > IP_MIN_LENGTH) {
-            if (ip.indexOf(COMMA_STRING) > 0) {
-                ip = ip.substring(0, ip.indexOf(COMMA_STRING));
+            if (ip.indexOf(Casts.COMMA) > 0) {
+                ip = ip.substring(0, ip.indexOf(Casts.COMMA));
             }
         }
 

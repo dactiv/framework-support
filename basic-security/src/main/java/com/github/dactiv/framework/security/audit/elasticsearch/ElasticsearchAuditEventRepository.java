@@ -146,11 +146,8 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     @Override
     public AuditEvent createAuditEvent(Map<String, Object> map) {
-        AuditEvent auditEvent = PluginAuditEventRepository.super.createAuditEvent(map);
-        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
-
+        PluginAuditEvent pluginAuditEvent = Casts.cast(PluginAuditEventRepository.super.createAuditEvent(map));
         pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
-
         return pluginAuditEvent;
     }
 

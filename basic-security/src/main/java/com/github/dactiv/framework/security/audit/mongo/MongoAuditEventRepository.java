@@ -147,9 +147,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     @Override
     public AuditEvent createAuditEvent(Map<String, Object> map) {
-        AuditEvent auditEvent = PluginAuditEventRepository.super.createAuditEvent(map);
-        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
-
+        PluginAuditEvent pluginAuditEvent = Casts.cast(PluginAuditEventRepository.super.createAuditEvent(map));
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
 
         return pluginAuditEvent;

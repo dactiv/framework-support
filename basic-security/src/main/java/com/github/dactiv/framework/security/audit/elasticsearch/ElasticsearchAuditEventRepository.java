@@ -29,8 +29,6 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +45,6 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     public static final int DEFAULT_FIND_SIZE = 10000;
 
     public static final String DEFAULT_INDEX_NAME = "ix_http_request_audit_event";
-
-    public static final String PRINCIPAL_TYPE_FIELD_NAME = "principalType";
-
-    public static final String PRINCIPAL_ID_FIELD_NAME = "principalId";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
@@ -79,7 +73,6 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     public void add(AuditEvent event) {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(
-                LocalDateTime.now().atOffset(ZoneOffset.UTC).toInstant(),
                 event.getPrincipal(),
                 event.getType(),
                 event.getData()
@@ -156,8 +149,6 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
 
         pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
-        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_ID_FIELD_NAME, StringUtils.EMPTY).toString());
-        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
 
         return pluginAuditEvent;
     }

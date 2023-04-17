@@ -3,7 +3,8 @@ package com.github.dactiv.framework.security.audit;
 import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.io.Serial;
-import java.time.*;
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,6 +20,8 @@ public class PluginAuditEvent extends AuditEvent {
 
     public static final String PRINCIPAL_FIELD_NAME = "principal";
 
+    public static final String PRINCIPAL_META_FIELD_NAME = "principalMeta";
+
     public static final String TYPE_FIELD_NAME = "type";
 
     /**
@@ -26,9 +29,7 @@ public class PluginAuditEvent extends AuditEvent {
      */
     private String id;
 
-    private String principalId;
-
-    private String principalType;
+    private Map<String, Object> principalMeta = new LinkedHashMap<>();
 
     public PluginAuditEvent(AuditEvent auditEvent) {
         super(auditEvent.getTimestamp(), auditEvent.getPrincipal(), auditEvent.getType(), auditEvent.getData());
@@ -36,7 +37,7 @@ public class PluginAuditEvent extends AuditEvent {
     }
 
     public PluginAuditEvent(String principal, String type, Map<String, Object> data) {
-        super(LocalDateTime.now().atOffset(ZoneOffset.UTC).toInstant(), principal, type, data);
+        super(Instant.now(), principal, type, data);
         this.id = UUID.randomUUID().toString();
     }
 
@@ -64,38 +65,22 @@ public class PluginAuditEvent extends AuditEvent {
     }
 
     /**
-     * 获取当事人 id
+     * 获取当事人元数据
      *
-     * @return 当事人 id
+     * @return 当事人元数据
      */
-    public String getPrincipalId() {
-        return principalId;
+    public Map<String, Object> getPrincipalMeta() {
+        return principalMeta;
     }
 
     /**
-     * 设置当事人 id
+     * 设置当事人元数据
      *
-     * @param principalId 当事人 id
+     * @param principalMeta 当事人元数据
      */
-    public void setPrincipalId(String principalId) {
-        this.principalId = principalId;
+    public void setPrincipalMeta(Map<String, Object> principalMeta) {
+        this.principalMeta = principalMeta;
     }
 
-    /**
-     * 获取当事人类型
-     *
-     * @return 当事人类型
-     */
-    public String getPrincipalType() {
-        return principalType;
-    }
 
-    /**
-     * 设置当事人类型
-     *
-     * @param principalType 当事人类型
-     */
-    public void setPrincipalType(String principalType) {
-        this.principalType = principalType;
-    }
 }

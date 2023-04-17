@@ -13,8 +13,6 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,7 +31,7 @@ public class TestElasticsearchAuditEventRepository {
 
     @Test
     public void test() throws InterruptedException {
-        Instant instant = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant();
+        Instant instant = Instant.now();
 
         int before = auditEventRepository.find("admin", instant, null).size();
 

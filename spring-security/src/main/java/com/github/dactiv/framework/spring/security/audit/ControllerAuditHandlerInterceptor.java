@@ -4,11 +4,13 @@ import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.security.audit.Auditable;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
+import com.github.dactiv.framework.security.entity.BasicUserDetails;
 import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
@@ -144,9 +146,13 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
                     type,
                     data
             );
-            auditEvent.setPrincipalId(securityUserDetails.getId().toString());
-            auditEvent.setPrincipalType(securityUserDetails.getType());
-            auditEvent.setMeta(securityUserDetails.getMeta());
+
+            if (MapUtils.isNotEmpty(securityUserDetails.getMeta())) {
+                auditEvent.setPrincipalMeta(securityUserDetails.getMeta());
+            }
+
+            auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_ID_FIELD_NAME, securityUserDetails.getId());
+            auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_TYPE_FIELD_NAME, securityUserDetails.getType());
 
             return auditEvent;
         } else {

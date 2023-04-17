@@ -10,7 +10,7 @@ import org.springframework.boot.actuate.audit.AuditEventRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,17 +65,21 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
             instant = Instant.ofEpochMilli(epochMilli);
         } else if (timestamp instanceof String string) {
             LocalDateTime localDateTime = LocalDateTime.parse(string);
-            instant = localDateTime.atOffset(ZoneOffset.UTC).toInstant();
+            instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         } else {
             throw new SystemException("找不到 " + RestResult.DEFAULT_TIMESTAMP_NAME + " 的数据转换支持");
         }
 
         String principal = map.get(PluginAuditEvent.PRINCIPAL_FIELD_NAME).toString();
         String type = map.get(PluginAuditEvent.TYPE_FIELD_NAME).toString();
-        map.get(RestResult.DEFAULT_DATA_NAME);
-        Map<String, Object> data = Casts.cast(map.getOrDefault(RestResult.DEFAULT_DATA_NAME, new LinkedHashMap<>()));
-        return new PluginAuditEvent(instant, principal, type, data);
 
+        Map<String, Object> data = Casts.cast(map.getOrDefault(RestResult.DEFAULT_DATA_NAME, new LinkedHashMap<>()));
+        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(instant, principal, type, data);
+
+        Map<String, Object> principalMeta = Casts.cast(map.getOrDefault(PluginAuditEvent.PRINCIPAL_META_FIELD_NAME, new LinkedHashMap<>()));
+        pluginAuditEvent.setPrincipalMeta(principalMeta);
+
+        return pluginAuditEvent;
     }
 
 }

@@ -41,10 +41,6 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     public static final String DEFAULT_COLLECTION_NAME = "col_http_request_audit_event";
 
-    public static final String PRINCIPAL_TYPE_FIELD_NAME = "principal_type";
-
-    public static final String PRINCIPAL_ID_FIELD_NAME = "principal_id";
-
     public static final String DEFAULT_ID_FIELD = "_id";
 
     private final MongoTemplate mongoTemplate;
@@ -155,8 +151,6 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
 
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
-        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_ID_FIELD_NAME, StringUtils.EMPTY).toString());
-        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
 
         return pluginAuditEvent;
     }

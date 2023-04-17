@@ -3,7 +3,7 @@ package com.github.dactiv.framework.security.audit;
 import org.springframework.boot.actuate.audit.AuditEvent;
 
 import java.io.Serial;
-import java.time.Instant;
+import java.time.*;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,20 +19,12 @@ public class PluginAuditEvent extends AuditEvent {
 
     public static final String PRINCIPAL_FIELD_NAME = "principal";
 
-    public static final String PRINCIPAL_TYPE_FIELD_NAME = "principal_type";
-
-    public static final String PRINCIPAL_ID_FIELD_NAME = "principal_id";
-
-    public static final String META_FIELD_NAME = "meta";
-
     public static final String TYPE_FIELD_NAME = "type";
 
     /**
      * 主键 id
      */
     private String id;
-
-    private Map<String, Object> meta;
 
     private String principalId;
 
@@ -44,12 +36,7 @@ public class PluginAuditEvent extends AuditEvent {
     }
 
     public PluginAuditEvent(String principal, String type, Map<String, Object> data) {
-        super(principal, type, data);
-        this.id = UUID.randomUUID().toString();
-    }
-
-    public PluginAuditEvent(String principal, String type, String... data) {
-        super(principal, type, data);
+        super(LocalDateTime.now().atOffset(ZoneOffset.UTC).toInstant(), principal, type, data);
         this.id = UUID.randomUUID().toString();
     }
 
@@ -74,24 +61,6 @@ public class PluginAuditEvent extends AuditEvent {
      */
     public void setId(String id) {
         this.id = id;
-    }
-
-    /**
-     * 获取元数据信息
-     *
-     * @return 元数据信息
-     */
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    /**
-     * 设置元数据信息
-     *
-     * @param meta 元数据信息
-     */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
     }
 
     /**

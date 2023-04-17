@@ -158,10 +158,13 @@ public class AuditConfiguration {
         public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
                                                                SecurityProperties securityProperties) {
 
+            List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
+            ignorePrincipals.add(securityProperties.getUser().getName());
+
             return new MongoAuditEventRepository(
                     mongoTemplate,
-                    PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS,
-                    securityProperties
+                    MongoAuditEventRepository.DEFAULT_COLLECTION_NAME,
+                    ignorePrincipals
             );
 
         }
@@ -181,11 +184,13 @@ public class AuditConfiguration {
         @Bean
         public PluginAuditEventRepository auditEventRepository(ElasticsearchOperations elasticsearchOperations,
                                                                SecurityProperties securityProperties) {
+            List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
+            ignorePrincipals.add(securityProperties.getUser().getName());
 
             return new ElasticsearchAuditEventRepository(
                     elasticsearchOperations,
-                    PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS,
-                    securityProperties
+                    ElasticsearchAuditEventRepository.DEFAULT_INDEX_NAME,
+                    ignorePrincipals
             );
 
         }

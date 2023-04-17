@@ -4,26 +4,31 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
+import com.github.dactiv.framework.commons.id.number.NumberIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.audit.PluginAuditEventRepository;
+import com.github.dactiv.framework.security.audit.elasticsearch.index.IndexGenerator;
+import com.github.dactiv.framework.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.util.Assert;
 
+import java.sql.Date;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * mongo 审计事件仓库实现
@@ -34,23 +39,32 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    public static final String DEFAULT_COLLECTION_NAME = "col_audit_event";
+    public static final String DEFAULT_COLLECTION_NAME = "col_http_request_audit_event";
+
+    public static final String PRINCIPAL_TYPE_FIELD_NAME = "principal_type";
+
+    public static final String PRINCIPAL_ID_FIELD_NAME = "principal_id";
 
     public static final String DEFAULT_ID_FIELD = "_id";
 
     private final MongoTemplate mongoTemplate;
 
-    private final SecurityProperties securityProperties;
-
     private final List<String> ignorePrincipals;
 
+    private final IndexGenerator indexGenerator;
+
     public MongoAuditEventRepository(MongoTemplate mongoTemplate,
-                                     List<String> ignorePrincipals,
-                                     SecurityProperties securityProperties) {
+                                     String indexName,
+                                     List<String> ignorePrincipals) {
 
         this.mongoTemplate = mongoTemplate;
         this.ignorePrincipals = ignorePrincipals;
-        this.securityProperties = securityProperties;
+
+        this.indexGenerator = new DateIndexGenerator(
+                indexName,
+                Casts.UNDERSCORE,
+                List.of(RestResult.DEFAULT_TIMESTAMP_NAME, NumberIdEntity.CREATION_TIME_FIELD_NAME)
+        );
     }
 
     @Override
@@ -58,7 +72,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
 
-        if (!validPrincipal(pluginAuditEvent.getPrincipal(), securityProperties.getUser().getName(), ignorePrincipals)) {
+        if (ignorePrincipals.contains(pluginAuditEvent.getPrincipal())) {
             return ;
         }
 
@@ -67,11 +81,8 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         }
 
         try {
-
-            if (!pluginAuditEvent.getPrincipal().equals(securityProperties.getUser().getName())) {
-                event = mongoTemplate.save(pluginAuditEvent, DEFAULT_COLLECTION_NAME);
-            }
-
+            String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
+            mongoTemplate.save(pluginAuditEvent, index);
         } catch (Exception e) {
             LOGGER.error("新增" + event.getPrincipal() + "审计事件失败", e);
         }
@@ -80,19 +91,19 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     @Override
     public List<AuditEvent> find(String principal, Instant after, String type) {
+        Assert.notNull(after, "查询 mongo 审计数据时 after 参数不能为空");
 
         Criteria criteria = createCriteria(principal, after, type);
 
         Query query = new Query(criteria).with(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
 
-        //noinspection rawtypes
-        List<Map> result = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
-
-        return new LinkedList<>(result.stream().map(this::createPluginAuditEvent).toList());
+        return findData(getCollectionName(after), query);
     }
 
     @Override
     public Page<AuditEvent> findPage(PageRequest pageRequest, String principal, Instant after, String type) {
+
+        Assert.notNull(after, "查询 mongo 审计f分页数据时 after 参数不能为空");
 
         Criteria criteria = createCriteria(principal, after, type);
 
@@ -100,10 +111,21 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
                 .with(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()))
                 .with(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
 
-        //noinspection rawtypes
-        List<Map> data = mongoTemplate.find(query, Map.class, DEFAULT_COLLECTION_NAME);
+        List<AuditEvent> data = findData(getCollectionName(after), query);
 
-        return new Page<>(pageRequest, new LinkedList<>(data.stream().map(this::createPluginAuditEvent).toList()));
+        return new Page<>(pageRequest, data);
+    }
+
+    private List<AuditEvent> findData(String index, Query query) {
+        List<AuditEvent> content = new LinkedList<>();
+        try {
+            List<Map<String, Object>> data = Casts.cast(mongoTemplate.find(query, Map.class, index));
+            content = data.stream().map(this::createAuditEvent).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOGGER.error("查询集合 [" + index + "] 出现错误", e);
+        }
+
+        return content;
     }
 
     @Override
@@ -113,34 +135,36 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         }
 
         StringIdEntity stringIdEntity = Casts.cast(id);
-        //noinspection unchecked
-        Map<String, Object> map = mongoTemplate.findById(stringIdEntity.getId(), Map.class, DEFAULT_COLLECTION_NAME);
+        String index = indexGenerator.generateIndex(stringIdEntity).toLowerCase();
 
-        if (MapUtils.isNotEmpty(map)) {
-            return createPluginAuditEvent(map);
+        try {
+            Map<String, Object> map = Casts.cast(mongoTemplate.findById(stringIdEntity.getId(), Map.class, index));
+            if (MapUtils.isNotEmpty(map)) {
+                return createAuditEvent(map);
+            }
+        } catch (Exception e) {
+            LOGGER.error("查询集合 [" + index + "] 出现错误", e);
         }
 
         return null;
     }
 
-    /**
-     * 创建插件审计事件
-     *
-     * @param map map 数据源
-     *
-     * @return 插件审计事件
-     */
-    public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
-
-        AuditEvent auditEvent = createAuditEvent(map);
+    @Override
+    public AuditEvent createAuditEvent(Map<String, Object> map) {
+        AuditEvent auditEvent = PluginAuditEventRepository.super.createAuditEvent(map);
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
 
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
-        pluginAuditEvent.setPrincipalType(map.getOrDefault(PluginAuditEvent.PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
-        pluginAuditEvent.setPrincipalId(map.getOrDefault(PluginAuditEvent.PRINCIPAL_ID_FIELD_NAME, StringUtils.EMPTY).toString());
-        pluginAuditEvent.setMeta(Casts.cast(map.getOrDefault(PluginAuditEvent.META_FIELD_NAME, Map.of())));
+        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_ID_FIELD_NAME, StringUtils.EMPTY).toString());
+        pluginAuditEvent.setPrincipalType(map.getOrDefault(PRINCIPAL_TYPE_FIELD_NAME, StringUtils.EMPTY).toString());
 
         return pluginAuditEvent;
+    }
+
+    public String getCollectionName(Instant instant) {
+        StringIdEntity id = new StringIdEntity();
+        id.setCreationTime(Date.from(instant));
+        return indexGenerator.generateIndex(id).toLowerCase();
     }
 
     /**
@@ -165,9 +189,13 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
         }
 
         if (Objects.nonNull(after)) {
-            criteria = criteria.and(RestResult.DEFAULT_TIMESTAMP_NAME).gte(after);
+            criteria = criteria.and(RestResult.DEFAULT_TIMESTAMP_NAME).gte(Date.from(after));
         }
 
         return criteria;
+    }
+
+    public MongoTemplate getMongoTemplate() {
+        return mongoTemplate;
     }
 }

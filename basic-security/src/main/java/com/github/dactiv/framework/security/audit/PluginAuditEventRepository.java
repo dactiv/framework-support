@@ -2,12 +2,17 @@ package com.github.dactiv.framework.security.audit;
 
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +30,7 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
      *
      * @param pageRequest 分页请求
      * @param principal   当前人
-     * @param after       在什么时间之后的
+     * @param after       在什么时间之后的数据
      * @param type        类型
      *
      * @return 分页信息
@@ -49,25 +54,28 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
      * @return 审计事件
      */
     default AuditEvent createAuditEvent(Map<String, Object> map) {
-        Instant instant = Instant.ofEpochMilli(
-                Casts.cast(map.get(RestResult.DEFAULT_TIMESTAMP_NAME), Long.class)
-        );
+        Object timestamp = map.get(RestResult.DEFAULT_TIMESTAMP_NAME);
+
+        Instant instant;
+        if (timestamp instanceof Date date) {
+            instant = date.toInstant();
+        } else if (timestamp instanceof Instant date) {
+            instant = date;
+        } else if (timestamp instanceof Long epochMilli){
+            instant = Instant.ofEpochMilli(epochMilli);
+        } else if (timestamp instanceof String string) {
+            LocalDateTime localDateTime = LocalDateTime.parse(string);
+            instant = localDateTime.atOffset(ZoneOffset.UTC).toInstant();
+        } else {
+            throw new SystemException("找不到 " + RestResult.DEFAULT_TIMESTAMP_NAME + " 的数据转换支持");
+        }
+
         String principal = map.get(PluginAuditEvent.PRINCIPAL_FIELD_NAME).toString();
         String type = map.get(PluginAuditEvent.TYPE_FIELD_NAME).toString();
-        //noinspection unchecked
-        Map<String, Object> data = Casts.cast(map.get(RestResult.DEFAULT_DATA_NAME), Map.class);
+        map.get(RestResult.DEFAULT_DATA_NAME);
+        Map<String, Object> data = Casts.cast(map.getOrDefault(RestResult.DEFAULT_DATA_NAME, new LinkedHashMap<>()));
+        return new PluginAuditEvent(instant, principal, type, data);
 
-        return new AuditEvent(instant, principal, type, data);
     }
 
-    default boolean validPrincipal(String principal, String securityPropertiesUsername, List<String> ignorePrincipals) {
-        if (principal.equals(securityPropertiesUsername)) {
-            return false;
-        }
-
-        if (ignorePrincipals.contains(principal)) {
-            return false;
-        }
-        return true;
-    }
 }

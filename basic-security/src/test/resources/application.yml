@@ -1,4 +1,40 @@
+spring:
+  aop:
+    proxyTargetClass: true
+  jackson:
+    default-property-inclusion: non_empty
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: true
+    deserialization:
+      FAIL-ON-UNKNOWN-PROPERTIES: false
+  data:
+    mongodb:
+      uri: mongodb://admin:19880602@localhost:27017/?authSource=admin
+      database: system_audit
+      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
+  elasticsearch:
+    uris: http://localhost:9200
+
+---
+spring:
+  config:
+    activate:
+      on-profile: elasticsearch
+
 dactiv:
   authentication:
     audit:
-      type: memory
+      type: elasticsearch
+
+---
+spring:
+  config:
+    activate:
+      on-profile: mongo
+
+dactiv:
+  authentication:
+    audit:
+      type: mongo

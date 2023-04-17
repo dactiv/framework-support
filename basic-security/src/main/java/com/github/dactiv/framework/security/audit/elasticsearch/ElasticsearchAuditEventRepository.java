@@ -132,8 +132,9 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                 .withQuery(q -> createQueryBuilder(q, after, type, principal))
                 .withSort(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
-        SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index)));
+
         try {
+            SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index)));
             List<AuditEvent> content = hits.stream().map(s -> this.createAuditEvent(s.getContent())).collect(Collectors.toList());
             return new TotalPage<>(pageRequest, content, hits.getTotalHits());
         } catch (Exception e) {

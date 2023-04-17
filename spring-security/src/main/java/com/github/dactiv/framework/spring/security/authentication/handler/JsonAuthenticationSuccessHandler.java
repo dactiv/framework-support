@@ -55,17 +55,16 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException{
 
-        if (!loginRequestMatcher.matches(request)) {
-            return ;
-        }
-
         RestResult<Object> result = RestResult.ofSuccess(HttpStatus.OK.getReasonPhrase(), authentication.getDetails());
 
         if (CollectionUtils.isNotEmpty(successResponses)) {
             successResponses.forEach(f -> f.setting(result, request));
         }
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(Casts.writeValueAsString(result));
+
+        if (loginRequestMatcher.matches(request)) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(Casts.writeValueAsString(result));
+        }
     }
 }

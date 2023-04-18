@@ -18,6 +18,8 @@ import org.apache.ibatis.mapping.MappedStatement;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -28,6 +30,18 @@ import java.util.*;
 public class InMemoryOperationDataTraceRepository implements OperationDataTraceRepository {
 
     private static final Map<String, List<OperationDataTraceRecord>> MEMORY = new LinkedHashMap<>();
+
+    public static final String DEFAULT_DATE_FORMATTER_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    private final DateFormat dateFormat;
+
+    public InMemoryOperationDataTraceRepository() {
+        dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMATTER_PATTERN);
+    }
+
+    public InMemoryOperationDataTraceRepository(String dateFormatPattern) {
+        this.dateFormat = new SimpleDateFormat(dateFormatPattern);
+    }
 
     @Override
     public List<OperationDataTraceRecord> createOperationDataTraceRecord(MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception{
@@ -83,7 +97,7 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
         record.setType(type);
         record.setTarget(target);
         record.setSubmitData(submitData);
-        record.setRemark(record.getPrincipal() + StringUtils.SPACE + record.getCreationTime().toString() +  StringUtils.SPACE + record.getType().getName());
+        record.setRemark(record.getPrincipal() + StringUtils.SPACE + dateFormat.format(record.getCreationTime()) +  StringUtils.SPACE + record.getType().getName());
 
         return record;
     }
@@ -112,5 +126,9 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
         int toIndex = Math.min(pageRequest.getNumber() * pageRequest.getSize(), records.size());
 
         return new TotalPage<>(pageRequest, records.subList(fromIndex, toIndex), records.size());
+    }
+
+    public DateFormat getDateFormat() {
+        return dateFormat;
     }
 }

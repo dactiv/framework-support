@@ -11,6 +11,7 @@ import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sf.jsqlparser.statement.Statement;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -91,6 +92,7 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
                 userDetailsRecord.setPrincipalMeta(meta);
                 userDetailsRecord.setPrincipal(username);
                 userDetailsRecord.setTraceId(traceId.toString());
+                userDetailsRecord.setRemark(username + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
                 result.add(userDetailsRecord);
             }
 

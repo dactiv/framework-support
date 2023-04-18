@@ -3,6 +3,7 @@ package com.github.dactiv.framework.security.audit;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
+import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -40,11 +41,11 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
     /**
      * 通过唯一识别获取数据
      *
-     * @param target 唯一识别;
+     * @param idEntity 唯一识别;
      *
      * @return 审计事件
      */
-    AuditEvent get(Object target);
+    AuditEvent get(StringIdEntity idEntity);
 
     /**
      * 创建审计事件

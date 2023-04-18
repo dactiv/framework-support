@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.spring.security.entity;
 
-import com.github.dactiv.framework.mybatis.interceptor.audit.OperationDataTraceRecord;
+import com.github.dactiv.framework.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
 
 import java.io.Serial;
 import java.util.Date;
@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author maurice.chen
  */
-public class UserDetailsOperationDataTraceRecord extends OperationDataTraceRecord {
+public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTraceRecord {
 
     @Serial
     private static final long serialVersionUID = 3211452737634539720L;

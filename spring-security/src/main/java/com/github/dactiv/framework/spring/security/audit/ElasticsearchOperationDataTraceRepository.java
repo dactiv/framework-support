@@ -136,6 +136,19 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
         return new TotalPage<>(pageRequest, new LinkedList<>(), 0);
     }
 
+    @Override
+    public OperationDataTraceRecord get(StringIdEntity idEntity) {
+
+        String index = indexGenerator.generateIndex(idEntity).toLowerCase();
+        try {
+            return elasticsearchOperations.get(idEntity.getId(), OperationDataTraceRecord.class, IndexCoordinates.of(index));
+        } catch (Exception e) {
+            LOGGER.warn("通过 ID 查询索引 [" + index + "] 出现错误", e);
+        }
+
+        return null;
+    }
+
 
     /**
      * 创建查询条件

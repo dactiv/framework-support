@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.audit;
 
+import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.mybatis.interceptor.audit.OperationDataTraceRecord;
@@ -36,5 +37,14 @@ public interface ShardingOperationDataTraceRepository extends EntityIdOperationD
      *
      */
     Page<OperationDataTraceRecord> findPage(PageRequest pageRequest,  Date creationTime, String target, Object entityId);
+
+    /**
+     * 获取操作数据留痕
+     *
+     * @param idEntity 唯一识别
+     *
+     * @return 操作数据留痕
+     */
+    OperationDataTraceRecord get(StringIdEntity idEntity);
 
 }

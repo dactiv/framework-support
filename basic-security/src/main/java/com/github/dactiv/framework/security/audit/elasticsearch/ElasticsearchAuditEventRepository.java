@@ -5,7 +5,6 @@ import co.elastic.clients.json.JsonData;
 import co.elastic.clients.util.ObjectBuilder;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
-import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.id.IdEntity;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
 import com.github.dactiv.framework.commons.id.number.NumberIdEntity;
@@ -151,17 +150,12 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     }
 
     @Override
-    public AuditEvent get(Object target) {
+    public AuditEvent get(StringIdEntity idEntity) {
 
-        if (!StringIdEntity.class.isAssignableFrom(target.getClass())) {
-            throw new SystemException("目标对象不是 " + StringIdEntity.class.getName() + " 对象");
-        }
-
-        StringIdEntity id = Casts.cast(target);
-        String index = indexGenerator.generateIndex(id).toLowerCase();
+        String index = indexGenerator.generateIndex(idEntity).toLowerCase();
         try {
             //noinspection unchecked
-            Map<String, Object> map = elasticsearchOperations.get(id.getId(), Map.class, IndexCoordinates.of(index));
+            Map<String, Object> map = elasticsearchOperations.get(idEntity.getId(), Map.class, IndexCoordinates.of(index));
             if (MapUtils.isNotEmpty(map)) {
                 return createAuditEvent(map);
             }

@@ -100,7 +100,7 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
 
         NativeQueryBuilder builder = new NativeQueryBuilder()
                 .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId))
-                .withSort(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)));
+                .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)));
 
         List<OperationDataTraceRecord> result = new LinkedList<>();
 
@@ -122,7 +122,7 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
 
         NativeQueryBuilder builder = new NativeQueryBuilder()
                 .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId))
-                .withSort(Sort.by(Sort.Order.desc(RestResult.DEFAULT_TIMESTAMP_NAME)))
+                .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {

@@ -12,9 +12,11 @@ import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.commons.page.TotalPage;
 import com.github.dactiv.framework.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.framework.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
+import com.github.dactiv.framework.security.audit.PluginAuditEvent;
 import com.github.dactiv.framework.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.framework.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.framework.security.audit.elasticsearch.index.support.DateIndexGenerator;
+import com.github.dactiv.framework.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.util.Assert;
 import org.springframework.validation.DataBinder;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -93,13 +96,13 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
     }
 
     @Override
-    public List<OperationDataTraceRecord> find(String target, Date creationTime, Object entityId) {
+    public List<OperationDataTraceRecord> find(String target, Date creationTime, Object entityId, String auditType, String principal) {
         Assert.notNull(creationTime, "查询 elasticsearch 操作留痕数据时 creationTime 参数不能为空");
 
         String index = getIndexName(creationTime).toLowerCase();
 
         NativeQueryBuilder builder = new NativeQueryBuilder()
-                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId))
+                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId, auditType, principal))
                 .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)));
 
         List<OperationDataTraceRecord> result = new LinkedList<>();
@@ -115,13 +118,13 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
     }
 
     @Override
-    public Page<OperationDataTraceRecord> findPage(PageRequest pageRequest, Date creationTime, String target, Object entityId) {
+    public Page<OperationDataTraceRecord> findPage(PageRequest pageRequest, Date creationTime, String target, Object entityId, String auditType, String principal) {
         Assert.notNull(creationTime, "查询 elasticsearch 操作留痕数据分页时 creationTime 参数不能为空");
 
         String index = getIndexName(creationTime).toLowerCase();
 
         NativeQueryBuilder builder = new NativeQueryBuilder()
-                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId))
+                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId, auditType, principal))
                 .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
@@ -156,14 +159,28 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
      * @param creationTime 在什么时间之后的
      * @param target       目标值
      * @param entityId     实体 id
+     * @param auditType    审计类型
+     * @param principal    操作人
+     *
      * @return 查询条件
      */
-    private ObjectBuilder<Query> createQueryBuilder(Query.Builder builder, Date creationTime, String target, Object entityId) {
+    private ObjectBuilder<Query> createQueryBuilder(Query.Builder builder, Date creationTime, String target, Object entityId, String auditType, String principal) {
 
         List<Query> queryList = new LinkedList<>();
 
         if (StringUtils.isNotBlank(target)) {
-            queryList.add(Query.of(q -> q.term(t -> t.field(DataBinder.DEFAULT_OBJECT_NAME).value(target))));
+            String value = CorsConfiguration.ALL + target + CorsConfiguration.ALL;
+            queryList.add(Query.of(q -> q.wildcard(t -> t.field(DataBinder.DEFAULT_OBJECT_NAME).value(value))));
+        }
+
+        if (StringUtils.isNotBlank(auditType)) {
+            String value = CorsConfiguration.ALL + auditType + CorsConfiguration.ALL;
+            queryList.add(Query.of(q -> q.wildcard(t -> t.field(UserDetailsOperationDataTraceRecord.AUDIT_TYPE_FIELD_NAME).value(value))));
+        }
+
+        if (StringUtils.isNotBlank(principal)) {
+            String value = CorsConfiguration.ALL + principal + CorsConfiguration.ALL;
+            queryList.add(Query.of(q -> q.wildcard(t -> t.field(PluginAuditEvent.PRINCIPAL_FIELD_NAME).value(value))));
         }
 
         if (Objects.nonNull(creationTime)) {

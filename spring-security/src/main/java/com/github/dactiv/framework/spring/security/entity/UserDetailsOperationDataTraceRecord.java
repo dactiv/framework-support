@@ -16,6 +16,8 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
     @Serial
     private static final long serialVersionUID = 3211452737634539720L;
 
+    public static final String AUDIT_TYPE_FIELD_NAME = "auditType";
+
     /**
      * 当事人元数据
      */
@@ -25,6 +27,11 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
      * 关联业务 id
      */
     private String traceId;
+
+    /**
+     * 目标类型
+     */
+    private String auditType;
 
     public UserDetailsOperationDataTraceRecord() {
     }
@@ -67,5 +74,23 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
      */
     public void setTraceId(String traceId) {
         this.traceId = traceId;
+    }
+
+    /**
+     * 获取审计类型
+     *
+     * @return 审计类型
+     */
+    public String getAuditType() {
+        return auditType;
+    }
+
+    /**
+     * 设置审计类型
+     *
+     * @param auditType 审计类型
+     */
+    public void setAuditType(String auditType) {
+        this.auditType = auditType;
     }
 }

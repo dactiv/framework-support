@@ -11,4 +11,11 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OperationDataTrace {
+
+    /**
+     * 目标名称
+     *
+     * @return 目标名称
+     */
+    String name();
 }

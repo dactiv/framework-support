@@ -89,6 +89,10 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
 
             for (OperationDataTraceRecord record : records) {
                 UserDetailsOperationDataTraceRecord userDetailsRecord = Casts.of(record, UserDetailsOperationDataTraceRecord.class);
+                Object auditType = httpServletRequest.getAttribute(ControllerAuditHandlerInterceptor.AUDIT_TYPE_ATTR_NAME);
+                if (Objects.nonNull(auditType)) {
+                    userDetailsRecord.setAuditType(auditType.toString());
+                }
                 userDetailsRecord.setPrincipalMeta(meta);
                 userDetailsRecord.setPrincipal(username);
                 userDetailsRecord.setTraceId(traceId.toString());

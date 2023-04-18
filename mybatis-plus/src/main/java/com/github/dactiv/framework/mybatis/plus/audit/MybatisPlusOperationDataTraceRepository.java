@@ -2,6 +2,7 @@ package com.github.dactiv.framework.mybatis.plus.audit;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.id.BasicIdentification;
@@ -99,7 +100,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
     }
 
     private Object getIdValueExp(String sqlSegment, Object parameterObject) throws OgnlException {
-        List<String> conditions = Arrays.asList(StringUtils.substringsBetween(sqlSegment,"(",")"));
+        List<String> conditions = Arrays.asList(StringUtils.substringsBetween(sqlSegment, StringPool.LEFT_BRACKET, StringPool.RIGHT_BRACKET));
         List<String> fields = conditions.stream().flatMap(s -> Arrays.stream(s.split(WHERE_SEPARATE))).toList();
 
         Object idValue = null;

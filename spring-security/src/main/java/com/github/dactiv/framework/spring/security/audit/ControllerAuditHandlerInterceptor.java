@@ -39,6 +39,8 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
     public static final String OPERATION_DATA_TRACE_ATT_NAME = "operationDataTrace";
 
+    public static final String AUDIT_TYPE_ATTR_NAME = "controllerAuditType";
+
     private static final String DEFAULT_SUCCESS_SUFFIX_NAME = "SUCCESS";
 
     private static final String DEFAULT_FAILURE_SUFFIX_NAME = "FAILURE";
@@ -96,10 +98,18 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
 
         if (Objects.nonNull(auditable) && auditable.operationDataTrace()) {
+            request.setAttribute(AUDIT_TYPE_ATTR_NAME, auditable.type());
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         } else if (Objects.nonNull(operationDataTrace)) {
+            request.setAttribute(AUDIT_TYPE_ATTR_NAME, operationDataTrace.name());
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         } else if (Objects.nonNull(plugin) && plugin.operationDataTrace()) {
+            String type = plugin.name();
+            Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
+            if (Objects.nonNull(root)) {
+                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
+            }
+            request.setAttribute(AUDIT_TYPE_ATTR_NAME, type);
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         }
 
@@ -115,13 +125,11 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         HandlerMethod handlerMethod = Casts.cast(handler);
 
-        String type;
         Object principal;
 
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
-            type = auditable.type();
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
@@ -130,13 +138,9 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
 
             principal = getPrincipal(null, request);
-            type = plugin.name();
-            Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
-            if (root != null) {
-                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
-            }
         }
 
+        String type = request.getAttribute(AUDIT_TYPE_ATTR_NAME).toString();
         AuditEvent auditEvent = createAuditEvent(principal, type, request, response, handler, ex);
 
         // 推送审计事件

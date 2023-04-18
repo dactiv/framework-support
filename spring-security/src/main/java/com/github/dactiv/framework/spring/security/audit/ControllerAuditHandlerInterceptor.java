@@ -37,6 +37,8 @@ import java.util.Objects;
  */
 public class ControllerAuditHandlerInterceptor implements ApplicationEventPublisherAware, AsyncHandlerInterceptor {
 
+    public static final String OPERATION_DATA_TRACE_ATT_NAME = "operationDataTrace";
+
     private static final String DEFAULT_SUCCESS_SUFFIX_NAME = "SUCCESS";
 
     private static final String DEFAULT_FAILURE_SUFFIX_NAME = "FAILURE";
@@ -82,6 +84,29 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
     }
 
     @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if (!HandlerMethod.class.isAssignableFrom(handler.getClass())) {
+            return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
+        }
+
+        HandlerMethod handlerMethod = Casts.cast(handler);
+
+        Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
+        OperationDataTrace operationDataTrace = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), OperationDataTrace.class);
+        Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
+
+        if (Objects.nonNull(auditable) && auditable.operationDataTrace()) {
+            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+        } else if (Objects.nonNull(operationDataTrace)) {
+            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+        } else if (Objects.nonNull(plugin) && plugin.operationDataTrace()) {
+            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+        }
+
+        return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
+    }
+
+    @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
         if (!HandlerMethod.class.isAssignableFrom(handler.getClass())) {
@@ -94,7 +119,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Object principal;
 
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
-        if (auditable != null) {
+        if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
             type = auditable.type();
         } else {
@@ -137,6 +162,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
                 data.put(exceptionKeyName, ex.getMessage());
             }
         }
+
         if (SecurityUserDetails.class.isAssignableFrom(principal.getClass())) {
             SecurityUserDetails securityUserDetails = Casts.cast(principal, SecurityUserDetails.class);
 
@@ -153,7 +179,14 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
             auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_ID_FIELD_NAME, securityUserDetails.getId());
             auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_TYPE_FIELD_NAME, securityUserDetails.getType());
+            Object trace = request.getAttribute(OPERATION_DATA_TRACE_ATT_NAME);
 
+            if (Objects.nonNull(trace) && Boolean.TRUE.equals(trace)) {
+                Object traceId = request.getAttribute(UserDetailsOperationDataTraceRepository.OPERATION_DATA_TRACE_ID_ATTR_NAME);
+                if (Objects.nonNull(traceId)) {
+                    auditEvent.setTraceId(traceId.toString());
+                }
+            }
             return auditEvent;
         } else {
             return new AuditEvent(Instant.now(), principal.toString(), type, data);

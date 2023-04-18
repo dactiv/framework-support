@@ -80,7 +80,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
             String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
             mongoTemplate.save(pluginAuditEvent, index);
         } catch (Exception e) {
-            LOGGER.error("新增" + event.getPrincipal() + "审计事件失败", e);
+            LOGGER.error("新增 mongo " + event.getPrincipal() + " 审计事件出现异常", e);
         }
 
     }

@@ -80,4 +80,11 @@ public @interface Plugin {
      */
     String remark() default "";
 
+    /**
+     * 是否操作数据留痕
+     *
+     * @return true 是，否则 false
+     */
+    boolean operationDataTrace() default false;
+
 }

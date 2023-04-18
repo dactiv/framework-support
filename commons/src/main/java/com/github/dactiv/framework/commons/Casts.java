@@ -595,4 +595,15 @@ public class Casts {
         return fields;
     }
 
+    public static boolean isPrimitive(Object value) {
+        return (value instanceof Boolean ||
+                value instanceof Byte ||
+                value instanceof Character ||
+                value instanceof Short ||
+                value instanceof Integer ||
+                value instanceof Long ||
+                value instanceof Float ||
+                value instanceof Double);
+    }
+
 }

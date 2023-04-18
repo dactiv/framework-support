@@ -31,6 +31,11 @@ public class PluginAuditEvent extends AuditEvent {
 
     private Map<String, Object> principalMeta = new LinkedHashMap<>();
 
+    /**
+     * 操作数据留痕 ID
+     */
+    private String traceId;
+
     public PluginAuditEvent(AuditEvent auditEvent) {
         super(auditEvent.getTimestamp(), auditEvent.getPrincipal(), auditEvent.getType(), auditEvent.getData());
         this.id = UUID.randomUUID().toString();
@@ -82,5 +87,21 @@ public class PluginAuditEvent extends AuditEvent {
         this.principalMeta = principalMeta;
     }
 
+    /**
+     * 获取操作数据留痕 ID
+     *
+     * @return 操作数据留痕 ID
+     */
+    public String getTraceId() {
+        return traceId;
+    }
 
+    /**
+     * 设置操作数据留痕 ID
+     *
+     * @param traceId 操作数据留痕 ID
+     */
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
 }

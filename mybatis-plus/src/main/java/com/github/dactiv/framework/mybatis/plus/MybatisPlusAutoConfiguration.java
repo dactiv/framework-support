@@ -3,14 +3,14 @@ package com.github.dactiv.framework.mybatis.plus;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.github.dactiv.framework.mybatis.MybatisAutoConfiguration;
+import com.github.dactiv.framework.mybatis.interceptor.audit.OperationDataTraceRepository;
+import com.github.dactiv.framework.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.framework.mybatis.plus.interceptor.LastModifiedDateInnerInterceptor;
-import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.query.QueryGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,8 +20,7 @@ import org.springframework.context.annotation.Configuration;
  * @author maurice.chen
  */
 @Configuration
-@AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableConfigurationProperties(SpringWebMvcProperties.class)
+@AutoConfigureBefore(MybatisAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "dactiv.mybatis.plus", value = "enabled", matchIfMissing = true)
 public class MybatisPlusAutoConfiguration {
 
@@ -29,6 +28,13 @@ public class MybatisPlusAutoConfiguration {
     @ConditionalOnMissingBean(QueryGenerator.class)
     public MybatisPlusQueryGenerator<?> mybatisPlusQueryGenerator() {
         return new MybatisPlusQueryGenerator<>();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(OperationDataTraceRepository.class)
+    @ConditionalOnProperty(prefix = "dactiv.mybatis.operation-data-trace", value = "enabled", matchIfMissing = true)
+    public MybatisPlusOperationDataTraceRepository mybatisPlusOperationDataTraceRepository() {
+        return new MybatisPlusOperationDataTraceRepository();
     }
 
     @Bean

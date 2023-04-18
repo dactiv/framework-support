@@ -50,7 +50,6 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-
     private final List<String> ignorePrincipals;
 
     private final IndexGenerator indexGenerator;
@@ -92,7 +91,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
             elasticsearchOperations.save(pluginAuditEvent, IndexCoordinates.of(index));
 
         } catch (Exception e) {
-            LOGGER.warn("新增" + event.getPrincipal() + "审计事件失败", e);
+            LOGGER.warn("新增 elasticsearch" + event.getPrincipal() + " 审计事件出现异常", e);
         }
 
     }

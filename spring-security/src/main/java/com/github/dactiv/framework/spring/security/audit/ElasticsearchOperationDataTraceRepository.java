@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.security.audit;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.util.ObjectBuilder;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
@@ -21,19 +22,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.util.Assert;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.io.InputStream;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +48,7 @@ import java.util.stream.Collectors;
 public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperationDataTraceRepository {
 
     public static final String DEFAULT_INDEX_NAME = "ix_user_operation_data_trace";
+    public static final String MAPPING_FILE_PATH = "elasticsearch/operation-data-trace-record-mapping.json";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
@@ -68,11 +73,26 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
         try {
             for (OperationDataTraceRecord record : records) {
                 String index = indexGenerator.generateIndex(record).toLowerCase();
-                elasticsearchOperations.save(record, IndexCoordinates.of(index));
+
+                IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
+                IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
+
+                ElasticsearchAuditEventRepository.createIndexIfNotExists(indexOperations, ElasticsearchAuditEventRepository.MAPPING_FILE_PATH);
+
+                IndexQuery indexQuery = new IndexQueryBuilder()
+                        .withId(record.getId())
+                        .withObject(record)
+                        .build();
+
+                elasticsearchOperations.index(indexQuery, indexCoordinates);
             }
         } catch (Exception e) {
             LOGGER.warn("新增 elasticsearch 操作数据留痕出现异常", e);
         }
+    }
+
+    private void createOperationDataTraceRecordDocument(Document document) {
+
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
@@ -161,7 +162,7 @@ public class Casts {
 
         try {
             return objectMapper.readValue(json, type);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             throw new SystemException(e);
         }
 
@@ -180,7 +181,60 @@ public class Casts {
 
         try {
             return objectMapper.readValue(json, type);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+
+    }
+
+    /**
+     * 将 bytes 内容转换为指定类型的对象
+     *
+     * @param json  json 字符串
+     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>   对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(InputStream stream, JavaType type) {
+        try {
+            return objectMapper.readValue(stream, type);
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * 将 bytes 内容转换为指定类型的对象
+     *
+     * @param stream input 流
+     * @param type  指定类型的对象 class
+     * @param <T>   对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(InputStream stream, Class<T> type) {
+        try {
+            return objectMapper.readValue(stream, type);
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * 将 json 字符串转换为指定类型的对象
+     *
+     * @param stream json 字符串
+     * @param type 引用类型
+     * @param <T>  对象范型实体值
+     *
+     * @return 指定类型的对象实例
+     */
+    public static <T> T readValue(InputStream stream, TypeReference<T> type) {
+
+        try {
+            return objectMapper.readValue(stream, type);
+        } catch (Exception e) {
             throw new SystemException(e);
         }
 

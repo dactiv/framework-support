@@ -7,6 +7,7 @@ import java.io.Serial;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 操作数据留记录
@@ -44,6 +45,7 @@ public class OperationDataTraceRecord extends StringIdEntity {
     private String remark;
 
     public OperationDataTraceRecord() {
+        setId(UUID.randomUUID().toString());
     }
 
     public OperationDataTraceRecord(String id, Date creationTime) {

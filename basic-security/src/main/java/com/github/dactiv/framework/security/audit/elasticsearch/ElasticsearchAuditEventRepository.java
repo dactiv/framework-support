@@ -3,6 +3,7 @@ package com.github.dactiv.framework.security.audit.elasticsearch;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.util.ObjectBuilder;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.id.IdEntity;
@@ -23,10 +24,16 @@ import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +49,8 @@ import java.util.stream.Collectors;
 public class ElasticsearchAuditEventRepository implements PluginAuditEventRepository {
 
     public static final int DEFAULT_FIND_SIZE = 10000;
+
+    public static final String MAPPING_FILE_PATH = "elasticsearch/plugin-audit-mapping.json";
 
     public static final String DEFAULT_INDEX_NAME = "ix_http_request_audit_event";
 
@@ -87,12 +96,34 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         try {
 
             String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
-            elasticsearchOperations.save(pluginAuditEvent, IndexCoordinates.of(index));
+
+            IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
+            IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
+            createIndexIfNotExists(indexOperations, MAPPING_FILE_PATH);
+
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withId(pluginAuditEvent.getId())
+                    .withObject(pluginAuditEvent)
+                    .build();
+
+            elasticsearchOperations.index(indexQuery, indexCoordinates);
 
         } catch (Exception e) {
             LOGGER.warn("新增 elasticsearch" + event.getPrincipal() + " 审计事件出现异常", e);
         }
 
+    }
+
+    public static void createIndexIfNotExists(IndexOperations indexOperations, String mappingFilePath) throws IOException {
+        if (indexOperations.exists()) {
+            return ;
+        }
+
+        indexOperations.create();
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(mappingFilePath)) {
+            Map<String, Object> mapping = Casts.readValue(input, new TypeReference<>() {});
+            indexOperations.putMapping(Document.from(mapping));
+        }
     }
 
     @Override

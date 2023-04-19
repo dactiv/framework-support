@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 审计事件仓库单元测试
@@ -35,7 +36,7 @@ public class TestElasticsearchAuditEventRepository {
 
         int before = auditEventRepository.find("admin", instant, null).size();
 
-        auditEventRepository.add(new PluginAuditEvent("admin", "test", new LinkedHashMap<>()));
+        auditEventRepository.add(new PluginAuditEvent("admin", "test", Map.of("d", 1, "xx",3,"test","tests", "data", Map.of("date", new Date()))));
         Thread.sleep(5000);
         List<AuditEvent> auditEvents = auditEventRepository.find("admin", instant, null);
 

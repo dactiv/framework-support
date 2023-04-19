@@ -92,7 +92,6 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
                                                                            Map<String, Object> submitData) throws UnknownHostException {
         OperationDataTraceRecord record = new OperationDataTraceRecord();
 
-        record.setId(UUID.randomUUID().toString());
         record.setPrincipal(InetAddress.getLocalHost().getHostAddress());
         record.setType(type);
         record.setTarget(target);

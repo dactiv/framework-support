@@ -14,8 +14,6 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -28,9 +26,7 @@ import java.util.List;
 )
 public class OperationDataTraceInterceptor implements Interceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OperationDataTraceInterceptor.class);
-
-    public static final String REMOVE_ESCAPE_REG = "[\t\n]";
+    public static final String REMOVE_ESCAPE_REG = "\\\\.|\\n|\\t";
 
     private static final List<SqlCommandType> SQL_COMMAND_TYPES = List.of(SqlCommandType.INSERT, SqlCommandType.UPDATE, SqlCommandType.DELETE);
 
@@ -59,16 +55,11 @@ public class OperationDataTraceInterceptor implements Interceptor {
             return result;
         }
 
-        BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(invocation.getArgs()[1]);
-
+        Object parameter = invocation.getArgs()[1];
+        BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(parameter);
         String sql = RegExUtils.replaceAll(boundSql.getSql(), REMOVE_ESCAPE_REG, StringUtils.SPACE);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("对 sql 进行解析, 原始 sql:" + boundSql.getSql() + ", 去掉转义字符 sql:" + sql);
-        }
-
         Statement statement = CCJSqlParserUtil.parse(sql);
-        Object parameter = invocation.getArgs()[1];
 
         List<OperationDataTraceRecord> records = operationDataTraceRepository.createOperationDataTraceRecord(mappedStatement, statement, parameter);
 

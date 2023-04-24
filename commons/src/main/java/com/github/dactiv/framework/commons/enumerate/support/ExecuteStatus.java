@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons.enumerate.support;
 
+import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 
 import java.util.Date;
@@ -29,7 +30,12 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 执行失败
      */
-    Failure("执行失败", 99);
+    Failure("执行失败", 99),
+
+    /**
+     * 未知
+     */
+    UNKNOWN("未知", Integer.parseInt(RestResult.UNKNOWN_EXECUTE_CODE));
 
     /**
      * 执行状态枚举

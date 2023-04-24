@@ -17,6 +17,8 @@ public class RestResult<T> implements Serializable {
 
     public static final String SUCCESS_EXECUTE_CODE = "200";
 
+    public static final String UNKNOWN_EXECUTE_CODE = "404";
+
     public static final String PROCESSING_EXECUTE_CODE = "102";
 
     public static final String DEFAULT_PROCESSING_MESSAGE = "Processing";

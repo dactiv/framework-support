@@ -125,11 +125,13 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         HandlerMethod handlerMethod = Casts.cast(handler);
 
+        String type;
         Object principal;
 
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
+            type = auditable.type();
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
@@ -138,9 +140,18 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
 
             principal = getPrincipal(null, request);
+            type = plugin.name();
+            Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
+            if (root != null) {
+                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
+            }
         }
 
-        String type = request.getAttribute(AUDIT_TYPE_ATTR_NAME).toString();
+        Object preHandleAuditType = request.getAttribute(AUDIT_TYPE_ATTR_NAME);
+        if (Objects.nonNull(preHandleAuditType)) {
+            type = preHandleAuditType.toString();
+        }
+
         AuditEvent auditEvent = createAuditEvent(principal, type, request, response, handler, ex);
 
         // 推送审计事件

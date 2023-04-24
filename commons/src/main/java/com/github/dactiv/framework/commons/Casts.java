@@ -383,8 +383,8 @@ public class Casts {
      *
      * @return 新的 map 对象
      */
-    public static <K,V> Map<K, Object> castMapToStringObject(Map<K, V[]> map) {
-        return castMapToStringObject(map, s -> s);
+    public static <K,V> Map<K, Object> castArrayValueMapToObjectValueMap(Map<K, V[]> map) {
+        return castArrayValueMapToObjectValueMap(map, s -> s);
     }
 
     /**
@@ -410,7 +410,7 @@ public class Casts {
      * @param function 处理字符串的功能
      * @return key 为 String，value 为 object 的 map 对象
      */
-    public static <K,V> Map<K, Object> castMapToStringObject(Map<K, V[]> map, Function<V, Object> function) {
+    public static <K,V> Map<K, Object> castArrayValueMapToObjectValueMap(Map<K, V[]> map, Function<V, Object> function) {
         Map<K, Object> result = new LinkedHashMap<>();
 
         map.forEach((k, v) -> {

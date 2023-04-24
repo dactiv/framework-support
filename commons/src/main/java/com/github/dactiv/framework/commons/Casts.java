@@ -31,7 +31,12 @@ import java.util.stream.Collectors;
 public class Casts {
 
     /**
-     * 默认点符号
+     * 问号
+     */
+    public static final String QUESTION_MARK = "?";
+
+    /**
+     * 点符号
      */
     public static final String DOT = ".";
 
@@ -92,7 +97,6 @@ public class Casts {
      * @param value 值
      * @param type  指定类型
      * @param <T>   对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T convertValue(Object value, Class<T> type) {
@@ -102,10 +106,9 @@ public class Casts {
     /**
      * 将值转换成指定类型的对象
      *
-     * @param value 值
+     * @param value       值
      * @param toValueType 指定类型
-     * @param <T>   对象范型实体值
-     *
+     * @param <T>         对象范型实体值
      * @return 指定类型的对象实例
      */
     public static <T> T convertValue(Object value, JavaType toValueType) {
@@ -118,7 +121,6 @@ public class Casts {
      * @param value 值
      * @param type  引用类型
      * @param <T>   对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T convertValue(Object value, TypeReference<T> type) {
@@ -138,7 +140,6 @@ public class Casts {
      * 将值转换为 json 字符串
      *
      * @param value 值
-     *
      * @return json 字符串
      */
     public static String writeValueAsString(Object value) {
@@ -155,7 +156,6 @@ public class Casts {
      * @param json json 字符串
      * @param type 指定类型的对象 class
      * @param <T>  对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(String json, Class<T> type) {
@@ -174,7 +174,6 @@ public class Casts {
      * @param json json 字符串
      * @param type 引用类型
      * @param <T>  对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(String json, TypeReference<T> type) {
@@ -190,10 +189,9 @@ public class Casts {
     /**
      * 将 bytes 内容转换为指定类型的对象
      *
-     * @param json  json 字符串
-     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
-     * @param <T>   对象范型实体值
-     *
+     * @param stream input 流
+     * @param type   用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>    对象范型实体值
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(InputStream stream, JavaType type) {
@@ -208,9 +206,8 @@ public class Casts {
      * 将 bytes 内容转换为指定类型的对象
      *
      * @param stream input 流
-     * @param type  指定类型的对象 class
-     * @param <T>   对象范型实体值
-     *
+     * @param type   指定类型的对象 class
+     * @param <T>    对象范型实体值
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(InputStream stream, Class<T> type) {
@@ -224,10 +221,9 @@ public class Casts {
     /**
      * 将 json 字符串转换为指定类型的对象
      *
-     * @param stream json 字符串
-     * @param type 引用类型
-     * @param <T>  对象范型实体值
-     *
+     * @param stream input 流
+     * @param type   引用类型
+     * @param <T>    对象范型实体值
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(InputStream stream, TypeReference<T> type) {
@@ -243,10 +239,9 @@ public class Casts {
     /**
      * 将 bytes 内容转换为指定类型的对象
      *
-     * @param json  json 字符串
-     * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
-     * @param <T>   对象范型实体值
-     *
+     * @param json json 字符串
+     * @param type 用于包含信息和作为反序列化器键的类型标记类的基类
+     * @param <T>  对象范型实体值
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(String json, JavaType type) {
@@ -263,7 +258,6 @@ public class Casts {
      * @param bytes bytes 内容
      * @param type  指定类型的对象 class
      * @param <T>   对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(byte[] bytes, Class<T> type) {
@@ -280,7 +274,6 @@ public class Casts {
      * @param bytes bytes 内容
      * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
      * @param <T>   对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(byte[] bytes, JavaType type) {
@@ -297,7 +290,6 @@ public class Casts {
      * @param bytes bytes 内容
      * @param type  用于包含信息和作为反序列化器键的类型标记类的基类
      * @param <T>   对象范型实体值
-     *
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(byte[] bytes, TypeReference<T> type) {
@@ -312,7 +304,6 @@ public class Casts {
      * 将格式为 http query string 的字符串转型为成 MultiValueMap
      *
      * @param body 数据题
-     *
      * @return 转换后的 MultiValueMap 对象
      */
     public static MultiValueMap<String, String> castRequestBodyMap(String body) {
@@ -351,22 +342,20 @@ public class Casts {
      * 将 MultiValueMap 对象转换为 name=value&amp;name2=value2&amp;name3=value3 格式字符串
      *
      * @param newRequestBody MultiValueMap 对象
-     *
      * @return 转换后的字符串
      */
-    public static String castRequestBodyMapToString(MultiValueMap<String, String> newRequestBody) {
-        return castRequestBodyMapToString(newRequestBody, (s) -> s);
+    public static <K,V> String castRequestBodyMapToString(MultiValueMap<K, V> newRequestBody) {
+        return castRequestBodyMapToString(newRequestBody, Object::toString);
     }
 
     /**
      * 将 MultiValueMap 对象转换为 name=value&amp;name2=value2&amp;name3=value3 格式字符串
      *
      * @param newRequestBody MultiValueMap 对象
-     * @param function 处理字符串的功能
-     *
+     * @param function       处理字符串的功能
      * @return 转换后的字符串
      */
-    public static String castRequestBodyMapToString(MultiValueMap<String, String> newRequestBody, Function<String, String> function) {
+    public static <K,V> String castRequestBodyMapToString(MultiValueMap<K, V> newRequestBody, Function<V, String> function) {
         StringBuilder result = new StringBuilder();
 
         newRequestBody
@@ -388,28 +377,43 @@ public class Casts {
     }
 
     /**
-     * 将 key 为 String， value 为 String 数组的 map 数据转换成 key 为 String，value 为 object 的 map 对象
+     * 将数 map 数据转换成 普通的 map 对象，如果值为 map 参数的值为1个以上的数组值，将该 key 对应的值转换成 list 对象
      *
-     * @param map key 为 String， value 为 String 数组的 map
+     * @param map 要转换的 map 对象
      *
-     * @return key 为 String，value 为 object 的 map 对象
+     * @return 新的 map 对象
      */
-    public static Map<String, Object> castMapToStringObject(Map<String, String[]> map) {
+    public static <K,V> Map<K, Object> castMapToStringObject(Map<K, V[]> map) {
         return castMapToStringObject(map, s -> s);
+    }
+
+    /**
+     * 将数组值的 map 数据转换成 MultiValueMap 对象
+     *
+     * @param map map 对象
+     *
+     * @return MultiValueMap
+     *
+     */
+    public static <K,V> MultiValueMap<K, V> castMapToMultiValueMap(Map<K,V[]> map) {
+        MultiValueMap<K,V> result = new LinkedMultiValueMap<>();
+
+        map.forEach((key, value) -> result.put(key, Arrays.asList(value)));
+
+        return result;
     }
 
     /**
      * 将 key 为 String， value 为 String 数组的 map 数据转换成 key 为 String，value 为 object 的 map 对象
      *
-     * @param map key 为 String， value 为 String 数组的 map
+     * @param map      key 为 String， value 为 String 数组的 map
      * @param function 处理字符串的功能
-     *
      * @return key 为 String，value 为 object 的 map 对象
      */
-    public static Map<String, Object> castMapToStringObject(Map<String, String[]> map, Function<String, Object> function) {
-        Map<String, Object> result = new LinkedHashMap<>();
+    public static <K,V> Map<K, Object> castMapToStringObject(Map<K, V[]> map, Function<V, Object> function) {
+        Map<K, Object> result = new LinkedHashMap<>();
 
-        map.forEach((k,v) -> {
+        map.forEach((k, v) -> {
             if (v.length > 1) {
                 result.put(k, Arrays.stream(v).map(function).collect(Collectors.toList()));
             } else {
@@ -498,7 +502,6 @@ public class Casts {
      *
      * @param source map 数据源
      * @param path   路径，多个以点(".")分割
-     *
      * @return map 实体
      */
     public static Map<String, Object> getPathMap(Map<String, Object> source, String path) {
@@ -520,7 +523,6 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
-     *
      * @return 转型后的值
      */
     public static <T> T cast(Object value) {
@@ -535,7 +537,6 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
-     *
      * @return 转型后的值
      */
     public static <T> T castIfNotNull(Object value) {
@@ -552,7 +553,6 @@ public class Casts {
      * @param value 值
      * @param type  值类型 class
      * @param <T>   值类型
-     *
      * @return 转型后的值
      */
     public static <T> T cast(Object value, Class<T> type) {
@@ -564,7 +564,6 @@ public class Casts {
      *
      * @param value 值
      * @param <T>   值类型
-     *
      * @return Optional
      */
     public static <T> Optional<T> castOptional(Object value) {
@@ -577,7 +576,6 @@ public class Casts {
      * @param value 值
      * @param type  值类型 class
      * @param <T>   值类型
-     *
      * @return 转型后的值
      */
     public static <T> T castIfNotNull(Object value, Class<T> type) {
@@ -594,7 +592,6 @@ public class Casts {
      *
      * @param url           url 路径
      * @param variableValue url 路径的变量对应值 map
-     *
      * @return 新的 url 路径
      */
     public static String setUrlPathVariableValue(String url, Map<String, String> variableValue) {
@@ -625,10 +622,9 @@ public class Casts {
      * @param source           原数据
      * @param targetClass      新的对象类型
      * @param ignoreProperties 要忽略的属性名称
-     *
      * @return 新的对象内容
      */
-    public static <T> T of(Object source, Class<T> targetClass, String ...ignoreProperties) {
+    public static <T> T of(Object source, Class<T> targetClass, String... ignoreProperties) {
 
         T result = ClassUtils.newInstance(targetClass);
 

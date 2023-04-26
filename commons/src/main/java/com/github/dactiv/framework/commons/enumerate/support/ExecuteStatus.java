@@ -35,7 +35,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 未知
      */
-    UNKNOWN("未知", Integer.parseInt(RestResult.UNKNOWN_EXECUTE_CODE));
+    Unknown("未知", Integer.parseInt(RestResult.UNKNOWN_EXECUTE_CODE));
 
     /**
      * 执行状态枚举

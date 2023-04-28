@@ -2,6 +2,7 @@ package com.github.dactiv.framework.commons.enumerate.support;
 
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
+import com.github.dactiv.framework.commons.retry.Retryable;
 
 import java.util.Date;
 
@@ -70,6 +71,30 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     public static void success(Body body) {
         body.setExecuteStatus(ExecuteStatus.Success);
         body.setSuccessTime(new Date());
+    }
+
+    /**
+     * 重试设置值
+     *
+     * @param body      数据体
+     * @param exception 异常信息
+     */
+    public static void retry(Body body, String exception) {
+        body.setException(exception);
+
+        if (body instanceof Retryable retryable) {
+
+            retryable.setRetryCount(retryable.getRetryCount() + 1);
+
+            if (retryable.getRetryCount() > retryable.getMaxRetryCount()) {
+                body.setExecuteStatus(ExecuteStatus.Unknown);
+            } else {
+                body.setExecuteStatus(ExecuteStatus.Retrying);
+            }
+
+        } else {
+            body.setExecuteStatus(ExecuteStatus.Retrying);
+        }
     }
 
     /**

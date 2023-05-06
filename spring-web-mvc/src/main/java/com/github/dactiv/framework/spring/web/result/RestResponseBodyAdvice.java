@@ -118,26 +118,20 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             HttpStatus status = HttpStatus.valueOf(httpResponse.getServletResponse().getStatus());
             // 获取执行状态
             String message = status.getReasonPhrase();
-            // 获取实际要响应的 data 内容
-            Object data = body == null ? new LinkedHashMap<>() : body;
 
-            RestResult<Object> result = RestResult.of(
-                    message,
-                    status.value(),
-                    RestResult.SUCCESS_EXECUTE_CODE,
-                    data
-            );
+            RestResult<Object> result;
 
             // 如果响应的 body 有值，并且是 RestResult，获取 data信息，看看是否需要过滤字段
             if (Objects.nonNull(body) && RestResult.class.isAssignableFrom(body.getClass())) {
-
                 result = Casts.cast(body);
-
+            } else {
+                // 获取实际要响应的 data 内容
+                Object data = body == null ? new LinkedHashMap<>() : Casts.convertValue(body, body.getClass());
+                result = RestResult.of(message, status.value(), RestResult.SUCCESS_EXECUTE_CODE, data);
             }
 
             // 如果没设置执行代码。根据状态值来设置执行代码
             if (Objects.isNull(result.getExecuteCode())) {
-
                 if (HttpStatus.OK == status) {
                     result.setExecuteCode(RestResult.SUCCESS_EXECUTE_CODE);
                 } else {

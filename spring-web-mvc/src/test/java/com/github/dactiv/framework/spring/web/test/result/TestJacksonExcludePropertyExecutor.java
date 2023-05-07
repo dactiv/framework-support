@@ -1,12 +1,10 @@
 package com.github.dactiv.framework.spring.web.test.result;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import com.github.dactiv.framework.spring.web.test.result.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -14,9 +12,6 @@ import java.util.Map;
 
 @SpringBootTest
 public class TestJacksonExcludePropertyExecutor {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @SuppressWarnings("unchecked")
     @Test

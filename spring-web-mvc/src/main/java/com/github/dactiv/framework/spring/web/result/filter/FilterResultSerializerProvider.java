@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 
 import java.io.IOException;
+import java.io.Serial;
 
 /**
  * 过滤结果集序列话供应者实现，由于默认的序列话供应者对于 JsonSerializer 缓存机制，无法执行新的序列化过程，所以必须要重写
@@ -15,6 +16,9 @@ import java.io.IOException;
  * @author maurice.chen
  */
 public class FilterResultSerializerProvider extends DefaultSerializerProvider {
+
+    @Serial
+    private static final long serialVersionUID = 9019736618410718003L;
 
     public FilterResultSerializerProvider() {
         super();

@@ -49,14 +49,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
     public static final String DEFAULT_EXCLUDE_PREFIX = "exclude";
 
-    private final static Class<? extends Annotation>[] ANNOTATIONS_TO_ADD = (Class<? extends Annotation>[])
-            new Class<?>[] {
-                    ExcludeViews.class,
-                    ExcludeView.class,
-                    IncludeView.class,
-                    IncludeViews.class
-            };
-
+    public final static List<Class<? extends Annotation>> ANNOTATIONS_TO_ADD = List.of(ExcludeViews.class, ExcludeView.class, IncludeView.class, IncludeViews.class);
     /**
      * 需要扫描的包路径
      */
@@ -86,7 +79,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
     public FilterProvider getFilterProvider(MapperConfig<?> config) {
 
         SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
-
+        //ANNOTATIONS_TO_ADD.stream().map()
         for (String basePackage : basePackages) {
 
             String placeholders = SystemPropertyUtils.resolvePlaceholders(basePackage);
@@ -112,8 +105,13 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
                     addProviderFilter(simpleFilterProvider, annotatedClass);
 
                     for (AnnotatedField field : annotatedClass.fields()) {
+                        long count = ANNOTATIONS_TO_ADD
+                                .stream()
+                                .map(field::getAnnotation)
+                                .filter(Objects::nonNull)
+                                .count();
 
-                        if (!field.getAllAnnotations().hasOneOf(ANNOTATIONS_TO_ADD)) {
+                        if (count <= 0){
                             continue;
                         }
 

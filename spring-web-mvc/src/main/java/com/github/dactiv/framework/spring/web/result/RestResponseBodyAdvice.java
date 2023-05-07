@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
+import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,6 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,7 +128,12 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                 result = Casts.cast(body);
             } else {
                 // 获取实际要响应的 data 内容
-                Object data = body == null ? new LinkedHashMap<>() : Casts.convertValue(body, body.getClass());
+                Object data = Objects.isNull(body) ? new LinkedHashMap<>() : body;
+                List<Annotation> annotatedTypes = List.of(data.getClass().getAnnotations());
+                if (annotatedTypes.stream().anyMatch(a -> FilterResultAnnotationBuilder.ANNOTATIONS_TO_ADD.contains(a.annotationType()))) {
+                    // FIXME 由于 RestResult 的范型为 Object 会导致在使用 @IncludeView 等注解时，无法找到响应的类型匹配，先这样加，后面在想办法改改。
+                    data = Casts.convertValue(data, data.getClass());
+                }
                 result = RestResult.of(message, status.value(), RestResult.SUCCESS_EXECUTE_CODE, data);
             }
 

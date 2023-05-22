@@ -28,7 +28,7 @@ public class RestResultErrorAttributes extends DefaultErrorAttributes {
     public static final String DEFAULT_ERROR_EXECUTE_ATTR_NAME = "REST_ERROR_ATTRIBUTES_EXECUTE";
 
     public static final List<Class<? extends Exception>> DEFAULT_MESSAGE_EXCEPTION = Arrays.asList(
-            SystemException.class,
+            IllegalArgumentException.class,
             ServiceException.class
     );
 

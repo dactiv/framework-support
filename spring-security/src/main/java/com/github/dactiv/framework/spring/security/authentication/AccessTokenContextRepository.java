@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
@@ -16,9 +17,11 @@ import com.github.dactiv.framework.spring.security.authentication.config.Authent
 import com.github.dactiv.framework.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.framework.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
+import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -34,6 +37,8 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.nio.charset.Charset;
+import java.security.Security;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -101,23 +106,28 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             ByteSource byteSource = cipherService.decrypt(Base64.decode(token), key);
             String plaintext = new String(byteSource.obtainBytes(), Charset.defaultCharset());
 
-            MobileUserDetails plaintextUserDetail = convertPlaintext(plaintext);
+            Map<String, Object> plaintextUserDetail = convertPlaintext(plaintext);
+            String type = plaintextUserDetail.get(PluginAuditEvent.TYPE_FIELD_NAME).toString();
+            Object id = plaintextUserDetail.get(IdEntity.ID_FIELD_NAME).toString();
 
-            RBucket<SecurityContext> bucket = getSecurityContextBucket(plaintextUserDetail);
+            RBucket<SecurityContext> bucket = getSecurityContextBucket(type, id);
             SecurityContext context = bucket.get();
             if (Objects.isNull(context)) {
                 return null;
             }
 
-            MobileUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
+            SecurityUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
             String existToken = userDetails.getMeta().getOrDefault(AccessTokenProperties.DEFAULT_ACCESS_TOKEN_PARAM_NAME, StringUtils.EMPTY).toString();
 
             if (!StringUtils.equals(existToken, token)) {
                 return null;
             }
 
-            if (!StringUtils.equals(plaintextUserDetail.toUniqueValue(), userDetails.toUniqueValue())) {
-                return null;
+            if (userDetails instanceof MobileUserDetails mobileUserDetails) {
+                Object deviceIdentified = plaintextUserDetail.get(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME);
+                if (!Objects.equals(deviceIdentified, mobileUserDetails.getDeviceIdentified())) {
+                    return null;
+                }
             }
 
             return context;
@@ -129,25 +139,24 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return null;
     }
 
-    public RBucket<SecurityContext> getSecurityContextBucket(MobileUserDetails mobileUserDetails) {
-        return getSecurityContextBucket(mobileUserDetails.getType(), mobileUserDetails.getDeviceIdentified());
-    }
-
-    public RBucket<SecurityContext> getSecurityContextBucket(String type, String deviceIdentified) {
+    public RBucket<SecurityContext> getSecurityContextBucket(String type, Object deviceIdentified) {
         String key = authenticationProperties.getAccessToken().getCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
         return redissonClient.getBucket(key, new SerializationCodec());
     }
 
-    public String generatePlaintextString(MobileUserDetails mobileUserDetails) {
-        Map<String, Object> map = Map.of(
-                IdEntity.ID_FIELD_NAME, mobileUserDetails.getId(),
-                AuthenticationProperties.SECURITY_FORM_USERNAME_PARAM_NAME, mobileUserDetails.getUsername(),
-                PluginAuditEvent.TYPE_FIELD_NAME, mobileUserDetails.getType(),
-                DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileUserDetails.getDeviceIdentified(),
-                NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis()
-        );
+    public String generatePlaintextString(SecurityUserDetails userDetails) {
+        Map<String, Object> json = new LinkedHashMap<>();
 
-        String plaintext = Casts.writeValueAsString(map);
+        json.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
+        json.put(AuthenticationProperties.SECURITY_FORM_USERNAME_PARAM_NAME, userDetails.getUsername());
+        json.put(PluginAuditEvent.TYPE_FIELD_NAME, userDetails.getType());
+        json.put(NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis());
+
+        if (userDetails instanceof MobileUserDetails mobileUserDetails) {
+            json.put(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileUserDetails.getDeviceIdentified());
+        }
+
+        String plaintext = Casts.writeValueAsString(json);
 
         CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
         byte[] key = Base64.decode(authenticationProperties.getAccessToken().getKey());
@@ -156,8 +165,8 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return source.getBase64();
     }
 
-    public MobileUserDetails convertPlaintext(String plaintext) {
-        return Casts.readValue(plaintext, MobileUserDetails.class);
+    public Map<String, Object> convertPlaintext(String plaintext) {
+        return Casts.readValue(plaintext, new TypeReference<>() {});
     }
 
     @Override
@@ -170,10 +179,10 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     /**
      * 删除缓存
      *
-     * @param mobileUserDetails 移动端的用户明细实现
+     * @param userDetails 移动端的用户明细实现
      */
-    public void deleteContext(MobileUserDetails mobileUserDetails) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(mobileUserDetails);
+    public void deleteContext(SecurityUserDetails userDetails) {
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(userDetails.getType(), userDetails.getId());
         bucket.deleteAsync();
     }
 
@@ -181,10 +190,10 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
      * 删除缓存
      *
      * @param type 用户类型
-     * @param deviceIdentified 设备唯一识别
+     * @param id 设备唯一识别
      */
-    public void deleteContext(String type, String deviceIdentified) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(type, deviceIdentified);
+    public void deleteContext(String type, Object id) {
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(type, id);
         bucket.deleteAsync();
     }
 
@@ -204,29 +213,30 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         }
 
         Object details = authentication.getDetails();
-        if (Objects.isNull(details) || !MobileUserDetails.class.isAssignableFrom(details.getClass())) {
+        if (Objects.isNull(details)) {
             return;
         }
 
+        SecurityUserDetails userDetails = Casts.cast(details);
+        if (MapUtils.isEmpty(userDetails.getMeta())) {
+            return ;
+        }
 
-        MobileUserDetails mobileUserDetails = Casts.cast(details);
-        String accessToken = mobileUserDetails
+        String accessToken = userDetails
                 .getMeta()
                 .getOrDefault(AccessTokenProperties.DEFAULT_ACCESS_TOKEN_PARAM_NAME, StringUtils.EMPTY)
                 .toString();
 
         if (StringUtils.isEmpty(accessToken)) {
-            mobileUserDetails.getMeta().put(AccessTokenProperties.DEFAULT_ACCESS_TOKEN_PARAM_NAME, generatePlaintextString(mobileUserDetails));
+            userDetails.getMeta().put(AccessTokenProperties.DEFAULT_ACCESS_TOKEN_PARAM_NAME, generatePlaintextString(userDetails));
         }
 
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(mobileUserDetails);
-
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(userDetails.getType(), userDetails.getId());
+        bucket.set(context);
         TimeProperties time = authenticationProperties.getAuthenticationCache().getExpiresTime();
 
-        if (Objects.isNull(time)) {
-            bucket.set(context);
-        } else {
-            bucket.set(context, time.getValue(), time.getUnit());
+        if (Objects.nonNull(time)) {
+            bucket.expireAsync(time.toDuration());
         }
     }
 

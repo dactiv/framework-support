@@ -5,6 +5,7 @@ import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.retry.Retryable;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 执行状态枚举
@@ -37,6 +38,11 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
      * 未知
      */
     Unknown("未知", Integer.parseInt(RestResult.UNKNOWN_EXECUTE_CODE));
+
+    /**
+     * 执行中的状态
+     */
+    public static final List<ExecuteStatus> EXECUTING_STATUS = List.of(Retrying, Processing);
 
     /**
      * 执行状态枚举
@@ -73,13 +79,18 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
         body.setSuccessTime(new Date());
     }
 
+    public static void retry(Body body, String exception) {
+        retry(body, exception, false);
+    }
+
     /**
      * 重试设置值
      *
      * @param body      数据体
      * @param exception 异常信息
+     * @param setFailureStatus 是否设置为失败状态 true 是，否则 false
      */
-    public static void retry(Body body, String exception) {
+    public static void retry(Body body, String exception, boolean setFailureStatus) {
         body.setException(exception);
 
         if (body instanceof Retryable retryable) {
@@ -87,7 +98,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
             retryable.setRetryCount(retryable.getRetryCount() + 1);
 
             if (retryable.getRetryCount() > retryable.getMaxRetryCount()) {
-                body.setExecuteStatus(ExecuteStatus.Unknown);
+                body.setExecuteStatus(setFailureStatus ? ExecuteStatus.Failure : ExecuteStatus.Unknown);
             } else {
                 body.setExecuteStatus(ExecuteStatus.Retrying);
             }

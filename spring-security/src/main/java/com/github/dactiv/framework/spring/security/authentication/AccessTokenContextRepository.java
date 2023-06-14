@@ -90,6 +90,10 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             return null;
         }
 
+        return getSecurityContext(token);
+    }
+
+    public SecurityContext getSecurityContext(String token) {
         CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
         byte[] key = Base64.decode(authenticationProperties.getAccessToken().getKey());
 

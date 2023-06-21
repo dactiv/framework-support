@@ -121,7 +121,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      *
      * @return 解密后的字节原
      */
-    private ByteSource decrypt(byte[] cipherText, byte[] key, byte[] iv) {
+    protected ByteSource decrypt(byte[] cipherText, byte[] key, byte[] iv) {
         byte[] decrypted = crypt(cipherText, key, iv, Cipher.DECRYPT_MODE);
         return decrypted == null ? null : new SimpleByteSource(decrypted);
     }
@@ -167,7 +167,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      *
      * @throws CryptoException 加密错误时抛出
      */
-    private void decrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
+    protected void decrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
         crypt(in, out, key, iv, Cipher.DECRYPT_MODE);
     }
 
@@ -211,7 +211,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
      *
      * @throws CryptoException 加密出错时抛出
      */
-    private void encrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
+    protected void encrypt(InputStream in, OutputStream out, byte[] key, byte[] iv) throws CryptoException {
         if (iv != null && iv.length > 0) {
             try {
                 out.write(iv);
@@ -261,12 +261,10 @@ public abstract class AbstractJcaCipherService implements CipherService {
     protected byte[] generateInitializationVector(boolean streaming) {
         int size = getInitializationVectorSize();
         if (size <= 0) {
-            String msg = "初始化向量值必须大于0";
-            throw new IllegalStateException(msg);
+            throw new IllegalStateException("初始化向量值必须大于0");
         }
         if (size % IV_MULTIPLE_VALUE != 0) {
-            String msg = "向量值必须是8个倍数";
-            throw new IllegalStateException(msg);
+            throw new IllegalStateException("向量值必须是" + IV_MULTIPLE_VALUE + "的倍数");
         }
         int sizeInBytes = size / IV_MULTIPLE_VALUE;
         byte[] ivBytes = new byte[sizeInBytes];

@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.spring.security.authentication.token;
 
+import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +31,11 @@ public class PrincipalAuthenticationToken extends SimpleAuthenticationToken {
 
     public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, boolean rememberMe, Date lastAuthenticationTime) {
         super(token, type, rememberMe);
+        this.lastAuthenticationTime = lastAuthenticationTime;
+    }
+
+    public PrincipalAuthenticationToken(UsernamePasswordAuthenticationToken token,SecurityUserDetails userDetails, boolean rememberMe, Date lastAuthenticationTime) {
+        super(token, userDetails.getType(), userDetails, userDetails.getAuthorities(), rememberMe);
         this.lastAuthenticationTime = lastAuthenticationTime;
     }
 

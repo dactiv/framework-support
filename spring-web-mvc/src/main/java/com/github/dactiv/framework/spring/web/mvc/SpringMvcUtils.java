@@ -60,6 +60,10 @@ public class SpringMvcUtils {
         return Casts.cast(getCurrentRequestAttributes().getAttribute(name, RequestAttributes.SCOPE_REQUEST));
     }
 
+    public static void removeRequestAttribute(String name) {
+        getCurrentRequestAttributes().removeAttribute(name, RequestAttributes.SCOPE_REQUEST);
+    }
+
     /**
      * 设置 session 的 attribute
      *
@@ -90,6 +94,10 @@ public class SpringMvcUtils {
      */
     public static <T> T getSessionAttribute(String name) {
         return Casts.cast(getCurrentRequestAttributes().getAttribute(name, RequestAttributes.SCOPE_SESSION));
+    }
+
+    public static void removeSessionAttribute(String name) {
+        getCurrentRequestAttributes().removeAttribute(name, RequestAttributes.SCOPE_SESSION);
     }
 
     /**

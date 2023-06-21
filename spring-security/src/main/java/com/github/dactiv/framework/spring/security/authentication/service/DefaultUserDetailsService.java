@@ -30,10 +30,10 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
     public DefaultUserDetailsService(AuthenticationProperties properties,
                                      PasswordEncoder passwordEncoder) {
         super(properties);
-        for (SecurityProperties.User user : properties.getUsers()) {
-
+        for (int i = 0; i < properties.getUsers().size(); i++) {
+            SecurityProperties.User user = properties.getUsers().get(i);
             SecurityUserDetails userDetails = new SecurityUserDetails(
-                    UUID.randomUUID().toString(),
+                    i + 1,
                     user.getName(),
                     passwordEncoder.encode(user.getPassword())
             );

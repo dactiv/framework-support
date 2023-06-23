@@ -153,13 +153,6 @@ public class SpringWebMvcAutoConfiguration {
         module.addSerializer(ValueEnum.class, new ValueEnumSerializer());
         module.addSerializer(NameEnum.class, new NameEnumSerializer());
 
-        NumberFormat numberFormat = NumberFormat.getNumberInstance();
-        numberFormat.setMaximumFractionDigits(properties.getJsonNumberMaximumFractionDigits());
-        numberFormat.setRoundingMode(properties.getJsonNumberRoundingMode());
-
-        DoubleSerializer doubleSerializer = new DoubleSerializer(numberFormat);
-        module.addSerializer(Double.class, doubleSerializer);
-
         Map<SerializationFeature, Boolean> map = jacksonProperties.getSerialization();
         Boolean isWriteDatesAsTimestamps = map.get(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         if (Objects.nonNull(isWriteDatesAsTimestamps) && isWriteDatesAsTimestamps) {

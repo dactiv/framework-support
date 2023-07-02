@@ -12,6 +12,7 @@ import java.lang.annotation.*;
  * @author maurice
  */
 @Documented
+@Repeatable(ConcurrentElements.class)
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Concurrent {

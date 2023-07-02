@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
 import com.github.dactiv.framework.idempotent.annotation.Concurrent;
+import com.github.dactiv.framework.idempotent.annotation.ConcurrentElements;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
@@ -30,7 +31,7 @@ public class ConcurrentPointcutAdvisor extends AbstractPointcutAdvisor {
         return new StaticMethodMatcherPointcut() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                return method.isAnnotationPresent(Concurrent.class);
+                return method.isAnnotationPresent(Concurrent.class) || method.isAnnotationPresent(ConcurrentElements.class);
             }
 
         };

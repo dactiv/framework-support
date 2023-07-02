@@ -4,6 +4,7 @@ import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.idempotent.advisor.concurrent.ConcurrentInterceptor;
+import com.github.dactiv.framework.idempotent.annotation.Concurrent;
 
 /**
  * 并发配置
@@ -157,5 +158,17 @@ public class ConcurrentConfig {
         ConcurrentConfig newOne = Casts.of(this, ConcurrentConfig.class);
         newOne.setKey(name);
         return newOne;
+    }
+
+    public static ConcurrentConfig ofConcurrent(Concurrent concurrent) {
+        ConcurrentConfig config = new ConcurrentConfig();
+
+        config.setKey(concurrent.value());
+        config.setException(concurrent.exception());
+        config.setLockType(concurrent.type());
+        config.setLeaseTime(TimeProperties.of(concurrent.leaseTime().value(), concurrent.leaseTime().unit()));
+        config.setWaitTime(TimeProperties.of(concurrent.waitTime().value(), concurrent.waitTime().unit()));
+
+        return config;
     }
 }

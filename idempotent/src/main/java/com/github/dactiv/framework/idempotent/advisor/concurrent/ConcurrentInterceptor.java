@@ -1,22 +1,25 @@
 package com.github.dactiv.framework.idempotent.advisor.concurrent;
 
-import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.idempotent.ConcurrentConfig;
 import com.github.dactiv.framework.idempotent.LockType;
 import com.github.dactiv.framework.idempotent.annotation.Concurrent;
+import com.github.dactiv.framework.idempotent.annotation.ConcurrentElements;
 import com.github.dactiv.framework.idempotent.exception.ConcurrentException;
 import com.github.dactiv.framework.idempotent.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.annotation.AnnotationUtils;
 
-import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
 
 /**
@@ -46,29 +49,45 @@ public class ConcurrentInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
 
-        Concurrent concurrent = AnnotationUtils.findAnnotation(invocation.getMethod(), Concurrent.class);
+        List<Concurrent> concurrentList = new LinkedList<>();
+        ConcurrentElements concurrentElements = AnnotationUtils.findAnnotation(invocation.getMethod(), ConcurrentElements.class);
+        if (Objects.nonNull(concurrentElements)) {
+            concurrentList.addAll(List.of(concurrentElements.value()));
+        } else {
+            Concurrent concurrent = AnnotationUtils.findAnnotation(invocation.getMethod(), Concurrent.class);
+            concurrentList.add(concurrent);
+        }
 
-        if (Objects.isNull(concurrent)) {
+        if (CollectionUtils.isEmpty(concurrentList)) {
             return invocation.proceed();
         }
 
-        String condition = concurrent.condition();
+        List<ConcurrentConfig> concurrentConfigs = concurrentList
+                .stream()
+                .filter(c -> StringUtils.isEmpty(c.condition()) || valueGenerator.assertCondition(c.condition(), invocation.getMethod(), invocation.getArguments()))
+                .map(ConcurrentConfig::ofConcurrent)
+                .toList();
 
-        if (StringUtils.isNotBlank(condition) && !valueGenerator.assertCondition(condition, invocation.getMethod(), invocation.getArguments())) {
-            return invocation.proceed();
+        return invoke(concurrentConfigs, () -> this.invocationProceed(invocation)) ;
+    }
+
+    private <R> R invoke(List<ConcurrentConfig> concurrentConfigs, Supplier<R> supplier) {
+        List<RLock> locks = new LinkedList<>();
+        try {
+            for (ConcurrentConfig config : concurrentConfigs) {
+                RLock lock = getLock(config.getKey(), config.getLockType());
+
+                boolean tryLock = tryLock(lock, config.getWaitTime(), config.getLeaseTime());
+
+                if (!tryLock) {
+                    throw new ConcurrentException(config.getException());
+                }
+                locks.add(lock);
+            }
+            return supplier.get();
+        } finally {
+            locks.stream().filter(RLock::isLocked).forEach(Lock::unlock);
         }
-
-        String key = concurrent.value();
-
-        if (StringUtils.isBlank(key)) {
-            Method method = invocation.getMethod();
-            key = method.getDeclaringClass().getName() + Casts.DOT + method.getName();
-        }
-
-        Object concurrentKey = valueGenerator.generate(key, invocation.getMethod(), invocation.getArguments());
-
-        return invoke(concurrentKey.toString(), concurrent, () -> this.invocationProceed(invocation));
-
     }
 
     /**
@@ -242,8 +261,8 @@ public class ConcurrentInterceptor implements MethodInterceptor {
      *
      */
     private void invoke(String key,
-                         Concurrent concurrent,
-                         Runnable runnable) {
+                        Concurrent concurrent,
+                        Runnable runnable) {
         TimeProperties waitTime = TimeProperties.of(concurrent.waitTime());
         TimeProperties leaseTime = TimeProperties.of(concurrent.leaseTime());
 

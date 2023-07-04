@@ -3,6 +3,7 @@ package com.github.dactiv.framework.spring.security.authentication.handler;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,7 +56,11 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException{
 
-        RestResult<Object> result = RestResult.ofSuccess(HttpStatus.OK.getReasonPhrase(), authentication.getDetails());
+        RestResult<Object> result = RestResult.of(HttpStatus.OK.getReasonPhrase());
+        if (authentication.getDetails() instanceof SecurityUserDetails userDetails) {
+            SecurityUserDetails returnValue = Casts.of(userDetails, SecurityUserDetails.class);
+            result.setData(returnValue);
+        }
 
         if (CollectionUtils.isNotEmpty(successResponses)) {
             successResponses.forEach(f -> f.setting(result, request));

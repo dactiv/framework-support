@@ -38,7 +38,7 @@ public class DesensitizeSerializer extends JsonSerializer<Object> {
         int length = string.length();
 
         if (length <= DEFAULT_MULTIPLE_VALUE) {
-            return string;
+            return string.length() == DEFAULT_MULTIPLE_VALUE ? string.charAt(0) + DEFAULT_DESENSITIZE_SYMBOL : string ;
         }
 
         double avgLength = (double) length / DEFAULT_MULTIPLE_VALUE / DEFAULT_MULTIPLE_VALUE;

@@ -47,7 +47,9 @@ public class TestQueryGenerator {
         map.put("filter_[creation_time_between]", Arrays.asList(new Date(), new Date()));
 
         map.add("filter_[city.id_jin]", "nanning");
-        map.put("filter_[area_jin]", Arrays.asList("qingqiuqu", "xingningqu"));
+        map.put("filter_[area_jin]", Arrays.asList("qingxiuqu", "xingningqu"));
+        map.put("filter_[area_jsa]", Arrays.asList("qingxiuqu", "xingningqu"));
+        map.put("filter_[area_jso]", Arrays.asList("qingxiuqu", "xingningqu"));
 
         map.add("filter_[city.name_jeq]", "nanning");
         map.add("filter_[name_eq]_or_[username_like]_or_[real_name_like]", "nanning");
@@ -78,6 +80,8 @@ public class TestQueryGenerator {
         Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', ?, '$')"));
         Assertions.assertTrue(targetSql.contains("city->'$.name' = ?"));
         Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) OR JSON_CONTAINS(area, ?))"));
+        Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'all', ?) IS NOT NULL OR JSON_SEARCH(area, 'all', ?) IS NOT NULL)"));
+        Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'one', ?) IS NOT NULL OR JSON_SEARCH(area, 'one', ?) IS NOT NULL)"));
         Assertions.assertTrue(targetSql.contains("name = ? OR username LIKE ? OR real_name LIKE ?"));
     }
 }

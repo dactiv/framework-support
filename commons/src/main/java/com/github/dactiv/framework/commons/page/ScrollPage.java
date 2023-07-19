@@ -3,6 +3,7 @@ package com.github.dactiv.framework.commons.page;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class ScrollPage<T> implements Serializable {
     /**
      * 元数据信息
      */
-    private Map<String, Object> meta;
+    private Map<String, Object> meta = new LinkedHashMap<>();
 
     public ScrollPage() {
     }

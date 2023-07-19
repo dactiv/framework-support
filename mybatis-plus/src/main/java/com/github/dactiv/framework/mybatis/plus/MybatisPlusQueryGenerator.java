@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.commons.page.Page;
 import com.github.dactiv.framework.commons.page.PageRequest;
 import com.github.dactiv.framework.mybatis.plus.wildcard.*;
@@ -15,6 +16,7 @@ import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import com.github.dactiv.framework.spring.web.query.condition.support.SimpleConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +72,10 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
                             .stream()
                             .filter(w -> w.isSupport(c.name()))
                             .toList();
+
+                    if (CollectionUtils.isEmpty(result)) {
+                        throw new SystemException("找不到 [" + c.name() + "] 的表达式查询实现");
+                    }
 
                     for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
                         wildcardParser.structure(c.property(), subWrapper);

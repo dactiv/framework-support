@@ -6,6 +6,7 @@ import com.github.dactiv.framework.spring.security.authentication.config.Authent
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -31,7 +32,7 @@ public class JsonAuthenticationFailureHandler implements AuthenticationFailureHa
     public JsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses,
                                             AuthenticationProperties authenticationProperties) {
         this.failureResponses = failureResponses;
-        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl());
+        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name());
     }
 
     @Override

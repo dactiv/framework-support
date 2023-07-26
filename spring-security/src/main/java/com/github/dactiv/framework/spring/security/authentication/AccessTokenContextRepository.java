@@ -28,6 +28,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.codec.SerializationCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.DeferredSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
@@ -35,9 +36,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.nio.charset.Charset;
-import java.security.Security;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,11 +60,14 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     private final AuthenticationProperties authenticationProperties;
 
+    private final AntPathRequestMatcher loginRequestMatcher;
+
     private final CipherAlgorithmService cipherAlgorithmService = new CipherAlgorithmService();
 
     public AccessTokenContextRepository(RedissonClient redissonClient, AuthenticationProperties authenticationProperties) {
         this.redissonClient = redissonClient;
         this.authenticationProperties = authenticationProperties;
+        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name());
     }
 
     @Override
@@ -86,6 +90,9 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     private SecurityContext readSecurityContextFromRequest(HttpServletRequest request) {
+        if (this.loginRequestMatcher.matches(request)) {
+            return null;
+        }
         String token = request.getHeader(authenticationProperties.getAccessToken().getAccessTokenHeaderName());
         if (StringUtils.isEmpty(token)) {
             token = request.getParameter(authenticationProperties.getAccessToken().getAccessTokenParamName());

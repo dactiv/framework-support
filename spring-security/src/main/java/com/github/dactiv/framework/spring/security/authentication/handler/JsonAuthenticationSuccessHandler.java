@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -27,15 +28,12 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
 
     private final List<JsonAuthenticationSuccessResponse> successResponses;
 
-    private final AuthenticationProperties authenticationProperties;
-
     private final AntPathRequestMatcher loginRequestMatcher;
 
     public JsonAuthenticationSuccessHandler(List<JsonAuthenticationSuccessResponse> successResponses,
                                             AuthenticationProperties authenticationProperties) {
         this.successResponses = successResponses;
-        this.authenticationProperties = authenticationProperties;
-        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl());
+        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name());
     }
 
     @Override
@@ -44,7 +42,7 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         FilterChain chain,
                                         Authentication authentication) throws IOException, ServletException {
 
-        if (!request.getRequestURI().equals(authenticationProperties.getLoginProcessingUrl())) {
+        if (!loginRequestMatcher.matches(request)) {
             chain.doFilter(request, response);
         } else {
             onAuthenticationSuccess(request, response, authentication);

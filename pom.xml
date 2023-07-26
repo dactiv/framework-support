@@ -113,15 +113,15 @@
     <modules>
         <module>parent</module>
         <module>commons</module>
-        <module>basic-security</module>
-        <module>access-crypto</module>
-        <module>spring-web-mvc</module>
-        <module>spring-security</module>
-        <module>alibaba-nacos</module>
-        <module>idempotent</module>
-        <module>minio</module>
-        <module>mybatis</module>
-        <module>mybatis-plus</module>
+        <module>basic-security-starter</module>
+        <module>access-crypto-starter</module>
+        <module>spring-web-mvc-starter</module>
+        <module>spring-security-starter</module>
+        <module>alibaba-nacos-starter</module>
+        <module>idempotent-starter</module>
+        <module>minio-starter</module>
+        <module>mybatis-starter</module>
+        <module>mybatis-plus-starter</module>
     </modules>
 
 </project>

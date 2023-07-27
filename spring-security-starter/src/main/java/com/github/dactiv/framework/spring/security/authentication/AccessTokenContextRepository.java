@@ -246,7 +246,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         TimeProperties time = authenticationProperties.getAuthenticationCache().getExpiresTime();
 
         if (Objects.nonNull(time)) {
-            bucket.expireAsync(time.toChronoUnit().getDuration());
+            bucket.expireAsync(time.getDuration());
         }
     }
 

@@ -94,7 +94,7 @@ public class CookieRememberService implements RememberMeServices {
         }
 
         if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
-            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toChronoUnit().getDuration());
+            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().getDuration());
         }
 
         int maxAge = (int) properties.getRememberMe().getCache().getExpiresTime().toSeconds();

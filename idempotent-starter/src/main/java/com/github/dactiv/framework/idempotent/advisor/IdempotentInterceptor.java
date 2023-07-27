@@ -141,19 +141,13 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
         if (CollectionUtils.isNotEmpty(existValues)) {
 
-            boolean setResult = bucket.setIfAbsent(
-                    values,
-                    expirationTime.toChronoUnit().getDuration()
-            );
+            boolean setResult = bucket.setIfAbsent(values, expirationTime.getDuration());
 
             return values.stream().anyMatch(existValues::contains) || !setResult;
 
         }
 
-        return !bucket.setIfAbsent(
-                values,
-                expirationTime.toChronoUnit().getDuration()
-        );
+        return !bucket.setIfAbsent(values, expirationTime.getDuration());
     }
 
 }

@@ -228,7 +228,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
             bucket.setAsync(userDetails);
             if (Objects.nonNull(authenticationCache.getExpiresTime())) {
-                bucket.expireAsync(authenticationCache.getExpiresTime().toChronoUnit().getDuration());
+                bucket.expireAsync(authenticationCache.getExpiresTime().getDuration());
             }
         }
 
@@ -334,7 +334,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             list.addAllAsync(grantedAuthorities);
 
             if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                list.expireAsync(authorizationCache.getExpiresTime().toChronoUnit().getDuration());
+                list.expireAsync(authorizationCache.getExpiresTime().getDuration());
             }
         }
 

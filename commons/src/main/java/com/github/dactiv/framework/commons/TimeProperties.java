@@ -3,6 +3,7 @@ package com.github.dactiv.framework.commons;
 import com.github.dactiv.framework.commons.annotation.Time;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
@@ -90,6 +91,10 @@ public class TimeProperties implements Serializable {
             case DAYS:         return ChronoUnit.DAYS;
             default: throw new AssertionError();
         }
+    }
+    
+    public Duration getDuration() {
+        return Duration.of(value, toChronoUnit());
     }
 
     /**

@@ -4,10 +4,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +17,15 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * ip 认证过滤器
@@ -50,7 +52,7 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
                 .stream()
                 .filter(ip -> new AntPathRequestMatcher(ip.getUrl()).matches(request))
                 .flatMap(ip -> ip.getIps().stream())
-                .toList();
+                .collect(Collectors.toList());
 
         String remoteIp = SpringMvcUtils.getIpAddress(request);
 
@@ -62,8 +64,8 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
         if (ips.contains(remoteIp)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (Objects.isNull(authentication)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(remoteIp, this.getClass().getName(), List.of(new SimpleGrantedAuthority("IP_WHITELIST")));
-                WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetails(remoteIp, request.getSession().getId());
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(remoteIp, this.getClass().getName(), Collections.singletonList(new SimpleGrantedAuthority("IP_WHITELIST")));
+                WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetails(request);
                 authenticationToken.setDetails(webAuthenticationDetails);
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

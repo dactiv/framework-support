@@ -27,12 +27,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serial;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 过滤注解构造器
@@ -41,7 +38,7 @@ import java.util.Set;
  */
 public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector {
 
-    @Serial
+    
     private static final long serialVersionUID = -72593450166134217L;
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterResultAnnotationBuilder.class);
 
@@ -49,7 +46,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
     public static final String DEFAULT_EXCLUDE_PREFIX = "exclude";
 
-    public final static List<Class<? extends Annotation>> ANNOTATIONS_TO_ADD = List.of(ExcludeViews.class, ExcludeView.class, IncludeView.class, IncludeViews.class);
+    public final static List<Class<? extends Annotation>> ANNOTATIONS_TO_ADD = Arrays.asList(ExcludeViews.class, ExcludeView.class, IncludeView.class, IncludeViews.class);
     /**
      * 需要扫描的包路径
      */
@@ -166,7 +163,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
             for (ExcludeView view : excludeViews.value()) {
                 String id = getExcludeViewId(view, annotated);
-                Set<String> set = Set.of(view.properties());
+                Set<String> set = new LinkedHashSet<>(Arrays.asList(view.properties()));
                 simpleFilterProvider.addFilter(id, new SimpleBeanPropertyFilter.SerializeExceptFilter(set));
             }
         }
@@ -175,7 +172,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
         if (Objects.nonNull(excludeView)) {
             String id = getExcludeViewId(excludeView, annotated);
-            Set<String> set = Set.of(excludeView.properties());
+            Set<String> set = new LinkedHashSet<>(Arrays.asList(excludeView.properties()));
             simpleFilterProvider.addFilter(id, new SimpleBeanPropertyFilter.SerializeExceptFilter(set));
         }
 
@@ -185,7 +182,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
             for (IncludeView view : includeViews.value()) {
                 String id = getIncludeViewId(view, annotated);
-                Set<String> set = Set.of(view.properties());
+                Set<String> set = new LinkedHashSet<>(Arrays.asList(view.properties()));
                 simpleFilterProvider.addFilter(id, new SimpleBeanPropertyFilter.FilterExceptFilter(set));
             }
         }
@@ -194,7 +191,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
         if (Objects.nonNull(includeView)) {
             String id = getIncludeViewId(includeView, annotated);
-            Set<String> set = Set.of(includeView.properties());
+            Set<String> set = new LinkedHashSet<>(Arrays.asList(includeView.properties()));
             simpleFilterProvider.addFilter(id, new SimpleBeanPropertyFilter.FilterExceptFilter(set));
         }
     }

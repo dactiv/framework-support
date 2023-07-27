@@ -8,8 +8,6 @@ import com.github.dactiv.framework.security.entity.BasicUserDetails;
 import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -24,8 +22,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -214,9 +213,8 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         if (request.getHeaderNames().hasMoreElements()) {
             Map<String, Object> header = new LinkedHashMap<>();
-            Iterator<String> iterator = request.getHeaderNames().asIterator();
-            while (iterator.hasNext()) {
-                String key = iterator.next();
+            while (request.getHeaderNames().hasMoreElements()) {
+                String key = request.getHeaderNames().nextElement();
                 header.put(key, request.getHeader(key));
             }
             data.put(DEFAULT_HEADER_KEY, header);

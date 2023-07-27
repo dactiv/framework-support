@@ -1,11 +1,11 @@
 package com.github.dactiv.framework.mybatis.plus.wildcard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,8 +40,8 @@ public abstract class AbstractJsonFunctionWildcardParser<T> implements WildcardP
     protected abstract String getExpression(String propertyName, Integer index);
 
     protected ApplyObject structureApplyObject(Object value, Function<Integer, String> expression) {
-        if (value instanceof Iterable<?> iterable) {
-
+        if (value instanceof Iterable<?>) {
+            Iterable<?> iterable = Casts.cast(value);
             int i = 0;
 
             List<Object> values = new ArrayList<>();
@@ -70,7 +70,7 @@ public abstract class AbstractJsonFunctionWildcardParser<T> implements WildcardP
      */
     public static class ApplyObject implements Serializable {
 
-        @Serial
+        
         private static final long serialVersionUID = -4857566069778364200L;
 
         /**

@@ -6,7 +6,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -17,7 +16,7 @@ import java.util.Collection;
  */
 public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
 
-    @Serial
+    
     private static final long serialVersionUID = 3747271533448473641L;
 
     private final UsernamePasswordAuthenticationToken token;

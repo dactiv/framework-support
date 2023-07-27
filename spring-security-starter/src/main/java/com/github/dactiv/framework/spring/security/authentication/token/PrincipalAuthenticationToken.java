@@ -5,7 +5,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 
@@ -16,7 +15,7 @@ import java.util.Date;
  */
 public class PrincipalAuthenticationToken extends SimpleAuthenticationToken {
 
-    @Serial
+    
     private static final long serialVersionUID = 8996883635276805751L;
 
     /**

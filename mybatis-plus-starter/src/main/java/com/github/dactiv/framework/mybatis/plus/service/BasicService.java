@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 简单封装的基础实体业务逻辑基类，该类用于不实现 service 接口的情况直接继承使用，封装一些常用的方法
@@ -283,7 +284,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
             return result
                     .stream()
                     .map(o -> Casts.cast(o, returnType))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         return new ArrayList<>();

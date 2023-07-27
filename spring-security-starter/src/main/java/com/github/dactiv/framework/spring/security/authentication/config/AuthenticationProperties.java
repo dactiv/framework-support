@@ -114,6 +114,11 @@ public class AuthenticationProperties {
     private CacheProperties authorizationCache = CacheProperties.of(RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
+     * 是否允许访问投票器的拒绝和同意相等时允许访问
+     */
+    private boolean allowIfEqualGrantedDeniedDecisions = false;
+
+    /**
      * 获取默认用户信息集合
      *
      * @return 默认用户信息集合
@@ -363,5 +368,13 @@ public class AuthenticationProperties {
      */
     public void setAuthorizationCache(CacheProperties authorizationCache) {
         this.authorizationCache = authorizationCache;
+    }
+
+    public boolean isAllowIfEqualGrantedDeniedDecisions() {
+        return allowIfEqualGrantedDeniedDecisions;
+    }
+
+    public void setAllowIfEqualGrantedDeniedDecisions(boolean allowIfEqualGrantedDeniedDecisions) {
+        this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 }

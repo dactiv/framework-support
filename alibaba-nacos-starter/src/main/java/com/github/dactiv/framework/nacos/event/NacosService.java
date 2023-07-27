@@ -3,7 +3,6 @@ package com.github.dactiv.framework.nacos.event;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.Service;
 
-import java.io.Serial;
 import java.util.List;
 
 /**
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public class NacosService extends Service {
 
-    @Serial
+    
     private static final long serialVersionUID = -5952401177051610675L;
 
     /**

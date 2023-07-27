@@ -7,7 +7,6 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 
-import java.io.Serial;
 import java.lang.reflect.Method;
 
 /**
@@ -17,7 +16,7 @@ import java.lang.reflect.Method;
  */
 public class ConcurrentPointcutAdvisor extends AbstractPointcutAdvisor {
 
-    @Serial
+    
     private static final long serialVersionUID = -2797648387592489604L;
 
     private final ConcurrentInterceptor concurrentInterceptor;

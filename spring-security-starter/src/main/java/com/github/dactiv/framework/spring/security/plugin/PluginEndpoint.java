@@ -12,7 +12,6 @@ import com.github.dactiv.framework.security.plugin.PluginInfo;
 import com.github.dactiv.framework.security.plugin.TargetObject;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RegExUtils;
@@ -45,6 +44,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -452,7 +452,7 @@ public class PluginEndpoint {
                 parentValueList = parentValueList
                         .stream()
                         .map(s -> StringUtils.prependIfMissing(StringUtils.removeStart(s, AntPathMatcher.DEFAULT_PATH_SEPARATOR), prefix))
-                        .toList();
+                        .collect(Collectors.toList());
             }
         }
 
@@ -528,7 +528,7 @@ public class PluginEndpoint {
 
         return values.stream()
                 .map(v -> Objects.isNull(parent) ? v : getRequestValueString(target, v, parent))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.idempotent.exception;
 
-import java.io.Serial;
+
 
 /**
  * 并发异常
@@ -9,7 +9,7 @@ import java.io.Serial;
  */
 public class ConcurrentException extends IdempotentException {
 
-    @Serial
+    
     private static final long serialVersionUID = 2181395755678626994L;
 
     public ConcurrentException() {

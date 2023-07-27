@@ -8,7 +8,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
-import com.github.dactiv.framework.commons.jackson.serializer.DoubleSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -49,7 +48,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * spring mvc 自动配置实现
@@ -173,7 +172,7 @@ public class SpringWebMvcAutoConfiguration {
     @Bean
     @ConfigurationProperties("dactiv.enumerate")
     public EnumerateEndpoint enumerateEndpoint(ObjectProvider<InfoContributor> infoContributor) {
-        return new EnumerateEndpoint(infoContributor.stream().toList());
+        return new EnumerateEndpoint(infoContributor.stream().collect(Collectors.toList()));
     }
 
     @Bean

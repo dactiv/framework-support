@@ -89,10 +89,12 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         SimpleAuthenticationToken token = Casts.cast(authentication);
 
         SecurityUserDetails userDetails;
-        if (authentication instanceof RequestAuthenticationToken requestAuthenticationToken) {
+        if (authentication instanceof RequestAuthenticationToken) {
+            RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
             // 开始授权，如果失败抛出异常
             userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
-        } else if (authentication instanceof RememberMeAuthenticationToken rememberMeAuthenticationToken) {
+        } else if (authentication instanceof RememberMeAuthenticationToken) {
+            RememberMeAuthenticationToken rememberMeAuthenticationToken = Casts.cast(authentication);
             userDetails = doRememberMeAuthentication(rememberMeAuthenticationToken);
         } else {
             String error = messages.getMessage(
@@ -226,7 +228,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
             bucket.setAsync(userDetails);
             if (Objects.nonNull(authenticationCache.getExpiresTime())) {
-                bucket.expireAsync(authenticationCache.getExpiresTime().toDuration());
+                bucket.expireAsync(authenticationCache.getExpiresTime().toChronoUnit().getDuration());
             }
         }
 
@@ -291,7 +293,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         // 通过 token 获取对应 type 实现的 UserDetailsService
         Optional<UserDetailsService> optional = getUserDetailsService(token);
 
-        if (optional.isEmpty()) {
+        if (!optional.isPresent()) {
             return new PrincipalAuthenticationToken(
                     new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials()),
                     token.getType(),
@@ -332,7 +334,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             list.addAllAsync(grantedAuthorities);
 
             if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                list.expireAsync(authorizationCache.getExpiresTime().toDuration());
+                list.expireAsync(authorizationCache.getExpiresTime().toChronoUnit().getDuration());
             }
         }
 

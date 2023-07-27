@@ -2,7 +2,6 @@ package com.github.dactiv.framework.commons.id.number;
 
 import com.github.dactiv.framework.commons.id.IdEntity;
 
-import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Date;
  */
 public class IntegerIdEntity extends IdEntity<Integer> implements NumberIdEntity<Integer> {
 
-    @Serial
+    
     private static final long serialVersionUID = 6284036190187423322L;
 
     /**

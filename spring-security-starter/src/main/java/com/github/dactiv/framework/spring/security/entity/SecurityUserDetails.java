@@ -12,8 +12,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serial;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * spring security 用户实现
@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class SecurityUserDetails implements UserDetails, BasicIdentification<Object> {
 
-    @Serial
+    
     private static final long serialVersionUID = 1369484231035811533L;
 
     public static final String DEFAULT_IS_AUTHENTICATED_METHOD_NAME = "isAuthenticated";
@@ -114,7 +114,7 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
                         .filter(x -> StringUtils.endsWith(x, ResourceAuthority.DEFAULT_RESOURCE_SUFFIX))
                         .map(SimpleGrantedAuthority::new)
                         .distinct()
-                        .toList()
+                        .collect(Collectors.toList())
         );
 
         result.addAll(
@@ -122,7 +122,7 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
                         .map(x -> RoleAuthority.DEFAULT_ROLE_PREFIX + x.getAuthority())
                         .map(SimpleGrantedAuthority::new)
                         .distinct()
-                        .toList()
+                        .collect(Collectors.toList())
         );
 
         return result;
@@ -239,7 +239,7 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
      * @return 字符串集合的資源类型授权信息
      */
     public List<String> getResourceAuthorityStrings() {
-        return resourceAuthorities.stream().map(ResourceAuthority::getAuthority).toList();
+        return resourceAuthorities.stream().map(ResourceAuthority::getAuthority).collect(Collectors.toList());
     }
 
     /**

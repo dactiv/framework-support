@@ -3,7 +3,6 @@ package com.github.dactiv.framework.crypto.access;
 import com.github.dactiv.framework.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.framework.commons.enumerate.support.YesOrNo;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.List;
  */
 public class AccessCrypto implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = 1929949569679310785L;
 
     public static final String DEFAULT_REQUEST_DECRYPT_FIELD_NAME = "requestDecrypt";

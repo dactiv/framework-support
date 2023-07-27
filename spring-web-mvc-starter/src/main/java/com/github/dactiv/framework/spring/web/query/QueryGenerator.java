@@ -3,12 +3,13 @@ package com.github.dactiv.framework.spring.web.query;
 import com.github.dactiv.framework.spring.web.query.condition.Condition;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 查询生成器，用于 http 提交 filter_ 前缀参数时，根据条件内容生成已给符合查询内容的对象
@@ -72,14 +73,14 @@ public interface QueryGenerator<T> {
                 .stream()
                 // 过滤掉空的值
                 .filter(e -> Objects.nonNull(e.getValue()))
-                .toList();
+                .collect(Collectors.toList());
         Map<String, List<Condition>> filterConditionMap = new LinkedHashMap<>();
         for (Map.Entry<String, List<Object>> entry : entryList) {
             List<Condition> conditions = getConditionParserList()
                     .stream()
                     .filter(c -> c.isSupport(entry.getKey())) // 如果支持参数，就执行 getCondition 方法
                     .flatMap(c -> c.getCondition(entry.getKey(), columnMap.get(entry.getKey())).stream())
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (CollectionUtils.isNotEmpty(conditions)) {
                 filterConditionMap.put(entry.getKey(), conditions);

@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class TestBasicService {
         Assertions.assertTrue(
                 entity
                         .getExecutes()
-                        .containsAll(List.of(ExecuteStatus.Processing, ExecuteStatus.Success, ExecuteStatus.Retrying))
+                        .containsAll(Arrays.asList(ExecuteStatus.Processing, ExecuteStatus.Success, ExecuteStatus.Retrying))
         );
 
         Assertions.assertEquals(entity.getStatus(), DisabledOrEnabled.Enabled);
@@ -58,7 +59,7 @@ public class TestBasicService {
         AllTypeEntity entity = new AllTypeEntity();
 
         entity.setStatus(DisabledOrEnabled.Disabled);
-        entity.setExecutes(List.of(ExecuteStatus.Failure, ExecuteStatus.Processing));
+        entity.setExecutes(Arrays.asList(ExecuteStatus.Failure, ExecuteStatus.Processing));
 
         allTypeEntityService.save(entity);
 

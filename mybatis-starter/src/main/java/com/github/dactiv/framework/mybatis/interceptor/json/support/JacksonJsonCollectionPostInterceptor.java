@@ -20,10 +20,7 @@ import org.apache.ibatis.session.RowBounds;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,7 +74,7 @@ public class JacksonJsonCollectionPostInterceptor extends AbstractJsonCollection
                         .map(o -> getEnumValue(o, targetClass))
                         .filter(Objects::nonNull);
                 if (List.class.equals(collectionClass)) {
-                    newValue = stream.toList();
+                    newValue = stream.collect(Collectors.toList());
                 } else if (Set.class.equals(collectionClass)) {
                     newValue = stream.collect(Collectors.toSet());
                 } else {
@@ -91,7 +88,7 @@ public class JacksonJsonCollectionPostInterceptor extends AbstractJsonCollection
             }
 
             if (Objects.nonNull(pd.getWriteMethod())) {
-                ReflectionUtils.invokeMethod(result, pd.getWriteMethod(), List.of(newValue));
+                ReflectionUtils.invokeMethod(result, pd.getWriteMethod(), Collections.singletonList(newValue));
             } else {
                 ReflectionUtils.setFieldValue(result, pd.getName(), newValue);
             }

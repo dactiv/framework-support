@@ -15,13 +15,14 @@ import com.github.dactiv.framework.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.framework.spring.web.query.condition.ConditionType;
 import com.github.dactiv.framework.spring.web.query.condition.support.SimpleConditionParser;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Mybatis-Plus 查询生成器实现
@@ -70,18 +71,18 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
 
                     List<WildcardParser<QueryWrapper<T>>> result = getWildcardParserList()
                             .stream()
-                            .filter(w -> w.isSupport(c.name()))
-                            .toList();
+                            .filter(w -> w.isSupport(c.getName()))
+                            .collect(Collectors.toList());
 
                     if (CollectionUtils.isEmpty(result)) {
-                        throw new SystemException("找不到 [" + c.name() + "] 的表达式查询实现");
+                        throw new SystemException("找不到 [" + c.getName() + "] 的表达式查询实现");
                     }
 
                     for (WildcardParser<QueryWrapper<T>> wildcardParser : result) {
-                        wildcardParser.structure(c.property(), subWrapper);
+                        wildcardParser.structure(c.getProperty(), subWrapper);
                     }
 
-                    if (ConditionType.Or.equals(c.type())) {
+                    if (ConditionType.Or.equals(c.getType())) {
                         subWrapper = subWrapper.or();
                     }
 

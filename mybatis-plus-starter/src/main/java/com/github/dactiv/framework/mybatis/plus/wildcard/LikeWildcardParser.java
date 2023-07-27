@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.mybatis.plus.wildcard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.spring.web.query.Property;
 import com.github.dactiv.framework.spring.web.query.generator.WildcardParser;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +21,8 @@ public class LikeWildcardParser<T> implements WildcardParser<QueryWrapper<T>> {
     public static final String MATCH_SYMBOL = "%";
 
     public static void addMatchSymbol(Property property) {
-        if (property.getValue() instanceof List<?> list) {
+        if (property.getValue() instanceof List<?>) {
+            List<?> list = Casts.cast(property.getValue());
             List<String> newValue = new LinkedList<>();
             for (Object value : list) {
                 String stringValue = value.toString();

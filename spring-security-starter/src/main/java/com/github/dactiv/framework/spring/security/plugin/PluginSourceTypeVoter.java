@@ -4,22 +4,23 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.security.plugin.Plugin;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
- * 用户类型表决器实现，用于判断当前 controller 方法里面是否带有 {@link Plugin} 注解的记录是否符合当前用户调用
+ * 用户类型表决器实现，用于判断当前 controller 方法里面是否带有 {@link com.github.dactiv.framework.security.plugin.Plugin} 注解的记录是否符合当前用户调用
  *
  * @author maurice
  */
-public class PluginSourceAuthorizationManager implements AuthorizationManager<MethodInvocation> {
+public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocation> {
 
     /**
      * 默认同意的来源类型值
@@ -31,39 +32,38 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
      */
     private List<String> grantedSources = DEFAULT_GRANTED_SOURCES;
 
-    public PluginSourceAuthorizationManager() {
+    public boolean supports(ConfigAttribute attribute) {
+        return true;
     }
 
-    public PluginSourceAuthorizationManager(List<String> grantedSources) {
-        this.grantedSources = grantedSources;
+    public boolean supports(Class<?> targetClass) {
+        return MethodInvocation.class.isAssignableFrom(targetClass);
     }
 
     @Override
-    public AuthorizationDecision check(Supplier<Authentication> supplier, MethodInvocation object) {
+    public int vote(Authentication authentication, MethodInvocation object, Collection<ConfigAttribute> attributes) {
+
+        if (!authentication.isAuthenticated()) {
+            return AccessDecisionVoter.ACCESS_ABSTAIN;
+        }
+
+        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
+            return AccessDecisionVoter.ACCESS_ABSTAIN;
+        }
 
         Plugin plugin = AnnotationUtils.findAnnotation(object.getMethod(), Plugin.class);
 
         if (plugin == null) {
-            return null;
-        }
-
-        Authentication authentication = supplier.get();
-
-        if (!authentication.isAuthenticated()) {
-            return new AuthorizationDecision(false);
-        }
-
-        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
-            return new AuthorizationDecision(false);
+            return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
         List<String> resourceTypes = Arrays
                 .stream(plugin.sources())
                 .filter(s -> !grantedSources.contains(s))
-                .toList();
+                .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(resourceTypes)) {
-            return new AuthorizationDecision(true);
+            return AccessDecisionVoter.ACCESS_GRANTED;
         }
 
         if (SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
@@ -71,13 +71,13 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
             SecurityUserDetails userDetails = Casts.cast(authentication.getDetails(), SecurityUserDetails.class);
 
             if (!resourceTypes.contains(userDetails.getType())) {
-                return new AuthorizationDecision(false);
+                return AccessDecisionVoter.ACCESS_DENIED;
             } else {
-                return new AuthorizationDecision(true);
+                return AccessDecisionVoter.ACCESS_GRANTED;
             }
         }
 
-        return new AuthorizationDecision(false);
+        return AccessDecisionVoter.ACCESS_ABSTAIN;
     }
 
     /**

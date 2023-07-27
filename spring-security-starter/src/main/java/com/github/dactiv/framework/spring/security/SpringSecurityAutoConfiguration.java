@@ -36,6 +36,8 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.stream.Collectors;
+
 /**
  * spring security 重写支持自动配置类
  *
@@ -50,7 +52,7 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     @ConfigurationProperties("dactiv.authentication.plugin")
     PluginEndpoint pluginEndpoint(ObjectProvider<InfoContributor> infoContributor) {
-        return new PluginEndpoint(infoContributor.stream().toList());
+        return new PluginEndpoint(infoContributor.stream().collect(Collectors.toList()));
     }
 
     @Bean
@@ -92,7 +94,7 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
     public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureResponse,
                                                                              AuthenticationProperties authenticationProperties) {
-        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().toList(), authenticationProperties);
+        return new JsonAuthenticationFailureHandler(failureResponse.orderedStream().collect(Collectors.toList()), authenticationProperties);
     }
 
     @Bean
@@ -100,7 +102,7 @@ public class SpringSecurityAutoConfiguration {
     public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(ObjectProvider<JsonAuthenticationSuccessResponse> successResponse,
                                                                              AuthenticationProperties properties) {
         return new JsonAuthenticationSuccessHandler(
-                successResponse.orderedStream().toList(),
+                successResponse.orderedStream().collect(Collectors.toList()),
                 properties
         );
     }
@@ -113,7 +115,7 @@ public class SpringSecurityAutoConfiguration {
         return new RequestAuthenticationProvider(
                 redissonClient,
                 authenticationProperties,
-                userDetailsService.orderedStream().toList()
+                userDetailsService.orderedStream().collect(Collectors.toList())
         );
     }
 

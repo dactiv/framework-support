@@ -2,7 +2,6 @@ package com.github.dactiv.framework.mybatis.plus.audit;
 
 import com.github.dactiv.framework.mybatis.interceptor.audit.OperationDataTraceRecord;
 
-import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -11,7 +10,7 @@ import java.util.Date;
  * @author maurice.chen
  */
 public class EntityIdOperationDataTraceRecord extends OperationDataTraceRecord {
-    @Serial
+    
     private static final long serialVersionUID = 7972904701408013089L;
 
     public static final String ENTITY_ID_FIELD_NAME = "entityId";

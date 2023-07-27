@@ -6,7 +6,6 @@ import com.github.dactiv.framework.security.entity.ResourceAuthority;
 import com.github.dactiv.framework.security.enumerate.ResourceType;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 public class PluginInfo extends ResourceAuthority implements Tree<String, PluginInfo> {
 
-    @Serial
+    
     private static final long serialVersionUID = -6354440242310314107L;
 
     /**

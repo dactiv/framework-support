@@ -16,11 +16,13 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 并发拦截器
@@ -52,7 +54,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         List<Concurrent> concurrentList = new LinkedList<>();
         ConcurrentElements concurrentElements = AnnotationUtils.findAnnotation(invocation.getMethod(), ConcurrentElements.class);
         if (Objects.nonNull(concurrentElements)) {
-            concurrentList.addAll(List.of(concurrentElements.value()));
+            concurrentList.addAll(Arrays.asList(concurrentElements.value()));
         } else {
             Concurrent concurrent = AnnotationUtils.findAnnotation(invocation.getMethod(), Concurrent.class);
             concurrentList.add(concurrent);
@@ -66,7 +68,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
                 .stream()
                 .filter(c -> StringUtils.isEmpty(c.condition()) || valueGenerator.assertCondition(c.condition(), invocation.getMethod(), invocation.getArguments()))
                 .map(ConcurrentConfig::ofConcurrent)
-                .toList();
+                .collect(Collectors.toList());
 
         return invoke(concurrentConfigs, () -> this.invocationProceed(invocation)) ;
     }

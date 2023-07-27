@@ -8,7 +8,6 @@ import com.github.dactiv.framework.spring.security.authentication.token.SimpleAu
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import net.sf.jsqlparser.statement.Statement;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -39,7 +39,7 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
 
         Optional<HttpServletRequest> optional = SpringMvcUtils.getHttpServletRequest();
 
-        if (optional.isEmpty()) {
+        if (!optional.isPresent()) {
             return null;
         }
         HttpServletRequest httpServletRequest = optional.get();
@@ -59,7 +59,9 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             return null;
         }
 
-        if (context.getAuthentication() instanceof SimpleAuthenticationToken authenticationToken && authenticationToken.getDetails() instanceof SecurityUserDetails userDetails) {
+        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getDetails() instanceof SecurityUserDetails) {
+            SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
+            SecurityUserDetails userDetails = Casts.cast(authenticationToken.getDetails());
             String username = userDetails.getUsername();
             if (ignorePrincipals.contains(username)) {
                 return null;

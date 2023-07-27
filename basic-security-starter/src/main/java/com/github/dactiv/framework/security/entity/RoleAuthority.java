@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.security.entity;
 
-import java.io.Serial;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class RoleAuthority implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = 405960799851529326L;
 
     public static final String DEFAULT_ROLE_PREFIX = "ROLE_";

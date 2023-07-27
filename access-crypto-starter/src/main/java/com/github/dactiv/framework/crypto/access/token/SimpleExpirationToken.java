@@ -4,7 +4,6 @@ import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.crypto.access.AccessToken;
 import com.github.dactiv.framework.crypto.access.ExpirationToken;
 
-import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SimpleExpirationToken extends SimpleToken implements ExpirationToken {
 
-    @Serial
+    
     private static final long serialVersionUID = -2524113941584019855L;
 
     /**
@@ -36,7 +35,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     /**
      * 时间超时时间
      */
-    private LocalDateTime expirationTime = lastAccessedTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
+    private LocalDateTime expirationTime = lastAccessedTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit());
 
     /**
      * 超时的 token
@@ -47,7 +46,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     public SimpleExpirationToken(AccessToken token, TimeProperties maxInactiveInterval) {
         super(token.getType(), token.getToken(), token.getName(), token.getKey());
         this.maxInactiveInterval = maxInactiveInterval;
-        this.expirationTime = creationTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
+        this.expirationTime = creationTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit());
     }
 
     /**
@@ -80,7 +79,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
         this.lastAccessedTime = lastAccessedTime;
         this.expirationTime = lastAccessedTime.plus(
                 maxInactiveInterval.getValue(),
-                maxInactiveInterval.getUnit().toChronoUnit()
+                maxInactiveInterval.toChronoUnit()
         );
     }
 
@@ -94,7 +93,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
 
         return LocalDateTime
                 .now()
-                .plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit())
+                .plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit())
                 .isAfter(this.lastAccessedTime);
     }
 

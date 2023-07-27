@@ -1,9 +1,9 @@
 package com.github.dactiv.framework.spring.security.authentication.handler;
 
 import com.github.dactiv.framework.commons.RestResult;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

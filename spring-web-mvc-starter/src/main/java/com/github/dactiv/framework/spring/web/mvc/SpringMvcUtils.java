@@ -4,8 +4,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import nl.basjes.parse.useragent.UserAgent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,12 +17,14 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Optional;
 
 /**
@@ -118,8 +118,8 @@ public class SpringMvcUtils {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
-            return Optional.of(servletRequestAttributes.getRequest());
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return Optional.of(Casts.cast(requestAttributes, ServletRequestAttributes.class).getRequest());
         }
 
         return Optional.empty();
@@ -134,8 +134,8 @@ public class SpringMvcUtils {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
-            return Optional.ofNullable(servletRequestAttributes.getResponse());
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return Optional.ofNullable(Casts.cast(requestAttributes, ServletRequestAttributes.class).getResponse());
         }
 
         return Optional.empty();
@@ -176,7 +176,10 @@ public class SpringMvcUtils {
 
         Optional<HttpServletRequest> optional = getHttpServletRequest();
 
-        return DeviceUtils.getRequiredCurrentDevice(optional.orElseThrow(() -> new SystemException("当前线程中无法获取 HttpServletRequest 信息")));
+        if (!optional.isPresent()) {
+            throw new SystemException("当前线程中无法获取 HttpServletRequest 信息");
+        }
+        return DeviceUtils.getRequiredCurrentDevice(optional.get());
     }
 
     /**
@@ -232,9 +235,9 @@ public class SpringMvcUtils {
      *
      * @return 下载类型的 ResponseEntity
      */
-    public static ResponseEntity<byte[]> createDownloadResponseEntity(RestResult<byte[]> result) {
+    public static ResponseEntity<byte[]> createDownloadResponseEntity(RestResult<byte[]> result) throws UnsupportedEncodingException {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), Charset.defaultCharset()));
+        headers.setContentDispositionFormData(SpringMvcUtils.DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(result.getMessage(), "UTF-8"));
         return new ResponseEntity<>(result.getData(), headers, HttpStatus.OK);
     }
 
@@ -252,7 +255,7 @@ public class SpringMvcUtils {
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(filename, Charset.defaultCharset()));
+        headers.setContentDispositionFormData(DEFAULT_ATTACHMENT_NAME, URLEncoder.encode(filename, "UTF-8"));
 
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(new File(path)), headers, HttpStatus.CREATED);
     }

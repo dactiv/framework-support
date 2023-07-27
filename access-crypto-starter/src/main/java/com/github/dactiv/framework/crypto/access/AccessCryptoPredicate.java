@@ -1,7 +1,7 @@
 package com.github.dactiv.framework.crypto.access;
 
 
-import java.io.Serial;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class AccessCryptoPredicate implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = 5801688557790146889L;
     /**
      * 名称

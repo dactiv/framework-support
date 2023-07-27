@@ -1,9 +1,8 @@
 package com.github.dactiv.framework.spring.web.argument;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.argument.annotation.GenericsList;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.MutablePropertyValues;
@@ -20,6 +19,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.*;
 
 /**
@@ -172,7 +173,8 @@ public class GenericsListHandlerMethodArgumentResolver implements HandlerMethodA
 
                 Object value = entry.getValue();
 
-                if (value instanceof String[] tempValue) {
+                if (value instanceof String[]) {
+                    String[] tempValue = Casts.cast(value);
                     value = tempValue.length > 1 ? tempValue : tempValue[0];
                 }
 

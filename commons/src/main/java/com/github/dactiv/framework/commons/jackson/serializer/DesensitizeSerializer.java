@@ -61,9 +61,11 @@ public class DesensitizeSerializer extends JsonSerializer<Object> {
     }
 
     public Object getDesensitizeValue(Object s) {
-        if (s instanceof Collection<?> c) {
+        if (s instanceof Collection<?>) {
+            Collection<?> c = Casts.cast(s);
             return c.stream().map(v -> desensitize(v.toString())).collect(Collectors.toList());
-        } else if (s instanceof Map<?,?> map) {
+        } else if (s instanceof Map<?,?>) {
+            Map<?,?> map = Casts.cast(s);
             Map<?, Object> convert = Casts.cast(map);
 
             convert.entrySet()

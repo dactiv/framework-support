@@ -4,7 +4,6 @@ import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import org.springframework.util.DigestUtils;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Objects;
@@ -16,7 +15,7 @@ import java.util.Objects;
  */
 public class RememberMeToken implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = 5489556035568760298L;
 
     private Object id;

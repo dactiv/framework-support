@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.page;
 
-import java.io.Serial;
+
 import java.util.List;
 
 /**
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class TotalPage<T> extends Page<T>{
 
-    @Serial
+    
     private static final long serialVersionUID = 6689608497142134254L;
 
     /**

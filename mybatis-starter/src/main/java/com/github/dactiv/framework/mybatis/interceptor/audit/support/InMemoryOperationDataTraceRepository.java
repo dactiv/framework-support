@@ -46,11 +46,14 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
     @Override
     public List<OperationDataTraceRecord> createOperationDataTraceRecord(MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception{
 
-        if (statement instanceof Insert insert) {
+        if (statement instanceof Insert) {
+            Insert insert = Casts.cast(statement);
             return createInsertRecord(insert, mappedStatement, statement, parameter);
-        } else if (statement instanceof Update update) {
+        } else if (statement instanceof Update) {
+            Update update = Casts.cast(statement);
             return createUpdateRecord(update, mappedStatement, statement, parameter);
-        } else if (statement instanceof Delete delete) {
+        } else if (statement instanceof Delete) {
+            Delete delete = Casts.cast(statement);
             return createDeleteRecord(delete, mappedStatement, statement, parameter);
         }
 
@@ -61,18 +64,18 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
         OperationDataTraceRecord result = createBasicOperationDataTraceRecord(
                 OperationDataType.DELETE,
                 delete.getTable().getName(),
-                Casts.convertValue(parameter, new TypeReference<>() {})
+                Casts.convertValue(parameter, new TypeReference<Map<String, Object>>() {})
         );
-        return List.of(result);
+        return Collections.singletonList(result);
     }
 
     protected List<OperationDataTraceRecord> createUpdateRecord(Update update, MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception {
         OperationDataTraceRecord result = createBasicOperationDataTraceRecord(
                 OperationDataType.UPDATE,
                 update.getTable().getName(),
-                Casts.convertValue(parameter, new TypeReference<>() {})
+                Casts.convertValue(parameter, new TypeReference<Map<String, Object>>() {})
         );
-        return List.of(result);
+        return Collections.singletonList(result);
     }
 
     protected List<OperationDataTraceRecord> createInsertRecord(Insert insert,
@@ -82,9 +85,9 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
         OperationDataTraceRecord result = createBasicOperationDataTraceRecord(
                 OperationDataType.INSERT,
                 insert.getTable().getName(),
-                Casts.convertValue(parameter, new TypeReference<>() {})
+                Casts.convertValue(parameter, new TypeReference<Map<String, Object>>() {})
         );
-        return List.of(result);
+        return Collections.singletonList(result);
     }
 
     protected OperationDataTraceRecord createBasicOperationDataTraceRecord(OperationDataType type,

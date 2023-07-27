@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.exception;
 
-import java.io.Serial;
+
 
 /**
  * 业务逻辑异常实现.
@@ -9,7 +9,7 @@ import java.io.Serial;
  **/
 public class ServiceException extends RuntimeException {
 
-    @Serial
+    
     private static final long serialVersionUID = 5031974444998025805L;
 
     /**

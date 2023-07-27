@@ -39,7 +39,8 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
     @Override
     protected List<OperationDataTraceRecord> createInsertRecord(Insert insert, MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception {
 
-        if (parameter instanceof MapperMethod.ParamMap<?> map) {
+        if (parameter instanceof MapperMethod.ParamMap<?>) {
+            MapperMethod.ParamMap<?> map = Casts.cast(parameter);
             Object entity = map.get(Constants.ENTITY);
 
             if (Objects.isNull(entity)) {
@@ -55,7 +56,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                     insert.getTable().getName(),
                     OperationDataType.INSERT
             );
-            return List.of(record);
+            return Collections.singletonList(record);
         } else if (BasicIdentification.class.isAssignableFrom(parameter.getClass())) {
             BasicIdentification<Object> basicIdentification = Casts.cast(parameter);
             OperationDataTraceRecord record = createEntityIdOperationDataTraceRecord(
@@ -63,7 +64,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                     insert.getTable().getName(),
                     OperationDataType.INSERT
             );
-            return List.of(record);
+            return Collections.singletonList(record);
         }
 
         return super.createInsertRecord(insert, mappedStatement, statement, parameter);
@@ -76,7 +77,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                 new LinkedHashMap<>()
         );
         EntityIdOperationDataTraceRecord entityRecord = Casts.of(result, EntityIdOperationDataTraceRecord.class);
-        entityRecord.setSubmitData(Casts.convertValue(basicIdentification, new TypeReference<>() {}));
+        entityRecord.setSubmitData(Casts.convertValue(basicIdentification, new TypeReference<Map<String, Object>>() {}));
         entityRecord.setEntityId(basicIdentification.getId());
         return entityRecord;
     }
@@ -101,7 +102,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
 
     private Object getIdValueExp(String sqlSegment, Object parameterObject) throws OgnlException {
         List<String> conditions = Arrays.asList(StringUtils.substringsBetween(sqlSegment, StringPool.LEFT_BRACKET, StringPool.RIGHT_BRACKET));
-        List<String> fields = conditions.stream().flatMap(s -> Arrays.stream(s.split(WHERE_SEPARATE))).toList();
+        List<String> fields = conditions.stream().flatMap(s -> Arrays.stream(s.split(WHERE_SEPARATE))).collect(Collectors.toList());
 
         Object idValue = null;
         for (String field : fields) {
@@ -129,7 +130,8 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
     protected List<OperationDataTraceRecord> createUpdateOrDeleteRecord(String tableName,
                                                                         OperationDataType type,
                                                                         Object parameter) throws Exception {
-        if (parameter instanceof MapperMethod.ParamMap<?> map) {
+        if (parameter instanceof MapperMethod.ParamMap<?>) {
+            MapperMethod.ParamMap<?> map = Casts.cast(parameter);
 
             Object wrapper = null;
             if (map.containsKey(Constants.WRAPPER)) {
@@ -142,8 +144,8 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
             }
 
             if (Objects.isNull(entity) && Objects.isNull(wrapper)) {
-                Map<String, Object> submitData = Casts.convertValue(parameter, new TypeReference<>() {});
-                return List.of(createBasicOperationDataTraceRecord(type, tableName, submitData));
+                Map<String, Object> submitData = Casts.convertValue(parameter, new TypeReference<Map<String, Object>>() {});
+                return Collections.singletonList(createBasicOperationDataTraceRecord(type, tableName, submitData));
             }
 
             if (Objects.nonNull(entity) && BasicIdentification.class.isAssignableFrom(entity.getClass())) {
@@ -154,7 +156,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                         type
                 );
 
-                return List.of(entityRecord);
+                return Collections.singletonList(entityRecord);
             }
 
             if (Objects.nonNull(wrapper) && Wrapper.class.isAssignableFrom(wrapper.getClass())) {
@@ -178,7 +180,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                         Map<String, Object> submitData = getUpdateModifiedMap(updateWrapper.getSqlSet(), parameter);
                         entityRecord.setSubmitData(submitData);
                     }
-                    return List.of(entityRecord);
+                    return Collections.singletonList(entityRecord);
                 }
             }
         } else if (BasicIdentification.class.isAssignableFrom(parameter.getClass())) {
@@ -189,12 +191,12 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
                         tableName,
                         type
                 );
-                return List.of(record);
+                return Collections.singletonList(record);
             }
         }
 
-        Map<String, Object> submitData = Casts.convertValue(parameter, new TypeReference<>() {});
-        return List.of(createBasicOperationDataTraceRecord(type, tableName, submitData));
+        Map<String, Object> submitData = Casts.convertValue(parameter, new TypeReference<Map<String, Object>>() {});
+        return Collections.singletonList(createBasicOperationDataTraceRecord(type, tableName, submitData));
 
     }
 
@@ -208,7 +210,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
             );
             EntityIdOperationDataTraceRecord entityRecord = Casts.of(record, EntityIdOperationDataTraceRecord.class);
             entityRecord.setEntityId(parameter);
-            return List.of(entityRecord);
+            return Collections.singletonList(entityRecord);
         }
 
         return createUpdateOrDeleteRecord(delete.getTable().getName(), OperationDataType.DELETE, parameter);
@@ -219,7 +221,7 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
     @Override
     public List<OperationDataTraceRecord> find(String target, Object entityId) {
         List<OperationDataTraceRecord> records = find(target);
-        List<EntityIdOperationDataTraceRecord> result = records.stream().map(r -> Casts.cast(r, EntityIdOperationDataTraceRecord.class)).toList();
+        List<EntityIdOperationDataTraceRecord> result = records.stream().map(r -> Casts.cast(r, EntityIdOperationDataTraceRecord.class)).collect(Collectors.toList());
         return result.stream().filter(e -> e.getEntityId().equals(entityId)).collect(Collectors.toCollection(LinkedList::new));
     }
 

@@ -82,7 +82,7 @@ public class MinioAutoDeleteConfiguration implements SchedulingConfigurer {
                         LocalDateTime expirationTime = item
                                 .lastModified()
                                 .toLocalDateTime()
-                                .plus(time.getValue(), time.getUnit().toChronoUnit());
+                                .plus(time.getValue(), time.toChronoUnit());
 
                         if (LocalDateTime.now().isAfter(expirationTime)) {
                             minioTemplate.deleteObject(FileObject.of(bucket, item.objectName()));

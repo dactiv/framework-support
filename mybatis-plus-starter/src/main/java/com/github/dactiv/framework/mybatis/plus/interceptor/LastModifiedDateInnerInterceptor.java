@@ -86,7 +86,8 @@ public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void setLastModifiedDateByWrapper(Map<String, Object> map, String msId) {
         Object ew = map.get(Constants.WRAPPER);
-        if (ew instanceof AbstractWrapper && ew instanceof Update updateWrapper) {
+        if (ew instanceof AbstractWrapper && ew instanceof Update ) {
+            Update updateWrapper = Casts.cast(ew);
             Class<?> entityClass = ENTITY_CLASS_CACHE.get(msId);
             if (null == entityClass) {
                 try {

@@ -36,7 +36,17 @@ public class TestElasticsearchAuditEventRepository {
 
         int before = auditEventRepository.find("admin", instant, null).size();
 
-        auditEventRepository.add(new PluginAuditEvent("admin", "test", Map.of("d", 1, "xx",3,"test","tests", "data", Map.of("date", new Date()))));
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("d",1);
+        map.put("xx",3);
+        map.put("test","tests");
+
+        Map<String, Object> date = new LinkedHashMap<>();
+        date.put("date", new Date());
+        map.put("data",date);
+
+
+        auditEventRepository.add(new PluginAuditEvent("admin", "test", map));
         Thread.sleep(5000);
         List<AuditEvent> auditEvents = auditEventRepository.find("admin", instant, null);
 

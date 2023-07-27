@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.page;
 
-import java.io.Serial;
+
 
 /**
  * 分页请求对象
@@ -9,7 +9,7 @@ import java.io.Serial;
  **/
 public class PageRequest extends ScrollPageRequest {
 
-    @Serial
+    
     private static final long serialVersionUID = -7063877675141922463L;
 
     /**

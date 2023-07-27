@@ -364,7 +364,7 @@ public class Casts {
                                 v -> result
                                         .append(key)
                                         .append(EQ)
-                                        .append(value.size() > 1 ? value.stream().map(function).toList() : function.apply(value.get(0)))
+                                        .append(value.size() > 1 ? value.stream().map(function).collect(Collectors.toList()) : function.apply(value.get(0)))
                                         .append(HTTP_AND)
                         )
                 );
@@ -604,7 +604,7 @@ public class Casts {
                 .stream()
                 .map(StringUtils::trimToEmpty)
                 .filter(variableValue::containsKey)
-                .toList();
+                .collect(Collectors.toList());
 
         String temp = url;
 

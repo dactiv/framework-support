@@ -1,9 +1,11 @@
 package com.github.dactiv.framework.commons.enumerate.support;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.retry.Retryable;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +44,7 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     /**
      * 执行中的状态
      */
-    public static final List<ExecuteStatus> EXECUTING_STATUS = List.of(Retrying, Processing);
+    public static final List<ExecuteStatus> EXECUTING_STATUS = Arrays.asList(Retrying, Processing);
 
     /**
      * 执行状态枚举
@@ -93,8 +95,8 @@ public enum ExecuteStatus implements NameValueEnum<Integer> {
     public static void retry(Body body, String exception, boolean setFailureStatus) {
         body.setException(exception);
 
-        if (body instanceof Retryable retryable) {
-
+        if (body instanceof Retryable) {
+            Retryable retryable = Casts.cast(body);
             retryable.setRetryCount(retryable.getRetryCount() + 1);
 
             if (retryable.getRetryCount() > retryable.getMaxRetryCount()) {

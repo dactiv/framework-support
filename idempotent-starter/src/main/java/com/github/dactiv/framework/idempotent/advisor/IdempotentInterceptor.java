@@ -1,6 +1,7 @@
 package com.github.dactiv.framework.idempotent.advisor;
 
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.TimeProperties;
 import com.github.dactiv.framework.idempotent.annotation.Idempotent;
 import com.github.dactiv.framework.idempotent.config.IdempotentProperties;
 import com.github.dactiv.framework.idempotent.exception.IdempotentException;
@@ -17,7 +18,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,6 +102,10 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
         List<Object> values = new LinkedList<>();
 
+        TimeProperties expirationTime = TimeProperties.of(
+                idempotent.expirationTime().value(),
+                idempotent.expirationTime().unit()
+        );
         if (ArrayUtils.isEmpty(idempotent.value())) {
 
             String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
@@ -139,7 +143,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
             boolean setResult = bucket.setIfAbsent(
                     values,
-                    Duration.of(idempotent.expirationTime().value(), idempotent.expirationTime().unit().toChronoUnit())
+                    expirationTime.toChronoUnit().getDuration()
             );
 
             return values.stream().anyMatch(existValues::contains) || !setResult;
@@ -148,7 +152,7 @@ public class IdempotentInterceptor implements MethodInterceptor {
 
         return !bucket.setIfAbsent(
                 values,
-                Duration.of(idempotent.expirationTime().value(), idempotent.expirationTime().unit().toChronoUnit())
+                expirationTime.toChronoUnit().getDuration()
         );
     }
 

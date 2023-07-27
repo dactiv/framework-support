@@ -15,6 +15,7 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Intercepts(
@@ -28,7 +29,7 @@ public class OperationDataTraceInterceptor implements Interceptor {
 
     public static final String REMOVE_ESCAPE_REG = "\\\\.|\\n|\\t";
 
-    private static final List<SqlCommandType> SQL_COMMAND_TYPES = List.of(SqlCommandType.INSERT, SqlCommandType.UPDATE, SqlCommandType.DELETE);
+    private static final List<SqlCommandType> SQL_COMMAND_TYPES = Arrays.asList(SqlCommandType.INSERT, SqlCommandType.UPDATE, SqlCommandType.DELETE);
 
     private final OperationDataTraceRepository operationDataTraceRepository;
 

@@ -6,7 +6,6 @@ import org.springframework.beans.propertyeditors.ResourceBundleEditor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.DigestUtils;
 
-import java.io.Serial;
 import java.nio.charset.Charset;
 
 /**
@@ -16,7 +15,7 @@ import java.nio.charset.Charset;
  */
 public class FilenameObject extends FileObject {
 
-    @Serial
+    
     private static final long serialVersionUID = -8658801081544792057L;
     /**
      * 文件名称

@@ -3,7 +3,7 @@ package com.github.dactiv.framework.spring.security.entity;
 import com.github.dactiv.framework.commons.CacheProperties;
 import com.github.dactiv.framework.security.enumerate.UserStatus;
 
-import java.io.Serial;
+
 
 /**
  * 移动端的用户明细实现
@@ -12,7 +12,7 @@ import java.io.Serial;
  */
 public class MobileUserDetails extends SecurityUserDetails implements DeviceIdentifiedUserDetails {
 
-    @Serial
+    
     private static final long serialVersionUID = -848955060608795664L;
 
     /**

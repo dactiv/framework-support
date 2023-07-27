@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.minio;
 
-import java.io.Serial;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 public class Bucket implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = -8374508623316725573L;
 
     /**

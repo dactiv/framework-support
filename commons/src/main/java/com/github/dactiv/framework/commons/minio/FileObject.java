@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.minio;
 
-import java.io.Serial;
+
 
 /**
  * 文件对象描述
@@ -9,7 +9,7 @@ import java.io.Serial;
  */
 public class FileObject extends Bucket {
 
-    @Serial
+    
     private static final long serialVersionUID = 3325877878659487154L;
 
     /**

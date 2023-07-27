@@ -7,7 +7,6 @@ import com.github.dactiv.framework.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.framework.spring.web.mvc.SpringMvcUtils;
 import com.github.dactiv.framework.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.framework.spring.web.result.filter.holder.FilterResultHolder;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -27,11 +25,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * rest 响应同一格式实现类
@@ -129,7 +125,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             } else {
                 // 获取实际要响应的 data 内容
                 Object data = Objects.isNull(body) ? new LinkedHashMap<>() : body;
-                List<Annotation> annotatedTypes = List.of(data.getClass().getAnnotations());
+                List<Annotation> annotatedTypes = Arrays.asList(data.getClass().getAnnotations());
                 if (annotatedTypes.stream().anyMatch(a -> FilterResultAnnotationBuilder.ANNOTATIONS_TO_ADD.contains(a.annotationType()))) {
                     // FIXME 由于 RestResult 的范型为 Object 会导致在使用 @IncludeView 等注解时，无法找到响应的类型匹配，先这样加，后面在想办法改改。
                     data = Casts.convertValue(data, data.getClass());
@@ -145,7 +141,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                     result.setExecuteCode(ErrorCodeException.DEFAULT_EXCEPTION_CODE);
                 }
             }
-            response.setStatusCode(HttpStatusCode.valueOf(result.getStatus()));
+            response.setStatusCode(HttpStatus.valueOf(result.getStatus()));
             return result;
         } else {
             return body;

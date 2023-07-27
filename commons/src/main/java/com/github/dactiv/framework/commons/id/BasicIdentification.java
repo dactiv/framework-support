@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 基础 id 接口，用于对数据对象操作的统一继承接口。
@@ -68,7 +69,7 @@ public interface BasicIdentification<T> extends Serializable {
         List<PropertyDescriptor> propertyDescriptorList = Arrays
                 .stream(propertyDescriptors)
                 .filter(p -> ignorePropertyList.contains(p.getName()))
-                .toList();
+                .collect(Collectors.toList());
 
         for (PropertyDescriptor propertyDescriptor : propertyDescriptorList) {
             if (Objects.nonNull(propertyDescriptor.getWriteMethod()) && Objects.nonNull(propertyDescriptor.getReadMethod())) {

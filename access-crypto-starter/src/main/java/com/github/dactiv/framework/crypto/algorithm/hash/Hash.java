@@ -1,6 +1,7 @@
 
 package com.github.dactiv.framework.crypto.algorithm.hash;
 
+import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.crypto.algorithm.AbstractByteSource;
 import com.github.dactiv.framework.crypto.algorithm.ByteSource;
 import com.github.dactiv.framework.crypto.algorithm.CodecUtils;
@@ -8,7 +9,6 @@ import com.github.dactiv.framework.crypto.algorithm.SimpleByteSource;
 import com.github.dactiv.framework.crypto.algorithm.exception.CodecException;
 import com.github.dactiv.framework.crypto.algorithm.exception.UnknownAlgorithmException;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Hash extends AbstractByteSource implements Serializable {
 
-    @Serial
+    
     private static final long serialVersionUID = 6396657711027799821L;
 
     /**
@@ -231,7 +231,8 @@ public class Hash extends AbstractByteSource implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Hash other) {
+        if (o instanceof Hash) {
+            Hash other = Casts.cast(o);
             return MessageDigest.isEqual(obtainBytes(), other.obtainBytes());
         }
         return false;

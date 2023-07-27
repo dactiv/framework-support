@@ -12,10 +12,7 @@ import org.springframework.boot.actuate.audit.AuditEventRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 插件审计事件的仓库实现
@@ -24,7 +21,7 @@ import java.util.Map;
  */
 public interface PluginAuditEventRepository extends AuditEventRepository {
 
-    List<String> DEFAULT_IGNORE_PRINCIPALS = List.of("anonymousUser");
+    List<String> DEFAULT_IGNORE_PRINCIPALS = Collections.singletonList("anonymousUser");
 
     /**
      * 获取分页信息
@@ -58,13 +55,16 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
         Object timestamp = map.get(RestResult.DEFAULT_TIMESTAMP_NAME);
 
         Instant instant;
-        if (timestamp instanceof Date date) {
+        if (timestamp instanceof Date) {
+            Date date = Casts.cast(timestamp);
             instant = date.toInstant();
-        } else if (timestamp instanceof Instant date) {
-            instant = date;
-        } else if (timestamp instanceof Long epochMilli){
+        } else if (timestamp instanceof Instant) {
+            instant = Casts.cast(timestamp);
+        } else if (timestamp instanceof Long){
+            Long epochMilli = Casts.cast(timestamp);
             instant = Instant.ofEpochMilli(epochMilli);
-        } else if (timestamp instanceof String string) {
+        } else if (timestamp instanceof String) {
+            String string = timestamp.toString();
             LocalDateTime localDateTime = LocalDateTime.parse(string);
             instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         } else {

@@ -19,8 +19,6 @@ import com.github.dactiv.framework.spring.security.authentication.token.SimpleAu
 import com.github.dactiv.framework.spring.security.entity.MobileUserDetails;
 import com.github.dactiv.framework.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.framework.spring.web.device.DeviceUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
@@ -30,20 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.DeferredSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * 访问 token 上下文仓库实现，用于移动端用户明细登陆系统后，返回一个 token， 为无状态的 http 传输中，通过该 token 来完成认证授权等所有工作
@@ -56,7 +51,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     private final RedissonClient redissonClient;
 
-    private SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+    //private SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 
     private final AuthenticationProperties authenticationProperties;
 
@@ -82,12 +77,12 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return securityContext;
     }
 
-    @Override
+    /*@Override
     public DeferredSecurityContext loadDeferredContext(HttpServletRequest request) {
         DeferredSecurityContext superDeferredSecurityContext = super.loadDeferredContext(request);
         Supplier<SecurityContext> supplier = () -> readSecurityContextFromRequest(request);
         return new AccessTokenDeferredSecurityContext(List.of(superDeferredSecurityContext, supplier), securityContextHolderStrategy);
-    }
+    }*/
 
     private SecurityContext readSecurityContextFromRequest(HttpServletRequest request) {
         if (this.loginRequestMatcher.matches(request)) {
@@ -130,7 +125,8 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            if (userDetails instanceof MobileUserDetails mobileUserDetails) {
+            if (userDetails instanceof MobileUserDetails) {
+                MobileUserDetails mobileUserDetails = Casts.cast(userDetails);
                 Object deviceIdentified = plaintextUserDetail.get(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME);
                 if (!Objects.equals(deviceIdentified, mobileUserDetails.getDeviceIdentified())) {
                     return null;
@@ -159,7 +155,8 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         json.put(PluginAuditEvent.TYPE_FIELD_NAME, userDetails.getType());
         json.put(NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis());
 
-        if (userDetails instanceof MobileUserDetails mobileUserDetails) {
+        if (userDetails instanceof MobileUserDetails) {
+            MobileUserDetails mobileUserDetails = Casts.cast(userDetails);
             json.put(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileUserDetails.getDeviceIdentified());
         }
 
@@ -173,7 +170,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public Map<String, Object> convertPlaintext(String plaintext) {
-        return Casts.readValue(plaintext, new TypeReference<>() {});
+        return Casts.readValue(plaintext, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override
@@ -211,12 +208,18 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
         Authentication authentication = context.getAuthentication();
 
-        if (authentication instanceof RememberMeAuthenticationToken rememberMeToken && rememberMeToken.isRememberMe()) {
-            return ;
+        if (authentication instanceof RememberMeAuthenticationToken) {
+            RememberMeAuthenticationToken rememberMeToken = Casts.cast(authentication);
+            if (rememberMeToken.isRememberMe()) {
+                return;
+            }
         }
 
-        if (authentication instanceof SimpleAuthenticationToken simpleToken && simpleToken.isRememberMe()) {
-            return ;
+        if (authentication instanceof SimpleAuthenticationToken) {
+            SimpleAuthenticationToken simpleToken = Casts.cast(authentication);
+            if (simpleToken.isRememberMe()) {
+                return;
+            }
         }
 
         Object details = authentication.getDetails();
@@ -243,7 +246,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         TimeProperties time = authenticationProperties.getAuthenticationCache().getExpiresTime();
 
         if (Objects.nonNull(time)) {
-            bucket.expireAsync(time.toDuration());
+            bucket.expireAsync(time.toChronoUnit().getDuration());
         }
     }
 
@@ -254,12 +257,12 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return superValue || Objects.nonNull(context);
     }
 
-    @Override
+   /* @Override
     public void setSecurityContextHolderStrategy(SecurityContextHolderStrategy strategy) {
         this.securityContextHolderStrategy = strategy;
-    }
+    }*/
 
-    static final class AccessTokenDeferredSecurityContext implements DeferredSecurityContext {
+    /*static final class AccessTokenDeferredSecurityContext implements DeferredSecurityContext {
 
         private final List<Supplier<SecurityContext>> suppliers;
         private final SecurityContextHolderStrategy securityContextHolderStrategy;
@@ -303,5 +306,5 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 this.securityContext = this.securityContextHolderStrategy.createEmptyContext();
             }
         }
-    }
+    }*/
 }

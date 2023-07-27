@@ -5,6 +5,7 @@ import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.github.dactiv.framework.commons.Casts;
+import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.nacos.task.annotation.NacosCronScheduled;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * nacos 动态 cron 调度监听器实现，用于存在自动调度任务时，通过该类来进行 cron 任务调动的动态改变
@@ -102,7 +104,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                 .stream()
                 .filter(p -> p.getName().equals(dataId))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new SystemException("找不到 ID 为 [" + dataId + "] 的配置数据原"));
 
         // 通过缓存内容去匹配有哪些调度修改了值，并添加到 changeScheduledInfos 中
         CACHE.forEach((matchEvaluations, target) -> {
@@ -111,7 +113,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     // 匹配等于条件的值
                     .filter(m -> propertySource.containsProperty(m.getMatch().toString()))
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (result.stream().anyMatch(m -> m.evaluation(propertySource.getProperty(m.getMatch().toString()), target))) {
                 changeScheduledInfos.add(target);
@@ -453,7 +455,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
                     .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
-                    .toList();
+                    .collect(Collectors.toList());
 
             list.addAll(result);
         }
@@ -466,7 +468,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     .stream()
                     .filter(NacosConfigProperties.Config::isRefresh)
                     .map(c -> new NacosConfigProperties.Config(c.getDataId(), c.getGroup()))
-                    .toList();
+                    .collect(Collectors.toList());
 
             list.addAll(result);
         }

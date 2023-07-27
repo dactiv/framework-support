@@ -1,6 +1,6 @@
 package com.github.dactiv.framework.commons.exception;
 
-import java.io.Serial;
+
 
 /**
  * 带 http 状态和错误代码的异常
@@ -9,7 +9,7 @@ import java.io.Serial;
  */
 public class StatusErrorCodeException extends ErrorCodeException {
 
-    @Serial
+    
     private static final long serialVersionUID = -8343474924487172853L;
 
     private final int status;

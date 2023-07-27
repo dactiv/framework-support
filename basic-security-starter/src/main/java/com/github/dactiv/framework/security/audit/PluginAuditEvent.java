@@ -2,7 +2,6 @@ package com.github.dactiv.framework.security.audit;
 
 import org.springframework.boot.actuate.audit.AuditEvent;
 
-import java.io.Serial;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ import java.util.UUID;
  */
 public class PluginAuditEvent extends AuditEvent {
 
-    @Serial
+    
     private static final long serialVersionUID = 8633684304971875621L;
 
     public static final String PRINCIPAL_FIELD_NAME = "principal";

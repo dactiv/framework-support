@@ -1,9 +1,5 @@
 package com.github.dactiv.framework.spring.security.audit;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.json.JsonData;
-import co.elastic.clients.util.ObjectBuilder;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.id.StringIdEntity;
@@ -19,11 +15,12 @@ import com.github.dactiv.framework.security.audit.elasticsearch.index.IndexGener
 import com.github.dactiv.framework.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import com.github.dactiv.framework.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -32,11 +29,11 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.Assert;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,7 +61,7 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
         this.indexGenerator = new DateIndexGenerator(
                 indexName,
                 Casts.UNDERSCORE,
-                List.of(RestResult.DEFAULT_TIMESTAMP_NAME, NumberIdEntity.CREATION_TIME_FIELD_NAME)
+                Arrays.asList(RestResult.DEFAULT_TIMESTAMP_NAME, NumberIdEntity.CREATION_TIME_FIELD_NAME)
         );
     }
 
@@ -121,9 +118,11 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
 
         String index = getIndexName(creationTime).toLowerCase();
 
-        NativeQueryBuilder builder = new NativeQueryBuilder()
-                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId, auditType, principal))
-                .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)));
+        QueryBuilder queryBuilder = createQueryBuilder(creationTime, target, entityId, auditType, principal);
+
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
+                .withQuery(queryBuilder)
+                .withSorts(SortBuilders.fieldSort(NumberIdEntity.CREATION_TIME_FIELD_NAME));
 
         List<OperationDataTraceRecord> result = new LinkedList<>();
 
@@ -143,9 +142,11 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
 
         String index = getIndexName(creationTime).toLowerCase();
 
-        NativeQueryBuilder builder = new NativeQueryBuilder()
-                .withQuery(q -> createQueryBuilder(q, creationTime, target, entityId, auditType, principal))
-                .withSort(Sort.by(Sort.Order.desc(NumberIdEntity.CREATION_TIME_FIELD_NAME)))
+        QueryBuilder queryBuilder = createQueryBuilder(creationTime, target, entityId, auditType, principal);
+
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
+                .withQuery(queryBuilder)
+                .withSorts(SortBuilders.fieldSort(NumberIdEntity.CREATION_TIME_FIELD_NAME))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {
@@ -159,6 +160,35 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
         return new TotalPage<>(pageRequest, new LinkedList<>(), 0);
     }
 
+    private QueryBuilder createQueryBuilder(Date creationTime, String target, Object entityId, String auditType, String principal) {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+
+        if (StringUtils.isNotBlank(target)) {
+            String value = CorsConfiguration.ALL + target + CorsConfiguration.ALL;
+            queryBuilder = queryBuilder.must(QueryBuilders.wildcardQuery(DataBinder.DEFAULT_OBJECT_NAME, value));
+        }
+
+        if (StringUtils.isNotBlank(auditType)) {
+            String value = CorsConfiguration.ALL + auditType + CorsConfiguration.ALL;
+            queryBuilder = queryBuilder.must(QueryBuilders.wildcardQuery(UserDetailsOperationDataTraceRecord.AUDIT_TYPE_FIELD_NAME, value));
+        }
+
+        if (Objects.nonNull(creationTime)) {
+            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery(NumberIdEntity.CREATION_TIME_FIELD_NAME).gte(creationTime.toInstant()).lte(creationTime.toInstant()));
+        }
+
+        if (StringUtils.isNotBlank(principal)) {
+            String value = CorsConfiguration.ALL + principal + CorsConfiguration.ALL;
+            queryBuilder = queryBuilder.must(QueryBuilders.wildcardQuery(PluginAuditEvent.PRINCIPAL_FIELD_NAME, value));
+        }
+
+        if (Objects.nonNull(entityId)) {
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(EntityIdOperationDataTraceRecord.ENTITY_ID_FIELD_NAME, entityId.toString()));
+        }
+
+        return queryBuilder;
+    }
+
     @Override
     public OperationDataTraceRecord get(StringIdEntity idEntity) {
 
@@ -170,48 +200,6 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
         }
 
         return null;
-    }
-
-
-    /**
-     * 创建查询条件
-     *
-     * @param creationTime 在什么时间之后的
-     * @param target       目标值
-     * @param entityId     实体 id
-     * @param auditType    审计类型
-     * @param principal    操作人
-     *
-     * @return 查询条件
-     */
-    private ObjectBuilder<Query> createQueryBuilder(Query.Builder builder, Date creationTime, String target, Object entityId, String auditType, String principal) {
-
-        List<Query> queryList = new LinkedList<>();
-
-        if (StringUtils.isNotBlank(target)) {
-            String value = CorsConfiguration.ALL + target + CorsConfiguration.ALL;
-            queryList.add(Query.of(q -> q.wildcard(t -> t.field(DataBinder.DEFAULT_OBJECT_NAME).value(value))));
-        }
-
-        if (StringUtils.isNotBlank(auditType)) {
-            String value = CorsConfiguration.ALL + auditType + CorsConfiguration.ALL;
-            queryList.add(Query.of(q -> q.wildcard(t -> t.field(UserDetailsOperationDataTraceRecord.AUDIT_TYPE_FIELD_NAME).value(value))));
-        }
-
-        if (StringUtils.isNotBlank(principal)) {
-            String value = CorsConfiguration.ALL + principal + CorsConfiguration.ALL;
-            queryList.add(Query.of(q -> q.wildcard(t -> t.field(PluginAuditEvent.PRINCIPAL_FIELD_NAME).value(value))));
-        }
-
-        if (Objects.nonNull(creationTime)) {
-            queryList.add(Query.of(q -> q.range(r -> r.field(NumberIdEntity.CREATION_TIME_FIELD_NAME).gte(JsonData.of(creationTime.getTime())))));
-        }
-
-        if (Objects.nonNull(entityId)) {
-            queryList.add(Query.of(q -> q.term(t -> t.field(EntityIdOperationDataTraceRecord.ENTITY_ID_FIELD_NAME).value(entityId.toString()))));
-        }
-
-        return builder.bool(t -> t.must(queryList));
     }
 
     public String getIndexName(Date creationTime) {

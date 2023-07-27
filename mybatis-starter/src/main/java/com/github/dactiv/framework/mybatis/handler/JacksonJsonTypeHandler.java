@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * jackson json type handler 实现
@@ -36,7 +37,7 @@ public class JacksonJsonTypeHandler<T> extends BaseTypeHandler<T> {
                     .stream()
                     .map(NameValueEnumTypeHandler::getEnumValue)
                     .filter(Objects::nonNull)
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (!nameValueEnums.isEmpty()) {
                 ps.setString(i, Casts.writeValueAsString(nameValueEnums));

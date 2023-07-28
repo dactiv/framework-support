@@ -1,0 +1,17 @@
+server:
+  port: 9100
+
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: alibaba-nacos-support
+  cloud:
+    nacos:
+      discovery:
+        event:
+          enabled: true
+        server-addr: localhost:8848
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        file-extension: yml

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 值枚举的反序列化实现
@@ -34,7 +33,7 @@ public class ValueEnumDeserializer<T extends ValueEnum> extends JsonDeserializer
         List<ValueEnum> valueEnums = Arrays
                 .stream(type.getEnumConstants())
                 .map(v -> Casts.cast(v, ValueEnum.class))
-                .collect(Collectors.toList());
+                .toList();
 
         Optional<ValueEnum> optional = valueEnums
                 .stream()

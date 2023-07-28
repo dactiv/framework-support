@@ -1,5 +1,6 @@
 package com.github.dactiv.framework.commons;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -11,9 +12,12 @@ import java.util.Objects;
  **/
 public class RestResult<T> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 8809220528389402403L;
 
     public static final String SUCCESS_EXECUTE_CODE = "200";
+
+    public static final String UNKNOWN_EXECUTE_CODE = "404";
 
     public static final String PROCESSING_EXECUTE_CODE = "102";
 

@@ -2,7 +2,9 @@ package com.github.dactiv.framework.commons;
 
 import com.github.dactiv.framework.commons.annotation.Time;
 
+import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeProperties implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2842217678288186207L;
     /**
      * 值
@@ -157,7 +160,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties of(Integer value, TimeUnit unit) {
+    public static TimeProperties of(long value, TimeUnit unit) {
         return new TimeProperties(value, unit);
     }
 
@@ -179,7 +182,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofDay(Integer value) {
+    public static TimeProperties ofDay(int value) {
         return new TimeProperties(value, TimeUnit.DAYS);
     }
 
@@ -190,7 +193,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofHours(Integer value) {
+    public static TimeProperties ofHours(int value) {
         return new TimeProperties(value, TimeUnit.HOURS);
     }
 
@@ -201,7 +204,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofMinutes(Integer value) {
+    public static TimeProperties ofMinutes(int value) {
         return new TimeProperties(value, TimeUnit.MINUTES);
     }
 
@@ -212,7 +215,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofSeconds(Integer value) {
+    public static TimeProperties ofSeconds(int value) {
         return new TimeProperties(value, TimeUnit.SECONDS);
     }
 
@@ -223,7 +226,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofMilliseconds(Integer value) {
+    public static TimeProperties ofMilliseconds(long value) {
         return new TimeProperties(value, TimeUnit.MILLISECONDS);
     }
 
@@ -234,7 +237,7 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofMicroseconds(Integer value) {
+    public static TimeProperties ofMicroseconds(long value) {
         return new TimeProperties(value, TimeUnit.MICROSECONDS);
     }
 
@@ -245,7 +248,16 @@ public class TimeProperties implements Serializable {
      *
      * @return 时间配置
      */
-    public static TimeProperties ofNanoseconds(Integer value) {
+    public static TimeProperties ofNanoseconds(long value) {
         return new TimeProperties(value, TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     * 转换为期间
+     *
+     * @return 期间
+     */
+    public Duration toDuration() {
+        return Duration.of(value, unit.toChronoUnit());
     }
 }

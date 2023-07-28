@@ -1,0 +1,28 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "principalMeta": {
+      "type": "object",
+      "dynamic": true
+    },
+    "traceId": {
+      "type": "keyword"
+    },
+    "principal": {
+      "type": "keyword"
+    },
+    "timestamp": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd'T'HH:mm:ss.SSSZZ||epoch_millis"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "data": {
+      "type": "object",
+      "dynamic": true
+    }
+  }
+}

@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.commons.id;
 
+import java.io.Serial;
+
 /**
  * 主键实体
  *
@@ -7,6 +9,7 @@ package com.github.dactiv.framework.commons.id;
  */
 public class IdEntity<T> implements BasicIdentification<T> {
 
+    @Serial
     private static final long serialVersionUID = -1430010950223063423L;
 
     /**

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.exception.NameEnumNotFoundException;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -45,7 +45,7 @@ public class NameEnumUtils {
 
         for (Enum<? extends NameEnum> anEnum : values) {
             NameEnum nameEnum = (NameEnum) anEnum;
-            if (anEnum.name().equals(value)) {
+            if (anEnum.name().equals(value) || nameEnum.toString().equals(value)) {
                 return nameEnum.getName();
             }
         }
@@ -151,7 +151,7 @@ public class NameEnumUtils {
         Enum<? extends NameEnum>[] values = enumClass.getEnumConstants();
 
         for (Enum<? extends NameEnum> o : values) {
-            if (Objects.equals(o.name(), value)) {
+            if (Objects.equals(o.name(), value) || o.toString().equals(value)) {
                 return Casts.cast(o);
             }
         }

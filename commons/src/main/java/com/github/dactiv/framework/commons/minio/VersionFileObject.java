@@ -1,5 +1,7 @@
 package com.github.dactiv.framework.commons.minio;
 
+import java.io.Serial;
+
 /**
  * 版本文件对象描述
  *
@@ -7,6 +9,7 @@ package com.github.dactiv.framework.commons.minio;
  */
 public class VersionFileObject extends FileObject {
 
+    @Serial
     private static final long serialVersionUID = 1336016999557997726L;
 
     /**

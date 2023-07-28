@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -34,6 +35,7 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(IpAuthenticationFilter.class);
 
+    public static final GrantedAuthority IP_WHITELIST_AUTHORITY = new SimpleGrantedAuthority("IP_WHITELIST");
     private final AuthenticationProperties authenticationProperties;
 
     public IpAuthenticationFilter(AuthenticationProperties authenticationProperties) {
@@ -62,7 +64,7 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
         if (ips.contains(remoteIp)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (Objects.isNull(authentication)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(remoteIp, this.getClass().getName(), List.of(new SimpleGrantedAuthority("IP_WHITELIST")));
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(remoteIp, this.getClass().getName(), List.of(IP_WHITELIST_AUTHORITY));
                 WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetails(remoteIp, request.getSession().getId());
                 authenticationToken.setDetails(webAuthenticationDetails);
 

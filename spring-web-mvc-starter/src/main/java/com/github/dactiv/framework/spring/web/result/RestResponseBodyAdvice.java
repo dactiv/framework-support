@@ -111,7 +111,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         boolean execute = (notFormat == null || !notFormat) && (errorExecute == null || !errorExecute);
 
         // 判断是否支持格式发，目前针对只有头的 X-REQUEST-CLIENT = supportClients 变量集合才会格式化
-        boolean support = clients != null && clients.stream().anyMatch(properties::isSupportClient);
+        boolean support = properties.isAllRestResultFormat() || (clients != null && clients.stream().anyMatch(properties::isSupportClient));
 
         setFilterResultId(httpRequest.getServletRequest());
 

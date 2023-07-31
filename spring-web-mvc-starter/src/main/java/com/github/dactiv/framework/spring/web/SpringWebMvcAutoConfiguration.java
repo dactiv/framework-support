@@ -8,7 +8,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
-import com.github.dactiv.framework.commons.jackson.serializer.DoubleSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -49,7 +48,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -89,7 +87,7 @@ public class SpringWebMvcAutoConfiguration {
                                                                       SpringWebMvcProperties properties) {
         return new RestResultErrorAttributes(
                 resultResolvers,
-                properties.getSupportException(),
+                properties.getRestResultSupportException(),
                 properties.getSupportHttpStatus()
         );
     }

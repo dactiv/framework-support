@@ -6,7 +6,6 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpStatus;
 
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +45,12 @@ public class SpringWebMvcProperties {
     /**
      * 支持的异常抛出消息的类
      */
-    private List<Class<? extends Exception>> supportException = RestResultErrorAttributes.DEFAULT_MESSAGE_EXCEPTION;
+    private List<Class<? extends Exception>> restResultSupportException = RestResultErrorAttributes.DEFAULT_MESSAGE_EXCEPTION;
+
+    /**
+     * 是否统一用 rest result 格式化数据
+     */
+    private boolean allRestResultFormat = false;
 
     /**
      * 支持的 http 响应状态
@@ -57,16 +61,6 @@ public class SpringWebMvcProperties {
      * Undertow 的 webSocketDeploymentBuffers 默认值
      */
     private int webSocketDeploymentBuffers = 2048;
-
-    /**
-     * json 响应的数值最大浮点数（保留多少位小数）
-     */
-    private int jsonNumberMaximumFractionDigits = 2;
-
-    /**
-     * json 响应的数值浮点四舍五入模型
-     */
-    private RoundingMode jsonNumberRoundingMode = RoundingMode.FLOOR;
 
     public SpringWebMvcProperties() {
     }
@@ -195,17 +189,17 @@ public class SpringWebMvcProperties {
      *
      * @return 支持的异常抛出消息的类
      */
-    public List<Class<? extends Exception>> getSupportException() {
-        return supportException;
+    public List<Class<? extends Exception>> getRestResultSupportException() {
+        return restResultSupportException;
     }
 
     /**
      * 设置支持的异常抛出消息的类
      *
-     * @param supportException 支持的异常抛出消息的类
+     * @param restResultSupportException 支持的异常抛出消息的类
      */
-    public void setSupportException(List<Class<? extends Exception>> supportException) {
-        this.supportException = supportException;
+    public void setRestResultSupportException(List<Class<? extends Exception>> restResultSupportException) {
+        this.restResultSupportException = restResultSupportException;
     }
 
     /**
@@ -227,38 +221,20 @@ public class SpringWebMvcProperties {
     }
 
     /**
-     * 获取 json 响应的数值最大浮点数（保留多少位小数）
+     * 是否统一用 rest result 格式化数据
      *
-     * @return 数值最大浮点数
+     * @return true 是，否则 false
      */
-    public int getJsonNumberMaximumFractionDigits() {
-        return jsonNumberMaximumFractionDigits;
+    public boolean isAllRestResultFormat() {
+        return allRestResultFormat;
     }
 
     /**
-     * 设置json 响应的数值最大浮点数（保留多少位小数）
+     * 设置是否统一用 rest result 格式化数据
      *
-     * @param jsonNumberMaximumFractionDigits 最大浮点数（保留多少位小数）
+     * @param allRestResultFormat true 是，否则 false
      */
-    public void setJsonNumberMaximumFractionDigits(int jsonNumberMaximumFractionDigits) {
-        this.jsonNumberMaximumFractionDigits = jsonNumberMaximumFractionDigits;
-    }
-
-    /**
-     * 获取 json 响应的数值浮点四舍五入模型
-     *
-     * @return 四舍五入模型
-     */
-    public RoundingMode getJsonNumberRoundingMode() {
-        return jsonNumberRoundingMode;
-    }
-
-    /**
-     * 设置 json 响应的数值浮点四舍五入模型
-     *
-     * @param jsonNumberRoundingMode json 响应的数值浮点四舍五入模型
-     */
-    public void setJsonNumberRoundingMode(RoundingMode jsonNumberRoundingMode) {
-        this.jsonNumberRoundingMode = jsonNumberRoundingMode;
+    public void setAllRestResultFormat(boolean allRestResultFormat) {
+        this.allRestResultFormat = allRestResultFormat;
     }
 }

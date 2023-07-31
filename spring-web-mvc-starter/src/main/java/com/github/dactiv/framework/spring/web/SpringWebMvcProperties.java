@@ -6,7 +6,6 @@ import com.github.dactiv.framework.spring.web.result.RestResultErrorAttributes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpStatus;
 
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,10 +35,12 @@ public class SpringWebMvcProperties {
     /**
      * 支持格式化的客户端集合，默认为 "SPRING_GATEWAY"
      */
-    private List<String> supportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
+    private List<String> restResultFormatSupportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
+
+    private boolean allRestResultFormat = false;
 
     /**
-     * 是否使用 filter result 的 ObjectMapper设置到 Casts工具类中, 默认为 true
+     * 是否使用 filter result 的 ObjectMapper 设置到 Casts工具类中, 默认为 true
      */
     private boolean useFilterResultObjectMapperToCastsClass = true;
 
@@ -57,16 +58,6 @@ public class SpringWebMvcProperties {
      * Undertow 的 webSocketDeploymentBuffers 默认值
      */
     private int webSocketDeploymentBuffers = 2048;
-
-    /**
-     * json 响应的数值最大浮点数（保留多少位小数）
-     */
-    private int jsonNumberMaximumFractionDigits = 2;
-
-    /**
-     * json 响应的数值浮点四舍五入模型
-     */
-    private RoundingMode jsonNumberRoundingMode = RoundingMode.FLOOR;
 
     public SpringWebMvcProperties() {
     }
@@ -130,17 +121,17 @@ public class SpringWebMvcProperties {
      *
      * @return 可支持格式化的客户端信息
      */
-    public List<String> getSupportClients() {
-        return supportClients;
+    public List<String> getRestResultFormatSupportClients() {
+        return restResultFormatSupportClients;
     }
 
     /**
      * 设置可支持格式化的客户端信息
      *
-     * @param supportClients 客户端信息
+     * @param restResultFormatSupportClients 客户端信息
      */
-    public void setSupportClients(List<String> supportClients) {
-        this.supportClients = supportClients;
+    public void setRestResultFormatSupportClients(List<String> restResultFormatSupportClients) {
+        this.restResultFormatSupportClients = restResultFormatSupportClients;
     }
 
     /**
@@ -151,7 +142,7 @@ public class SpringWebMvcProperties {
      * @return true 是，否则 false
      */
     public boolean isSupportClient(String client) {
-        return supportClients.contains(client);
+        return restResultFormatSupportClients.contains(client);
     }
 
     /**
@@ -226,39 +217,11 @@ public class SpringWebMvcProperties {
         this.supportHttpStatus = supportHttpStatus;
     }
 
-    /**
-     * 获取 json 响应的数值最大浮点数（保留多少位小数）
-     *
-     * @return 数值最大浮点数
-     */
-    public int getJsonNumberMaximumFractionDigits() {
-        return jsonNumberMaximumFractionDigits;
+    public boolean isAllRestResultFormat() {
+        return allRestResultFormat;
     }
 
-    /**
-     * 设置json 响应的数值最大浮点数（保留多少位小数）
-     *
-     * @param jsonNumberMaximumFractionDigits 最大浮点数（保留多少位小数）
-     */
-    public void setJsonNumberMaximumFractionDigits(int jsonNumberMaximumFractionDigits) {
-        this.jsonNumberMaximumFractionDigits = jsonNumberMaximumFractionDigits;
-    }
-
-    /**
-     * 获取 json 响应的数值浮点四舍五入模型
-     *
-     * @return 四舍五入模型
-     */
-    public RoundingMode getJsonNumberRoundingMode() {
-        return jsonNumberRoundingMode;
-    }
-
-    /**
-     * 设置 json 响应的数值浮点四舍五入模型
-     *
-     * @param jsonNumberRoundingMode json 响应的数值浮点四舍五入模型
-     */
-    public void setJsonNumberRoundingMode(RoundingMode jsonNumberRoundingMode) {
-        this.jsonNumberRoundingMode = jsonNumberRoundingMode;
+    public void setAllRestResultFormat(boolean allRestResultFormat) {
+        this.allRestResultFormat = allRestResultFormat;
     }
 }

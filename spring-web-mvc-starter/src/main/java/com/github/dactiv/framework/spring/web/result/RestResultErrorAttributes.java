@@ -4,7 +4,6 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.RestResult;
 import com.github.dactiv.framework.commons.exception.ErrorCodeException;
 import com.github.dactiv.framework.commons.exception.ServiceException;
-import com.github.dactiv.framework.commons.exception.SystemException;
 import com.github.dactiv.framework.spring.web.result.error.ErrorResultResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

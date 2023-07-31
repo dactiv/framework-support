@@ -54,6 +54,7 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "dactiv.authentication.audit", name = "enabled", havingValue = "true")
     ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor() {
         return new ControllerAuditHandlerInterceptor();
     }
@@ -133,6 +134,7 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Configuration
+    @ConditionalOnProperty(prefix = "dactiv.authentication.audit", name = "enabled", havingValue = "true")
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {
 

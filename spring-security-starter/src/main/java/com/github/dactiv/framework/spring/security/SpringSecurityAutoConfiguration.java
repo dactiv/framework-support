@@ -125,12 +125,27 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     public FeignExceptionResultResolver feignExceptionResultResolver() {
-        return new FeignExceptionResultResolver();
+        if (isFeignExceptionClassAvailable()) {
+            new FeignExceptionResultResolver();
+        }
+        return null;
     }
 
     @Bean
     public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver(AuthenticationProperties properties) {
-        return new FeignAuthenticationTypeTokenResolver(properties);
+        if (isFeignExceptionClassAvailable()) {
+            return new FeignAuthenticationTypeTokenResolver(properties);
+        }
+        return null;
+    }
+
+    private boolean isFeignExceptionClassAvailable() {
+        try {
+            Class.forName("feign.FeignException");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     @Configuration

@@ -25,6 +25,7 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -211,14 +212,15 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         Map<String, Object> data = new LinkedHashMap<>();
 
-        if (request.getHeaderNames().hasMoreElements()) {
-            Map<String, Object> header = new LinkedHashMap<>();
-            while (request.getHeaderNames().hasMoreElements()) {
-                String key = request.getHeaderNames().nextElement();
-                header.put(key, request.getHeader(key));
-            }
-            data.put(DEFAULT_HEADER_KEY, header);
+        Map<String, Object> header = new LinkedHashMap<>();
+
+        Enumeration<String> parameterNames = request.getHeaderNames();
+        while (parameterNames.hasMoreElements()) {
+            String key = parameterNames.nextElement();
+            header.put(key, request.getHeader(key));
         }
+
+        data.put(DEFAULT_HEADER_KEY, header);
 
         Map<String, String[]> parameterMap = request.getParameterMap();
 

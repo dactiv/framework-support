@@ -52,7 +52,7 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
                     .findFirst();
         }
 
-        if (optional.isPresent()) {
+        if (!optional.isPresent()) {
 
             optional = valueEnums
                     .stream()

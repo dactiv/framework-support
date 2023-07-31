@@ -8,6 +8,9 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.enumerate.NameEnum;
 import com.github.dactiv.framework.commons.enumerate.NameValueEnum;
 import com.github.dactiv.framework.commons.enumerate.ValueEnum;
+import com.github.dactiv.framework.commons.jackson.deserializer.NameEnumDeserializer;
+import com.github.dactiv.framework.commons.jackson.deserializer.NameValueEnumDeserializer;
+import com.github.dactiv.framework.commons.jackson.deserializer.ValueEnumDeserializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.framework.commons.jackson.serializer.ValueEnumSerializer;
@@ -151,6 +154,10 @@ public class SpringWebMvcAutoConfiguration {
         module.addSerializer(NameValueEnum.class, new NameValueEnumSerializer());
         module.addSerializer(ValueEnum.class, new ValueEnumSerializer());
         module.addSerializer(NameEnum.class, new NameEnumSerializer());
+
+        module.addDeserializer(NameValueEnum.class, new NameValueEnumDeserializer<>());
+        module.addDeserializer(ValueEnum.class, new ValueEnumDeserializer<>());
+        module.addDeserializer(NameEnum.class, new NameEnumDeserializer<>());
 
         Map<SerializationFeature, Boolean> map = jacksonProperties.getSerialization();
         Boolean isWriteDatesAsTimestamps = map.get(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

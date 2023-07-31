@@ -21,6 +21,7 @@ import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -126,6 +127,7 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(feign.FeignException.class)
     public FeignExceptionResultResolver feignExceptionResultResolver() {
         return new FeignExceptionResultResolver();
     }

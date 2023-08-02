@@ -223,7 +223,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         }
 
         Object details = authentication.getDetails();
-        if (Objects.isNull(details)) {
+        if (Objects.isNull(details) || !SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
             return;
         }
 

@@ -114,8 +114,6 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .disable()
                 .requestCache()
                 .disable()
-                .anonymous()
-                .disable()
                 .securityContext()
                 .securityContextRepository(accessTokenContextRepository);
 

@@ -29,6 +29,13 @@ public @interface Plugin {
     String icon() default "";
 
     /**
+     * 权限信息
+     *
+     * @return 权限信息
+     */
+    String[] authority() default "";
+
+    /**
      * 唯一识别
      *
      * @return 值

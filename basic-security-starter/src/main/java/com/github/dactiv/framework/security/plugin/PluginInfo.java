@@ -4,6 +4,7 @@ import com.github.dactiv.framework.commons.Casts;
 import com.github.dactiv.framework.commons.tree.Tree;
 import com.github.dactiv.framework.security.entity.ResourceAuthority;
 import com.github.dactiv.framework.security.enumerate.ResourceType;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serial;
@@ -116,15 +117,19 @@ public class PluginInfo extends ResourceAuthority implements Tree<String, Plugin
     public PluginInfo(Plugin plugin, List<Tree<String, PluginInfo>> children) {
         this.setId(plugin.id());
 
-        this.parent = plugin.parent();
-        this.children = children;
+        this.setParent(plugin.parent());
+        this.setChildren(children);
 
         this.setName(plugin.name());
-        this.icon = plugin.icon();
-        this.sort = plugin.sort();
+        this.setIcon(plugin.icon());
+        this.setSort(plugin.sort());
         this.setType(plugin.type().toString());
         this.setSources(Arrays.asList(plugin.sources()));
-        this.remark = plugin.remark();
+        this.setRemark(plugin.remark());
+
+        if (ArrayUtils.isNotEmpty(plugin.authority())) {
+            this.setAuthority(StringUtils.join(plugin.authority()));
+        }
     }
 
     /**

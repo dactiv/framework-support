@@ -36,6 +36,13 @@ public @interface Plugin {
     String id() default "";
 
     /**
+     * spring security 权限信息
+     *
+     * @return 权限信息
+     */
+    String[] authority() default "";
+
+    /**
      * 父类识别
      *
      * @return 值

@@ -12,8 +12,8 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>basic-security-starter</artifactId>
-    <name>basic-security-starter</name>
+    <artifactId>spring-boot-starter-basic-security</artifactId>
+    <name>spring-boot-starter-basic-security</name>
     <description>basic security jar</description>
     <packaging>jar</packaging>
 

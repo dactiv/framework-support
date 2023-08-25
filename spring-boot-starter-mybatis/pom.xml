@@ -13,8 +13,8 @@
     </parent>
 
     <packaging>jar</packaging>
-    <artifactId>mybatis-starter</artifactId>
-    <name>mybatis-starter</name>
+    <artifactId>spring-boot-starter-mybatis</artifactId>
+    <name>spring-boot-starter-mybatis</name>
     <description>mybatis support jar</description>
 
     <dependencies>

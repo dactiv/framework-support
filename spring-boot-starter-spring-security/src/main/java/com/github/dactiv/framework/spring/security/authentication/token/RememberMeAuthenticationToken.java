@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
 
 /**
@@ -13,6 +14,9 @@ import java.util.Collection;
  * @author maurice.chen
  */
 public class RememberMeAuthenticationToken extends SimpleAuthenticationToken {
+
+    @Serial
+    private static final long serialVersionUID = -4179593780958790701L;
 
     private Object id;
 

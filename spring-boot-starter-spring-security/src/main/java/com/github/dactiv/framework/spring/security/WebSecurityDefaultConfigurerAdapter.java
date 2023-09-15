@@ -109,7 +109,7 @@ public class WebSecurityDefaultConfigurerAdapter {
                 .authenticationEntryPoint(new RestResultAuthenticationEntryPoint(resultResolvers))
                 .and()
                 .cors()
-                .disable()
+                .and()
                 .csrf()
                 .disable()
                 .requestCache()

@@ -8,9 +8,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author maurice.chen
  */
-public class JsonContainsWildcardParser<T> extends AbstractJsonFunctionWildcardParser<T> {
+public class JsonNotContainsWildcardParser<T> extends AbstractJsonFunctionWildcardParser<T> {
 
-    private final static String DEFAULT_WILDCARD_NAME = "jin";
+    private final static String DEFAULT_WILDCARD_NAME = "jnin";
 
     @Override
     public boolean isSupport(String condition) {
@@ -23,9 +23,9 @@ public class JsonContainsWildcardParser<T> extends AbstractJsonFunctionWildcardP
         if (StringUtils.contains(propertyName, Casts.DOT)) {
             String path = StringUtils.substringAfter(propertyName, Casts.DOT);
             String field = StringUtils.substringBefore(propertyName, Casts.DOT);
-            return "JSON_CONTAINS(" + field + "->'$[*]." + path  + "', {" + index + "}, '$') IS NOT NULL";
+            return "JSON_EXTRACT(" + field + "->'$[*]." + path  + "', {" + index + "}, '$') IS NULL";
         }
 
-        return "JSON_CONTAINS(" + propertyName + ", {" + index + "}) IS NOT NULL";
+        return "JSON_EXTRACT(" + propertyName + ", {" + index + "}) IS NULL";
     }
 }

@@ -125,6 +125,7 @@ public class MybatisPlusQueryGenerator<T> implements QueryGenerator<QueryWrapper
                 new EqnWildcardParser<>(),
                 new NenWildcardParser<>(),
                 new JsonContainsWildcardParser<>(),
+                new JsonNotContainsWildcardParser<>(),
                 new JsonEqWildcardParser<>(),
                 new JsonSearchOneWildcardParser<>(),
                 new JsonSearchAllWildcardParser<>()

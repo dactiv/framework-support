@@ -79,7 +79,7 @@ public class TestQueryGenerator {
 
         Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', ?, '$')"));
         Assertions.assertTrue(targetSql.contains("city->'$.name' = ?"));
-        Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) OR JSON_CONTAINS(area, ?))"));
+        Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, ?) IS NOT NULL OR JSON_CONTAINS(area, ?) IS NOT NULL"));
         Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'all', ?) IS NOT NULL OR JSON_SEARCH(area, 'all', ?) IS NOT NULL)"));
         Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'one', ?) IS NOT NULL OR JSON_SEARCH(area, 'one', ?) IS NOT NULL)"));
         Assertions.assertTrue(targetSql.contains("name = ? OR username LIKE ? OR real_name LIKE ?"));

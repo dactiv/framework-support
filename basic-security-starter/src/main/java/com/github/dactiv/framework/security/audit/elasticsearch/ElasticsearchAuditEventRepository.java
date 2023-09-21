@@ -25,6 +25,7 @@ import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -137,16 +138,24 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                 .withSorts(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC));
 
         try {
-            return elasticsearchOperations
-                    .search(builder.build(), Map.class, IndexCoordinates.of(index))
-                    .stream()
-                    .map(SearchHit::getContent)
-                    .map(this::createPluginAuditEvent)
-                    .collect(Collectors.toList());
+            SearchHits<Map> searchHits = elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index));
+            List<PluginAuditEvent> result = createPluginAuditEvent(searchHits);
+
+            return new LinkedList<>(result);
         } catch (Exception e) {
             LOGGER.warn("查询 elasticsearch 审计事件出现异常", e);
             return new LinkedList<>();
         }
+    }
+
+    private List<PluginAuditEvent> createPluginAuditEvent(SearchHits<Map> hits) {
+        List<PluginAuditEvent> result = new LinkedList<>();
+        for (SearchHit<Map> hit : hits.getSearchHits()) {
+            Map<String, Object> data = Casts.convertValue(hit.getContent(), new TypeReference<Map<String, Object>>() {});
+            PluginAuditEvent pluginAuditEvent = this.createPluginAuditEvent(data);
+            result.add(pluginAuditEvent);
+        }
+        return result;
     }
 
     @Override
@@ -164,14 +173,11 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {
-            List<PluginAuditEvent> content = elasticsearchOperations
-                    .search(builder.build(), Map.class, IndexCoordinates.of(index))
-                    .stream()
-                    .map(SearchHit::getContent)
-                    .map(this::createPluginAuditEvent)
-                    .collect(Collectors.toList());
 
-            return new Page<>(pageRequest, new ArrayList<>(content));
+            SearchHits<Map> searchHits = elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index));
+            List<PluginAuditEvent> result = this.createPluginAuditEvent(searchHits);
+
+            return new Page<>(pageRequest, new ArrayList<>(result));
         } catch (Exception e) {
             LOGGER.warn("查询 elasticsearch 审计事件出现异常", e);
             return new Page<>(pageRequest, new ArrayList<>());

@@ -21,7 +21,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.*;
@@ -182,17 +182,19 @@ public class AuditConfiguration {
     public static class ElasticsearchAuditConfiguration {
 
         @Bean
-        public PluginAuditEventRepository auditEventRepository(ElasticsearchOperations elasticsearchOperations,
+        public PluginAuditEventRepository auditEventRepository(ElasticsearchTemplate elasticsearchTemplate,
                                                                SecurityProperties securityProperties) {
             List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
             ignorePrincipals.add(securityProperties.getUser().getName());
 
             return new ElasticsearchAuditEventRepository(
-                    elasticsearchOperations,
+                    elasticsearchTemplate,
                     ElasticsearchAuditEventRepository.DEFAULT_INDEX_NAME,
                     ignorePrincipals
             );
 
         }
+
+
     }
 }

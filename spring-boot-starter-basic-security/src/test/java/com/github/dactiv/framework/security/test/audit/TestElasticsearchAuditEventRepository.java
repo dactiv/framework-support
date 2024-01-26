@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +30,13 @@ public class TestElasticsearchAuditEventRepository {
     private ElasticsearchAuditEventRepository auditEventRepository;
 
     @Test
-    public void test() throws InterruptedException {
+    public void test() {
         Instant instant = Instant.now();
 
         int before = auditEventRepository.find("admin", instant, null).size();
 
         auditEventRepository.add(new PluginAuditEvent("admin", "test", Map.of("d", 1, "xx",3,"test","tests", "data", Map.of("date", new Date()))));
-        Thread.sleep(5000);
+
         List<AuditEvent> auditEvents = auditEventRepository.find("admin", instant, null);
 
         Assertions.assertEquals(before + 1, auditEvents.size());
@@ -56,7 +55,7 @@ public class TestElasticsearchAuditEventRepository {
         Assertions.assertEquals(event.getTimestamp(), target.getTimestamp());
 
         auditEventRepository
-                .getElasticsearchOperations()
+                .getElasticsearchTemplate()
                 .indexOps(IndexCoordinates.of(auditEventRepository.getIndexName(instant)))
                 .delete();
 

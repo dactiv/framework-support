@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
@@ -56,17 +57,17 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
-    private final ElasticsearchOperations elasticsearchOperations;
+    private final ElasticsearchTemplate elasticsearchTemplate;
 
     private final List<String> ignorePrincipals;
 
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchAuditEventRepository(ElasticsearchOperations elasticsearchOperations,
+    public ElasticsearchAuditEventRepository(ElasticsearchTemplate elasticsearchTemplate,
                                              String indexName,
                                              List<String> ignorePrincipals) {
 
-        this.elasticsearchOperations = elasticsearchOperations;
+        this.elasticsearchTemplate = elasticsearchTemplate;
         this.ignorePrincipals = ignorePrincipals;
 
         this.indexGenerator = new DateIndexGenerator(
@@ -98,7 +99,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
             String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
 
             IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
-            IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
+            IndexOperations indexOperations = elasticsearchTemplate.indexOps(indexCoordinates);
             createIndexIfNotExists(indexOperations, MAPPING_FILE_PATH);
 
             IndexQuery indexQuery = new IndexQueryBuilder()
@@ -106,8 +107,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                     .withObject(pluginAuditEvent)
                     .build();
 
-            elasticsearchOperations.index(indexQuery, indexCoordinates);
-
+            elasticsearchTemplate.index(indexQuery, indexCoordinates);
         } catch (Exception e) {
             LOGGER.warn("新增 elasticsearch" + event.getPrincipal() + " 审计事件出现异常", e);
         }
@@ -141,7 +141,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         List<AuditEvent> result = new LinkedList<>();
 
         try {
-            SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index)));
+            SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchTemplate.search(builder.build(), Map.class, IndexCoordinates.of(index)));
             result = hits.stream().map(s -> this.createAuditEvent(s.getContent())).collect(Collectors.toList());
         } catch (Exception e) {
             LOGGER.warn("查询索引 [" + index + "] 数据出现错误", e);
@@ -163,7 +163,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {
-            SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchOperations.search(builder.build(), Map.class, IndexCoordinates.of(index)));
+            SearchHits<Map<String, Object>> hits = Casts.cast(elasticsearchTemplate.search(builder.build(), Map.class, IndexCoordinates.of(index)));
             List<AuditEvent> content = hits.stream().map(s -> this.createAuditEvent(s.getContent())).collect(Collectors.toList());
             return new TotalPage<>(pageRequest, content, hits.getTotalHits());
         } catch (Exception e) {
@@ -186,7 +186,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         String index = indexGenerator.generateIndex(idEntity).toLowerCase();
         try {
             //noinspection unchecked
-            Map<String, Object> map = elasticsearchOperations.get(idEntity.getId(), Map.class, IndexCoordinates.of(index));
+            Map<String, Object> map = elasticsearchTemplate.get(idEntity.getId(), Map.class, IndexCoordinates.of(index));
             if (MapUtils.isNotEmpty(map)) {
                 return createAuditEvent(map);
             }
@@ -230,7 +230,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
         return builder.bool(t -> t.must(queryList));
     }
 
-    public ElasticsearchOperations getElasticsearchOperations() {
-        return elasticsearchOperations;
+    public ElasticsearchOperations getElasticsearchTemplate() {
+        return elasticsearchTemplate;
     }
 }
